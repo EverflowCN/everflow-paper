@@ -46,15 +46,13 @@ const originalLogout="await api('/api/auth/logout',{method:'POST'});location.hre
 const patchedLogout="await api('/api/auth/logout',{method:'POST'});forgetAuthToken();location.href='/'";
 replaceOnce('logout',originalLogout,patchedLogout);
 
-// The private archive currently calls pageHead() across dashboard and app pages,
-// but the helper itself is missing from site.js. Recreate the intended contract
-// using the existing .page-head / .page-actions CSS. It supports 2, 3 and 4 args:
-// title + subtitle; optional actions; optional extra note + actions.
+// The private archive calls pageHead() throughout the app but omits the helper.
+// Insert it at a stable, simple function boundary that exists in the archive.
 if(!s.includes('function pageHead(')){
-  const safeAnchor="function safe(s){return String(s??'').replace(/[&<>\\\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\\"':'&quot;'}[c]))}";
-  const pageHead="function pageHead(title,subtitle='',third='',fourth=''){let note='',actions='';if(arguments.length>=4){note=third||'';actions=fourth||''}else if(typeof third==='string'&&/<(?:a|button)\\b/i.test(third)){actions=third}else note=third||'';return `<div class=\\\"page-head\\\"><div><h1>${title??''}</h1>${subtitle?`<p>${subtitle}</p>`:''}${note?`<p>${note}</p>`:''}</div>${actions?`<div class=\\\"page-actions\\\">${actions}</div>`:''}</div>`}";
-  if(!s.includes(safeAnchor)) throw new Error('PAGE_HEAD_SAFE_ANCHOR_NOT_FOUND');
-  s=s.replace(safeAnchor,`${safeAnchor}\n${pageHead}`);
+  const insertAnchor="function authRequiredRoute(){return route.startsWith('/app')||route==='/onboarding'}";
+  const pageHead="function pageHead(title,subtitle='',third='',fourth=''){let note='',actions='';if(arguments.length>=4){note=third||'';actions=fourth||''}else if(typeof third==='string'&&/<(?:a|button)\\b/i.test(third)){actions=third}else note=third||'';return '<div class=\"page-head\"><div><h1>'+String(title??'')+'</h1>'+(subtitle?'<p>'+subtitle+'</p>':'')+(note?'<p>'+note+'</p>':'')+'</div>'+(actions?'<div class=\"page-actions\">'+actions+'</div>':'')+'</div>'}";
+  if(!s.includes(insertAnchor)) throw new Error('PAGE_HEAD_INSERT_ANCHOR_NOT_FOUND');
+  s=s.replace(insertAnchor,`${pageHead}\n${insertAnchor}`);
   stats.pageHead++;
 }
 
