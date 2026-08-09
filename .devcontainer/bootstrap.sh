@@ -8,7 +8,7 @@ if [ ! -f "$ARCHIVE" ]; then
 fi
 
 echo "[Everflow] Expanding private source archive into Codespace workspace..."
-unzip -oq "$ARCHIVE" -d .
+unzip -oq "$ARCHIVE" -d . -x '.devcontainer/*' '.github/*'
 rm -rf .runtime dist node_modules demo-output
 rm -f .env
 
