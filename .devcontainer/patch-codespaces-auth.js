@@ -1,6 +1,7 @@
 const fs=require('fs');
 const path=require('path');
 
+const PATCH_VERSION='2026-08-09-pagehead-v3';
 const file=path.join(process.cwd(),'apps/web/static/site/site.js');
 if(!fs.existsSync(file)){
   console.error('[Everflow] Codespaces auth patch failed: site.js not found.');
@@ -9,7 +10,7 @@ if(!fs.existsSync(file)){
 
 let s=fs.readFileSync(file,'utf8');
 const before=s;
-const stats={api:0,load:0,submit:0,passkey:0,recovery:0,logout:0,render:0,quota:0,pageHead:0};
+const stats={api:0,load:0,submit:0,passkey:0,recovery:0,logout:0,render:0,quota:0,pageHead:0,version:0};
 
 function replaceOnce(label,from,to,{required=false}={}){
   if(s.includes(to)) return;
@@ -46,8 +47,6 @@ const originalLogout="await api('/api/auth/logout',{method:'POST'});location.hre
 const patchedLogout="await api('/api/auth/logout',{method:'POST'});forgetAuthToken();location.href='/'";
 replaceOnce('logout',originalLogout,patchedLogout);
 
-// The private archive calls pageHead() throughout the app but omits the helper.
-// Insert it at a stable, simple function boundary that exists in the archive.
 if(!s.includes('function pageHead(')){
   const insertAnchor="function authRequiredRoute(){return route.startsWith('/app')||route==='/onboarding'}";
   const pageHead="function pageHead(title,subtitle='',third='',fourth=''){let note='',actions='';if(arguments.length>=4){note=third||'';actions=fourth||''}else if(typeof third==='string'&&/<(?:a|button)\\b/i.test(third)){actions=third}else note=third||'';return '<div class=\"page-head\"><div><h1>'+String(title??'')+'</h1>'+(subtitle?'<p>'+subtitle+'</p>':'')+(note?'<p>'+note+'</p>':'')+'</div>'+(actions?'<div class=\"page-actions\">'+actions+'</div>':'')+'</div>'}";
@@ -56,7 +55,17 @@ if(!s.includes('function pageHead(')){
   stats.pageHead++;
 }
 
-// Render defensively when account hydration is temporarily incomplete.
+// Stamp the generated source so a running Codespace can be identified exactly.
+const versionLine=`const everflowCodespacesPatchVersion='${PATCH_VERSION}';`;
+if(!s.includes(versionLine)){
+  const anchor='const codespacesAuthFallback=';
+  const idx=s.indexOf(anchor);
+  if(idx<0) throw new Error('PATCH_VERSION_INSERT_ANCHOR_NOT_FOUND');
+  const lineStart=s.lastIndexOf('\n',idx)+1;
+  s=s.slice(0,lineStart)+versionLine+'\n'+s.slice(lineStart);
+  stats.version++;
+}
+
 for(const [from,to] of [
   ['initials(me.displayName)',"initials(me?.displayName||fallbackUser()?.displayName||'E')"],
   ['safe(me.displayName)',"safe(me?.displayName||fallbackUser()?.displayName||'用户')"],
@@ -70,11 +79,11 @@ for(const [from,to] of [
 const quotaDirect=/\bquota\.([A-Za-z_$][\w$]*)/g;
 s=s.replace(quotaDirect,(_,prop)=>{stats.quota++;return `quota?.${prop}`});
 
-const requiredMarkers=['codespacesAuthFallback','fallbackToken()','fallbackUser()','rememberAuthToken','async function loadAccount()','function pageHead('];
+const requiredMarkers=['codespacesAuthFallback','fallbackToken()','fallbackUser()','rememberAuthToken','async function loadAccount()','function pageHead(',versionLine];
 for(const marker of requiredMarkers){
   if(!s.includes(marker)) throw new Error(`AUTH_PATCH_VERIFY_FAILED:${marker}`);
 }
 
 fs.writeFileSync(file,s);
-console.log(`[Everflow] Codespaces dashboard patch applied: ${JSON.stringify(stats)}`);
-if(before===s) console.log('[Everflow] Codespaces dashboard patch already current.');
+console.log(`[Everflow] Codespaces dashboard patch ${PATCH_VERSION} applied: ${JSON.stringify(stats)}`);
+if(before===s) console.log(`[Everflow] Codespaces dashboard patch ${PATCH_VERSION} already current.`);
