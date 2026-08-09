@@ -26,10 +26,11 @@ jobs:
           unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
-      - name: Diagnose dashboard source positions
+      - name: Diagnose patched dashboard and quota helpers
         shell: bash
         run: |
           set -euo pipefail
+          node .devcontainer/patch-codespaces-auth.js
           node <<'NODE'
           const fs=require('fs');
           const p='apps/web/static/site/site.js';
@@ -37,22 +38,26 @@ jobs:
           const lines=s.split(/\r?\n/);
           for(const [line,col] of [[89,463],[207,665]]){
             const text=lines[line-1]||'';
-            const a=Math.max(0,col-1-320), b=Math.min(text.length,col-1+320);
-            console.log(`=== POSITION ${line}:${col} lineLength=${text.length} ===`);
+            const a=Math.max(0,col-1-360), b=Math.min(text.length,col-1+360);
+            console.log(`=== PATCHED POSITION ${line}:${col} lineLength=${text.length} ===`);
             console.log(text.slice(a,b));
             console.log(`=== CARET ${' '.repeat(Math.max(0,col-1-a))}^ ===`);
           }
-          const idx=s.indexOf('async function dashboard');
-          console.log(`=== DASHBOARD INDEX ${idx} ===`);
-          if(idx>=0) console.log(s.slice(idx,idx+8000));
-          const idx2=s.indexOf('function dashboard');
-          if(idx<0&&idx2>=0) console.log(s.slice(idx2,idx2+8000));
+          for(const name of ['dashboard','quotaUsed','quotaRemain','effectivePlan','pageHead','shell','wireCommon']){
+            const candidates=[`function ${name}`,`async function ${name}`];
+            let idx=-1;
+            for(const c of candidates){idx=s.indexOf(c);if(idx>=0)break;}
+            console.log(`=== FUNCTION ${name} INDEX ${idx} ===`);
+            if(idx>=0){
+              const end=s.indexOf('\nfunction ',idx+1);
+              console.log(s.slice(idx,end>idx?Math.min(end,idx+5000):idx+5000));
+            }
+          }
           NODE
       - name: Verify Codespaces dashboard auth patch
         shell: bash
         run: |
           set -euo pipefail
-          node .devcontainer/patch-codespaces-auth.js
           test -f apps/web/static/site/site.js
           node --check apps/web/static/site/site.js
           grep -q 'codespacesAuthFallback' apps/web/static/site/site.js
