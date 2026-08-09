@@ -3,8 +3,6 @@ name: Import Everflow private source
 on:
   push:
     branches: [main]
-    paths:
-      - 'everflow-private-github-ready.zip'
   workflow_dispatch:
 
 permissions:
@@ -43,13 +41,8 @@ jobs:
           rm -rf /tmp/everflow-import
           mkdir -p /tmp/everflow-import
           unzip -q everflow-private-github-ready.zip -d /tmp/everflow-import
-
-          # The archive was generated from the tested Core Audit 02 source tree.
-          # Copy all source files and binary template assets into the private repo.
           rsync -a --exclude='.git/' /tmp/everflow-import/ ./
           rm -f everflow-private-github-ready.zip
-
-          # Never allow local runtime/build/secrets to enter Git history.
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
 
