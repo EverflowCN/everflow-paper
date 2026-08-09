@@ -26,7 +26,7 @@ jobs:
           unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
-      - name: Verify Codespaces dashboard auth patch
+      - name: Verify Codespaces dashboard patch
         shell: bash
         run: |
           set -euo pipefail
@@ -35,6 +35,7 @@ jobs:
           node --check apps/web/static/site/site.js
           grep -q 'codespacesAuthFallback' apps/web/static/site/site.js
           grep -q 'fallbackUser()' apps/web/static/site/site.js
+          grep -q 'function pageHead(' apps/web/static/site/site.js
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build
