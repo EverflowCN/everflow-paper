@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f everflow-private-github-ready.zip
-          unzip -oq everflow-private-github-ready.zip -d .
+          unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
       - name: Install dependencies
