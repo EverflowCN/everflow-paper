@@ -26,6 +26,16 @@ jobs:
           unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
+      - name: Diagnose static asset delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== site.js references ==='
+          grep -RIn --include='*.html' --include='*.js' 'site/site.js\|site.js' apps 2>/dev/null | head -80 || true
+          echo '=== service worker references ==='
+          grep -RIn --include='*.html' --include='*.js' 'serviceWorker\|service-worker\|navigator.serviceWorker' apps 2>/dev/null | head -80 || true
+          echo '=== cache/static server code ==='
+          grep -RIn --include='*.ts' --include='*.js' 'Cache-Control\|cache-control\|max-age\|immutable\|static\|sendFile\|readFile.*site' apps/api src 2>/dev/null | head -160 || true
       - name: Verify Codespaces dashboard patch
         shell: bash
         run: |
@@ -52,6 +62,8 @@ jobs:
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:8787/health >/tmp/health.json; then
               cat /tmp/health.json
+              echo '=== static headers ==='
+              curl -sSI http://127.0.0.1:8787/site/site.js || true
               exit 0
             fi
             sleep 1
