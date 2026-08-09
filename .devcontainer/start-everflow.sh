@@ -10,12 +10,27 @@ if [ ! -f package.json ]; then
   exit 1
 fi
 
-# Codespaces/browser previews can reject the normal HttpOnly cookie as a
-# third-party/preview cookie. Apply a development-only sessionStorage Bearer
-# fallback to the already-expanded web source. Production remains cookie-first.
-if [ -f .devcontainer/patch-codespaces-auth.js ]; then
-  node .devcontainer/patch-codespaces-auth.js
+# A Codespace working tree does not automatically follow origin/main. Fetch the
+# latest development-only dashboard patch without resetting or overwriting any
+# user files, then execute it directly from /tmp. Fall back to the local patch
+# when the remote fetch is unavailable.
+PATCH_RUNNER=".devcontainer/patch-codespaces-auth.js"
+if git fetch -q origin main 2>/dev/null && git show origin/main:.devcontainer/patch-codespaces-auth.js > /tmp/everflow-codespaces-patch.js 2>/dev/null; then
+  PATCH_RUNNER="/tmp/everflow-codespaces-patch.js"
+  echo "[Everflow] Using latest Codespaces dashboard patch from origin/main."
 fi
+if [ -f "$PATCH_RUNNER" ]; then
+  node "$PATCH_RUNNER"
+fi
+
+SITE_JS="apps/web/static/site/site.js"
+if [ ! -f "$SITE_JS" ] || ! grep -q 'function pageHead(' "$SITE_JS"; then
+  echo "[Everflow] Dashboard patch verification failed: pageHead() is missing."
+  exit 1
+fi
+PATCH_VERSION="$(grep -o "everflowCodespacesPatchVersion='[^']*'" "$SITE_JS" | head -1 | cut -d\' -f2 || true)"
+SITE_HASH="$(sha256sum "$SITE_JS" | awk '{print $1}' | cut -c1-12)"
+echo "[Everflow] Dashboard patch version: ${PATCH_VERSION:-legacy}; site.js sha256:${SITE_HASH}"
 
 # On a fresh Codespace bootstrap already builds the project once. Do not invoke
 # `npm run api` here because that script runs `npm run build` again and can keep
