@@ -10,6 +10,13 @@ if [ ! -f package.json ]; then
   exit 1
 fi
 
+# Codespaces/browser previews can reject the normal HttpOnly cookie as a
+# third-party/preview cookie. Apply a development-only sessionStorage Bearer
+# fallback to the already-expanded web source. Production remains cookie-first.
+if [ -f .devcontainer/patch-codespaces-auth.js ]; then
+  node .devcontainer/patch-codespaces-auth.js
+fi
+
 # On a fresh Codespace bootstrap already builds the project once. Do not invoke
 # `npm run api` here because that script runs `npm run build` again and can keep
 # port 8787 unavailable for a long time. Only build when the compiled server is
