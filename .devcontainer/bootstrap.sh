@@ -12,6 +12,10 @@ unzip -oq "$ARCHIVE" -d . -x '.devcontainer/*' '.github/*'
 rm -rf .runtime dist node_modules demo-output
 rm -f .env
 
+if [ -f .devcontainer/patch-codespaces-auth.js ]; then
+  node .devcontainer/patch-codespaces-auth.js
+fi
+
 echo "[Everflow] Installing Node dependencies..."
 npm install --no-audit --no-fund
 
