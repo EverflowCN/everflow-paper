@@ -26,15 +26,7 @@ jobs:
           unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
-      - name: Diagnose page header contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo '=== JS pageHead uses ==='
-          grep -n -o '.\{0,120\}pageHead(.\{0,260\}' apps/web/static/site/site.js || true
-          echo '=== CSS page header selectors ==='
-          grep -n -E 'page-head|pagehead|page-title|page-actions|page-sub|page-desc|header-actions' apps/web/static/site/site.css || true
-      - name: Verify Codespaces dashboard auth patch
+      - name: Verify latest main dashboard patch
         shell: bash
         run: |
           set -euo pipefail
@@ -43,6 +35,8 @@ jobs:
           node --check apps/web/static/site/site.js
           grep -q 'codespacesAuthFallback' apps/web/static/site/site.js
           grep -q 'fallbackUser()' apps/web/static/site/site.js
+          grep -q 'function pageHead(' apps/web/static/site/site.js
+          echo 'pageHead patch verified against private archive'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build
