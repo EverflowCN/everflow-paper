@@ -1,0 +1,85 @@
+name: Import Everflow private source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'everflow-private-github-ready.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: everflow-private-source-import
+  cancel-in-progress: false
+
+jobs:
+  import-source:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'a1504615378'
+    steps:
+      - name: Checkout private repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify source archive exists
+        id: archive
+        shell: bash
+        run: |
+          if [ -f everflow-private-github-ready.zip ]; then
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+            echo 'Archive is not present; nothing to import.'
+          fi
+
+      - name: Import complete Everflow tree
+        if: steps.archive.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/everflow-import
+          mkdir -p /tmp/everflow-import
+          unzip -q everflow-private-github-ready.zip -d /tmp/everflow-import
+
+          # The archive was generated from the tested Core Audit 02 source tree.
+          # Copy all source files and binary template assets into the private repo.
+          rsync -a --exclude='.git/' /tmp/everflow-import/ ./
+          rm -f everflow-private-github-ready.zip
+
+          # Never allow local runtime/build/secrets to enter Git history.
+          rm -rf .runtime dist node_modules demo-output
+          rm -f .env
+
+      - name: Guard against accidental secrets/runtime files
+        if: steps.archive.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=$(find . -type f \( -name '.env' -o -name '*.pem' -o -name '*.p12' -o -name '*.key' \) -not -path './.git/*' || true)
+          if [ -n "$bad" ]; then
+            echo 'Forbidden sensitive files detected:'
+            echo "$bad"
+            exit 1
+          fi
+          if grep -RIlE '(sk-[A-Za-z0-9_-]{20,}|github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{20,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY)' . --exclude-dir=.git --exclude='*.md' --exclude='*.example' | grep -q .; then
+            echo 'Potential credential pattern detected. Import stopped.'
+            exit 1
+          fi
+
+      - name: Commit imported private source
+        if: steps.archive.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No source changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Import Everflow Core Audit 02 private source'
+          git push origin HEAD:main
