@@ -9,7 +9,7 @@ if(!fs.existsSync(file)){
 
 let s=fs.readFileSync(file,'utf8');
 const before=s;
-const stats={api:0,load:0,submit:0,passkey:0,recovery:0,logout:0,render:0,quota:0};
+const stats={api:0,load:0,submit:0,passkey:0,recovery:0,logout:0,render:0,quota:0,pageHead:0};
 
 function replaceOnce(label,from,to,{required=false}={}){
   if(s.includes(to)) return;
@@ -46,6 +46,18 @@ const originalLogout="await api('/api/auth/logout',{method:'POST'});location.hre
 const patchedLogout="await api('/api/auth/logout',{method:'POST'});forgetAuthToken();location.href='/'";
 replaceOnce('logout',originalLogout,patchedLogout);
 
+// The private archive currently calls pageHead() across dashboard and app pages,
+// but the helper itself is missing from site.js. Recreate the intended contract
+// using the existing .page-head / .page-actions CSS. It supports 2, 3 and 4 args:
+// title + subtitle; optional actions; optional extra note + actions.
+if(!s.includes('function pageHead(')){
+  const safeAnchor="function safe(s){return String(s??'').replace(/[&<>\\\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\\"':'&quot;'}[c]))}";
+  const pageHead="function pageHead(title,subtitle='',third='',fourth=''){let note='',actions='';if(arguments.length>=4){note=third||'';actions=fourth||''}else if(typeof third==='string'&&/<(?:a|button)\\b/i.test(third)){actions=third}else note=third||'';return `<div class=\\\"page-head\\\"><div><h1>${title??''}</h1>${subtitle?`<p>${subtitle}</p>`:''}${note?`<p>${note}</p>`:''}</div>${actions?`<div class=\\\"page-actions\\\">${actions}</div>`:''}</div>`}";
+  if(!s.includes(safeAnchor)) throw new Error('PAGE_HEAD_SAFE_ANCHOR_NOT_FOUND');
+  s=s.replace(safeAnchor,`${safeAnchor}\n${pageHead}`);
+  stats.pageHead++;
+}
+
 // Render defensively when account hydration is temporarily incomplete.
 for(const [from,to] of [
   ['initials(me.displayName)',"initials(me?.displayName||fallbackUser()?.displayName||'E')"],
@@ -57,18 +69,14 @@ for(const [from,to] of [
   if(s.includes(from)){s=s.replaceAll(from,to);stats.render++}
 }
 
-// A cached Codespaces user can be available while /api/auth/me is temporarily
-// unavailable. In that state quota is intentionally null. Make every direct
-// quota property read null-safe so dashboard rendering cannot throw.
 const quotaDirect=/\bquota\.([A-Za-z_$][\w$]*)/g;
 s=s.replace(quotaDirect,(_,prop)=>{stats.quota++;return `quota?.${prop}`});
 
-// Fail closed if the essential auth fallback did not end up in the expanded source.
-const requiredMarkers=['codespacesAuthFallback','fallbackToken()','fallbackUser()','rememberAuthToken','async function loadAccount()'];
+const requiredMarkers=['codespacesAuthFallback','fallbackToken()','fallbackUser()','rememberAuthToken','async function loadAccount()','function pageHead('];
 for(const marker of requiredMarkers){
   if(!s.includes(marker)) throw new Error(`AUTH_PATCH_VERIFY_FAILED:${marker}`);
 }
 
 fs.writeFileSync(file,s);
-console.log(`[Everflow] Codespaces auth fallback applied: ${JSON.stringify(stats)}`);
-if(before===s) console.log('[Everflow] Codespaces auth fallback already current.');
+console.log(`[Everflow] Codespaces dashboard patch applied: ${JSON.stringify(stats)}`);
+if(before===s) console.log('[Everflow] Codespaces dashboard patch already current.');
