@@ -30,12 +30,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          bash -n .devcontainer/start-everflow.sh
           node .devcontainer/patch-codespaces-auth.js
           test -f apps/web/static/site/site.js
           node --check apps/web/static/site/site.js
           grep -q 'codespacesAuthFallback' apps/web/static/site/site.js
           grep -q 'fallbackUser()' apps/web/static/site/site.js
           grep -q 'function pageHead(' apps/web/static/site/site.js
+          grep -q "everflowCodespacesPatchVersion='2026-08-09-pagehead-v3'" apps/web/static/site/site.js
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build
