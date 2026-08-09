@@ -26,36 +26,19 @@ jobs:
           unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
-      - name: Diagnose dashboard dependencies
+      - name: Diagnose page header contract
         shell: bash
         run: |
           set -euo pipefail
-          node .devcontainer/patch-codespaces-auth.js
-          node <<'NODE'
-          const fs=require('fs');
-          const p='apps/web/static/site/site.js';
-          const s=fs.readFileSync(p,'utf8');
-          const lines=s.split(/\r?\n/);
-          console.log(`=== LINE 89 length=${(lines[88]||'').length} ===`); console.log(lines[88]||'');
-          console.log(`=== LINE 207 length=${(lines[206]||'').length} ===`); console.log(lines[206]||'');
-          const patterns=[
-            'function dashboard','function pageHead','const pageHead','pageHead=',
-            'async function loadShell','function loadShell','loadShell=',
-            'function safe','const safe','safe=',
-            'function icon','const icon','icon=',
-            'let me','let quota','let papers','let questions','const app=',
-            'async function loadAccount'
-          ];
-          for(const pat of patterns){
-            const idx=s.indexOf(pat);
-            console.log(`=== PATTERN ${pat} INDEX ${idx} ===`);
-            if(idx>=0) console.log(s.slice(Math.max(0,idx-180),Math.min(s.length,idx+3500)));
-          }
-          NODE
+          echo '=== JS pageHead uses ==='
+          grep -n -o '.\{0,120\}pageHead(.\{0,260\}' apps/web/static/site/site.js || true
+          echo '=== CSS page header selectors ==='
+          grep -n -E 'page-head|pagehead|page-title|page-actions|page-sub|page-desc|header-actions' apps/web/static/site/site.css || true
       - name: Verify Codespaces dashboard auth patch
         shell: bash
         run: |
           set -euo pipefail
+          node .devcontainer/patch-codespaces-auth.js
           test -f apps/web/static/site/site.js
           node --check apps/web/static/site/site.js
           grep -q 'codespacesAuthFallback' apps/web/static/site/site.js
