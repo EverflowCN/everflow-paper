@@ -1,0 +1,31 @@
+{
+  "name": "Everflow Private Codespace",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": {
+      "label": "Everflow Web",
+      "onAutoForward": "openBrowser",
+      "visibility": "private"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/bootstrap.sh",
+  "postStartCommand": "bash .devcontainer/start-everflow.sh",
+  "remoteEnv": {
+    "EVERFLOW_PERSISTENCE": "file",
+    "EVERFLOW_JOB_DRIVER": "memory",
+    "EVERFLOW_OBJECT_STORE": "local",
+    "EVERFLOW_COMPILE_SANDBOX": "host",
+    "PORT": "8787"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}
