@@ -26,6 +26,28 @@ jobs:
           unzip -oq everflow-private-github-ready.zip -d . -x '.devcontainer/*' '.github/*'
           rm -rf .runtime dist node_modules demo-output
           rm -f .env
+      - name: Diagnose dashboard source positions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const p='apps/web/static/site/site.js';
+          const s=fs.readFileSync(p,'utf8');
+          const lines=s.split(/\r?\n/);
+          for(const [line,col] of [[89,463],[207,665]]){
+            const text=lines[line-1]||'';
+            const a=Math.max(0,col-1-320), b=Math.min(text.length,col-1+320);
+            console.log(`=== POSITION ${line}:${col} lineLength=${text.length} ===`);
+            console.log(text.slice(a,b));
+            console.log(`=== CARET ${' '.repeat(Math.max(0,col-1-a))}^ ===`);
+          }
+          const idx=s.indexOf('async function dashboard');
+          console.log(`=== DASHBOARD INDEX ${idx} ===`);
+          if(idx>=0) console.log(s.slice(idx,idx+8000));
+          const idx2=s.indexOf('function dashboard');
+          if(idx<0&&idx2>=0) console.log(s.slice(idx2,idx2+8000));
+          NODE
       - name: Verify Codespaces dashboard auth patch
         shell: bash
         run: |
