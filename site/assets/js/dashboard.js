@@ -3,6 +3,8 @@
   const pad=n=>String(Math.max(0,n)).padStart(2,'0');
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const progressKey='oxygen408-progress-v2';
+  const REFRESH_MS=2*60*1000;
+  let lastOxygenVersion='';
 
   async function loadJson(path){
     const r=await fetch(path+'?t='+Date.now(),{cache:'no-store'});
@@ -65,12 +67,26 @@
     const sync=$('[data-oxygen-sync]');
     if(sync){
       const dt=data.updatedAt?new Date(data.updatedAt):null;
-      sync.innerHTML=`<span class="status-dot"></span>${esc(syncLabel(data.source))} · ${dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步'}`;
+      sync.innerHTML=`<span class="status-dot"></span>${esc(syncLabel(data.source))} · ${dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步'} · 页面每2分钟自动刷新`;
       sync.title=String(data.source?.message||'');
     }
   }
 
-  Promise.all([loadJson('data/exam.json'),loadJson('data/oxygen.json')])
-    .then(([exam,oxygen])=>{renderCountdown(exam);renderOxygen(oxygen)})
-    .catch(err=>{console.error(err);const s=$('[data-oxygen-sync]');if(s)s.textContent='数据暂时加载失败，请刷新重试。'});
+  async function refreshOxygen(force=false){
+    try{
+      const oxygen=await loadJson('data/oxygen.json');
+      const version=String(oxygen.updatedAt||'')+'|'+['ds','co','os','cn'].map(k=>(oxygen.subjects?.[k]?.items||[]).length).join(',');
+      if(!force&&version===lastOxygenVersion)return;
+      lastOxygenVersion=version;
+      renderOxygen(oxygen);
+    }catch(err){
+      console.error(err);
+      const s=$('[data-oxygen-sync]');
+      if(s&&!lastOxygenVersion)s.textContent='数据暂时加载失败，请刷新重试。';
+    }
+  }
+
+  loadJson('data/exam.json').then(renderCountdown).catch(console.error);
+  refreshOxygen(true);
+  setInterval(()=>refreshOxygen(false),REFRESH_MS);
 })();
