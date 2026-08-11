@@ -30,24 +30,26 @@
 const API='https://api.evera.top';
 const $=id=>document.getElementById(id);
 let posts=[],current=null;
-let token=localStorage.getItem('everflow-admin-token')||'';
-if(location.hash.startsWith('#token=')){token=decodeURIComponent(location.hash.slice(7));localStorage.setItem('everflow-admin-token',token);history.replaceState(null,'',location.pathname)}
-const authHeaders=()=>({'Authorization':'Bearer '+token,'Content-Type':'application/json'});
+localStorage.removeItem('everflow-admin-token');
+if(location.hash.startsWith('#token='))history.replaceState(null,'',location.pathname);
+const apiFetch=(path,options={})=>fetch(API+path,{credentials:'include',...options});
+const jsonHeaders=()=>({'Content-Type':'application/json'});
 function note(msg,ok=false){const n=$('notice');n.textContent=msg;n.className='notice'+(ok?' ok':'');n.style.display='block'}
 function slugify(s){return String(s).trim().toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function health(){try{const r=await fetch(API+'/api/health',{cache:'no-store'});const d=await r.json();$('setupStatus').textContent=d.oauthConfigured?'后台服务已就绪。':'GitHub OAuth 尚未配置。';$('loginBtn').disabled=!d.oauthConfigured}catch{$('setupStatus').textContent='后台服务连接失败。';$('loginBtn').disabled=true}}
-async function me(){if(!token)return false;try{const r=await fetch(API+'/api/me',{headers:authHeaders()});if(!r.ok)throw new Error();const d=await r.json();$('identity').textContent='已登录：'+d.login;$('login').style.display='none';$('dashboard').style.display='grid';$('logout').style.display='inline-block';await loadPosts();return true}catch{localStorage.removeItem('everflow-admin-token');token='';return false}}
+async function health(){try{const r=await apiFetch('/api/health',{cache:'no-store'});const d=await r.json();$('setupStatus').textContent=d.oauthConfigured?'后台服务已就绪。':'GitHub OAuth 尚未配置。';$('loginBtn').disabled=!d.oauthConfigured}catch{$('setupStatus').textContent='后台服务连接失败。';$('loginBtn').disabled=true}}
+async function me(){try{const r=await apiFetch('/api/me',{cache:'no-store'});if(!r.ok)return false;const d=await r.json();$('identity').textContent='已登录：'+d.login;$('login').style.display='none';$('dashboard').style.display='grid';$('logout').style.display='inline-block';await loadPosts();return true}catch{return false}}
 async function loadPosts(){try{const r=await fetch('../data/posts.json?t='+Date.now(),{cache:'no-store'});posts=r.ok?await r.json():[];renderList()}catch{posts=[];renderList()}}
-function renderList(){$('count').textContent=posts.length+' 篇';$('postList').innerHTML=posts.map((p,i)=>`<div class="post-item" data-i="${i}"><strong>${escapeHtml(p.title)}</strong><small>${p.date||''} · ${p.slug}</small></div>`).join('')||'<div class="status">还没有文章。</div>';document.querySelectorAll('.post-item').forEach(el=>el.onclick=()=>edit(posts[Number(el.dataset.i)]))}
+function renderList(){$('count').textContent=posts.length+' 篇';$('postList').innerHTML=posts.map((p,i)=>`<div class="post-item" data-i="${i}"><strong>${escapeHtml(p.title)}</strong><small>${escapeHtml(p.date||'')} · ${escapeHtml(p.slug||'')}</small></div>`).join('')||'<div class="status">还没有文章。</div>';document.querySelectorAll('.post-item').forEach(el=>el.onclick=()=>edit(posts[Number(el.dataset.i)]))}
 function edit(p){current=p;$('editorTitle').textContent='编辑文章';$('title').value=p.title||'';$('slug').value=p.slug||'';$('date').value=p.date||'';$('tags').value=(p.tags||[]).join(', ');$('excerpt').value=p.excerpt||'';$('content').value=p.content||'';$('notice').style.display='none';scrollTo({top:0,behavior:'smooth'})}
-function clearForm(){current=null;$('editorTitle').textContent='新建文章';['title','slug','tags','excerpt','content'].forEach(id=>$(id).value='');$('date').value=new Date().toISOString().slice(0,10);$('notice').style.display='none'}
+function localDate(){const d=new Date();const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function clearForm(){current=null;$('editorTitle').textContent='新建文章';['title','slug','tags','excerpt','content'].forEach(id=>$(id).value='');$('date').value=localDate();$('notice').style.display='none'}
 $('title').addEventListener('input',()=>{if(!current&&!$('slug').value)$('slug').value=slugify($('title').value)});
 $('loginBtn').onclick=()=>location.href=API+'/api/auth/login';
-$('logout').onclick=()=>{localStorage.removeItem('everflow-admin-token');location.reload()};
+$('logout').onclick=async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'});}finally{location.reload()}};
 $('newBtn').onclick=clearForm;$('clearBtn').onclick=clearForm;
-$('publishBtn').onclick=async()=>{const payload={title:$('title').value.trim(),slug:$('slug').value.trim(),date:$('date').value,tags:$('tags').value,excerpt:$('excerpt').value.trim(),content:$('content').value};if(!payload.title||!payload.slug)return note('标题和 Slug 不能为空。');try{$('publishBtn').disabled=true;note('正在提交到 GitHub…');const r=await fetch(API+'/api/publish',{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.error||'发布失败');note('发布成功。GitHub Pages 正在自动部署。',true);await loadPosts();if(d.post)edit(d.post)}catch(e){note(e.message)}finally{$('publishBtn').disabled=false}};
-$('deleteBtn').onclick=async()=>{const slug=$('slug').value.trim();if(!slug)return note('当前没有可删除的文章。');if(!confirm('确定删除这篇文章吗？'))return;try{const r=await fetch(API+'/api/delete?slug='+encodeURIComponent(slug),{method:'DELETE',headers:authHeaders()});const d=await r.json();if(!r.ok)throw new Error(d.error||'删除失败');note('已删除，GitHub Pages 正在重新部署。',true);await loadPosts();clearForm()}catch(e){note(e.message)}};
+$('publishBtn').onclick=async()=>{const payload={title:$('title').value.trim(),slug:$('slug').value.trim(),date:$('date').value,tags:$('tags').value,excerpt:$('excerpt').value.trim(),content:$('content').value};if(!payload.title||!payload.slug)return note('标题和 Slug 不能为空。');try{$('publishBtn').disabled=true;note('正在提交到 GitHub…');const r=await apiFetch('/api/publish',{method:'POST',headers:jsonHeaders(),body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.error||'发布失败');note('发布成功。GitHub Pages 正在自动部署。',true);await loadPosts();if(d.post)edit(d.post)}catch(e){note(e.message)}finally{$('publishBtn').disabled=false}};
+$('deleteBtn').onclick=async()=>{const slug=$('slug').value.trim();if(!slug)return note('当前没有可删除的文章。');if(!confirm('确定删除这篇文章吗？'))return;try{const r=await apiFetch('/api/delete?slug='+encodeURIComponent(slug),{method:'DELETE'});const d=await r.json();if(!r.ok)throw new Error(d.error||'删除失败');note('已删除，GitHub Pages 正在重新部署。',true);await loadPosts();clearForm()}catch(e){note(e.message)}};
 clearForm();health().then(()=>me());
 </script>
 </body>
