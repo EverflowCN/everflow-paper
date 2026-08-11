@@ -35,7 +35,7 @@
     document.head.appendChild(script);
 
     const oxygenGuard=document.createElement('script');
-    oxygenGuard.src='../assets/js/workspace-oxygen-guard-v1.js?v=1';
+    oxygenGuard.src='../assets/js/workspace-oxygen-guard-v1.js?v=2';
     oxygenGuard.async=true;
     document.head.appendChild(oxygenGuard);
   }
