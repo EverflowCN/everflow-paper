@@ -8,54 +8,72 @@
     localStorage.setItem('everflow-theme',body.classList.contains('dark')?'dark':'light');
   }));
 
-  // Membership promotion entry. It sits immediately before “账户”. Once a user
-  // claims/redeems a membership, or explicitly closes it with ×, it stays hidden
-  // on this device. The membership page remains reachable from the account page.
-  const membershipHidden=()=>localStorage.getItem('everflow-membership-nav-hidden-v1')==='1';
-  const ensurePromoStyle=()=>{
-    if(document.getElementById('everflow-membership-nav-style'))return;
-    const style=document.createElement('style');style.id='everflow-membership-nav-style';
-    style.textContent=`.membership-nav-entry{display:inline-flex;align-items:center;gap:3px}.membership-nav-entry>a{white-space:nowrap}.membership-nav-close{border:0;background:transparent;color:var(--muted,#777);font:600 15px/1 system-ui;padding:4px 2px;cursor:pointer;border-radius:999px}.membership-nav-close:hover{color:var(--text,#111);background:rgba(127,127,127,.12)}.membership-nav-entry.is-hidden{display:none!important}.mobile-panel .membership-nav-entry{display:flex;width:100%;align-items:center}.mobile-panel .membership-nav-entry>a{flex:1}.mobile-panel .membership-nav-close{padding:10px 12px}`;
+  function ensureUiStyle(){
+    if(document.getElementById('everflow-ui-style'))return;
+    const style=document.createElement('style');style.id='everflow-ui-style';
+    style.textContent=`
+      .membership-nav-entry{display:inline-flex;align-items:center;gap:6px}
+      .membership-nav-entry>a{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 13px;border-radius:999px;background:var(--red);color:#fff!important;font-weight:850;white-space:nowrap;box-shadow:0 7px 18px color-mix(in srgb,var(--red) 16%,transparent)}
+      .membership-nav-close{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);background:var(--card);color:var(--muted);font:700 18px/1 system-ui;border-radius:999px;cursor:pointer;transition:transform .14s,background .14s,color .14s}
+      .membership-nav-close:hover{color:var(--ink);background:var(--soft)}.membership-nav-close:active{transform:scale(.92)}
+      .membership-nav-entry.is-hidden{display:none!important}
+      .mobile-panel .membership-nav-entry{display:grid;grid-template-columns:1fr 44px;gap:8px;width:100%;padding:7px 0;border-bottom:1px solid var(--line)}
+      .mobile-panel .membership-nav-entry>a{min-height:44px;width:100%}.mobile-panel .membership-nav-close{width:44px;height:44px;font-size:22px}
+      .evera-toast-stack{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:9999;width:min(430px,calc(100% - 28px));transform:translateX(-50%);display:grid;gap:9px;pointer-events:none}
+      .evera-toast{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:13px 14px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:0 16px 48px rgba(0,0,0,.16);backdrop-filter:blur(18px);color:var(--ink);pointer-events:auto;animation:everaToastIn .2s ease-out}
+      .evera-toast-icon{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:var(--soft);font-weight:900}.evera-toast.success .evera-toast-icon{background:color-mix(in srgb,var(--green) 14%,var(--card));color:var(--green)}.evera-toast.error .evera-toast-icon{background:color-mix(in srgb,var(--red) 12%,var(--card));color:var(--red)}
+      .evera-toast strong{display:block;font-size:14px;line-height:1.35}.evera-toast p{margin:3px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.evera-toast-x{border:0;background:transparent;color:var(--muted);width:28px;height:28px;border-radius:999px;cursor:pointer}.evera-toast-x:active{transform:scale(.9)}
+      .is-busy{position:relative;cursor:wait!important}.is-busy:before{content:'';width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:-2px;animation:everaSpin .7s linear infinite}
+      @keyframes everaSpin{to{transform:rotate(360deg)}}@keyframes everaToastIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+      @media(max-width:760px){.evera-toast-stack{bottom:calc(16px + env(safe-area-inset-bottom))}}
+    `;
     document.head.appendChild(style);
+  }
+  ensureUiStyle();
+
+  const toast=(message,options={})=>{
+    const type=options.type||'info',title=options.title||({success:'操作成功',error:'操作失败',info:'提示'}[type]||'提示');
+    let stack=document.querySelector('.evera-toast-stack');
+    if(!stack){stack=document.createElement('div');stack.className='evera-toast-stack';stack.setAttribute('aria-live','polite');document.body.appendChild(stack)}
+    const el=document.createElement('div');el.className=`evera-toast ${type}`;el.setAttribute('role',type==='error'?'alert':'status');
+    const icon=type==='success'?'✓':type==='error'?'!':'i';
+    el.innerHTML=`<span class="evera-toast-icon">${icon}</span><div><strong></strong><p></p></div><button class="evera-toast-x" type="button" aria-label="关闭提示">×</button>`;
+    el.querySelector('strong').textContent=title;el.querySelector('p').textContent=String(message||'');
+    const remove=()=>{el.remove()};el.querySelector('button').addEventListener('click',remove);stack.appendChild(el);
+    setTimeout(remove,Number(options.duration)||3600);return el;
   };
+  const setBusy=(btn,busy,label)=>{
+    if(!btn)return;
+    if(busy){if(!btn.dataset.everaLabel)btn.dataset.everaLabel=btn.textContent;btn.disabled=true;btn.classList.add('is-busy');if(label)btn.textContent=label}
+    else{btn.disabled=false;btn.classList.remove('is-busy');btn.textContent=label||btn.dataset.everaLabel||btn.textContent;delete btn.dataset.everaLabel}
+  };
+  const complete=(btn,label='完成 ✓',restoreMs=1400)=>{
+    if(!btn)return;const original=btn.dataset.everaLabel||btn.textContent;btn.classList.remove('is-busy');btn.disabled=true;btn.textContent=label;
+    if(restoreMs>0)setTimeout(()=>{btn.disabled=false;btn.textContent=original;delete btn.dataset.everaLabel},restoreMs);
+  };
+  window.EveraUI={toast,setBusy,complete};
+
+  // Promotional membership entry directly before “账户”. The × is a real,
+  // separate button with its own hit target. Claiming/redeeming also hides it.
+  const membershipHidden=()=>localStorage.getItem('everflow-membership-nav-hidden-v1')==='1';
   const accountAnchor=container=>[...(container?.querySelectorAll('a')||[])].find(a=>a.textContent.trim()==='账户');
   const addMembershipEntry=container=>{
     const account=accountAnchor(container);if(!account||container.querySelector('.membership-nav-entry'))return;
-    ensurePromoStyle();
     const wrap=document.createElement('span');wrap.className='membership-nav-entry'+(membershipHidden()?' is-hidden':'');
     const link=document.createElement('a');link.href='/membership/';link.textContent='购买会员';if(location.pathname.startsWith('/membership/'))link.classList.add('active');
-    const close=document.createElement('button');close.type='button';close.className='membership-nav-close';close.setAttribute('aria-label','关闭会员入口');close.textContent='×';
-    close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(x=>x.classList.add('is-hidden'));});
+    const close=document.createElement('button');close.type='button';close.className='membership-nav-close';close.setAttribute('aria-label','关闭购买会员入口');close.setAttribute('title','关闭');close.textContent='×';
+    close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(x=>x.classList.add('is-hidden'))});
     wrap.append(link,close);account.before(wrap);
   };
-  addMembershipEntry(document.querySelector('.links'));
-  addMembershipEntry(document.querySelector('.mobile-panel'));
-  document.addEventListener('everflow:membership-change',e=>{
-    if(e.detail?.active){localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(x=>x.classList.add('is-hidden'));}
-  });
+  addMembershipEntry(document.querySelector('.links'));addMembershipEntry(document.querySelector('.mobile-panel'));
+  document.addEventListener('everflow:membership-change',e=>{if(e.detail?.active){localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(x=>x.classList.add('is-hidden'))}});
 
   const menu=document.querySelector('.mobile-panel');
   const menuButtons=[...document.querySelectorAll('[data-menu]')];
-  const setMenu=open=>{
-    if(!menu)return;
-    menu.classList.toggle('open',open);
-    body.classList.toggle('menu-open',open);
-    menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'));
-  };
-
-  menuButtons.forEach(btn=>{
-    btn.setAttribute('aria-expanded','false');
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      setMenu(!menu?.classList.contains('open'));
-    });
-  });
-
+  const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};
+  menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',e=>{e.stopPropagation();setMenu(!menu?.classList.contains('open'))})});
   menu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMenu(false)));
-
-  document.addEventListener('click',e=>{
-    if(menu?.classList.contains('open')&&!menu.contains(e.target)&&!e.target.closest('[data-menu]'))setMenu(false);
-  });
+  document.addEventListener('click',e=>{if(menu?.classList.contains('open')&&!menu.contains(e.target)&&!e.target.closest('[data-menu]'))setMenu(false)});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
   window.addEventListener('resize',()=>{if(window.innerWidth>760)setMenu(false)},{passive:true});
 })();
