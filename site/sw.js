@@ -1,21 +1,25 @@
-const CACHE='everflow-study-shell-v1';
+const CACHE='everflow-study-shell-v2';
 const APP_SHELL=[
   '/',
   '/408/',
   '/focus/',
   '/stats/',
+  '/membership/',
   '/account/',
   '/archive/',
   '/about/',
   '/assets/css/site.css',
   '/assets/css/responsive.css',
   '/assets/css/study.css',
+  '/assets/css/membership.css',
   '/assets/js/site.js',
   '/assets/js/study-store.js',
   '/assets/js/cloud-config.js',
+  '/assets/js/cloud.js',
   '/assets/js/checkin.js',
   '/assets/js/focus.js',
   '/assets/js/stats.js',
+  '/assets/js/membership.js',
   '/assets/js/account.js',
   '/assets/everflow-icon.svg',
   '/manifest.webmanifest'
@@ -59,7 +63,6 @@ self.addEventListener('fetch',event=>{
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
 
-  // Frequently changing data and public cloud configuration should prefer network.
   if(request.mode==='navigate'||url.pathname.startsWith('/data/')||url.pathname.endsWith('/cloud-config.js')){
     event.respondWith(networkFirst(request));return;
   }
