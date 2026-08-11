@@ -53,8 +53,23 @@
   };
   window.EveraUI={toast,setBusy,complete};
 
-  // Promotional membership entry directly before “账户”. The × is a real,
-  // separate button with its own hit target. Claiming/redeeming also hides it.
+  // Merge “专注/统计” into one navigation item and rename the old article entry.
+  const normalizeNav=container=>{
+    if(!container)return;
+    const anchors=[...container.querySelectorAll('a')];
+    anchors.filter(a=>new URL(a.href,location.href).pathname.replace(/\/+$/,'')==='/stats').forEach(a=>a.remove());
+    const focus=[...container.querySelectorAll('a')].find(a=>new URL(a.href,location.href).pathname.replace(/\/+$/,'')==='/focus');
+    if(focus)focus.textContent='专注统计';
+    const archive=[...container.querySelectorAll('a')].find(a=>new URL(a.href,location.href).pathname.replace(/\/+$/,'')==='/archive');
+    if(archive)archive.textContent='通知通告';
+    if(archive&&!container.querySelector('[data-resources-nav]')){
+      const link=document.createElement('a');link.href='/links/';link.textContent='资源';link.dataset.resourcesNav='1';
+      if(location.pathname.startsWith('/links/'))link.classList.add('active');
+      archive.before(link);
+    }
+  };
+  normalizeNav(document.querySelector('.links'));normalizeNav(document.querySelector('.mobile-panel'));
+
   const membershipHidden=()=>localStorage.getItem('everflow-membership-nav-hidden-v1')==='1';
   const accountAnchor=container=>[...(container?.querySelectorAll('a')||[])].find(a=>a.textContent.trim()==='账户');
   const addMembershipEntry=container=>{
