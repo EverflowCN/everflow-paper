@@ -78,11 +78,22 @@
     `:`<div class="empty-state"><strong>${esc(info.label)}强化暂未同步到课程</strong><br><span>自动任务会持续检查「就是氧气11」的新视频。</span></div>`;
   }
 
+  function syncLabel(source={}){
+    const status=source.syncStatus||'seed';
+    const states=source.subjectStatus||{};
+    const okCount=SUBJECTS.filter(k=>states[k]?.ok).length;
+    if(status==='ok')return '自动同步正常 · 4/4';
+    if(status==='partial')return `部分同步 · ${okCount}/4，失败科目将自动重试`;
+    if(status==='error')return '本轮同步失败，系统将自动重试';
+    return '自动同步已启用';
+  }
+
   function render(){
     SUBJECTS.forEach(renderSubject);stats();
     const dt=data.updatedAt?new Date(data.updatedAt):null;
     $('[data-sync-time]').textContent=dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步';
-    $('[data-sync-status]').textContent=data.source?.syncStatus==='ok'?'自动同步正常':'自动同步已配置';
+    $('[data-sync-status]').textContent=syncLabel(data.source);
+    $('[data-sync-status]').title=String(data.source?.message||'');
     switchTab(active);
   }
 
