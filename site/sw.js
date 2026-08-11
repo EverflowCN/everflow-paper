@@ -1,4 +1,4 @@
-const CACHE='everflow-study-shell-v5';
+const CACHE='everflow-study-shell-v6';
 const APP_SHELL=[
   '/',
   '/408/',
@@ -40,4 +40,4 @@ self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys
 
 async function networkFirst(request){const cache=await caches.open(CACHE);try{const response=await fetch(request);if(response&&response.ok&&request.method==='GET')cache.put(request,response.clone());return response}catch{return (await cache.match(request))||(request.mode==='navigate'?await cache.match('/'):Response.error())}}
 async function staleWhileRevalidate(request){const cache=await caches.open(CACHE),cached=await cache.match(request);const fresh=fetch(request).then(response=>{if(response&&response.ok)cache.put(request,response.clone());return response}).catch(()=>null);return cached||(await fresh)||Response.error()}
-self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(request.mode==='navigate'||url.pathname.startsWith('/data/')||url.pathname.endsWith('/cloud-config.js')){event.respondWith(networkFirst(request));return}event.respondWith(staleWhileRevalidate(request))});
+self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;const adminAsset=url.pathname.startsWith('/workspace/')||url.pathname.endsWith('/workspace-v2.css')||url.pathname.endsWith('/workspace-v2.js')||url.pathname.endsWith('/admin-cloud.js');if(request.mode==='navigate'||adminAsset||url.pathname.startsWith('/data/')||url.pathname.endsWith('/cloud-config.js')){event.respondWith(networkFirst(request));return}event.respondWith(staleWhileRevalidate(request))});
