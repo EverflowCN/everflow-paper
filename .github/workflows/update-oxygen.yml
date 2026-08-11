@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - "scripts/update_oxygen.py"
+      - "scripts/cleanup_oxygen.py"
       - ".github/workflows/update-oxygen.yml"
 
 permissions:
@@ -62,6 +63,9 @@ jobs:
 
       - name: Merge without deleting failed-subject data
         run: python scripts/update_oxygen.py --merge-dir sync
+
+      - name: Normalize confirmed title aliases
+        run: python scripts/cleanup_oxygen.py
 
       - name: Commit updated course data
         shell: bash
