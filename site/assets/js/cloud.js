@@ -1,10 +1,7 @@
 const cfg=window.EVERFLOW_CLOUD||{};
 const enabled=Boolean(cfg.url&&cfg.publishableKey);
-let client=null;
-let readyResolve;
-let syncing=false;
+let client=null,readyResolve,syncing=false;
 const ready=new Promise(r=>readyResolve=r);
-
 const fromCourse=r=>({id:r.course_id,subject:r.subject,done:r.done,note:r.note||'',completedAt:r.completed_at,updatedAt:r.updated_at,deviceId:r.device_id||'',syncState:'cloud'});
 const toCourse=(r,userId)=>({user_id:userId,course_id:r.id,subject:r.subject||'unknown',done:Boolean(r.done),note:r.note||'',completed_at:r.completedAt||null,device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()});
 
@@ -13,116 +10,43 @@ async function init(){
   try{
     const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm');
     client=createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    client.auth.onAuthStateChange((event,session)=>{
-      document.dispatchEvent(new CustomEvent('everflow:auth-change',{detail:{event,user:session?.user||null}}));
-      if(session?.user&&navigator.onLine!==false)setTimeout(()=>syncAll().catch(()=>{}),0);
-    });
-    readyResolve(client);
-    document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:true}}));
-    const {data}=await client.auth.getSession();
-    if(data?.session?.user&&navigator.onLine!==false)syncAll().catch(()=>{});
-    return client;
-  }catch(err){
-    console.error('Everflow cloud init failed',err);readyResolve(null);
-    document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false,error:String(err)}}));
-    document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:'云端初始化失败'}}));
-    return null;
-  }
+    client.auth.onAuthStateChange((event,session)=>{document.dispatchEvent(new CustomEvent('everflow:auth-change',{detail:{event,user:session?.user||null}}));if(session?.user&&navigator.onLine!==false)setTimeout(()=>syncAll().catch(()=>{}),0)});
+    readyResolve(client);document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:true}}));
+    const {data}=await client.auth.getSession();if(data?.session?.user&&navigator.onLine!==false)syncAll().catch(()=>{});return client;
+  }catch(err){console.error('Everflow cloud init failed',err);readyResolve(null);document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false,error:String(err)}}));document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:'云端初始化失败'}}));return null}
 }
-
 async function getUser(){await ready;if(!client)return null;const {data,error}=await client.auth.getUser();if(error)return null;return data.user||null}
 async function signIn(email,password){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signInWithPassword({email,password})}
 async function signUp(email,password){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signUp({email,password})}
-async function signInOtp(email){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}})}
+async function signInOtp(email){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signInWithOtp({email,options:{shouldCreateUser:true}})}
+async function verifyOtp(email,token){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.verifyOtp({email,token:String(token||'').replace(/\D/g,''),type:'email'})}
 async function signOut(){await ready;if(!client)return;return client.auth.signOut()}
 
-async function pushLocal(userId){
-  const local=await EveraStore.exportAll();
-  const courseRows=(local.courseStates||[]).map(r=>toCourse(r,userId));
-  if(courseRows.length){const {error}=await client.from('course_states').upsert(courseRows,{onConflict:'user_id,course_id'});if(error)throw error}
-  return {courseRows};
-}
-
+async function pushLocal(userId){const local=await EveraStore.exportAll();const courseRows=(local.courseStates||[]).map(r=>toCourse(r,userId));if(courseRows.length){const {error}=await client.from('course_states').upsert(courseRows,{onConflict:'user_id,course_id'});if(error)throw error}return {courseRows}}
 async function syncAll(){
-  await ready;if(!client||!window.EveraStore)return {ok:false,reason:'disabled'};
-  if(navigator.onLine===false)return {ok:false,reason:'offline'};
-  if(syncing)return {ok:false,reason:'busy'};
-  const user=await getUser();if(!user)return {ok:false,reason:'guest'};
-  syncing=true;
+  await ready;if(!client||!window.EveraStore)return {ok:false,reason:'disabled'};if(navigator.onLine===false)return {ok:false,reason:'offline'};if(syncing)return {ok:false,reason:'busy'};const user=await getUser();if(!user)return {ok:false,reason:'guest'};syncing=true;
   try{
-    await EveraStore.init();
-    const remoteCourse=await client.from('course_states').select('*').eq('user_id',user.id);
-    if(remoteCourse.error)throw remoteCourse.error;
-    const mapped={focusSessions:[],courseStates:(remoteCourse.data||[]).map(fromCourse)};
-    const scope=await EveraStore.prepareForUser?.(user.id,{remoteFocusCount:1,remoteCourseCount:mapped.courseStates.length});
-    if(scope?.recoveredLegacy)document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'检测到账户切换，已隔离上一账号的本机数据并载入当前账号。'}}));
-    else if(scope?.changed&&scope?.from)document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'已切换本机数据空间，当前账号不会混入上一账号的数据。'}}));
-    await EveraStore.importAll(mapped);
-    const pushed=await pushLocal(user.id);
-    const {error:profileError}=await client.from('profiles').upsert({user_id:user.id,last_seen_at:new Date().toISOString()},{onConflict:'user_id'});
-    if(profileError)throw profileError;
-    const out={ok:true,at:new Date().toISOString(),userId:user.id,courses:pushed.courseRows.length};
-    localStorage.setItem('everflow-last-cloud-sync',JSON.stringify(out));
-    localStorage.setItem('everflow-last-cloud-user-id-v2',user.id);
-    document.dispatchEvent(new CustomEvent('everflow:cloud-sync',{detail:out}));
-    return out;
-  }catch(error){
-    console.error('Everflow cloud sync failed',error);
-    document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:error?.message||'同步失败'}}));
-    throw error;
-  }finally{syncing=false}
+    await EveraStore.init();const remoteCourse=await client.from('course_states').select('*').eq('user_id',user.id);if(remoteCourse.error)throw remoteCourse.error;
+    const mapped={focusSessions:[],courseStates:(remoteCourse.data||[]).map(fromCourse)};const scope=await EveraStore.prepareForUser?.(user.id,{remoteFocusCount:1,remoteCourseCount:mapped.courseStates.length});
+    if(scope?.recoveredLegacy)document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'检测到账户切换，已隔离上一账号的本机数据并载入当前账号。'}}));else if(scope?.changed&&scope?.from)document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'已切换本机数据空间，当前账号不会混入上一账号的数据。'}}));
+    await EveraStore.importAll(mapped);const pushed=await pushLocal(user.id);const {error:profileError}=await client.from('profiles').upsert({user_id:user.id,last_seen_at:new Date().toISOString()},{onConflict:'user_id'});if(profileError)throw profileError;
+    const out={ok:true,at:new Date().toISOString(),userId:user.id,courses:pushed.courseRows.length};localStorage.setItem('everflow-last-cloud-sync',JSON.stringify(out));localStorage.setItem('everflow-last-cloud-user-id-v2',user.id);document.dispatchEvent(new CustomEvent('everflow:cloud-sync',{detail:out}));return out;
+  }catch(error){console.error('Everflow cloud sync failed',error);document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:error?.message||'同步失败'}}));throw error}finally{syncing=false}
 }
-
 async function isOwner(){const u=await getUser();return Boolean(u?.app_metadata?.role==='owner')}
 async function requireOwner(){await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');return true}
-async function getOwnerOverview(){
-  await requireOwner();
-  const [profiles,courses,recent]=await Promise.all([
-    client.from('profiles').select('*',{count:'exact',head:true}),
-    client.from('course_states').select('*',{count:'exact',head:true}),
-    client.from('profiles').select('user_id,display_name,created_at,last_seen_at').order('last_seen_at',{ascending:false}).limit(20)
-  ]);
-  if(profiles.error)throw profiles.error;if(courses.error)throw courses.error;if(recent.error)throw recent.error;
-  return {users:profiles.count||0,courses:courses.count||0,recent:recent.data||[]};
-}
+async function getOwnerOverview(){await requireOwner();const [profiles,courses,recent]=await Promise.all([client.from('profiles').select('*',{count:'exact',head:true}),client.from('course_states').select('*',{count:'exact',head:true}),client.from('profiles').select('user_id,display_name,created_at,last_seen_at').order('last_seen_at',{ascending:false}).limit(20)]);if(profiles.error)throw profiles.error;if(courses.error)throw courses.error;if(recent.error)throw recent.error;return {users:profiles.count||0,courses:courses.count||0,recent:recent.data||[]}}
 async function ownerUsers(action,payload={}){await requireOwner();const {data,error}=await client.functions.invoke('owner-users',{body:{action,...payload}});if(error)throw error;if(data?.error)throw new Error(data.error);return data}
 async function membership(action='status',payload={}){await ready;if(!client)throw new Error('云同步尚未配置');const user=await getUser();if(!user)throw new Error('login_required');const {data,error}=await client.functions.invoke('membership',{body:{action,...payload}});if(error)throw error;if(data?.error)throw new Error(data.error);return data}
-
-async function listNotices({limit=50,owner=false}={}){
-  await ready;if(!client)return [];
-  if(owner)await requireOwner();
-  let q=client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').order('pinned',{ascending:false}).order('published_at',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false}).limit(Math.max(1,Math.min(100,Number(limit)||50)));
-  if(!owner)q=q.eq('published',true);
-  const {data,error}=await q;if(error)throw error;return data||[];
-}
+async function listNotices({limit=50,owner=false}={}){await ready;if(!client)return [];if(owner)await requireOwner();let q=client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').order('pinned',{ascending:false}).order('published_at',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false}).limit(Math.max(1,Math.min(100,Number(limit)||50)));if(!owner)q=q.eq('published',true);const {data,error}=await q;if(error)throw error;return data||[]}
 async function getNotice(id){await ready;if(!client||!id)return null;const {data,error}=await client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').eq('id',id).maybeSingle();if(error)throw error;return data||null}
-async function saveNotice(input={}){
-  await requireOwner();const user=await getUser();const id=input.id||undefined;const row={title:String(input.title||'').trim(),summary:String(input.summary||''),content:String(input.content||''),level:['info','important','update','event'].includes(input.level)?input.level:'info',pinned:Boolean(input.pinned),published:Boolean(input.published),published_at:input.published?(input.published_at||new Date().toISOString()):null,updated_at:new Date().toISOString(),created_by:user.id};
-  if(!row.title)throw new Error('通知标题不能为空');
-  const q=id?client.from('notices').update(row).eq('id',id):client.from('notices').insert(row);
-  const {data,error}=await q.select().single();if(error)throw error;return data;
-}
+async function saveNotice(input={}){await requireOwner();const user=await getUser();const id=input.id||undefined;const row={title:String(input.title||'').trim(),summary:String(input.summary||''),content:String(input.content||''),level:['info','important','update','event'].includes(input.level)?input.level:'info',pinned:Boolean(input.pinned),published:Boolean(input.published),published_at:input.published?(input.published_at||new Date().toISOString()):null,updated_at:new Date().toISOString(),created_by:user.id};if(!row.title)throw new Error('通知标题不能为空');const q=id?client.from('notices').update(row).eq('id',id):client.from('notices').insert(row);const {data,error}=await q.select().single();if(error)throw error;return data}
 async function deleteNotice(id){await requireOwner();const {error}=await client.from('notices').delete().eq('id',id);if(error)throw error;return true}
-
-async function getResourceHub(){
-  await ready;if(!client)return {settings:null,items:[]};
-  const [settings,items]=await Promise.all([
-    client.from('resource_hub_settings').select('id,title,subtitle,avatar_url,footer_note,updated_at').eq('id','default').maybeSingle(),
-    client.from('resource_hub_items').select('id,title,subtitle,url,icon,group_name,sort_order,enabled,created_at,updated_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
-  ]);
-  if(settings.error)throw settings.error;if(items.error)throw items.error;return {settings:settings.data||null,items:items.data||[]};
-}
-async function saveResourceSettings(input={}){await requireOwner();const user=await getUser();const row={id:'default',title:String(input.title||'Everflow 资源导航'),subtitle:String(input.subtitle||''),avatar_url:String(input.avatar_url||''),footer_note:String(input.footer_note||''),updated_at:new Date().toISOString(),updated_by:user.id};const {data,error}=await client.from('resource_hub_settings').upsert(row,{onConflict:'id'}).select().single();if(error)throw error;return data}
-async function saveResourceItem(input={}){await requireOwner();const user=await getUser();const row={title:String(input.title||'').trim(),subtitle:String(input.subtitle||''),url:String(input.url||'').trim(),icon:String(input.icon||'↗').slice(0,12),group_name:String(input.group_name||'常用入口'),sort_order:Number(input.sort_order)||100,enabled:input.enabled!==false,updated_at:new Date().toISOString(),created_by:user.id};if(!row.title||!row.url)throw new Error('标题和链接不能为空');const q=input.id?client.from('resource_hub_items').update(row).eq('id',input.id):client.from('resource_hub_items').insert(row);const {data,error}=await q.select().single();if(error)throw error;return data}
+async function getResourceHub(){await ready;if(!client)return {settings:null,items:[]};const [settings,items]=await Promise.all([client.from('resource_hub_settings').select('id,title,subtitle,avatar_url,footer_note,announcement,announcement_enabled,background_variant,updated_at').eq('id','default').maybeSingle(),client.from('resource_hub_items').select('id,title,subtitle,url,icon,group_name,sort_order,enabled,badge,accent,created_at,updated_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})]);if(settings.error)throw settings.error;if(items.error)throw items.error;return {settings:settings.data||null,items:items.data||[]}}
+async function saveResourceSettings(input={}){await requireOwner();const user=await getUser();const row={id:'default',title:String(input.title||'Everflow 资源导航'),subtitle:String(input.subtitle||''),avatar_url:String(input.avatar_url||''),footer_note:String(input.footer_note||''),announcement:String(input.announcement||''),announcement_enabled:Boolean(input.announcement_enabled),background_variant:String(input.background_variant||'paper'),updated_at:new Date().toISOString(),updated_by:user.id};const {data,error}=await client.from('resource_hub_settings').upsert(row,{onConflict:'id'}).select().single();if(error)throw error;return data}
+async function saveResourceItem(input={}){await requireOwner();const user=await getUser();const row={title:String(input.title||'').trim(),subtitle:String(input.subtitle||''),url:String(input.url||'').trim(),icon:String(input.icon||'↗').slice(0,24),group_name:String(input.group_name||'常用入口'),sort_order:Number(input.sort_order)||100,enabled:input.enabled!==false,badge:String(input.badge||'').slice(0,24),accent:String(input.accent||'default').slice(0,24),updated_at:new Date().toISOString(),created_by:user.id};if(!row.title||!row.url)throw new Error('标题和链接不能为空');const q=input.id?client.from('resource_hub_items').update(row).eq('id',input.id):client.from('resource_hub_items').insert(row);const {data,error}=await q.select().single();if(error)throw error;return data}
 async function deleteResourceItem(id){await requireOwner();const {error}=await client.from('resource_hub_items').delete().eq('id',id);if(error)throw error;return true}
-
-async function getOwnerAudit(){await requireOwner();const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(30);if(error)throw error;return data||[]}
-
-let syncTimer;
-document.addEventListener('everflow:study-change',()=>{if(syncing)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200)});
-addEventListener('online',()=>syncAll().catch(()=>{}));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})});
-setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})},5*60*1000);
-
-window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,membership,listNotices,getNotice,saveNotice,deleteNotice,getResourceHub,saveResourceSettings,saveResourceItem,deleteResourceItem,getOwnerAudit};
+async function getOwnerAudit(){await requireOwner();const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(100);if(error)throw error;return data||[]}
+let syncTimer;document.addEventListener('everflow:study-change',()=>{if(syncing)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200)});addEventListener('online',()=>syncAll().catch(()=>{}));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})});setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})},5*60*1000);
+window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,verifyOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,membership,listNotices,getNotice,saveNotice,deleteNotice,getResourceHub,saveResourceSettings,saveResourceItem,deleteResourceItem,getOwnerAudit};
 init();
