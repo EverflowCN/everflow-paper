@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow · 408《1800题》强化必刷打卡">
+  <meta name="description" content="Everflow · 408《1800题》强化必刷题打卡表">
   <meta name="robots" content="noindex,nofollow">
   <title>1800题强化必刷 · Everflow</title>
   <link rel="icon" href="../../../assets/everflow-icon.svg">
@@ -11,25 +11,66 @@
   <link rel="stylesheet" href="../../../assets/css/responsive.css">
   <link rel="stylesheet" href="../../../assets/css/study.css">
   <link rel="stylesheet" href="../../../assets/css/learning-center.css">
+  <link rel="stylesheet" href="../../../assets/css/app-ui.css">
   <link rel="stylesheet" href="../../../assets/css/practice.css">
 </head>
 <body>
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../../../"><img src="../../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
 <div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
-<main class="wrap practice-shell">
+
+<main class="wrap practice-shell" data-practice-root>
   <header class="practice-head">
-    <div><div class="eyebrow">学习中心 / 刷题 / 408</div><h1>《1800题》强化必刷</h1><p>这里只管理做题状态，不放课程课时。题单按四科与章节组织，并支持错题、待二刷、已掌握和个人备注。</p></div>
+    <div><div class="eyebrow">学习中心 / 刷题 / 408</div><h1>《1800题》强化必刷</h1><p>按原打卡表的四科、章节、考点与题号整理。这里记录做题进度和备注，不与氧气11课程课时混用。</p></div>
     <a class="learning-btn" href="../">返回刷题中心</a>
   </header>
-  <section class="practice-metrics" aria-label="题单统计"><article class="practice-metric"><span>题目总数</span><strong data-practice-total>--</strong></article><article class="practice-metric"><span>已处理</span><strong data-practice-done>--</strong></article><article class="practice-metric"><span>错题 / 待二刷</span><strong data-practice-wrong>--</strong></article><article class="practice-metric"><span>已掌握</span><strong data-practice-mastered>--</strong></article><article class="practice-metric"><span>完成率</span><strong data-practice-percent>--</strong></article></section>
-  <div class="practice-meta"><span>题单状态：<strong data-practice-source-status>正在读取</strong></span><span class="practice-message" data-practice-message>本地优先；登录后同步个人刷题进度。</span></div>
-  <nav class="practice-tabs" aria-label="408题单科目"><button class="active" data-practice-tab="ds">DS --</button><button data-practice-tab="co">CO --</button><button data-practice-tab="os">OS --</button><button data-practice-tab="cn">CN --</button></nav>
+
+  <details class="practice-guide" open>
+    <summary>先看：这份必刷题应该怎么做</summary>
+    <div class="practice-guide-grid">
+      <article><strong>① 重点题法</strong><p>重点题要真正吃透，不只对答案；做完主动扩展相关知识点，并想一想有没有第二种解法。</p></article>
+      <article><strong>② 检验法</strong><p>用刷题暴露知识盲区。错题精准定位到讲义或课本章节，回去补漏洞，而不是只记选项。</p></article>
+      <article><strong>③ 加强记忆法</strong><p>先快速回顾知识点再刷题，通过题目深化理解，最终形成完整知识框架。</p></article>
+    </div>
+    <div class="practice-rule"><strong>强化阶段硬规则</strong><span>单题尽量控制在 2 分钟内；第一遍不清楚的题及时弄懂；其他选项为什么错也要知道；错题回顾时复盘“当时为什么错”。</span></div>
+  </details>
+
+  <section class="practice-metrics" aria-label="题单统计">
+    <article class="practice-metric"><span>已完成题次</span><strong data-practice-done>0</strong></article>
+    <article class="practice-metric"><span>必刷题次总数</span><strong data-practice-total>0</strong></article>
+    <article class="practice-metric"><span>剩余</span><strong data-practice-remain>0</strong></article>
+    <article class="practice-metric"><span>总进度</span><strong data-practice-percent>0%</strong></article>
+    <article class="practice-metric"><span>今日完成</span><strong data-practice-today>0</strong></article>
+    <article class="practice-metric"><span>连续打卡</span><strong data-practice-streak>0 天</strong></article>
+  </section>
+
+  <section class="practice-progress-card">
+    <div><span>整体进度</span><strong data-practice-progress-text>0 / 0</strong></div>
+    <div class="practice-progress-track"><i data-practice-progress-bar></i></div>
+    <p class="practice-message" data-practice-message>本地优先；登录后同步个人刷题进度。</p>
+  </section>
+
+  <nav class="practice-tabs" aria-label="408题单科目">
+    <button class="active" data-practice-tab="ds">数据结构 <span>0/0</span></button>
+    <button data-practice-tab="co">组成原理 <span>0/0</span></button>
+    <button data-practice-tab="os">操作系统 <span>0/0</span></button>
+    <button data-practice-tab="cn">计算机网络 <span>0/0</span></button>
+  </nav>
+
+  <section class="practice-toolbar" aria-label="题单筛选">
+    <label class="practice-search"><span aria-hidden="true">⌕</span><input type="search" data-practice-search placeholder="搜索章节 / 考点 / 题号…" autocomplete="off"></label>
+    <select data-practice-chapter data-pretty-select aria-label="章节筛选"><option value="">全部章节</option></select>
+    <select data-practice-status data-pretty-select aria-label="完成状态"><option value="">全部状态</option><option value="todo">仅未完成</option><option value="done">仅已完成</option><option value="none">无指定题</option></select>
+    <div class="practice-toolbar-actions"><button type="button" class="practice-action primary" data-practice-mark="done">当前筛选全部完成</button><button type="button" class="practice-action" data-practice-mark="clear">当前筛选全部清空</button><button type="button" class="practice-action" data-practice-export>导出进度</button><button type="button" class="practice-action" data-practice-import>导入进度</button><input type="file" accept=".json,application/json" data-practice-import-file hidden></div>
+  </section>
+
   <section data-practice-list><div class="practice-empty">正在读取题单…</div></section>
 </main>
-<footer class="footer"><div class="wrap footer-inner"><span>1800题 · 只记录题号与个人进度，不转载原题正文</span><span><a href="../../../408/">去课程 →</a></span></div></footer>
+
+<footer class="footer"><div class="wrap footer-inner"><span>原表题号整理 · “/”表示该考点未指定强化必刷题</span><span><a href="../">刷题中心 →</a></span></div></footer>
 <script src="../../../assets/js/site-runtime-v2.js"></script>
 <script src="../../../assets/js/cloud-config.js"></script>
 <script type="module" src="../../../assets/js/cloud.js"></script>
+<script src="../../../assets/js/pretty-select.js"></script>
 <script src="../../../assets/js/practice-1800.js"></script>
 </body>
 </html>
