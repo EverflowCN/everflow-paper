@@ -11,14 +11,15 @@
   .brand span{font-size:21px;line-height:1;overflow:hidden;text-overflow:ellipsis}
   .topnav{gap:8px;flex:0 0 auto}
   .topnav .btn{width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:14px}
+  .topnav .hide-mobile{display:none!important}
   .sidebar{top:64px;width:min(86vw,320px);padding:20px 16px}
-  .content{padding:26px 18px 72px}
-  .hero{padding:24px 0 14px}
-  .hero h1{font-size:38px;line-height:1.08;margin:16px 0 14px;letter-spacing:-.045em}
-  .hero p{font-size:16px;line-height:1.65;margin-bottom:20px}
+  .content{padding:24px 18px 72px}
+  .hero{padding:22px 0 12px}
+  .hero h1{font-size:36px;line-height:1.08;margin:14px 0 12px;letter-spacing:-.045em}
+  .hero p{font-size:16px;line-height:1.65;margin-bottom:18px}
   .hero-actions{gap:10px}
   .hero-actions .btn{width:auto;height:auto;padding:10px 14px}
-  .showcase{grid-template-columns:1fr;gap:14px;margin:26px 0 42px}
+  .showcase{grid-template-columns:1fr;gap:14px;margin:24px 0 40px}
   .showcase-main{min-height:0;padding:26px 22px 24px;border-radius:24px;display:flex;flex-direction:column;overflow:hidden}
   .showcase-main:before{width:280px;height:280px;right:-120px;top:-90px;filter:blur(90px);opacity:.18}
   .showcase-main h3{font-size:27px;line-height:1.25;margin:10px 0 8px;position:relative;z-index:1}
@@ -32,11 +33,16 @@
   .feature-card{padding:19px 20px;border-radius:18px}
   .feature-icon{margin-bottom:12px}
   .page-gallery{grid-template-columns:1fr;gap:14px}
-  .content h1{font-size:34px;line-height:1.15;margin:14px 0 20px}
-  .content h2{font-size:25px;margin:38px 0 14px}
-  .content h3{font-size:19px;margin:26px 0 8px}
-  .content pre{padding:17px;border-radius:14px;font-size:13px}
-  .content table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .content h1{font-size:31px;line-height:1.15;margin:10px 0 18px}
+  .content h2{font-size:23px;line-height:1.3;margin:30px 0 12px}
+  .content h3{font-size:18px;margin:24px 0 8px}
+  .content p,.content li{font-size:16px;line-height:1.72}
+  .content pre{padding:16px;border-radius:14px;font-size:13px;line-height:1.7}
+  .content table{display:block;width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
+  .content table thead,.content table tbody{min-width:580px}
+  .content table tr{min-width:580px}
+  .content table th,.content table td{min-width:155px;white-space:nowrap;padding:11px 14px;font-size:14px}
+  .content table th:first-child,.content table td:first-child{min-width:210px}
   .search-panel{padding-top:84px}
   .search-box{width:calc(100% - 28px);padding:14px;border-radius:18px}
 }
@@ -46,7 +52,7 @@
   .brand span{font-size:19px}
   .topnav{gap:6px}
   .topnav .btn{width:42px;height:42px}
-  .hero h1{font-size:34px}
+  .hero h1{font-size:33px}
   .showcase-main{padding:23px 18px 20px}
   .showcase-main .book{width:min(84%,260px)}
 }
