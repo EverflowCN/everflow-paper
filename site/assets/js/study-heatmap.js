@@ -12,9 +12,9 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const timeMs=v=>{const n=Date.parse(v||'');return Number.isFinite(n)?n:0};
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let supa=null,user=null,events=[],mode='month';
+let supa=null,user=null,events=[],mode='month',subject1800Map=null;
 const today=new Date();today.setHours(12,0,0,0);
 let cursorYear=today.getFullYear(),cursorMonth=today.getMonth();
 
@@ -28,6 +28,17 @@ async function initClient(){
 }
 function level(count){return count<=0?0:count===1?1:count===2?2:count<=4?3:4}
 function localEvent(type,sourceId,itemId,subject,at,note=''){if(!at||!timeMs(at))return null;return {id:`local:${type}:${sourceId}:${itemId}:${at}`,event_type:type,source_id:sourceId,item_id:itemId,subject:subject||'',occurred_at:at,metadata:{local:true,note}}}
+
+async function get1800SubjectMap(){
+  if(subject1800Map)return subject1800Map;
+  subject1800Map=new Map();
+  try{
+    const r=await fetch('/data/practice/408-1800-2027.json',{cache:'no-store'});if(!r.ok)return subject1800Map;
+    const catalog=await r.json();
+    for(const [subject,info] of Object.entries(catalog.subjects||{}))for(const chapter of info.chapters||[])for(const row of chapter.rows||[])if(row?.id)subject1800Map.set(String(row.id),subject);
+  }catch(e){console.warn('heatmap 1800 catalog read failed',e)}
+  return subject1800Map;
+}
 async function collectLocalEvents(){
   const out=[];
   try{
@@ -38,8 +49,11 @@ async function collectLocalEvents(){
     }
   }catch(e){console.warn('heatmap course local read failed',e)}
   try{
-    const done=JSON.parse(localStorage.getItem('everflow_1800_done_v2')||'{}');
-    for(const [id,v] of Object.entries(done)){const at=v?.updatedAt||(v?.ts?new Date(v.ts).toISOString():v?.date?`${v.date}T12:00:00`:null);const e=localEvent('practice','408-1800-2027-reinforcement',id,'408',at);if(e)out.push(e)}
+    const done=JSON.parse(localStorage.getItem('everflow_1800_done_v2')||'{}'),subjectMap=await get1800SubjectMap();
+    for(const [id,v] of Object.entries(done)){
+      const cut=id.lastIndexOf('|'),rowId=cut>0?id.slice(0,cut):id,q=cut>0?id.slice(cut+1):'',subject=subjectMap.get(rowId)||'408',cloudId=cut>0&&subject!=='408'?`q:${subject}:${rowId}:${Number(q)}`:id;
+      const at=v?.updatedAt||(v?.ts?new Date(v.ts).toISOString():v?.date?`${v.date}T12:00:00`:null),e=localEvent('practice','408-1800-2027-reinforcement',cloudId,subject,at);if(e)out.push(e)
+    }
   }catch{}
   try{
     const state=JSON.parse(localStorage.getItem('everflow-practice-ds-reinforcement-v1')||'{}');
