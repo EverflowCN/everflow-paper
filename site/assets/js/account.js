@@ -59,7 +59,7 @@ import './cloud.js';
   async function authAction(type,btn){
     const email=$('[data-auth-email]')?.value.trim(),password=$('[data-auth-password]')?.value||'';
     clearFeedback('[data-auth-feedback]');
-    if(!EveraCloud.enabled){feedback('[data-auth-feedback]','云端未连接','本地学习功能仍可继续使用。','error');return}
+    if(!EveraCloud.enabled){feedback('[data-auth-feedback]','云端未连接','本地课程打卡仍可继续使用。','error');return}
     if(!email){feedback('[data-auth-feedback]','需要邮箱','请先填写邮箱地址。','error');return}
     try{
       if(type==='login'){
@@ -99,7 +99,7 @@ import './cloud.js';
   $('[data-cloud-save]')?.addEventListener('click',saveCloudConfig);$('[data-cloud-clear]')?.addEventListener('click',clearCloudConfig);
   $('[data-login]')?.addEventListener('click',e=>authAction('login',e.currentTarget));$('[data-signup]')?.addEventListener('click',e=>authAction('signup',e.currentTarget));$('[data-otp]')?.addEventListener('click',e=>authAction('otp',e.currentTarget));
   $('[data-logout]')?.addEventListener('click',async e=>{ui().setBusy?.(e.currentTarget,true,'退出中…');await EveraCloud.signOut();ui().setBusy?.(e.currentTarget,false);feedback('[data-auth-feedback]','已退出登录','当前设备上的本地数据仍会保留。','info');ui().toast?.('本机数据仍然保留。',{type:'success',title:'已退出'});renderAuth()});
-  $('[data-sync-now]')?.addEventListener('click',async e=>{const btn=e.currentTarget;ui().setBusy?.(btn,true,'同步中…');try{const r=await EveraCloud.syncAll();if(r.ok){feedback('[data-auth-feedback-signed]','同步完成',`已同步 ${r.focus} 条专注记录和 ${r.courses} 条课程状态。`,'success');ui().complete?.(btn,'同步完成 ✓');ui().toast?.('本机与云端数据已合并。',{type:'success',title:'同步完成'})}else if(r.reason==='busy'){feedback('[data-auth-feedback-signed]','正在同步','后台同步任务已经在运行。','info');ui().setBusy?.(btn,false)}else{throw new Error(r.reason||'同步未完成')}}catch(e){const text=friendlyError(e);feedback('[data-auth-feedback-signed]','同步失败',`${text} 本机数据仍然安全。`,'error');ui().toast?.(`${text} 本机数据仍然安全。`,{type:'error',title:'同步失败'});ui().setBusy?.(btn,false)}});
+  $('[data-sync-now]')?.addEventListener('click',async e=>{const btn=e.currentTarget;ui().setBusy?.(btn,true,'同步中…');try{const r=await EveraCloud.syncAll();if(r.ok){feedback('[data-auth-feedback-signed]','同步完成',`已同步 ${r.courses} 条课程状态。`,'success');ui().complete?.(btn,'同步完成 ✓');ui().toast?.('本机与云端数据已合并。',{type:'success',title:'同步完成'})}else if(r.reason==='busy'){feedback('[data-auth-feedback-signed]','正在同步','后台同步任务已经在运行。','info');ui().setBusy?.(btn,false)}else{throw new Error(r.reason||'同步未完成')}}catch(e){const text=friendlyError(e);feedback('[data-auth-feedback-signed]','同步失败',`${text} 本机数据仍然安全。`,'error');ui().toast?.(`${text} 本机数据仍然安全。`,{type:'error',title:'同步失败'});ui().setBusy?.(btn,false)}});
   $('[data-export]')?.addEventListener('click',e=>exportData(e.currentTarget));$('[data-import-file]')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importData(f)});
   document.addEventListener('everflow:auth-change',renderAuth);document.addEventListener('everflow:cloud-sync',renderAuth);document.addEventListener('everflow:membership-change',renderAuth);
   document.addEventListener('everflow:cloud-recovery',e=>{const text=e.detail?.message||'已安全切换账号数据空间。';feedback('[data-auth-feedback-signed]','账号数据已隔离',text,'success');ui().toast?.(text,{type:'success',title:'账号切换完成',duration:5200})});
