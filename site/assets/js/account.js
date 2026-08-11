@@ -7,8 +7,9 @@ import './cloud.js';
   async function renderAuth(){
     await EveraCloud.ready;
     const user=await EveraCloud.getUser();
-    const status=$('[data-cloud-status]'),auth=$('[data-auth-state]'),guest=$('[data-auth-guest]'),signed=$('[data-auth-signed]');
-    if(status)status.textContent=EveraCloud.enabled?'云端已配置':'本地模式 · 云端待配置';
+    const status=$('[data-cloud-status]'),auth=$('[data-auth-state]'),guest=$('[data-auth-guest]'),signed=$('[data-auth-signed]'),setup=$('[data-cloud-setup]');
+    if(status)status.textContent=EveraCloud.enabled?(navigator.onLine?'云端已配置 · 在线':'云端已配置 · 当前离线'):'本地模式 · 云端待配置';
+    if(setup)setup.hidden=EveraCloud.enabled;
     if(guest)guest.hidden=Boolean(user);if(signed)signed.hidden=!user;
     if(auth)auth.textContent=user?`已登录 · ${user.email||user.id}`:'未登录 · 数据仅保存在本机';
     const email=$('[data-user-email]');if(email)email.textContent=user?.email||'';
@@ -16,8 +17,26 @@ import './cloud.js';
     const sync=$('[data-last-sync]');if(sync){try{const x=JSON.parse(localStorage.getItem('everflow-last-cloud-sync')||'null');sync.textContent=x?.at?new Date(x.at).toLocaleString('zh-CN',{hour12:false}):'尚未同步'}catch{sync.textContent='尚未同步'}}
   }
 
+  function saveCloudConfig(){
+    const url=$('[data-cloud-url]')?.value.trim().replace(/\/$/,'')||'';
+    const publishableKey=$('[data-cloud-key]')?.value.trim()||'';
+    if(!/^https:\/\//i.test(url)){msg('Project URL 必须是 https:// 地址。',true);return}
+    if(publishableKey.length<20){msg('Publishable / anon key 看起来不完整。',true);return}
+    localStorage.setItem('everflow-cloud-public-config',JSON.stringify({url,publishableKey}));
+    msg('已保存公开云配置，正在重新载入…');
+    setTimeout(()=>location.reload(),250);
+  }
+
+  function clearCloudConfig(){
+    localStorage.removeItem('everflow-cloud-public-config');
+    localStorage.removeItem('everflow-last-cloud-sync');
+    msg('已清除本机测试云配置，正在重新载入…');
+    setTimeout(()=>location.reload(),250);
+  }
+
   async function authAction(type){
     const email=$('[data-auth-email]')?.value.trim(),password=$('[data-auth-password]')?.value||'';
+    if(!EveraCloud.enabled){msg('请先连接 Supabase；本地学习功能仍可继续使用。',true);return}
     if(!email){msg('请填写邮箱。',true);return}
     try{
       if(type==='login'){
@@ -27,7 +46,7 @@ import './cloud.js';
         if(password.length<6){msg('密码至少 6 位。',true);return}
         const {error}=await EveraCloud.signUp(email,password);if(error)throw error;msg('注册请求已提交；如果项目开启邮箱确认，请先查看邮箱。');
       }else if(type==='otp'){
-        const {error}=await EveraCloud.signInOtp(email);if(error)throw error;msg('登录链接/验证码已发送到邮箱。');
+        const {error}=await EveraCloud.signInOtp(email);if(error)throw error;msg('登录链接 / 验证码已发送到邮箱。');
       }
       renderAuth();
     }catch(e){msg(e.message||String(e),true)}
@@ -44,6 +63,8 @@ import './cloud.js';
     try{const payload=JSON.parse(await file.text());await EveraStore.importAll(payload);msg('备份已合并到本机；登录后会继续同步到云端。');await EveraCloud.syncAll().catch(()=>{});renderAuth()}catch(e){msg(e.message||'导入失败',true)}
   }
 
+  $('[data-cloud-save]')?.addEventListener('click',saveCloudConfig);
+  $('[data-cloud-clear]')?.addEventListener('click',clearCloudConfig);
   $('[data-login]')?.addEventListener('click',()=>authAction('login'));
   $('[data-signup]')?.addEventListener('click',()=>authAction('signup'));
   $('[data-otp]')?.addEventListener('click',()=>authAction('otp'));
@@ -53,5 +74,7 @@ import './cloud.js';
   $('[data-import-file]')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importData(f)});
   document.addEventListener('everflow:auth-change',renderAuth);
   document.addEventListener('everflow:cloud-sync',renderAuth);
+  document.addEventListener('everflow:cloud-error',e=>msg(`云同步失败，本机数据仍安全：${e.detail?.message||'请稍后重试'}`,true));
+  addEventListener('online',renderAuth);addEventListener('offline',renderAuth);
   Promise.resolve(window.EveraStore?.init()).then(renderAuth).catch(console.error);
 })();
