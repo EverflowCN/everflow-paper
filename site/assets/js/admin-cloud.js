@@ -31,15 +31,16 @@ async function membership(action='status',payload={}){
 
 async function snapshot(){
   await requireOwner();
-  const [profiles,memberships,notices,resources,audit]=await Promise.all([
+  const [profiles,courses,memberships,notices,resources,audit]=await Promise.all([
     client.from('profiles').select('user_id,display_name,created_at,last_seen_at').order('last_seen_at',{ascending:false}).limit(1000),
+    client.from('course_states').select('user_id,course_id,subject,done,completed_at,updated_at').order('updated_at',{ascending:false}).limit(5000),
     client.from('memberships').select('user_id,plan,status,source,starts_at,expires_at,updated_at').limit(1000),
     client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').order('pinned',{ascending:false}).order('updated_at',{ascending:false}).limit(200),
     client.from('resource_hub_items').select('id,title,subtitle,url,icon,group_name,sort_order,enabled,created_at,updated_at').order('sort_order',{ascending:true}).limit(300),
     client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(100)
   ]);
-  [profiles,memberships,notices,resources,audit].forEach(ensure);
-  return {profiles:profiles.data||[],memberships:memberships.data||[],notices:notices.data||[],resources:resources.data||[],audit:audit.data||[]};
+  [profiles,courses,memberships,notices,resources,audit].forEach(ensure);
+  return {profiles:profiles.data||[],courses:courses.data||[],memberships:memberships.data||[],notices:notices.data||[],resources:resources.data||[],audit:audit.data||[]};
 }
 
 function membershipActive(row,cfg){
@@ -58,7 +59,7 @@ async function dashboard(){
   const publishedNotices=snap.notices.filter(x=>x.published).length;
   const enabledResources=snap.resources.filter(x=>x.enabled).length;
   const activeCodes=(codes.codes||[]).filter(x=>x.active).length;
-  return {users:users.users||[],snap,codes:codes.codes||[],config,hub,metrics:{userCount:(users.users||[]).length,active7d,activeMemberships,publishedNotices,enabledResources,activeCodes}};
+  return {users:users.users||[],snap,codes:codes.codes||[],config,hub,metrics:{userCount:(users.users||[]).length,courseCount:snap.courses.length,active7d,activeMemberships,publishedNotices,enabledResources,activeCodes}};
 }
 
 async function getMembershipConfig(){await requireOwner();const {data,error}=await client.from('membership_config').select('id,pro_free_claim_enabled,pro_free_until,promo_title,promo_copy,updated_at').eq('id','default').single();if(error)throw error;return data}
