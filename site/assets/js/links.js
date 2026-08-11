@@ -1,26 +1,18 @@
 import './cloud.js';
 
 (()=>{
-  const $=s=>document.querySelector(s);
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const safeUrl=value=>{
-    const url=String(value||'').trim();
-    if(/^https?:\/\//i.test(url)||/^(mailto|tel):/i.test(url))return url;
-    if(url.startsWith('/'))return url;
-    return url&&/^[a-z0-9][a-z0-9/_?=&.#%-]*$/i.test(url)?'/'+url:'#';
+  const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safeUrl=value=>{const u=String(value||'').trim();if(/^https?:\/\//i.test(u)||/^(mailto|tel):/i.test(u))return u;if(u.startsWith('/'))return u;return u&&/^[a-z0-9][a-z0-9/_?=&.#%-]*$/i.test(u)?'/'+u:'#'};
+  const icons={
+    book:'<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+    grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>',
+    bell:'<svg viewBox="0 0 24 24"><path d="M10 5a2 2 0 1 1 4 0 7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>',
+    ticket:'<svg viewBox="0 0 24 24"><path d="M15 5v2M15 11v2M15 17v2"/><path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2"/></svg>',
+    play:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg>',
+    download:'<svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+    link:'<svg viewBox="0 0 24 24"><path d="M9 15l6-6"/><path d="M11 6l.5-.5a5 5 0 0 1 7 7L18 13"/><path d="M13 18l-.5.5a5 5 0 0 1-7-7L6 11"/></svg>'
   };
-  async function render(){
-    const root=$('[data-resource-root]');if(!root)return;
-    try{
-      await EveraCloud.ready;
-      const {settings,items}=await EveraCloud.getResourceHub();
-      const title=settings?.title||'Everflow 资源导航',subtitle=settings?.subtitle||'把常用入口收拢到一个页面。',footer=settings?.footer_note||'Everflow · 彼时流年若水';
-      const avatar=settings?.avatar_url?`<img src="${esc(settings.avatar_url)}" alt="">`:'<span class="fallback">EF</span>';
-      const groups={};items.filter(x=>x.enabled!==false).forEach(x=>(groups[x.group_name||'常用入口']||(groups[x.group_name||'常用入口']=[])).push(x));
-      const groupHtml=Object.entries(groups).map(([name,rows])=>`<section class="resource-group"><h2 class="resource-group-title">${esc(name)}</h2><div class="resource-links">${rows.map(x=>{const href=safeUrl(x.url);return `<a class="resource-link" href="${esc(href)}" ${/^https?:\/\//i.test(href)?'target="_blank" rel="noopener"':''}><span class="resource-icon">${esc(x.icon||'↗')}</span><span><strong>${esc(x.title)}</strong><span>${esc(x.subtitle||'')}</span></span><b class="resource-arrow">›</b></a>`}).join('')}</div></section>`).join('');
-      root.innerHTML=`<section class="resource-profile"><div class="resource-avatar">${avatar}</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></section>${groupHtml||'<div class="content-empty">后台还没有添加资源入口。</div>'}<div class="resource-footer">${esc(footer)}</div>`;
-      document.title=title+' · Everflow';
-    }catch(e){root.innerHTML='<div class="content-empty">资源导航暂时加载失败，请稍后刷新。</div>';console.error(e)}
-  }
+  const iconOf=v=>icons[String(v||'').toLowerCase()]||icons.link;
+  async function render(){const root=$('[data-resource-root]');if(!root)return;try{await EveraCloud.ready;const {settings,items}=await EveraCloud.getResourceHub(),title=settings?.title||'Everflow 资源导航',subtitle=settings?.subtitle||'把常用入口收拢到一个页面。',footer=settings?.footer_note||'Everflow · 彼时流年若水',avatar=settings?.avatar_url?`<img src="${esc(settings.avatar_url)}" alt="">`:'<img src="../assets/everflow-icon.svg" alt="Everflow">';document.body.dataset.resourceTheme=settings?.background_variant||'paper';const announcement=settings?.announcement_enabled&&settings?.announcement?`<div class="resource-announcement"><span>公告</span><p>${esc(settings.announcement)}</p></div>`:'';const groups={};items.filter(x=>x.enabled!==false).forEach(x=>(groups[x.group_name||'常用入口']||(groups[x.group_name||'常用入口']=[])).push(x));const groupHtml=Object.entries(groups).map(([name,rows])=>`<section class="resource-group"><h2>${esc(name)}</h2><div class="resource-links">${rows.map((x,i)=>{const href=safeUrl(x.url),external=/^https?:\/\//i.test(href),accent=['red','dark','soft','default'].includes(x.accent)?x.accent:'default';return `<a class="resource-link ${i===0?'featured':''}" data-accent="${accent}" href="${esc(href)}" ${external?'target="_blank" rel="noopener"':''}><span class="resource-icon">${iconOf(x.icon)}</span><span class="resource-copy"><strong>${esc(x.title)}${x.badge?`<em>${esc(x.badge)}</em>`:''}</strong>${x.subtitle?`<small>${esc(x.subtitle)}</small>`:''}</span><span class="resource-arrow">↗</span></a>`}).join('')}</div></section>`).join('');root.innerHTML=`<section class="resource-profile"><div class="resource-avatar">${avatar}</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></section>${announcement}${groupHtml||'<div class="content-empty">后台还没有添加资源入口。</div>'}<footer class="resource-footer"><span>${esc(footer)}</span><b>evera.top</b></footer>`;document.title=title+' · Everflow'}catch(e){root.innerHTML='<div class="content-empty">资源导航暂时加载失败，请稍后刷新。</div>';console.error(e)}}
   render();
 })();
