@@ -1,4 +1,4 @@
-const CACHE='everflow-study-shell-v4';
+const CACHE='everflow-study-shell-v5';
 const APP_SHELL=[
   '/',
   '/408/',
@@ -16,7 +16,10 @@ const APP_SHELL=[
   '/assets/css/membership.css',
   '/assets/css/account-membership.css',
   '/assets/css/content.css',
+  '/assets/css/app-ui.css',
+  '/assets/css/focus-dashboard.css',
   '/assets/js/site.js',
+  '/assets/js/pretty-select.js',
   '/assets/js/study-store.js',
   '/assets/js/cloud-config.js',
   '/assets/js/cloud.js',
@@ -27,6 +30,7 @@ const APP_SHELL=[
   '/assets/js/notices.js',
   '/assets/js/links.js',
   '/assets/js/account.js',
+  '/assets/js/account-owner.js',
   '/assets/everflow-icon.svg',
   '/manifest.webmanifest'
 ];
