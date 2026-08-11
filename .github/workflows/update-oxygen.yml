@@ -18,14 +18,50 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sync:
+  fetch:
+    name: Fetch ${{ matrix.subject }}
+    strategy:
+      fail-fast: false
+      matrix:
+        subject: [ds, co, os, cn]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sync Bilibili courses
-        run: python scripts/update_oxygen.py
+      - name: Fetch one subject from Bilibili
+        run: |
+          mkdir -p sync
+          python scripts/update_oxygen.py --subject "${{ matrix.subject }}" --output "sync/${{ matrix.subject }}.json"
+
+      - name: Upload subject result
+        uses: actions/upload-artifact@v4
+        with:
+          name: oxygen-${{ matrix.subject }}
+          path: sync/${{ matrix.subject }}.json
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Merge course data
+    needs: fetch
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download subject results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: oxygen-*
+          path: sync
+          merge-multiple: true
+
+      - name: Merge without deleting failed-subject data
+        run: python scripts/update_oxygen.py --merge-dir sync
 
       - name: Commit updated course data
         shell: bash
@@ -38,4 +74,5 @@ jobs:
           git config user.email "54564601+EverflowCN@users.noreply.github.com"
           git add site/data/oxygen.json
           git commit -m "Auto-sync 氧气11 408强化"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
