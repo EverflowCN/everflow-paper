@@ -6,7 +6,9 @@ export const REPO_NAME = 'everflow-paper';
 export const DATA_PATH = 'site/data/posts.json';
 export const FRONTEND = 'https://evera.top';
 export const CALLBACK = 'https://api.evera.top/api/auth/callback';
+export const SESSION_COOKIE = 'everflow_admin_session';
 
+const SESSION_TTL_SECONDS = 12 * 60 * 60;
 const allowedOrigins = new Set([
   'https://evera.top',
   'https://www.evera.top',
@@ -17,6 +19,7 @@ export function applyCors(req, res) {
   const origin = req.headers.origin;
   if (origin && allowedOrigins.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
@@ -28,6 +31,7 @@ export function handleOptions(req, res) {
   applyCors(req, res);
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
+    res.setHeader('Cache-Control', 'no-store');
     res.end();
     return true;
   }
@@ -37,8 +41,18 @@ export function handleOptions(req, res) {
 export function json(req, res, status, body) {
   applyCors(req, res);
   res.statusCode = status;
+  res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(body));
+}
+
+export function requireTrustedOrigin(req, res) {
+  const origin = String(req.headers.origin || '');
+  if (!allowedOrigins.has(origin)) {
+    json(req, res, 403, { error: 'Untrusted origin' });
+    return false;
+  }
+  return true;
 }
 
 function secret() {
@@ -88,7 +102,7 @@ export function createSession(login, githubToken) {
   const plaintext = Buffer.from(JSON.stringify({
     login,
     githubToken,
-    exp: Date.now() + 12 * 60 * 60 * 1000
+    exp: Date.now() + SESSION_TTL_SECONDS * 1000
   }), 'utf8');
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
@@ -114,13 +128,30 @@ export function readSession(token) {
   }
 }
 
-export function bearer(req) {
-  const value = String(req.headers.authorization || '');
-  return value.startsWith('Bearer ') ? value.slice(7) : '';
+function parseCookies(req) {
+  const result = {};
+  const raw = String(req.headers.cookie || '');
+  raw.split(';').forEach(part => {
+    const index = part.indexOf('=');
+    if (index < 0) return;
+    const key = part.slice(0, index).trim();
+    const value = part.slice(index + 1).trim();
+    if (!key) return;
+    try { result[key] = decodeURIComponent(value); } catch { result[key] = value; }
+  });
+  return result;
+}
+
+export function setSessionCookie(res, token) {
+  res.setHeader('Set-Cookie', `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${SESSION_TTL_SECONDS}; HttpOnly; Secure; SameSite=Lax`);
+}
+
+export function clearSessionCookie(res) {
+  res.setHeader('Set-Cookie', `${SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`);
 }
 
 export function requireSession(req, res) {
-  const session = readSession(bearer(req));
+  const session = readSession(parseCookies(req)[SESSION_COOKIE]);
   if (!session) {
     json(req, res, 401, { error: 'Unauthorized' });
     return null;
