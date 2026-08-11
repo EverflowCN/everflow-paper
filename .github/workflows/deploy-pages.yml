@@ -28,6 +28,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      # 同步工作流的数据提交不会递归触发 push；update-oxygen.yml 会显式 workflow_dispatch 本工作流。
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
