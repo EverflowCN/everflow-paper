@@ -29,16 +29,17 @@ async function init(){
     client=createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     client.auth.onAuthStateChange((event,session)=>{
       document.dispatchEvent(new CustomEvent('everflow:auth-change',{detail:{event,user:session?.user||null}}));
-      if(session?.user)setTimeout(()=>syncAll().catch(console.error),0);
+      if(session?.user&&navigator.onLine!==false)setTimeout(()=>syncAll().catch(()=>{}),0);
     });
     readyResolve(client);
     document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:true}}));
     const {data}=await client.auth.getSession();
-    if(data?.session?.user)syncAll().catch(console.error);
+    if(data?.session?.user&&navigator.onLine!==false)syncAll().catch(()=>{});
     return client;
   }catch(err){
     console.error('Everflow cloud init failed',err);readyResolve(null);
     document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false,error:String(err)}}));
+    document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:'云端初始化失败'}}));
     return null;
   }
 }
@@ -54,6 +55,7 @@ async function signOut(){await ready;if(!client)return;return client.auth.signOu
 
 async function syncAll(){
   await ready;if(!client||!window.EveraStore)return {ok:false,reason:'disabled'};
+  if(navigator.onLine===false)return {ok:false,reason:'offline'};
   if(syncing)return {ok:false,reason:'busy'};
   const user=await getUser();if(!user)return {ok:false,reason:'guest'};
   syncing=true;
@@ -81,6 +83,10 @@ async function syncAll(){
     localStorage.setItem('everflow-last-cloud-sync',JSON.stringify(out));
     document.dispatchEvent(new CustomEvent('everflow:cloud-sync',{detail:out}));
     return out;
+  }catch(error){
+    console.error('Everflow cloud sync failed',error);
+    document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:error?.message||'同步失败'}}));
+    throw error;
   }finally{syncing=false}
 }
 
@@ -116,6 +122,12 @@ document.addEventListener('everflow:study-change',()=>{
   if(syncing)return;
   clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200);
 });
+
+// Offline-first recovery: local writes never wait for the network. When the
+// connection returns, or the tab becomes active again, merge changes automatically.
+addEventListener('online',()=>syncAll().catch(()=>{}));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})});
+setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})},5*60*1000);
 
 window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,getOwnerAudit};
 init();
