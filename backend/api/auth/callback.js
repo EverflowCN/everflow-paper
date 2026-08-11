@@ -1,4 +1,4 @@
-import { ADMIN, CALLBACK, FRONTEND, createSession, verifyState } from '../../lib/common.js';
+import { ADMIN, CALLBACK, FRONTEND, createSession, setSessionCookie, verifyState } from '../../lib/common.js';
 
 export default async function handler(req, res) {
   try {
@@ -7,6 +7,7 @@ export default async function handler(req, res) {
     const state = url.searchParams.get('state');
     if (!code || !verifyState(state)) {
       res.statusCode = 400;
+      res.setHeader('Cache-Control', 'no-store');
       return res.end('Invalid OAuth callback');
     }
 
@@ -23,6 +24,7 @@ export default async function handler(req, res) {
     const tokenData = await tokenResponse.json();
     if (!tokenResponse.ok || !tokenData.access_token) {
       res.statusCode = 502;
+      res.setHeader('Cache-Control', 'no-store');
       return res.end('GitHub token exchange failed');
     }
 
@@ -37,15 +39,19 @@ export default async function handler(req, res) {
     const user = await userResponse.json();
     if (!userResponse.ok || String(user.login || '').toLowerCase() !== ADMIN.toLowerCase()) {
       res.statusCode = 403;
+      res.setHeader('Cache-Control', 'no-store');
       return res.end('This GitHub account is not allowed');
     }
 
     const session = createSession(user.login, tokenData.access_token);
+    setSessionCookie(res, session);
     res.statusCode = 302;
-    res.setHeader('Location', `${FRONTEND}/admin/#token=${encodeURIComponent(session)}`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Location', `${FRONTEND}/admin/`);
     res.end();
   } catch (error) {
     res.statusCode = 500;
+    res.setHeader('Cache-Control', 'no-store');
     res.end('OAuth callback failed');
   }
 }
