@@ -1,4 +1,4 @@
-const CACHE='everflow-study-shell-v3';
+const CACHE='everflow-study-shell-v4';
 const APP_SHELL=[
   '/',
   '/408/',
@@ -7,12 +7,15 @@ const APP_SHELL=[
   '/membership/',
   '/account/',
   '/archive/',
+  '/notice/',
+  '/links/',
   '/about/',
   '/assets/css/site.css',
   '/assets/css/responsive.css',
   '/assets/css/study.css',
   '/assets/css/membership.css',
   '/assets/css/account-membership.css',
+  '/assets/css/content.css',
   '/assets/js/site.js',
   '/assets/js/study-store.js',
   '/assets/js/cloud-config.js',
@@ -21,51 +24,16 @@ const APP_SHELL=[
   '/assets/js/focus.js',
   '/assets/js/stats.js',
   '/assets/js/membership.js',
+  '/assets/js/notices.js',
+  '/assets/js/links.js',
   '/assets/js/account.js',
   '/assets/everflow-icon.svg',
   '/manifest.webmanifest'
 ];
 
-self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));
-});
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('everflow-study-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 
-self.addEventListener('activate',event=>{
-  event.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('everflow-study-shell-')&&k!==CACHE).map(k=>caches.delete(k))))
-      .then(()=>self.clients.claim())
-  );
-});
-
-async function networkFirst(request){
-  const cache=await caches.open(CACHE);
-  try{
-    const response=await fetch(request);
-    if(response&&response.ok&&request.method==='GET')cache.put(request,response.clone());
-    return response;
-  }catch{
-    return (await cache.match(request))||(request.mode==='navigate'?await cache.match('/'):Response.error());
-  }
-}
-
-async function staleWhileRevalidate(request){
-  const cache=await caches.open(CACHE);
-  const cached=await cache.match(request);
-  const fresh=fetch(request).then(response=>{
-    if(response&&response.ok)cache.put(request,response.clone());
-    return response;
-  }).catch(()=>null);
-  return cached||(await fresh)||Response.error();
-}
-
-self.addEventListener('fetch',event=>{
-  const request=event.request;
-  if(request.method!=='GET')return;
-  const url=new URL(request.url);
-  if(url.origin!==self.location.origin)return;
-
-  if(request.mode==='navigate'||url.pathname.startsWith('/data/')||url.pathname.endsWith('/cloud-config.js')){
-    event.respondWith(networkFirst(request));return;
-  }
-  event.respondWith(staleWhileRevalidate(request));
-});
+async function networkFirst(request){const cache=await caches.open(CACHE);try{const response=await fetch(request);if(response&&response.ok&&request.method==='GET')cache.put(request,response.clone());return response}catch{return (await cache.match(request))||(request.mode==='navigate'?await cache.match('/'):Response.error())}}
+async function staleWhileRevalidate(request){const cache=await caches.open(CACHE),cached=await cache.match(request);const fresh=fetch(request).then(response=>{if(response&&response.ok)cache.put(request,response.clone());return response}).catch(()=>null);return cached||(await fresh)||Response.error()}
+self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(request.mode==='navigate'||url.pathname.startsWith('/data/')||url.pathname.endsWith('/cloud-config.js')){event.respondWith(networkFirst(request));return}event.respondWith(staleWhileRevalidate(request))});
