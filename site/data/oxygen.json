@@ -1,29 +1,33 @@
 {
   "schema": 2,
-  "updatedAt": "2026-08-11T17:16:09+08:00",
+  "updatedAt": "2026-08-11T17:36:32+08:00",
   "source": {
     "up": "就是氧气11",
     "mid": 378777885,
     "collection": "27考研408计算机基础综合合集",
     "auto": true,
-    "syncStatus": "partial",
-    "message": "本次 2/4 科同步成功；已有数据均保留。失败：co: HTTPError: HTTP Error 412: Precondition Failed | os: HTTPError: HTTP Error 412: Precondition Failed",
+    "syncStatus": "ok",
+    "message": "27强化合集四科同步成功；新增 31 条，补全 27 条课程元数据。",
     "subjectStatus": {
       "ds": {
         "ok": true,
-        "error": ""
+        "error": "",
+        "method": "search"
       },
       "co": {
-        "ok": false,
-        "error": "HTTPError: HTTP Error 412: Precondition Failed"
+        "ok": true,
+        "error": "",
+        "method": "search"
       },
       "os": {
-        "ok": false,
-        "error": "HTTPError: HTTP Error 412: Precondition Failed"
+        "ok": true,
+        "error": "",
+        "method": "search"
       },
       "cn": {
         "ok": true,
-        "error": ""
+        "error": "",
+        "method": "search"
       }
     }
   },
@@ -354,57 +358,57 @@
           "id": "co|计算机组成与性能指标专题",
           "title": "计算机组成与性能指标专题",
           "duration": "37:15",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1U6EQ6rEvC/",
+          "bvid": "BV1U6EQ6rEvC",
+          "publishedAt": 1781063983
         },
         {
           "id": "co|计算机组成与性能指标选择题专题",
           "title": "计算机组成与性能指标选择题专题",
           "duration": "26:00",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV13WEe68E3b/",
+          "bvid": "BV13WEe68E3b",
+          "publishedAt": 1781139168
         },
         {
           "id": "co|数据的机器级表示专题（上）",
           "title": "数据的机器级表示专题（上）",
           "duration": "26:26",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1cCEe62E8m/",
+          "bvid": "BV1cCEe62E8m",
+          "publishedAt": 1781146800
         },
         {
           "id": "co|数据的机器级表示专题（下）",
           "title": "数据的机器级表示专题（下）",
           "duration": "52:01",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1bwEk62ELV/",
+          "bvid": "BV1bwEk62ELV",
+          "publishedAt": 1781230318
         },
         {
           "id": "co|数据的机器级表示选择题专题",
           "title": "数据的机器级表示选择题专题",
           "duration": "49:37",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1sRJj6uEwR/",
+          "bvid": "BV1sRJj6uEwR",
+          "publishedAt": 1781317029
         },
         {
           "id": "co|IEEE754浮点数专题",
           "title": "IEEE754浮点数专题",
           "duration": "38:30",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV18eJc6qEzA/",
+          "bvid": "BV18eJc6qEzA",
+          "publishedAt": 1781400915
         },
         {
           "id": "co|IEEE754浮点数选择题专题",
           "title": "IEEE754浮点数选择题专题",
           "duration": "30:41",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1e6Ju6vEeW/",
+          "bvid": "BV1e6Ju6vEeW",
+          "publishedAt": 1781488550
         },
         {
           "id": "co|乘除法运算及其电路专题",
@@ -418,168 +422,417 @@
           "id": "co|数据的表示与运算综合大题专题",
           "title": "数据的表示与运算综合大题专题",
           "duration": "54:10",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1mBLQ6AEiR/",
+          "bvid": "BV1mBLQ6AEiR",
+          "publishedAt": 1781664267
         },
         {
           "id": "co|存储器专题",
           "title": "存储器专题",
           "duration": "41:48",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV131jF68EBs/",
+          "bvid": "BV131jF68EBs",
+          "publishedAt": 1781747640
         },
         {
           "id": "co|总线专题",
           "title": "总线专题",
           "duration": "32:12",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1LBje6AE8V/",
+          "bvid": "BV1LBje6AE8V",
+          "publishedAt": 1781839414
         },
         {
           "id": "co|存储器与总线选择题专题",
           "title": "存储器与总线选择题专题",
           "duration": "33:56",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV13wjC6UEHS/",
+          "bvid": "BV13wjC6UEHS",
+          "publishedAt": 1781923184
         },
         {
           "id": "co|Cache专题",
           "title": "Cache专题",
           "duration": "44:00",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1DRj46MEzj/",
+          "bvid": "BV1DRj46MEzj",
+          "publishedAt": 1782009255
         },
         {
           "id": "co|Cache，存储器与总线综合大题专题",
           "title": "Cache，存储器与总线综合大题专题",
           "duration": "01:20:02",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1co7w69EXh/",
+          "bvid": "BV1co7w69EXh",
+          "publishedAt": 1782094233
         },
         {
           "id": "co|CPU组成与指令寻址专题",
           "title": "CPU组成与指令寻址专题",
           "duration": "33:38",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1au7g6ZEhh/",
+          "bvid": "BV1au7g6ZEhh",
+          "publishedAt": 1782182741
         },
         {
           "id": "co|CPU组成与指令寻址选择题专题",
           "title": "CPU组成与指令寻址选择题专题",
           "duration": "24:11",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1dc7g6PEZg/",
+          "bvid": "BV1dc7g6PEZg",
+          "publishedAt": 1782184800
         },
         {
           "id": "co|单总线多周期数据通路专题",
           "title": "单总线多周期数据通路专题",
           "duration": "37:04",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1fwjQ6DE9P/",
+          "bvid": "BV1fwjQ6DE9P",
+          "publishedAt": 1782265984
         },
         {
           "id": "co|MIPS与单周期数据通路专题",
           "title": "MIPS与单周期数据通路专题",
           "duration": "47:29",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1Jg786fEcu/",
+          "bvid": "BV1Jg786fEcu",
+          "publishedAt": 1782356816
         },
         {
           "id": "co|数据通路综合大题专题",
           "title": "数据通路综合大题专题",
           "duration": "01:01:36",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1qS7q6LELq/",
+          "bvid": "BV1qS7q6LELq",
+          "publishedAt": 1782444308
         },
         {
           "id": "co|MIPS指令流水线及其数据通路专题",
           "title": "MIPS指令流水线及其数据通路专题",
           "duration": "01:12:11",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1oq7J68EKY/",
+          "bvid": "BV1oq7J68EKY",
+          "publishedAt": 1782516990
         },
         {
           "id": "co|指令流水线选择题专题",
           "title": "指令流水线选择题专题",
           "duration": "40:29",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1NRTK6LEwr/",
+          "bvid": "BV1NRTK6LEwr",
+          "publishedAt": 1782616618
         },
         {
           "id": "co|MIPS与过程调用专题",
           "title": "MIPS与过程调用专题",
           "duration": "01:04:32",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1pYT56aEs9/",
+          "bvid": "BV1pYT56aEs9",
+          "publishedAt": 1782703644
         },
         {
           "id": "co|C程序机器级表示综合大题专题",
           "title": "C程序机器级表示综合大题专题",
           "duration": "01:16:43",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1KaKd6nEef/",
+          "bvid": "BV1KaKd6nEef",
+          "publishedAt": 1782791146
         },
         {
           "id": "co|微程序控制器专题",
           "title": "微程序控制器专题",
           "duration": "46:03",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1vBTh6AEyw/",
+          "bvid": "BV1vBTh6AEyw",
+          "publishedAt": 1782870222
         },
         {
           "id": "co|IO接口与DMA专题",
           "title": "IO接口与DMA专题",
           "duration": "51:59",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1BQTr6PEww/",
+          "bvid": "BV1BQTr6PEww",
+          "publishedAt": 1782964794
         },
         {
           "id": "co|中断与异常专题",
           "title": "中断与异常专题",
           "duration": "58:53",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1ZfTp62EkK/",
+          "bvid": "BV1ZfTp62EkK",
+          "publishedAt": 1783050204
         },
         {
           "id": "co|IO选择题专题",
           "title": "IO选择题专题",
           "duration": "50:56",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1QRTZ6KEbL/",
+          "bvid": "BV1QRTZ6KEbL",
+          "publishedAt": 1783135513
         },
         {
           "id": "co|IO综合大题专题",
           "title": "IO综合大题专题",
           "duration": "38:25",
-          "url": "",
-          "bvid": "",
-          "publishedAt": ""
+          "url": "https://www.bilibili.com/video/BV1DoMu6eEzC/",
+          "bvid": "BV1DoMu6eEzC",
+          "publishedAt": 1783221507
+        },
+        {
+          "id": "co|27考研408计算机组成原理强化课更新指南",
+          "title": "27考研408计算机组成原理强化课更新指南",
+          "duration": "05:23",
+          "url": "https://www.bilibili.com/video/BV1b5Ej6kEY8/",
+          "bvid": "BV1b5Ej6kEY8",
+          "publishedAt": 1780983721
+        },
+        {
+          "id": "co|乘除法运算及其电路专题专题",
+          "title": "乘除法运算及其电路专题专题",
+          "duration": "01:20:22",
+          "url": "https://www.bilibili.com/video/BV1YEjg6ZEmk/",
+          "bvid": "BV1YEjg6ZEmk",
+          "publishedAt": 1781581616
         }
       ]
     },
     "os": {
       "label": "操作系统",
       "short": "OS",
-      "items": []
+      "items": [
+        {
+          "id": "os|操作系统概念专题",
+          "title": "操作系统概念专题",
+          "duration": "43:30",
+          "url": "https://www.bilibili.com/video/BV1G4TC6FExP/",
+          "bvid": "BV1G4TC6FExP",
+          "publishedAt": 1783244488
+        },
+        {
+          "id": "os|系统调用专题",
+          "title": "系统调用专题",
+          "duration": "31:34",
+          "url": "https://www.bilibili.com/video/BV1yeTD6qEtV/",
+          "bvid": "BV1yeTD6qEtV",
+          "publishedAt": 1783308664
+        },
+        {
+          "id": "os|进程的概念与状态模型专题",
+          "title": "进程的概念与状态模型专题",
+          "duration": "39:48",
+          "url": "https://www.bilibili.com/video/BV1BbMx6ZEQp/",
+          "bvid": "BV1BbMx6ZEQp",
+          "publishedAt": 1783393776
+        },
+        {
+          "id": "os|进程的切换与调度专题",
+          "title": "进程的切换与调度专题",
+          "duration": "41:29",
+          "url": "https://www.bilibili.com/video/BV1DHMe6vEaP/",
+          "bvid": "BV1DHMe6vEaP",
+          "publishedAt": 1783478537
+        },
+        {
+          "id": "os|进程间通信专题",
+          "title": "进程间通信专题",
+          "duration": "39:53",
+          "url": "https://www.bilibili.com/video/BV1mqM76JEZf/",
+          "bvid": "BV1mqM76JEZf",
+          "publishedAt": 1783566810
+        },
+        {
+          "id": "os|线程专题",
+          "title": "线程专题",
+          "duration": "24:39",
+          "url": "https://www.bilibili.com/video/BV1QcNj65EFj/",
+          "bvid": "BV1QcNj65EFj",
+          "publishedAt": 1783659609
+        },
+        {
+          "id": "os|多处理器专题",
+          "title": "多处理器专题",
+          "duration": "41:30",
+          "url": "https://www.bilibili.com/video/BV1pXNW6XEx2/",
+          "bvid": "BV1pXNW6XEx2",
+          "publishedAt": 1783740326
+        },
+        {
+          "id": "os|进程与线程选择题专题(上)",
+          "title": "进程与线程选择题专题(上)",
+          "duration": "55:23",
+          "url": "https://www.bilibili.com/video/BV1rTNM6MEUR/",
+          "bvid": "BV1rTNM6MEUR",
+          "publishedAt": 1783836661
+        },
+        {
+          "id": "os|进程与线程选择题专题(下)",
+          "title": "进程与线程选择题专题(下)",
+          "duration": "29:57",
+          "url": "https://www.bilibili.com/video/BV1mFNy6SEcX/",
+          "bvid": "BV1mFNy6SEcX",
+          "publishedAt": 1783913403
+        },
+        {
+          "id": "os|进程的同步与互斥专题",
+          "title": "进程的同步与互斥专题",
+          "duration": "55:54",
+          "url": "https://www.bilibili.com/video/BV1cvN16yEaK/",
+          "bvid": "BV1cvN16yEaK",
+          "publishedAt": 1783929142
+        },
+        {
+          "id": "os|信号量PV模型专题",
+          "title": "信号量PV模型专题",
+          "duration": "46:17",
+          "url": "https://www.bilibili.com/video/BV1EuNQ6dEXD/",
+          "bvid": "BV1EuNQ6dEXD",
+          "publishedAt": 1784001480
+        },
+        {
+          "id": "os|信号量PV综合大题专题(上)",
+          "title": "信号量PV综合大题专题(上)",
+          "duration": "46:29",
+          "url": "https://www.bilibili.com/video/BV1zjNY6uERF/",
+          "bvid": "BV1zjNY6uERF",
+          "publishedAt": 1784086581
+        },
+        {
+          "id": "os|信号量PV综合大题专题(下)",
+          "title": "信号量PV综合大题专题(下)",
+          "duration": "47:35",
+          "url": "https://www.bilibili.com/video/BV1NVK36REre/",
+          "bvid": "BV1NVK36REre",
+          "publishedAt": 1784169649
+        },
+        {
+          "id": "os|死锁专题",
+          "title": "死锁专题",
+          "duration": "37:49",
+          "url": "https://www.bilibili.com/video/BV1uqKE6nEJF/",
+          "bvid": "BV1uqKE6nEJF",
+          "publishedAt": 1784260953
+        },
+        {
+          "id": "os|死锁选择题专题",
+          "title": "死锁选择题专题",
+          "duration": "35:34",
+          "url": "https://www.bilibili.com/video/BV1R5Kc6VE6N/",
+          "bvid": "BV1R5Kc6VE6N",
+          "publishedAt": 1784340367
+        },
+        {
+          "id": "os|管程专题",
+          "title": "管程专题",
+          "duration": "19:29",
+          "url": "https://www.bilibili.com/video/BV17aKi6UEyD/",
+          "bvid": "BV17aKi6UEyD",
+          "publishedAt": 1784421910
+        },
+        {
+          "id": "os|程序的链接与装入专题",
+          "title": "程序的链接与装入专题",
+          "duration": "33:15",
+          "url": "https://www.bilibili.com/video/BV1s4K66BEYL/",
+          "bvid": "BV1s4K66BEYL",
+          "publishedAt": 1784505600
+        },
+        {
+          "id": "os|连续分配方式专题",
+          "title": "连续分配方式专题",
+          "duration": "42:07",
+          "url": "https://www.bilibili.com/video/BV1N7Km6ZEdJ/",
+          "bvid": "BV1N7Km6ZEdJ",
+          "publishedAt": 1784543644
+        },
+        {
+          "id": "os|非连续分配方式专题",
+          "title": "非连续分配方式专题",
+          "duration": "43:40",
+          "url": "https://www.bilibili.com/video/BV15sKt6HEd6/",
+          "bvid": "BV15sKt6HEd6",
+          "publishedAt": 1784603044
+        },
+        {
+          "id": "os|虚拟存储器专题",
+          "title": "虚拟存储器专题",
+          "duration": "54:58",
+          "url": "https://www.bilibili.com/video/BV1gMg66xEG7/",
+          "bvid": "BV1gMg66xEG7",
+          "publishedAt": 1784683804
+        },
+        {
+          "id": "os|虚拟存储器综合大题专题（上）",
+          "title": "虚拟存储器综合大题专题（上）",
+          "duration": "48:02",
+          "url": "https://www.bilibili.com/video/BV1qtgm6REk3/",
+          "bvid": "BV1qtgm6REk3",
+          "publishedAt": 1784774143
+        },
+        {
+          "id": "os|虚拟存储器综合大题专题（下）",
+          "title": "虚拟存储器综合大题专题（下）",
+          "duration": "01:21:07",
+          "url": "https://www.bilibili.com/video/BV1aSgh6iEgt/",
+          "bvid": "BV1aSgh6iEgt",
+          "publishedAt": 1784861323
+        },
+        {
+          "id": "os|文件概念专题",
+          "title": "文件概念专题",
+          "duration": "39:07",
+          "url": "https://www.bilibili.com/video/BV1My3M6vEPm/",
+          "bvid": "BV1My3M6vEPm",
+          "publishedAt": 1784960471
+        },
+        {
+          "id": "os|open与read系统调用专题",
+          "title": "open与read系统调用专题",
+          "duration": "29:28",
+          "url": "https://www.bilibili.com/video/BV1is376uEu2/",
+          "bvid": "BV1is376uEu2",
+          "publishedAt": 1785037152
+        },
+        {
+          "id": "os|虚拟文件系统与内存映射文件专题",
+          "title": "虚拟文件系统与内存映射文件专题",
+          "duration": "28:26",
+          "url": "https://www.bilibili.com/video/BV1y33J6dE6t/",
+          "bvid": "BV1y33J6dE6t",
+          "publishedAt": 1785057431
+        },
+        {
+          "id": "os|空闲空间管理与文件共享专题",
+          "title": "空闲空间管理与文件共享专题",
+          "duration": "35:38",
+          "url": "https://www.bilibili.com/video/BV1evgf6SEZL/",
+          "bvid": "BV1evgf6SEZL",
+          "publishedAt": 1785122665
+        },
+        {
+          "id": "os|文件系统综合大题专题",
+          "title": "文件系统综合大题专题",
+          "duration": "51:20",
+          "url": "https://www.bilibili.com/video/BV1pw3e6FEaL/",
+          "bvid": "BV1pw3e6FEaL",
+          "publishedAt": 1785209781
+        },
+        {
+          "id": "os|IO子系统专题",
+          "title": "IO子系统专题",
+          "duration": "44:29",
+          "url": "https://www.bilibili.com/video/BV1kL3k6pERN/",
+          "bvid": "BV1kL3k6pERN",
+          "publishedAt": 1785294299
+        },
+        {
+          "id": "os|磁盘与SSD专题",
+          "title": "磁盘与SSD专题",
+          "duration": "43:02",
+          "url": "https://www.bilibili.com/video/BV1Xm3x6xEBh/",
+          "bvid": "BV1Xm3x6xEBh",
+          "publishedAt": 1785383509
+        }
+      ]
     },
     "cn": {
       "label": "计算机网络",
