@@ -1,7 +1,7 @@
 {
   "name":"Everflow Study · 27考研",
   "short_name":"Everflow",
-  "description":"408强化打卡、通知资源与离线优先数据保存",
+  "description":"课程、刷题、通知资源与离线优先数据保存",
   "lang":"zh-CN",
   "start_url":"/",
   "scope":"/",
@@ -10,5 +10,9 @@
   "theme_color":"#f31224",
   "icons":[
     {"src":"/assets/everflow-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ],
+  "shortcuts":[
+    {"name":"学习中心","short_name":"学习","url":"/study/","icons":[{"src":"/assets/everflow-icon.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"408强化课程","short_name":"408课程","url":"/408/","icons":[{"src":"/assets/everflow-icon.svg","sizes":"any","type":"image/svg+xml"}]}
   ]
 }
