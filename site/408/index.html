@@ -9,6 +9,7 @@
   <link rel="icon" href="../assets/everflow-icon.svg">
   <link rel="stylesheet" href="../assets/css/site.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/study.css">
 </head>
 <body>
 <header class="topbar">
@@ -17,23 +18,25 @@
     <nav class="links">
       <a href="../">首页</a>
       <a class="active" href="./">408强化</a>
+      <a href="../focus/">专注</a>
+      <a href="../stats/">统计</a>
       <a href="../archive/">文章</a>
-      <a href="../about/">关于</a>
+      <a href="../account/">账户</a>
       <button class="icon-btn" data-theme aria-label="切换主题">◐</button>
     </nav>
     <button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button>
   </div>
 </header>
-<div class="mobile-panel"><a href="../">首页</a><a href="./">408强化</a><a href="../archive/">文章</a><a href="../about/">关于</a><button class="icon-btn" data-theme>◐</button></div>
+<div class="mobile-panel"><a href="../">首页</a><a href="./">408强化</a><a href="../focus/">专注</a><a href="../stats/">统计</a><a href="../archive/">文章</a><a href="../account/">账户</a><button class="icon-btn" data-theme>◐</button></div>
 
 <main class="wrap checkin-shell" data-checkin-root>
   <header class="checkin-head">
     <div>
       <div class="eyebrow">OXYGEN 11 · 27 KAoyan 408</div>
       <h1>408 强化自动更新表</h1>
-      <p>课程来源：B站 UP 主「就是氧气11」。勾选和备注只保存在当前浏览器；新课程同步后不会清空原有进度。</p>
+      <p>课程来源：B站 UP 主「就是氧气11」。勾选和备注优先保存在当前设备；登录后可与云端合并同步，新课程同步不会清空原有进度。</p>
     </div>
-    <a class="ghost-link" href="../">← 返回倒计时</a>
+    <a class="ghost-link" href="../stats/">查看学习统计 →</a>
   </header>
 
   <section class="overall-card">
@@ -58,8 +61,11 @@
   <section class="checkin-panel" data-panel="cn"></section>
 </main>
 
-<footer class="footer"><div class="wrap footer-inner"><span>打卡数据存储于浏览器本地</span><span>课程列表由 GitHub Actions 自动同步</span></div></footer>
+<footer class="footer"><div class="wrap footer-inner"><span>本地优先保存 · 登录后可云同步</span><span><a href="../account/">账户与备份 →</a></span></div></footer>
 <script src="../assets/js/site.js"></script>
+<script src="../assets/js/study-store.js"></script>
+<script src="../assets/js/cloud-config.js"></script>
+<script type="module" src="../assets/js/cloud.js"></script>
 <script src="../assets/js/checkin.js"></script>
 </body>
 </html>
