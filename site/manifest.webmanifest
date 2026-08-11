@@ -1,0 +1,14 @@
+{
+  "name":"Everflow Study · 27考研",
+  "short_name":"Everflow",
+  "description":"408强化打卡、专注计时、学习热力图与离线优先数据保存",
+  "lang":"zh-CN",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "background_color":"#ffffff",
+  "theme_color":"#f31224",
+  "icons":[
+    {"src":"/assets/everflow-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
