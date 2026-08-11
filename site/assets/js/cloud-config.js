@@ -24,6 +24,11 @@
   // Workspace-only visual/runtime enhancement. Kept separate from workspace-v3
   // business logic so UI polish cannot break Owner APIs or cloud operations.
   if(location.pathname.startsWith('/workspace/')){
+    const style=document.createElement('link');
+    style.rel='stylesheet';
+    style.href='../assets/css/workspace-hotfix-v5.css?v=5';
+    document.head.appendChild(style);
+
     const script=document.createElement('script');
     script.src='../assets/js/workspace-controls-v4.js?v=4';
     script.async=true;
