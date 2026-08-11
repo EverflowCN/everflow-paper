@@ -1,0 +1,20 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Everflow · 彼时流年若水 408 LaTeX 三合一文档"><title>参数速查 · Everflow Docs</title><link rel="icon" href="../assets/everflow-icon.svg"><link rel="stylesheet" href="../assets/css/site.css"></head><body><header class="topbar"><a class="brand" href="../"><img src="../assets/everflow-icon.svg"><span>Everflow<small>彼时流年若水</small></span></a><nav class="topnav"><button class="btn search-open hide-mobile">搜索 <kbd>⌘K</kbd></button><button class="btn theme-toggle">◐</button><button class="btn mobile-menu">☰</button><a class="btn primary hide-mobile" href="../start/">快速开始</a></nav></header><div class="app"><aside class="sidebar"><div class="section-label">Documentation</div><a class="" href="../"><span class="dot"></span>首页</a><a class="" href="../start/"><span class="dot"></span>快速开始</a><a class="" href="../layouts/"><span class="dot"></span>Book 六种版式</a><a class="" href="../questions/"><span class="dot"></span>题目录入</a><a class="" href="../exam/"><span class="dot"></span>Exam 正式试卷</a><a class="" href="../public/"><span class="dot"></span>Public 出版模式</a><a class="" href="../cover/"><span class="dot"></span>统一封面与品牌</a><a class="" href="../features/"><span class="dot"></span>功能总览</a><a class="" href="../audit/"><span class="dot"></span>v24 审查</a><a class="active" href="../reference/"><span class="dot"></span>参数速查</a><div class="section-label">Brand</div><a href="../cover/"><span class="dot"></span>Everflow 标志系统</a></aside><main class="content"><h1 id="常用参数速查">常用参数速查</h1>
+<h2 id="book">Book</h2>
+<pre><code class="language-tex">\providecommand{\ZeroOneBookLayout}{standard}
+\providecommand{\ZeroOneBookTheme}{ink}
+\providecommand{\ZeroOneUseTOC}{true}
+</code></pre>
+<h2 id="水印">水印</h2>
+<pre><code class="language-tex">\providecommand{\ZeroOneBookWatermarkEnabled}{false}
+\providecommand{\ZeroOneBookWatermarkText}{Everflow·彼时流年若水}
+</code></pre>
+<h2 id="封面">封面</h2>
+<p>优先修改：</p>
+<pre><code class="language-text">00-user-config/06-cover-config.tex
+00-user-config/11-cover-spread.tex
+</code></pre>
+<h2 id="题源">题源</h2>
+<pre><code class="language-text">00-user-config/08-question-source.tex
+questions/question-list.tex
+</code></pre>
+<footer class="footer">Everflow · 彼时流年若水 · 408 LaTeX 三合一排版系统</footer></main><aside class="toc"><div class="section-label">本页目录</div><a style="padding-left:0px" href="#book">Book</a><a style="padding-left:0px" href="#水印">水印</a><a style="padding-left:0px" href="#封面">封面</a><a style="padding-left:0px" href="#题源">题源</a></aside></div><div class="search-panel"><div class="search-box"><input id="search-input" placeholder="搜索文档、命令或功能…"><div id="search-results"></div></div></div><script src="../assets/js/site.js"></script></body></html>
