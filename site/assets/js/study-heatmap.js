@@ -12,7 +12,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const timeMs=v=>{const n=Date.parse(v||'');return Number.isFinite(n)?n:0};
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
 let supa=null,user=null,events=[],mode='month';
 const today=new Date();today.setHours(12,0,0,0);
@@ -23,6 +23,7 @@ async function initClient(){
   const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm');
   supa=createClient(CFG.url,CFG.publishableKey,{auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false}});
   const {data}=await supa.auth.getSession();user=data?.session?.user||null;
+  supa.auth.onAuthStateChange((_event,session)=>{const next=session?.user||null;if(next?.id!==user?.id){user=next;queueMicrotask(()=>loadEvents().catch(()=>{}))}});
   return supa;
 }
 function level(count){return count<=0?0:count===1?1:count===2?2:count<=4?3:4}
@@ -50,17 +51,24 @@ async function collectLocalEvents(){
   }catch{}
   return out;
 }
+function mergeLocalLatest(cloudRows,localRows){
+  const maxCloud=new Map();for(const e of cloudRows){const k=`${e.event_type}|${e.source_id}|${e.item_id}`;maxCloud.set(k,Math.max(maxCloud.get(k)||0,timeMs(e.occurred_at)))}
+  const extras=localRows.filter(e=>{const k=`${e.event_type}|${e.source_id}|${e.item_id}`;return timeMs(e.occurred_at)>(maxCloud.get(k)||0)+1000});
+  return [...cloudRows,...extras].sort((a,b)=>timeMs(a.occurred_at)-timeMs(b.occurred_at));
+}
+async function fetchCloudEvents(){
+  const out=[],page=1000;let from=0;
+  while(true){const {data,error}=await supa.from('study_checkin_events').select('id,event_type,source_id,item_id,subject,occurred_at,metadata').eq('user_id',user.id).order('occurred_at',{ascending:true}).range(from,from+page-1);if(error)throw error;const rows=data||[];out.push(...rows);if(rows.length<page)break;from+=page}
+  return out;
+}
 async function loadEvents(){
   setStatus('正在读取学习记录…');
   try{
     if(!supa)await initClient();
+    const local=await collectLocalEvents();
     if(user){
-      const start=new Date(cursorYear-1,0,1),end=new Date(cursorYear+2,0,1);
-      const {data,error}=await supa.from('study_checkin_events').select('id,event_type,source_id,item_id,subject,occurred_at,metadata').eq('user_id',user.id).gte('occurred_at',start.toISOString()).lt('occurred_at',end.toISOString()).order('occurred_at',{ascending:true});
-      if(error)throw error;events=data||[];setStatus(`已登录 · 已读取 ${events.length} 条云端打卡记录`);
-    }else{
-      events=await collectLocalEvents();setStatus(`未登录 · 显示本机可识别的 ${events.length} 条打卡记录`);
-    }
+      const cloudRows=await fetchCloudEvents();events=mergeLocalLatest(cloudRows,local);const pending=events.length-cloudRows.length;setStatus(pending?`已登录 · 云端 ${cloudRows.length} 条 + 本机待同步 ${pending} 条`:`已登录 · 已读取 ${cloudRows.length} 条云端打卡记录`);
+    }else{events=local;setStatus(`未登录 · 显示本机可识别的 ${events.length} 条打卡记录`)}
   }catch(e){console.warn('heatmap load failed',e);events=await collectLocalEvents();setStatus('云端读取失败 · 已回退到本机记录','error')}
   renderAll();
 }
@@ -119,9 +127,12 @@ async function saveManual(event){
 function bind(){
   document.addEventListener('click',e=>{const day=e.target.closest('[data-day]');if(day){showDay(Number(day.dataset.day));return}const view=e.target.closest('[data-view]');if(view){toggleMode(view.dataset.view);return}if(e.target.closest('[data-prev-month]')){cursorMonth--;if(cursorMonth<0){cursorMonth=11;cursorYear--}renderAll();return}if(e.target.closest('[data-next-month]')){cursorMonth++;if(cursorMonth>11){cursorMonth=0;cursorYear++}renderAll();return}if(e.target.closest('[data-prev-year]')){cursorYear--;renderAll();return}if(e.target.closest('[data-next-year]')){cursorYear++;renderAll();return}if(e.target.closest('[data-jump-current]')){cursorYear=today.getFullYear();cursorMonth=today.getMonth();renderAll();return}if(e.target.closest('[data-jump-year]')){cursorYear=today.getFullYear();renderAll();return}if(e.target.closest('[data-manual-open]')){openManual();return}if(e.target.closest('[data-manual-close]')){$('[data-manual-dialog]').close();return}});
   $('[data-manual-form]')?.addEventListener('submit',saveManual);
-  document.addEventListener('everflow:auth-change',async()=>{await initClient();await loadEvents()});
+  document.addEventListener('everflow:auth-change',()=>loadEvents());
+  document.addEventListener('everflow:cloud-sync',()=>loadEvents());
+  document.addEventListener('everflow:practice-change',()=>loadEvents());
+  document.addEventListener('everflow:practice-batch-change',()=>loadEvents());
   addEventListener('online',()=>loadEvents());
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadEvents()});
 }
-async function boot(){bind();await initClient();try{await import('./study-store.js')}catch{}await loadEvents()}
+async function boot(){bind();await initClient();if(!window.EveraStore){try{await import('./study-store.js')}catch{}}await loadEvents()}
 boot();
