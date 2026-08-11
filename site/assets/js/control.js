@@ -12,8 +12,8 @@
     if(!user||!(await EveraCloud.isOwner())){
       root.innerHTML='<div class="control-guard"><div class="eyebrow">404</div><h1>页面不存在</h1><p class="muted">请检查地址后重试。</p></div>';return;
     }
-    root.hidden=false;
     const guard=$('[data-control-guard]');if(guard)guard.remove();
+    const content=$('[data-control-content]');if(content)content.hidden=false;
     const who=$('[data-control-owner]');if(who)who.textContent=user.email||user.id;
     await refresh();
   }
