@@ -33,5 +33,10 @@
     script.src='../assets/js/workspace-controls-v4.js?v=4';
     script.async=true;
     document.head.appendChild(script);
+
+    const oxygenGuard=document.createElement('script');
+    oxygenGuard.src='../assets/js/workspace-oxygen-guard-v1.js?v=1';
+    oxygenGuard.async=true;
+    document.head.appendChild(oxygenGuard);
   }
 })();
