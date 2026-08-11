@@ -24,15 +24,13 @@
       const key=el.dataset.wsNav;
       if(!ICONS[key])return;
       [...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).forEach(n=>n.remove());
-      qs('.ws-nav-icon',el)?.remove();
-      el.insertAdjacentHTML('afterbegin',icon(ICONS[key]));
+      if(!qs('.ws-nav-icon',el))el.insertAdjacentHTML('afterbegin',icon(ICONS[key]));
     });
     qsa('.ws3 .ws-nav a').forEach(el=>{
       const href=el.getAttribute('href')||'';
       const key=href.includes('account')?'account':'home';
       [...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).forEach(n=>n.remove());
-      qs('.ws-nav-icon',el)?.remove();
-      el.insertAdjacentHTML('afterbegin',icon(ICONS[key]));
+      if(!qs('.ws-nav-icon',el))el.insertAdjacentHTML('afterbegin',icon(ICONS[key]));
     });
   }
 
