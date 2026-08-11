@@ -9,96 +9,32 @@
   <link rel="stylesheet" href="assets/css/site.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
   <link rel="stylesheet" href="assets/css/study.css">
+  <link rel="stylesheet" href="assets/css/content.css">
 </head>
 <body data-root="./" data-view="home">
 <header class="topbar">
   <div class="wrap nav">
     <a class="brand" href="./"><img src="assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a>
-    <nav class="links">
-      <a class="active" href="./">首页</a>
-      <a href="408/">408强化</a>
-      <a href="focus/">专注</a>
-      <a href="stats/">统计</a>
-      <a href="archive/">文章</a>
-      <a href="account/">账户</a>
-      <button class="icon-btn" data-theme aria-label="切换主题">◐</button>
-    </nav>
+    <nav class="links"><a class="active" href="./">首页</a><a href="408/">408强化</a><a href="focus/">专注统计</a><a href="archive/">通知通告</a><a href="account/">账户</a><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav>
     <button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button>
   </div>
 </header>
-<div class="mobile-panel">
-  <a href="./">首页</a><a href="408/">408强化</a><a href="focus/">专注</a><a href="stats/">统计</a><a href="archive/">文章</a><a href="account/">账户</a><button class="icon-btn" data-theme>◐</button>
-</div>
-
+<div class="mobile-panel"><a href="./">首页</a><a href="408/">408强化</a><a href="focus/">专注统计</a><a href="archive/">通知通告</a><a href="account/">账户</a><button class="icon-btn" data-theme>◐</button></div>
 <main class="wrap">
   <section class="study-hero">
     <div class="countdown-panel">
-      <div class="eyebrow">27考研 · COUNTDOWN</div>
-      <h1 data-countdown-label>距离 27 考研</h1>
+      <div class="eyebrow">27考研 · COUNTDOWN</div><h1 data-countdown-label>距离 27 考研</h1>
       <p>把每天的学习变成看得见的进度。倒计时、408强化、专注时间和学习统计都放在这里。</p>
-      <div class="countdown" aria-label="考研倒计时">
-        <div class="countdown-unit"><strong data-countdown-days>--</strong><span>天 DAYS</span></div>
-        <div class="countdown-unit"><strong data-countdown-hours>--</strong><span>时 HOURS</span></div>
-        <div class="countdown-unit"><strong data-countdown-minutes>--</strong><span>分 MIN</span></div>
-        <div class="countdown-unit"><strong data-countdown-seconds>--</strong><span>秒 SEC</span></div>
-      </div>
+      <div class="countdown" aria-label="考研倒计时"><div class="countdown-unit"><strong data-countdown-days>--</strong><span>天 DAYS</span></div><div class="countdown-unit"><strong data-countdown-hours>--</strong><span>时 HOURS</span></div><div class="countdown-unit"><strong data-countdown-minutes>--</strong><span>分 MIN</span></div><div class="countdown-unit"><strong data-countdown-seconds>--</strong><span>秒 SEC</span></div></div>
       <div class="countdown-note" data-countdown-note>正在读取考试日期…</div>
     </div>
-
-    <aside class="focus-panel">
-      <div>
-        <div class="eyebrow">CURRENT FOCUS</div>
-        <h2>408 强化<br>持续推进</h2>
-        <p>数据结构 · 计算机组成原理 · 操作系统 · 计算机网络</p>
-        <div class="study-meta"><span class="study-chip" data-overall-study>读取进度…</span><span class="study-chip">本地优先保存</span></div>
-      </div>
-      <div class="quick-links"><a class="primary-link" href="focus/">开始专注 →</a><a class="ghost-link" href="408/">408 打卡</a></div>
-    </aside>
+    <aside class="focus-panel"><div><div class="eyebrow">CURRENT FOCUS</div><h2>408 强化<br>持续推进</h2><p>数据结构 · 计算机组成原理 · 操作系统 · 计算机网络</p><div class="study-meta"><span class="study-chip" data-overall-study>读取进度…</span><span class="study-chip">本地优先保存</span></div></div><div class="quick-links"><a class="primary-link" href="focus/">开始专注 →</a><a class="ghost-link" href="408/">408 打卡</a></div></aside>
   </section>
-
-  <section class="section" style="padding-top:0">
-    <div class="section-head"><div><div class="eyebrow">TODAY</div><h2>学习状态</h2></div><a href="stats/">查看完整统计 →</a></div>
-    <div class="home-study-strip">
-      <div class="home-study-item"><span>今日专注</span><strong data-home-focus>0m</strong></div>
-      <div class="home-study-item"><span>连续学习</span><strong data-home-streak>0 天</strong></div>
-      <div class="home-study-item"><span>最近 7 天</span><strong data-home-week>0m</strong></div>
-      <div class="home-study-item"><span>累计专注次数</span><strong data-home-sessions>0 次</strong></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head">
-      <div><div class="eyebrow">408 PROGRESS</div><h2>四科强化进度</h2></div>
-      <a href="408/">进入完整打卡表 →</a>
-    </div>
-    <div class="progress-grid">
-      <article class="subject-card" data-subject="ds"><div class="subject-top"><div class="subject-code">DS</div><div class="subject-number" data-subject-number>--</div></div><h3>数据结构</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article>
-      <article class="subject-card" data-subject="co"><div class="subject-top"><div class="subject-code">CO</div><div class="subject-number" data-subject-number>--</div></div><h3>计算机组成原理</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article>
-      <article class="subject-card" data-subject="os"><div class="subject-top"><div class="subject-code">OS</div><div class="subject-number" data-subject-number>--</div></div><h3>操作系统</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article>
-      <article class="subject-card" data-subject="cn"><div class="subject-top"><div class="subject-code">CN</div><div class="subject-number" data-subject-number>--</div></div><h3>计算机网络</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="sync-card">
-      <div><h3><span class="status-dot"></span>氧气11课程自动更新</h3><p>GitHub Actions 定时检查 B 站「就是氧气11」27考研408强化视频；发现新课后自动写入打卡表并重新部署。</p></div>
-      <div class="mono" data-oxygen-sync>正在检查同步状态…</div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><div><div class="eyebrow">NOTES</div><h2>最近文章</h2></div><a href="archive/">查看全部 →</a></div>
-    <div class="post-list" data-recent-posts><p>正在加载文章…</p></div>
-  </section>
+  <section class="section" style="padding-top:0"><div class="section-head"><div><div class="eyebrow">TODAY</div><h2>学习状态</h2></div><a href="focus/#analytics">查看完整统计 →</a></div><div class="home-study-strip"><div class="home-study-item"><span>今日专注</span><strong data-home-focus>0m</strong></div><div class="home-study-item"><span>连续学习</span><strong data-home-streak>0 天</strong></div><div class="home-study-item"><span>最近 7 天</span><strong data-home-week>0m</strong></div><div class="home-study-item"><span>累计专注次数</span><strong data-home-sessions>0 次</strong></div></div></section>
+  <section class="section"><div class="section-head"><div><div class="eyebrow">408 PROGRESS</div><h2>四科强化进度</h2></div><a href="408/">进入完整打卡表 →</a></div><div class="progress-grid"><article class="subject-card" data-subject="ds"><div class="subject-top"><div class="subject-code">DS</div><div class="subject-number" data-subject-number>--</div></div><h3>数据结构</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article><article class="subject-card" data-subject="co"><div class="subject-top"><div class="subject-code">CO</div><div class="subject-number" data-subject-number>--</div></div><h3>计算机组成原理</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article><article class="subject-card" data-subject="os"><div class="subject-top"><div class="subject-code">OS</div><div class="subject-number" data-subject-number>--</div></div><h3>操作系统</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article><article class="subject-card" data-subject="cn"><div class="subject-top"><div class="subject-code">CN</div><div class="subject-number" data-subject-number>--</div></div><h3>计算机网络</h3><p data-subject-meta>正在加载</p><div class="mini-progress"><span></span></div></article></div></section>
+  <section class="section"><div class="sync-card"><div><h3><span class="status-dot"></span>氧气11课程自动更新</h3><p>GitHub Actions 定时检查 B 站「就是氧气11」27考研408强化视频；发现新课后自动写入打卡表并重新部署。</p></div><div class="mono" data-oxygen-sync>正在检查同步状态…</div></div></section>
+  <section class="section"><div class="section-head"><div><div class="eyebrow">NOTICE</div><h2>最新通知</h2></div><a href="archive/">查看全部 →</a></div><div class="notice-list" data-recent-notices><p>正在加载通知…</p></div></section>
 </main>
-
 <footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>27考研 · Keep moving.</span></div></footer>
-<script src="assets/js/site.js"></script>
-<script src="assets/js/study-store.js"></script>
-<script src="assets/js/cloud-config.js"></script>
-<script type="module" src="assets/js/cloud.js"></script>
-<script src="assets/js/dashboard.js"></script>
-<script src="assets/js/home-study.js"></script>
-<script src="assets/js/blog.js"></script>
-</body>
-</html>
+<script src="assets/js/site.js"></script><script src="assets/js/study-store.js"></script><script src="assets/js/cloud-config.js"></script><script type="module" src="assets/js/cloud.js"></script><script src="assets/js/dashboard.js"></script><script src="assets/js/home-study.js"></script><script type="module" src="assets/js/notices.js"></script>
+</body></html>
