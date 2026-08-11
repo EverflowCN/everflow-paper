@@ -2,6 +2,7 @@ const cfg=window.EVERFLOW_CLOUD||{};
 const enabled=Boolean(cfg.url&&cfg.publishableKey);
 let client=null;
 let readyResolve;
+let syncing=false;
 const ready=new Promise(r=>readyResolve=r);
 
 const fromFocus=r=>({
@@ -53,30 +54,34 @@ async function signOut(){await ready;if(!client)return;return client.auth.signOu
 
 async function syncAll(){
   await ready;if(!client||!window.EveraStore)return {ok:false,reason:'disabled'};
+  if(syncing)return {ok:false,reason:'busy'};
   const user=await getUser();if(!user)return {ok:false,reason:'guest'};
-  await EveraStore.init();
+  syncing=true;
+  try{
+    await EveraStore.init();
+    const [remoteFocus,remoteCourse]=await Promise.all([
+      client.from('focus_sessions').select('*').eq('user_id',user.id),
+      client.from('course_states').select('*').eq('user_id',user.id)
+    ]);
+    if(remoteFocus.error)throw remoteFocus.error;if(remoteCourse.error)throw remoteCourse.error;
 
-  const [remoteFocus,remoteCourse]=await Promise.all([
-    client.from('focus_sessions').select('*').eq('user_id',user.id),
-    client.from('course_states').select('*').eq('user_id',user.id)
-  ]);
-  if(remoteFocus.error)throw remoteFocus.error;if(remoteCourse.error)throw remoteCourse.error;
+    await EveraStore.importAll({
+      focusSessions:(remoteFocus.data||[]).map(fromFocus),
+      courseStates:(remoteCourse.data||[]).map(fromCourse)
+    });
+    const local=await EveraStore.exportAll();
+    const focusRows=local.focusSessions.map(r=>toFocus(r,user.id));
+    const courseRows=local.courseStates.map(r=>toCourse(r,user.id));
 
-  await EveraStore.importAll({
-    focusSessions:(remoteFocus.data||[]).map(fromFocus),
-    courseStates:(remoteCourse.data||[]).map(fromCourse)
-  });
-  const local=await EveraStore.exportAll();
-  const focusRows=local.focusSessions.map(r=>toFocus(r,user.id));
-  const courseRows=local.courseStates.map(r=>toCourse(r,user.id));
-
-  if(focusRows.length){const {error}=await client.from('focus_sessions').upsert(focusRows,{onConflict:'id'});if(error)throw error}
-  if(courseRows.length){const {error}=await client.from('course_states').upsert(courseRows,{onConflict:'user_id,course_id'});if(error)throw error}
-  await client.from('profiles').upsert({user_id:user.id,last_seen_at:new Date().toISOString()},{onConflict:'user_id'});
-  const out={ok:true,at:new Date().toISOString(),focus:focusRows.length,courses:courseRows.length};
-  localStorage.setItem('everflow-last-cloud-sync',JSON.stringify(out));
-  document.dispatchEvent(new CustomEvent('everflow:cloud-sync',{detail:out}));
-  return out;
+    if(focusRows.length){const {error}=await client.from('focus_sessions').upsert(focusRows,{onConflict:'id'});if(error)throw error}
+    if(courseRows.length){const {error}=await client.from('course_states').upsert(courseRows,{onConflict:'user_id,course_id'});if(error)throw error}
+    const {error:profileError}=await client.from('profiles').upsert({user_id:user.id,last_seen_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(profileError)throw profileError;
+    const out={ok:true,at:new Date().toISOString(),focus:focusRows.length,courses:courseRows.length};
+    localStorage.setItem('everflow-last-cloud-sync',JSON.stringify(out));
+    document.dispatchEvent(new CustomEvent('everflow:cloud-sync',{detail:out}));
+    return out;
+  }finally{syncing=false}
 }
 
 async function isOwner(){const u=await getUser();return Boolean(u?.app_metadata?.role==='owner')}
@@ -88,11 +93,13 @@ async function getOwnerOverview(){
     client.from('course_states').select('*',{count:'exact',head:true}),
     client.from('profiles').select('user_id,display_name,created_at,last_seen_at').order('last_seen_at',{ascending:false}).limit(20)
   ]);
+  if(profiles.error)throw profiles.error;if(focus.error)throw focus.error;if(courses.error)throw courses.error;if(recent.error)throw recent.error;
   return {users:profiles.count||0,focus:focus.count||0,courses:courses.count||0,recent:recent.data||[]};
 }
 
 let syncTimer;
 document.addEventListener('everflow:study-change',()=>{
+  if(syncing)return;
   clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200);
 });
 
