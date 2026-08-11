@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: oxygen-408-sync
@@ -68,9 +69,11 @@ jobs:
         run: python scripts/cleanup_oxygen.py
 
       - name: Commit updated course data
+        id: commit_data
         shell: bash
         run: |
           if git diff --quiet -- site/data/oxygen.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No changes."
             exit 0
           fi
@@ -80,3 +83,12 @@ jobs:
           git commit -m "Auto-sync 氧气11 408强化"
           git pull --rebase origin main
           git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # GITHUB_TOKEN 产生的 push 默认不会再次触发 deploy-pages 的 push 事件，
+      # 所以数据变化后显式 dispatch Pages，确保 evera.top 立即拿到最新 oxygen.json。
+      - name: Deploy updated data to GitHub Pages
+        if: steps.commit_data.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
