@@ -41,7 +41,7 @@
     });
     select.addEventListener('change',()=>sync(host));
   }
-  function refresh(root=document){root.querySelectorAll?.('select[data-pretty-select]').forEach(build)}
+  function refresh(root=document){root.querySelectorAll?.('select[data-pretty-select]').forEach(select=>{build(select);const host=select.closest('.pretty-select-host');if(host)sync(host)})}
   document.addEventListener('click',e=>{if(!e.target.closest('.pretty-select-host'))closeAll()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
   new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType===1){if(n.matches?.('select[data-pretty-select]'))build(n);refresh(n)}}))).observe(document.documentElement,{childList:true,subtree:true});
