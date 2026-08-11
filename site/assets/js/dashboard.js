@@ -1,7 +1,7 @@
 (()=>{
   const $=s=>document.querySelector(s);
   const pad=n=>String(Math.max(0,n)).padStart(2,'0');
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const progressKey='oxygen408-progress-v2';
 
   async function loadJson(path){
