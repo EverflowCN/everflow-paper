@@ -111,6 +111,15 @@ async function ownerUsers(action,payload={}){
   return data;
 }
 
+async function membership(action='status',payload={}){
+  await ready;if(!client)throw new Error('云同步尚未配置');
+  const user=await getUser();if(!user)throw new Error('login_required');
+  const {data,error}=await client.functions.invoke('membership',{body:{action,...payload}});
+  if(error)throw error;
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+
 async function getOwnerAudit(){
   await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
   const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(30);
@@ -123,11 +132,9 @@ document.addEventListener('everflow:study-change',()=>{
   clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200);
 });
 
-// Offline-first recovery: local writes never wait for the network. When the
-// connection returns, or the tab becomes active again, merge changes automatically.
 addEventListener('online',()=>syncAll().catch(()=>{}));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})});
 setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})},5*60*1000);
 
-window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,getOwnerAudit};
+window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,membership,getOwnerAudit};
 init();
