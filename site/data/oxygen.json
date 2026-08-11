@@ -1,13 +1,31 @@
 {
   "schema": 2,
-  "updatedAt": "2026-08-11T17:09:47+08:00",
+  "updatedAt": "2026-08-11T17:16:09+08:00",
   "source": {
     "up": "就是氧气11",
     "mid": 378777885,
     "collection": "27考研408计算机基础综合合集",
     "auto": true,
-    "syncStatus": "ok",
-    "message": "本次 1/4 科同步成功；失败：co: HTTPError: HTTP Error 412: Precondition Failed | os: HTTPError: HTTP Error 412: Precondition Failed | cn: HTTPError: HTTP Error 412: Precondition Failed"
+    "syncStatus": "partial",
+    "message": "本次 2/4 科同步成功；已有数据均保留。失败：co: HTTPError: HTTP Error 412: Precondition Failed | os: HTTPError: HTTP Error 412: Precondition Failed",
+    "subjectStatus": {
+      "ds": {
+        "ok": true,
+        "error": ""
+      },
+      "co": {
+        "ok": false,
+        "error": "HTTPError: HTTP Error 412: Precondition Failed"
+      },
+      "os": {
+        "ok": false,
+        "error": "HTTPError: HTTP Error 412: Precondition Failed"
+      },
+      "cn": {
+        "ok": true,
+        "error": ""
+      }
+    }
   },
   "subjects": {
     "ds": {
@@ -26,7 +44,7 @@
           "id": "ds|时间复杂度专题",
           "title": "时间复杂度专题",
           "duration": "40:25",
-          "url": "http://www.bilibili.com/video/av116561151070231",
+          "url": "https://www.bilibili.com/video/BV1Pn5g66EXp/",
           "bvid": "BV1Pn5g66EXp",
           "publishedAt": 1778582180
         },
@@ -34,7 +52,7 @@
           "id": "ds|顺序表专题",
           "title": "顺序表专题",
           "duration": "32:32",
-          "url": "http://www.bilibili.com/video/av116565076874260",
+          "url": "https://www.bilibili.com/video/BV1Cb556SEyk/",
           "bvid": "BV1Cb556SEyk",
           "publishedAt": 1778642113
         },
@@ -42,7 +60,7 @@
           "id": "ds|链表专题",
           "title": "链表专题",
           "duration": "23:38",
-          "url": "http://www.bilibili.com/video/av116567056584923",
+          "url": "https://www.bilibili.com/video/BV18X5y61EPn/",
           "bvid": "BV18X5y61EPn",
           "publishedAt": 1778672370
         },
@@ -50,7 +68,7 @@
           "id": "ds|链表选择题专题",
           "title": "链表选择题专题",
           "duration": "36:51",
-          "url": "http://www.bilibili.com/video/av116570814684516",
+          "url": "https://www.bilibili.com/video/BV1R55X6CE4W/",
           "bvid": "BV1R55X6CE4W",
           "publishedAt": 1778729722
         },
@@ -58,7 +76,7 @@
           "id": "ds|栈专题",
           "title": "栈专题",
           "duration": "23:51",
-          "url": "http://www.bilibili.com/video/av116576065950098",
+          "url": "https://www.bilibili.com/video/BV1oe5h6nEnH/",
           "bvid": "BV1oe5h6nEnH",
           "publishedAt": 1778809884
         },
@@ -66,7 +84,7 @@
           "id": "ds|卡特兰数专题",
           "title": "卡特兰数专题",
           "duration": "22:47",
-          "url": "http://www.bilibili.com/video/av116581552101448",
+          "url": "https://www.bilibili.com/video/BV16x5k6xE4t/",
           "bvid": "BV16x5k6xE4t",
           "publishedAt": 1778893497
         },
@@ -74,7 +92,7 @@
           "id": "ds|栈选择题专题",
           "title": "栈选择题专题",
           "duration": "21:32",
-          "url": "http://www.bilibili.com/video/av116587759672187",
+          "url": "https://www.bilibili.com/video/BV1kWLj6REG1/",
           "bvid": "BV1kWLj6REG1",
           "publishedAt": 1778988267
         },
@@ -82,7 +100,7 @@
           "id": "ds|队列专题",
           "title": "队列专题",
           "duration": "31:54",
-          "url": "http://www.bilibili.com/video/av116592960606369",
+          "url": "https://www.bilibili.com/video/BV1Ag5f6rEB1/",
           "bvid": "BV1Ag5f6rEB1",
           "publishedAt": 1779067709
         },
@@ -90,7 +108,7 @@
           "id": "ds|字符串匹配KMP专题",
           "title": "字符串匹配KMP专题",
           "duration": "36:32",
-          "url": "http://www.bilibili.com/video/av116593010939531",
+          "url": "https://www.bilibili.com/video/BV1MF5f6EE8m/",
           "bvid": "BV1MF5f6EE8m",
           "publishedAt": 1779068446
         },
@@ -98,7 +116,7 @@
           "id": "ds|数组与矩阵专题",
           "title": "数组与矩阵专题",
           "duration": "23:19",
-          "url": "http://www.bilibili.com/video/av116598715323929",
+          "url": "https://www.bilibili.com/video/BV1kaLu6TEir/",
           "bvid": "BV1kaLu6TEir",
           "publishedAt": 1779155376
         },
@@ -106,7 +124,7 @@
           "id": "ds|数组与矩阵选择题专题",
           "title": "数组与矩阵选择题专题",
           "duration": "31:54",
-          "url": "http://www.bilibili.com/video/av116600476997424",
+          "url": "https://www.bilibili.com/video/BV1SULq6FEQ6/",
           "bvid": "BV1SULq6FEQ6",
           "publishedAt": 1779182317
         },
@@ -114,7 +132,7 @@
           "id": "ds|二叉树的性质与遍历专题",
           "title": "二叉树的性质与遍历专题",
           "duration": "36:10",
-          "url": "http://www.bilibili.com/video/av116604436290423",
+          "url": "https://www.bilibili.com/video/BV1d4Ly64EDC/",
           "bvid": "BV1d4Ly64EDC",
           "publishedAt": 1779242756
         },
@@ -122,7 +140,7 @@
           "id": "ds|二叉树的性质与遍历选择题专题",
           "title": "二叉树的性质与遍历选择题专题",
           "duration": "40:39",
-          "url": "http://www.bilibili.com/video/av116610023036525",
+          "url": "https://www.bilibili.com/video/BV1bTLx6tEaZ/",
           "bvid": "BV1bTLx6tEaZ",
           "publishedAt": 1779327863
         },
@@ -130,7 +148,7 @@
           "id": "ds|线索二叉树，树与森林专题",
           "title": "线索二叉树，树与森林专题",
           "duration": "24:12",
-          "url": "http://www.bilibili.com/video/av116611851753042",
+          "url": "https://www.bilibili.com/video/BV1k2Lb6tES8/",
           "bvid": "BV1k2Lb6tES8",
           "publishedAt": 1779355873
         },
@@ -138,7 +156,7 @@
           "id": "ds|线索二叉树，树与森林选择题专题",
           "title": "线索二叉树，树与森林选择题专题",
           "duration": "26:8",
-          "url": "http://www.bilibili.com/video/av116616331269712",
+          "url": "https://www.bilibili.com/video/BV1xYLi6nE8R/",
           "bvid": "BV1xYLi6nE8R",
           "publishedAt": 1779424208
         },
@@ -146,7 +164,7 @@
           "id": "ds|树的应用专题",
           "title": "树的应用专题",
           "duration": "35:59",
-          "url": "http://www.bilibili.com/video/av116621230283618",
+          "url": "https://www.bilibili.com/video/BV1moGa6qE2a/",
           "bvid": "BV1moGa6qE2a",
           "publishedAt": 1779498993
         },
@@ -154,7 +172,7 @@
           "id": "ds|树的应用选择题专题",
           "title": "树的应用选择题专题",
           "duration": "31:12",
-          "url": "http://www.bilibili.com/video/av116627387453895",
+          "url": "https://www.bilibili.com/video/BV13wGj6FEMY/",
           "bvid": "BV13wGj6FEMY",
           "publishedAt": 1779592929
         },
@@ -162,7 +180,7 @@
           "id": "ds|树的应用综合大题专题",
           "title": "树的应用综合大题专题",
           "duration": "40:21",
-          "url": "http://www.bilibili.com/video/av116632655502123",
+          "url": "https://www.bilibili.com/video/BV13LGs6pEb1/",
           "bvid": "BV13LGs6pEb1",
           "publishedAt": 1779673154
         },
@@ -170,7 +188,7 @@
           "id": "ds|图的概念与存储专题",
           "title": "图的概念与存储专题",
           "duration": "50:13",
-          "url": "http://www.bilibili.com/video/av116638561147828",
+          "url": "https://www.bilibili.com/video/BV1rPVA65Eyc/",
           "bvid": "BV1rPVA65Eyc",
           "publishedAt": 1779763464
         },
@@ -178,7 +196,7 @@
           "id": "ds|图的概念与存储选择题专题",
           "title": "图的概念与存储选择题专题",
           "duration": "32:44",
-          "url": "http://www.bilibili.com/video/av116640356243654",
+          "url": "https://www.bilibili.com/video/BV157VA6vEaa/",
           "bvid": "BV157VA6vEaa",
           "publishedAt": 1779790924
         },
@@ -186,7 +204,7 @@
           "id": "ds|图的遍历专题",
           "title": "图的遍历专题",
           "duration": "20:47",
-          "url": "http://www.bilibili.com/video/av116644382840093",
+          "url": "https://www.bilibili.com/video/BV19PGC6kEaM/",
           "bvid": "BV19PGC6kEaM",
           "publishedAt": 1779852199
         },
@@ -194,7 +212,7 @@
           "id": "ds|最小生成树专题",
           "title": "最小生成树专题",
           "duration": "33:41",
-          "url": "http://www.bilibili.com/video/av116650070316877",
+          "url": "https://www.bilibili.com/video/BV1g1GD6ZEbd/",
           "bvid": "BV1g1GD6ZEbd",
           "publishedAt": 1779939050
         },
@@ -202,7 +220,7 @@
           "id": "ds|最短路径算法专题",
           "title": "最短路径算法专题",
           "duration": "38:15",
-          "url": "http://www.bilibili.com/video/av116650238023916",
+          "url": "https://www.bilibili.com/video/BV1s6G96ZEe2/",
           "bvid": "BV1s6G96ZEe2",
           "publishedAt": 1779941624
         },
@@ -210,7 +228,7 @@
           "id": "ds|有向无环图的应用专题",
           "title": "有向无环图的应用专题",
           "duration": "42:59",
-          "url": "http://www.bilibili.com/video/av116655959054439",
+          "url": "https://www.bilibili.com/video/BV1w8Vb6pE4j/",
           "bvid": "BV1w8Vb6pE4j",
           "publishedAt": 1780028917
         },
@@ -218,7 +236,7 @@
           "id": "ds|图的应用综合大题专题",
           "title": "图的应用综合大题专题",
           "duration": "61:29",
-          "url": "http://www.bilibili.com/video/av116660623252392",
+          "url": "https://www.bilibili.com/video/BV15UVM6SEqi/",
           "bvid": "BV15UVM6SEqi",
           "publishedAt": 1780100128
         },
@@ -226,7 +244,7 @@
           "id": "ds|顺序与二分查找专题",
           "title": "顺序与二分查找专题",
           "duration": "25:17",
-          "url": "http://www.bilibili.com/video/av116667166298590",
+          "url": "https://www.bilibili.com/video/BV1bZV76eE4k/",
           "bvid": "BV1bZV76eE4k",
           "publishedAt": 1780199999
         },
@@ -234,7 +252,7 @@
           "id": "ds|二叉排序树与平衡二叉树专题",
           "title": "二叉排序树与平衡二叉树专题",
           "duration": "31:53",
-          "url": "http://www.bilibili.com/video/av116667199788763",
+          "url": "https://www.bilibili.com/video/BV1TcVE6aEEM/",
           "bvid": "BV1TcVE6aEEM",
           "publishedAt": 1780200535
         },
@@ -242,7 +260,7 @@
           "id": "ds|B树专题",
           "title": "B树专题",
           "duration": "34:32",
-          "url": "http://www.bilibili.com/video/av116674850198774",
+          "url": "https://www.bilibili.com/video/BV1mDVo6rE5x/",
           "bvid": "BV1mDVo6rE5x",
           "publishedAt": 1780317851
         },
@@ -250,7 +268,7 @@
           "id": "ds|红黑树的插入与删除专题",
           "title": "红黑树的插入与删除专题",
           "duration": "56:29",
-          "url": "http://www.bilibili.com/video/av116678323081659",
+          "url": "https://www.bilibili.com/video/BV1ktVB6yEc4/",
           "bvid": "BV1ktVB6yEc4",
           "publishedAt": 1780370290
         },
@@ -258,7 +276,7 @@
           "id": "ds|散列表专题",
           "title": "散列表专题",
           "duration": "27:59",
-          "url": "http://www.bilibili.com/video/av116684178396563",
+          "url": "https://www.bilibili.com/video/BV1q8V164ErM/",
           "bvid": "BV1q8V164ErM",
           "publishedAt": 1780459818
         },
@@ -266,7 +284,7 @@
           "id": "ds|查找选择题专题",
           "title": "查找选择题专题",
           "duration": "60:28",
-          "url": "http://www.bilibili.com/video/av116689748498286",
+          "url": "https://www.bilibili.com/video/BV1wo7o6VEjR/",
           "bvid": "BV1wo7o6VEjR",
           "publishedAt": 1780544509
         },
@@ -274,7 +292,7 @@
           "id": "ds|查找综合大题专题",
           "title": "查找综合大题专题",
           "duration": "35:52",
-          "url": "http://www.bilibili.com/video/av116695016411465",
+          "url": "https://www.bilibili.com/video/BV1Qs7z6gEMC/",
           "bvid": "BV1Qs7z6gEMC",
           "publishedAt": 1780624909
         },
@@ -282,7 +300,7 @@
           "id": "ds|内部排序专题（上）",
           "title": "内部排序专题（上）",
           "duration": "31:47",
-          "url": "http://www.bilibili.com/video/av116696710910320",
+          "url": "https://www.bilibili.com/video/BV1NP7C63E4t/",
           "bvid": "BV1NP7C63E4t",
           "publishedAt": 1780650790
         },
@@ -290,7 +308,7 @@
           "id": "ds|内部排序专题（下）",
           "title": "内部排序专题（下）",
           "duration": "33:3",
-          "url": "http://www.bilibili.com/video/av116701005944883",
+          "url": "https://www.bilibili.com/video/BV15i7S6CEsF/",
           "bvid": "BV15i7S6CEsF",
           "publishedAt": 1780716225
         },
@@ -298,7 +316,7 @@
           "id": "ds|外部排序专题",
           "title": "外部排序专题",
           "duration": "38:0",
-          "url": "http://www.bilibili.com/video/av116706626246418",
+          "url": "https://www.bilibili.com/video/BV18bEs6NEDJ/",
           "bvid": "BV18bEs6NEDJ",
           "publishedAt": 1780801990
         },
@@ -306,7 +324,7 @@
           "id": "ds|排序选择题专题",
           "title": "排序选择题专题",
           "duration": "49:27",
-          "url": "http://www.bilibili.com/video/av116712447938918",
+          "url": "https://www.bilibili.com/video/BV1HGEK6PE8W/",
           "bvid": "BV1HGEK6PE8W",
           "publishedAt": 1780890844
         },
@@ -314,7 +332,7 @@
           "id": "ds|排序综合大题专题",
           "title": "排序综合大题专题",
           "duration": "33:59",
-          "url": "http://www.bilibili.com/video/av116718135416851",
+          "url": "https://www.bilibili.com/video/BV1fjE76FEDg/",
           "bvid": "BV1fjE76FEDg",
           "publishedAt": 1780977900
         }
@@ -566,7 +584,120 @@
     "cn": {
       "label": "计算机网络",
       "short": "CN",
-      "items": []
+      "items": [
+        {
+          "id": "cn|计算机网络概念与层次结构专题",
+          "title": "计算机网络概念与层次结构专题",
+          "duration": "36:25",
+          "url": "https://www.bilibili.com/video/BV1QVGw6sELz/",
+          "bvid": "BV1QVGw6sELz",
+          "publishedAt": 1785465425
+        },
+        {
+          "id": "cn|电路，报文与分组交换计算专题",
+          "title": "电路，报文与分组交换计算专题",
+          "duration": "34:23",
+          "url": "https://www.bilibili.com/video/BV1S9Gu63E8L/",
+          "bvid": "BV1S9Gu63E8L",
+          "publishedAt": 1785552843
+        },
+        {
+          "id": "cn|物理层专题",
+          "title": "物理层专题",
+          "duration": "30:29",
+          "url": "https://www.bilibili.com/video/BV17w3D6PEgj/",
+          "bvid": "BV17w3D6PEgj",
+          "publishedAt": 1785642348
+        },
+        {
+          "id": "cn|物理层选择题专题",
+          "title": "物理层选择题专题",
+          "duration": "26:47",
+          "url": "https://www.bilibili.com/video/BV1HM3f6wEgx/",
+          "bvid": "BV1HM3f6wEgx",
+          "publishedAt": 1785722066
+        },
+        {
+          "id": "cn|封装成帧与PPP协议专题",
+          "title": "封装成帧与PPP协议专题",
+          "duration": "25:15",
+          "url": "https://www.bilibili.com/video/BV1qFMX6aEb7/",
+          "bvid": "BV1qFMX6aEb7",
+          "publishedAt": 1785727839
+        },
+        {
+          "id": "cn|可靠传输与滑动窗口协议专题",
+          "title": "可靠传输与滑动窗口协议专题",
+          "duration": "29:00",
+          "url": "https://www.bilibili.com/video/BV1wWuF6FEYq/",
+          "bvid": "BV1wWuF6FEYq",
+          "publishedAt": 1785812478
+        },
+        {
+          "id": "cn|以太网与CSMA/CD协议专题",
+          "title": "以太网与CSMA/CD协议专题",
+          "duration": "31:42",
+          "url": "https://www.bilibili.com/video/BV19MMr64ELK/",
+          "bvid": "BV19MMr64ELK",
+          "publishedAt": 1785898111
+        },
+        {
+          "id": "cn|交换机与虚拟局域网VLAN专题",
+          "title": "交换机与虚拟局域网VLAN专题",
+          "duration": "31:17",
+          "url": "https://www.bilibili.com/video/BV1FMMS68EXd/",
+          "bvid": "BV1FMMS68EXd",
+          "publishedAt": 1785985921
+        },
+        {
+          "id": "cn|无线局域网与CSMA/CA协议专题",
+          "title": "无线局域网与CSMA/CA协议专题",
+          "duration": "40:59",
+          "url": "https://www.bilibili.com/video/BV1wVut66EiX/",
+          "bvid": "BV1wVut66EiX",
+          "publishedAt": 1786073034
+        },
+        {
+          "id": "cn|数据的检错与纠错专题",
+          "title": "数据的检错与纠错专题",
+          "duration": "46:55",
+          "url": "https://www.bilibili.com/video/BV1PeuM6sEQr/",
+          "bvid": "BV1PeuM6sEQr",
+          "publishedAt": 1786156749
+        },
+        {
+          "id": "cn|数据链路层选择题专题",
+          "title": "数据链路层选择题专题",
+          "duration": "52:12",
+          "url": "https://www.bilibili.com/video/BV1bmuu6eE7z/",
+          "bvid": "BV1bmuu6eE7z",
+          "publishedAt": 1786177105
+        },
+        {
+          "id": "cn|IPV4与子网划分专题",
+          "title": "IPV4与子网划分专题",
+          "duration": "37:21",
+          "url": "https://www.bilibili.com/video/BV1dMu76AEo9/",
+          "bvid": "BV1dMu76AEo9",
+          "publishedAt": 1786239767
+        },
+        {
+          "id": "cn|NAT技术与IPV6专题",
+          "title": "NAT技术与IPV6专题",
+          "duration": "31:10",
+          "url": "https://www.bilibili.com/video/BV1w6uQ6gEGm/",
+          "bvid": "BV1w6uQ6gEGm",
+          "publishedAt": 1786329914
+        },
+        {
+          "id": "cn|分组转发流程与ARP协议专题",
+          "title": "分组转发流程与ARP协议专题",
+          "duration": "28:51",
+          "url": "https://www.bilibili.com/video/BV1JRuv6REgg/",
+          "bvid": "BV1JRuv6REgg",
+          "publishedAt": 1786417826
+        }
+      ]
     }
   }
 }
