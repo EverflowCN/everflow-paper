@@ -1,3 +1,5 @@
+import './cloud.js';
+
 (()=>{
   const $=s=>document.querySelector(s);
   const msg=(text,bad=false)=>{const el=$('[data-account-message]');if(el){el.textContent=text;el.style.color=bad?'var(--red)':'var(--muted)'}};
@@ -46,7 +48,7 @@
   $('[data-signup]')?.addEventListener('click',()=>authAction('signup'));
   $('[data-otp]')?.addEventListener('click',()=>authAction('otp'));
   $('[data-logout]')?.addEventListener('click',async()=>{await EveraCloud.signOut();msg('已退出登录，本地数据仍保留。');renderAuth()});
-  $('[data-sync-now]')?.addEventListener('click',async()=>{try{msg('正在同步…');const r=await EveraCloud.syncAll();msg(r.ok?'同步完成。':r.reason==='guest'?'请先登录。':'云端尚未配置。')}catch(e){msg(e.message||String(e),true)}renderAuth()});
+  $('[data-sync-now]')?.addEventListener('click',async()=>{try{msg('正在同步…');const r=await EveraCloud.syncAll();msg(r.ok?'同步完成。':r.reason==='guest'?'请先登录。':r.reason==='busy'?'同步正在进行。':'云端尚未配置。')}catch(e){msg(e.message||String(e),true)}renderAuth()});
   $('[data-export]')?.addEventListener('click',exportData);
   $('[data-import-file]')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importData(f)});
   document.addEventListener('everflow:auth-change',renderAuth);
