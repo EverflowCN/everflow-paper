@@ -2,20 +2,18 @@ import './cloud.js';
 
 (()=>{
   const $=s=>document.querySelector(s);
-  const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   let fallbackProfiles=[];
 
   async function boot(){
     const root=$('[data-control-root]');if(!root)return;
     await EveraCloud.ready;
-    if(!EveraCloud.enabled){
-      root.innerHTML='<div class="control-guard"><div class="eyebrow">NOT FOUND</div><h1>页面不可用</h1><p class="muted">当前站点没有启用此服务。</p></div>';return;
-    }
     const user=await EveraCloud.getUser();
-    if(!user||!(await EveraCloud.isOwner())){
-      root.innerHTML='<div class="control-guard"><div class="eyebrow">404</div><h1>页面不存在</h1><p class="muted">请检查地址后重试。</p></div>';return;
+    if(!EveraCloud.enabled||!user||!(await EveraCloud.isOwner())){
+      root.hidden=true;
+      return;
     }
-    const guard=$('[data-control-guard]');if(guard)guard.remove();
+    root.hidden=false;
     const content=$('[data-control-content]');if(content)content.hidden=false;
     const who=$('[data-control-owner]');if(who)who.textContent=user.email||user.id;
     await refresh();
@@ -41,7 +39,7 @@ import './cloud.js';
         return `<tr><td>${escapeHtml(u.email||'--')}</td><td class="mono">${escapeHtml(String(u.id).slice(0,8))}…</td><td>${u.createdAt?new Date(u.createdAt).toLocaleDateString('zh-CN'):'--'}</td><td>${u.lastSignInAt?new Date(u.lastSignInAt).toLocaleString('zh-CN',{hour12:false}):'--'}</td><td>${protectedOwner?'Owner':(banned?'已停用':'正常')}</td><td>${actions}</td></tr>`;
       }).join('')||'<tr><td colspan="6" class="muted">暂无账户</td></tr>';
     }catch(e){
-      if(status)status.textContent='用户管理接口未部署 · 当前只读';
+      if(status)status.textContent='用户管理接口暂不可用 · 当前只读';
       renderFallbackUsers();
     }
   }
@@ -51,7 +49,7 @@ import './cloud.js';
     try{
       const rows=await EveraCloud.getOwnerAudit();
       table.innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.created_at).toLocaleString('zh-CN',{hour12:false})}</td><td>${escapeHtml(x.action)}</td><td class="mono">${escapeHtml(String(x.target_user_id||'').slice(0,8))}${x.target_user_id?'…':''}</td><td>${escapeHtml(x.detail?.email||'')}</td></tr>`).join(''):'<tr><td colspan="4" class="muted">暂无管理操作记录</td></tr>';
-    }catch{table.innerHTML='<tr><td colspan="4" class="muted">审计日志尚不可用</td></tr>'}
+    }catch{table.innerHTML='<tr><td colspan="4" class="muted">审计日志暂不可用</td></tr>'}
   }
 
   async function refresh(){
@@ -76,5 +74,6 @@ import './cloud.js';
     try{await EveraCloud.ownerUsers(action,{userId});await refresh()}catch(err){alert('操作失败：'+(err.message||String(err)))}finally{btn.disabled=false}
   });
   $('[data-control-refresh]')?.addEventListener('click',()=>refresh().catch(console.error));
-  boot().catch(err=>{console.error(err);const root=$('[data-control-root]');if(root)root.innerHTML='<div class="control-guard"><h1>页面不存在</h1></div>'});
+  document.addEventListener('everflow:auth-change',()=>boot().catch(console.error));
+  boot().catch(err=>{console.error(err);const root=$('[data-control-root]');if(root)root.hidden=true});
 })();
