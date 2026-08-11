@@ -3,109 +3,79 @@ import './cloud.js';
 (()=>{
   const $=s=>document.querySelector(s);
   const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let fallbackProfiles=[];
+  const ui=()=>window.EveraUI||{};
+  let fallbackProfiles=[],noticeCache=[],resourceCache=[];
 
   function ensureMembershipAdmin(){
     const content=$('[data-control-content]');if(!content||$('[data-membership-admin]'))return;
     content.insertAdjacentHTML('beforeend',`<section class="study-card" style="margin-top:16px" data-membership-admin><div class="eyebrow">MEMBERSHIP CODES</div><h3>会员兑换码</h3><p class="muted">兑换码明文只在生成时显示一次，数据库只保存 SHA-256 摘要和提示片段。</p><div class="study-form" style="grid-template-columns:repeat(3,minmax(0,1fr));align-items:end"><label>等级<select data-code-plan><option value="member">普通会员</option><option value="pro">Pro</option></select></label><label>可兑换次数<input type="number" min="1" max="100000" value="1" data-code-uses></label><label>备注<input type="text" maxlength="200" placeholder="例如：活动赠送" data-code-note></label></div><div class="auth-actions" style="margin-top:12px"><button class="small-btn" type="button" data-code-create>生成兑换码</button></div><p class="notice" data-code-created hidden></p><div style="overflow:auto;margin-top:14px"><table class="control-table"><thead><tr><th>提示</th><th>等级</th><th>使用</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody data-code-list><tr><td colspan="6">正在读取…</td></tr></tbody></table></div></section>`);
   }
 
-  async function boot(){
-    const root=$('[data-control-root]');if(!root)return;
-    await EveraCloud.ready;
-    const user=await EveraCloud.getUser();
-    if(!EveraCloud.enabled||!user||!(await EveraCloud.isOwner())){
-      root.hidden=true;
-      return;
-    }
-    root.hidden=false;
-    const content=$('[data-control-content]');if(content)content.hidden=false;
-    const who=$('[data-control-owner]');if(who)who.textContent=user.email||user.id;
-    ensureMembershipAdmin();
-    await refresh();
+  function ensureContentAdmin(){
+    const content=$('[data-control-content]');if(!content||$('[data-content-admin]'))return;
+    if(!document.querySelector('link[href*="content.css"]')){const link=document.createElement('link');link.rel='stylesheet';link.href='../assets/css/content.css';document.head.appendChild(link)}
+    content.insertAdjacentHTML('beforeend',`<section class="study-card owner-content-editor" style="margin-top:16px" data-content-admin><div class="eyebrow">NOTICE PUBLISHER</div><h3>通知通告发布</h3><p class="muted">发布后首页和“通知通告”页会自动显示；支持置顶、草稿和 Markdown 基础格式。</p><input type="hidden" data-notice-id><div class="owner-content-grid study-form"><label>标题<input type="text" data-notice-title placeholder="例如：408 强化表更新"></label><label>摘要<input type="text" data-notice-summary placeholder="列表页的一句话说明"></label><label>类型<select data-notice-level><option value="info">普通通知</option><option value="important">重要</option><option value="update">功能更新</option><option value="event">活动</option></select></label><div class="switch-row"><label class="switch-check"><input type="checkbox" data-notice-published checked>立即发布</label><label class="switch-check"><input type="checkbox" data-notice-pinned>置顶</label></div><label class="wide">正文<textarea data-notice-content placeholder="支持 # 标题、**加粗**、[链接](https://...) 等基础 Markdown"></textarea></label></div><div class="auth-actions" style="margin-top:12px"><button class="small-btn" type="button" data-notice-save>发布 / 保存</button><button class="small-btn" type="button" data-notice-reset>新建通知</button></div><div class="owner-content-list" data-notice-admin-list><div class="muted">正在读取…</div></div></section>
+    <section class="study-card owner-content-editor" style="margin-top:16px" data-resource-admin><div class="eyebrow">RESOURCE HUB</div><h3>资源导航页面</h3><p class="muted">对应 /links/ 页面，可修改标题说明并添加、排序、停用或删除入口。</p><div class="owner-content-grid study-form"><label>页面标题<input type="text" data-hub-title></label><label>副标题<input type="text" data-hub-subtitle></label><label>头像 / Logo URL<input type="url" data-hub-avatar placeholder="可留空使用 EF 标识"></label><label>底部文字<input type="text" data-hub-footer></label></div><div class="auth-actions" style="margin-top:12px"><button class="small-btn" type="button" data-hub-settings-save>保存页面设置</button></div><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><input type="hidden" data-hub-item-id><div class="owner-content-grid study-form"><label>入口名称<input type="text" data-hub-item-title placeholder="例如：做题本"></label><label>说明<input type="text" data-hub-item-subtitle placeholder="一句话说明"></label><label>链接<input type="text" data-hub-item-url placeholder="/408/ 或 https://..."></label><label>小图标文字<input type="text" maxlength="12" data-hub-item-icon value="↗"></label><label>分组<input type="text" data-hub-item-group value="常用入口"></label><label>排序<input type="number" data-hub-item-sort value="100"></label><label class="switch-check"><input type="checkbox" data-hub-item-enabled checked>启用</label></div><div class="auth-actions" style="margin-top:12px"><button class="small-btn" type="button" data-hub-item-save>添加 / 保存入口</button><button class="small-btn" type="button" data-hub-item-reset>新建入口</button></div><div class="owner-content-list" data-hub-admin-list><div class="muted">正在读取…</div></div></section>`);
   }
 
   const set=(s,v)=>{const el=$(s);if(el)el.textContent=String(v)};
+  function resetNotice(){['[data-notice-id]','[data-notice-title]','[data-notice-summary]','[data-notice-content]'].forEach(s=>{const el=$(s);if(el)el.value=''});if($('[data-notice-level]'))$('[data-notice-level]').value='info';if($('[data-notice-published]'))$('[data-notice-published]').checked=true;if($('[data-notice-pinned]'))$('[data-notice-pinned]').checked=false}
+  function resetHubItem(){['[data-hub-item-id]','[data-hub-item-title]','[data-hub-item-subtitle]','[data-hub-item-url]'].forEach(s=>{const el=$(s);if(el)el.value=''});if($('[data-hub-item-icon]'))$('[data-hub-item-icon]').value='↗';if($('[data-hub-item-group]'))$('[data-hub-item-group]').value='常用入口';if($('[data-hub-item-sort]'))$('[data-hub-item-sort]').value='100';if($('[data-hub-item-enabled]'))$('[data-hub-item-enabled]').checked=true}
 
-  function renderFallbackUsers(){
-    const table=$('[data-control-users-list]');if(!table)return;
-    table.innerHTML=fallbackProfiles.length?fallbackProfiles.map(x=>`<tr><td>${escapeHtml(x.display_name||'未命名')}</td><td class="mono">${escapeHtml(String(x.user_id).slice(0,8))}…</td><td>${x.created_at?new Date(x.created_at).toLocaleDateString('zh-CN'):'--'}</td><td>${x.last_seen_at?new Date(x.last_seen_at).toLocaleString('zh-CN',{hour12:false}):'--'}</td><td class="muted">只读</td><td>—</td></tr>`).join(''):'<tr><td colspan="6" class="muted">暂无用户数据</td></tr>';
+  async function boot(){
+    const root=$('[data-control-root]');if(!root)return;await EveraCloud.ready;const user=await EveraCloud.getUser();
+    if(!EveraCloud.enabled||!user||!(await EveraCloud.isOwner())){root.hidden=true;return}
+    root.hidden=false;const content=$('[data-control-content]');if(content)content.hidden=false;const who=$('[data-control-owner]');if(who)who.textContent=user.email||user.id;
+    ensureMembershipAdmin();ensureContentAdmin();await refresh();
   }
+
+  function renderFallbackUsers(){const table=$('[data-control-users-list]');if(!table)return;table.innerHTML=fallbackProfiles.length?fallbackProfiles.map(x=>`<tr><td>${escapeHtml(x.display_name||'未命名')}</td><td class="mono">${escapeHtml(String(x.user_id).slice(0,8))}…</td><td>${x.created_at?new Date(x.created_at).toLocaleDateString('zh-CN'):'--'}</td><td>${x.last_seen_at?new Date(x.last_seen_at).toLocaleString('zh-CN',{hour12:false}):'--'}</td><td class="muted">只读</td><td>—</td></tr>`).join(''):'<tr><td colspan="6" class="muted">暂无用户数据</td></tr>'}
 
   async function loadUsers(){
     const status=$('[data-control-edge-status]');
-    try{
-      const out=await EveraCloud.ownerUsers('list',{page:1,perPage:50});
-      if(status)status.textContent='用户管理接口正常';
-      const table=$('[data-control-users-list]');if(!table)return;
-      table.innerHTML=(out.users||[]).map(u=>{
-        const banned=u.bannedUntil&&new Date(u.bannedUntil)>new Date();
-        const protectedOwner=u.role==='owner';
-        const actions=protectedOwner?'Owner':`<button class="small-btn" type="button" data-user-action="${banned?'unban':'ban'}" data-user-id="${escapeHtml(u.id)}">${banned?'解除停用':'停用'}</button> <button class="small-btn" type="button" data-user-action="delete" data-user-id="${escapeHtml(u.id)}">删除</button>`;
-        return `<tr><td>${escapeHtml(u.email||'--')}</td><td class="mono">${escapeHtml(String(u.id).slice(0,8))}…</td><td>${u.createdAt?new Date(u.createdAt).toLocaleDateString('zh-CN'):'--'}</td><td>${u.lastSignInAt?new Date(u.lastSignInAt).toLocaleString('zh-CN',{hour12:false}):'--'}</td><td>${protectedOwner?'Owner':(banned?'已停用':'正常')}</td><td>${actions}</td></tr>`;
-      }).join('')||'<tr><td colspan="6" class="muted">暂无账户</td></tr>';
-    }catch(e){
-      if(status)status.textContent='用户管理接口暂不可用 · 当前只读';
-      renderFallbackUsers();
-    }
+    try{const out=await EveraCloud.ownerUsers('list',{page:1,perPage:50});if(status)status.textContent='用户管理接口正常';const table=$('[data-control-users-list]');if(!table)return;table.innerHTML=(out.users||[]).map(u=>{const banned=u.bannedUntil&&new Date(u.bannedUntil)>new Date(),protectedOwner=u.role==='owner';const actions=protectedOwner?'Owner':`<button class="small-btn" type="button" data-user-action="${banned?'unban':'ban'}" data-user-id="${escapeHtml(u.id)}">${banned?'解除停用':'停用'}</button> <button class="small-btn" type="button" data-user-action="delete" data-user-id="${escapeHtml(u.id)}">删除</button>`;return `<tr><td>${escapeHtml(u.email||'--')}</td><td class="mono">${escapeHtml(String(u.id).slice(0,8))}…</td><td>${u.createdAt?new Date(u.createdAt).toLocaleDateString('zh-CN'):'--'}</td><td>${u.lastSignInAt?new Date(u.lastSignInAt).toLocaleString('zh-CN',{hour12:false}):'--'}</td><td>${protectedOwner?'Owner':(banned?'已停用':'正常')}</td><td>${actions}</td></tr>`}).join('')||'<tr><td colspan="6" class="muted">暂无账户</td></tr>'}
+    catch(e){if(status)status.textContent='用户管理接口暂不可用 · 当前只读';renderFallbackUsers()}
   }
 
-  async function loadCodes(){
-    const table=$('[data-code-list]');if(!table)return;
-    try{
-      const out=await EveraCloud.membership('list-codes');
-      table.innerHTML=(out.codes||[]).map(c=>`<tr><td class="mono">${escapeHtml(c.code_hint)}</td><td>${c.plan==='pro'?'Pro':'普通会员'}</td><td>${c.used_count}/${c.max_uses}</td><td>${c.active?'可用':'已停用'}</td><td>${new Date(c.created_at).toLocaleString('zh-CN',{hour12:false})}</td><td>${c.active?`<button class="small-btn" type="button" data-code-disable="${escapeHtml(c.id)}">停用</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">暂无兑换码</td></tr>';
-    }catch(e){table.innerHTML=`<tr><td colspan="6" class="muted">兑换码接口暂不可用：${escapeHtml(e.message||String(e))}</td></tr>`}
+  async function loadCodes(){const table=$('[data-code-list]');if(!table)return;try{const out=await EveraCloud.membership('list-codes');table.innerHTML=(out.codes||[]).map(c=>`<tr><td class="mono">${escapeHtml(c.code_hint)}</td><td>${c.plan==='pro'?'Pro':'普通会员'}</td><td>${c.used_count}/${c.max_uses}</td><td>${c.active?'可用':'已停用'}</td><td>${new Date(c.created_at).toLocaleString('zh-CN',{hour12:false})}</td><td>${c.active?`<button class="small-btn" type="button" data-code-disable="${escapeHtml(c.id)}">停用</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">暂无兑换码</td></tr>'}catch(e){table.innerHTML=`<tr><td colspan="6" class="muted">兑换码接口暂不可用：${escapeHtml(e.message||String(e))}</td></tr>`}}
+
+  async function loadNotices(){
+    const list=$('[data-notice-admin-list]');if(!list)return;
+    try{noticeCache=await EveraCloud.listNotices({owner:true,limit:100});list.innerHTML=noticeCache.length?noticeCache.map(n=>`<div class="owner-content-row"><div><strong>${escapeHtml(n.title)}</strong><p>${n.published?'已发布':'草稿'} · ${n.pinned?'置顶 · ':''}${new Date(n.updated_at||n.created_at).toLocaleString('zh-CN',{hour12:false})}</p></div><div class="owner-content-actions"><button class="small-btn" data-notice-edit="${n.id}" type="button">编辑</button><button class="small-btn" data-notice-toggle="${n.id}" type="button">${n.published?'转草稿':'发布'}</button><button class="small-btn" data-notice-delete="${n.id}" type="button">删除</button></div></div>`).join(''):'<div class="muted">暂无通知</div>'}catch(e){list.innerHTML='<div class="muted">通知管理暂不可用</div>'}
   }
 
-  async function loadAudit(){
-    const table=$('[data-control-audit]');if(!table)return;
-    try{
-      const rows=await EveraCloud.getOwnerAudit();
-      table.innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.created_at).toLocaleString('zh-CN',{hour12:false})}</td><td>${escapeHtml(x.action)}</td><td class="mono">${escapeHtml(String(x.target_user_id||'').slice(0,8))}${x.target_user_id?'…':''}</td><td>${escapeHtml(x.detail?.email||x.detail?.code_hint||'')}</td></tr>`).join(''):'<tr><td colspan="4" class="muted">暂无管理操作记录</td></tr>';
-    }catch{table.innerHTML='<tr><td colspan="4" class="muted">审计日志暂不可用</td></tr>'}
+  async function loadResources(){
+    const list=$('[data-hub-admin-list]');if(!list)return;
+    try{const data=await EveraCloud.getResourceHub();resourceCache=data.items||[];const s=data.settings||{};if($('[data-hub-title]'))$('[data-hub-title]').value=s.title||'';if($('[data-hub-subtitle]'))$('[data-hub-subtitle]').value=s.subtitle||'';if($('[data-hub-avatar]'))$('[data-hub-avatar]').value=s.avatar_url||'';if($('[data-hub-footer]'))$('[data-hub-footer]').value=s.footer_note||'';list.innerHTML=resourceCache.length?resourceCache.map(x=>`<div class="owner-content-row"><div><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.group_name)} · 排序 ${x.sort_order} · ${x.enabled?'启用':'停用'} · ${escapeHtml(x.url)}</p></div><div class="owner-content-actions"><button class="small-btn" data-hub-edit="${x.id}" type="button">编辑</button><button class="small-btn" data-hub-toggle="${x.id}" type="button">${x.enabled?'停用':'启用'}</button><button class="small-btn" data-hub-delete="${x.id}" type="button">删除</button></div></div>`).join(''):'<div class="muted">暂无资源入口</div>'}catch(e){list.innerHTML='<div class="muted">资源管理暂不可用</div>'}
   }
 
-  async function refresh(){
-    const data=await EveraCloud.getOwnerOverview();
-    set('[data-control-users]',data.users);set('[data-control-focus]',data.focus);set('[data-control-courses]',data.courses);
-    fallbackProfiles=data.recent||[];
-    await Promise.all([loadUsers(),loadAudit(),loadCodes()]);
-    try{
-      const r=await fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'}),o=await r.json();
-      const sub=o.subjects||{};
-      ['ds','co','os','cn'].forEach(k=>set(`[data-control-${k}]`,(sub[k]?.items||[]).length));
-      set('[data-control-oxygen-time]',o.updatedAt?new Date(o.updatedAt).toLocaleString('zh-CN',{hour12:false}):'--');
-    }catch{}
+  async function loadAudit(){const table=$('[data-control-audit]');if(!table)return;try{const rows=await EveraCloud.getOwnerAudit();table.innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.created_at).toLocaleString('zh-CN',{hour12:false})}</td><td>${escapeHtml(x.action)}</td><td class="mono">${escapeHtml(String(x.target_user_id||'').slice(0,8))}${x.target_user_id?'…':''}</td><td>${escapeHtml(x.detail?.email||x.detail?.code_hint||'')}</td></tr>`).join(''):'<tr><td colspan="4" class="muted">暂无管理操作记录</td></tr>'}catch{table.innerHTML='<tr><td colspan="4" class="muted">审计日志暂不可用</td></tr>'}}
+
+  async function refresh(){const data=await EveraCloud.getOwnerOverview();set('[data-control-users]',data.users);set('[data-control-focus]',data.focus);set('[data-control-courses]',data.courses);fallbackProfiles=data.recent||[];await Promise.all([loadUsers(),loadAudit(),loadCodes(),loadNotices(),loadResources()]);try{const r=await fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'}),o=await r.json(),sub=o.subjects||{};['ds','co','os','cn'].forEach(k=>set(`[data-control-${k}]`,(sub[k]?.items||[]).length));set('[data-control-oxygen-time]',o.updatedAt?new Date(o.updatedAt).toLocaleString('zh-CN',{hour12:false}):'--')}catch{}}
+
+  async function saveNotice(btn){
+    ui().setBusy?.(btn,true,'保存中…');
+    try{await EveraCloud.saveNotice({id:$('[data-notice-id]')?.value||undefined,title:$('[data-notice-title]')?.value,summary:$('[data-notice-summary]')?.value,content:$('[data-notice-content]')?.value,level:$('[data-notice-level]')?.value,published:$('[data-notice-published]')?.checked,pinned:$('[data-notice-pinned]')?.checked});ui().toast?.('通知已经保存。',{type:'success',title:'发布成功'});resetNotice();await loadNotices()}catch(e){ui().toast?.(e.message||'保存失败',{type:'error',title:'通知未保存'})}finally{ui().setBusy?.(btn,false)}
   }
+  async function saveHubItem(btn){ui().setBusy?.(btn,true,'保存中…');try{await EveraCloud.saveResourceItem({id:$('[data-hub-item-id]')?.value||undefined,title:$('[data-hub-item-title]')?.value,subtitle:$('[data-hub-item-subtitle]')?.value,url:$('[data-hub-item-url]')?.value,icon:$('[data-hub-item-icon]')?.value,group_name:$('[data-hub-item-group]')?.value,sort_order:$('[data-hub-item-sort]')?.value,enabled:$('[data-hub-item-enabled]')?.checked});ui().toast?.('资源入口已保存。',{type:'success'});resetHubItem();await loadResources()}catch(e){ui().toast?.(e.message||'保存失败',{type:'error'})}finally{ui().setBusy?.(btn,false)}}
 
   document.addEventListener('click',async e=>{
-    const createBtn=e.target.closest('[data-code-create]');
-    if(createBtn){
-      createBtn.disabled=true;
-      try{
-        const plan=$('[data-code-plan]')?.value||'member',maxUses=Number($('[data-code-uses]')?.value)||1,note=$('[data-code-note]')?.value||'';
-        const out=await EveraCloud.membership('create-code',{plan,maxUses,note});
-        const box=$('[data-code-created]');if(box){box.hidden=false;box.innerHTML=`新兑换码：<strong class="mono">${escapeHtml(out.code)}</strong>　请现在复制保存，之后后台只显示提示片段。`}
-        await Promise.all([loadCodes(),loadAudit()]);
-      }catch(err){alert('生成失败：'+(err.message||String(err)))}finally{createBtn.disabled=false}
-      return;
-    }
-    const disableBtn=e.target.closest('[data-code-disable]');
-    if(disableBtn){
-      if(!confirm('停用这个兑换码？已兑换的会员不会被取消。'))return;
-      disableBtn.disabled=true;
-      try{await EveraCloud.membership('disable-code',{codeId:disableBtn.dataset.codeDisable});await Promise.all([loadCodes(),loadAudit()])}catch(err){alert('停用失败：'+(err.message||String(err)))}finally{disableBtn.disabled=false}
-      return;
-    }
-    const btn=e.target.closest('[data-user-action]');if(!btn)return;
-    const action=btn.dataset.userAction,userId=btn.dataset.userId;
-    const text=action==='delete'?'永久删除这个账户及其云端学习数据？此操作不可撤销。':action==='ban'?'停用这个账户？':'解除该账户的停用状态？';
-    if(!confirm(text))return;
-    btn.disabled=true;
-    try{await EveraCloud.ownerUsers(action,{userId});await refresh()}catch(err){alert('操作失败：'+(err.message||String(err)))}finally{btn.disabled=false}
+    const target=e.target;
+    if(target.closest('[data-notice-save]')){await saveNotice(target.closest('[data-notice-save]'));return}
+    if(target.closest('[data-notice-reset]')){resetNotice();return}
+    const noticeEdit=target.closest('[data-notice-edit]');if(noticeEdit){const n=noticeCache.find(x=>x.id===noticeEdit.dataset.noticeEdit);if(n){$('[data-notice-id]').value=n.id;$('[data-notice-title]').value=n.title;$('[data-notice-summary]').value=n.summary||'';$('[data-notice-content]').value=n.content||'';$('[data-notice-level]').value=n.level||'info';$('[data-notice-published]').checked=Boolean(n.published);$('[data-notice-pinned]').checked=Boolean(n.pinned);$('[data-content-admin]').scrollIntoView({behavior:'smooth',block:'start'})}return}
+    const noticeToggle=target.closest('[data-notice-toggle]');if(noticeToggle){const n=noticeCache.find(x=>x.id===noticeToggle.dataset.noticeToggle);if(n){await EveraCloud.saveNotice({...n,published:!n.published});await loadNotices();ui().toast?.(!n.published?'通知已发布。':'通知已转为草稿。',{type:'success'})}return}
+    const noticeDelete=target.closest('[data-notice-delete]');if(noticeDelete){if(confirm('删除这条通知？')){await EveraCloud.deleteNotice(noticeDelete.dataset.noticeDelete);await loadNotices();ui().toast?.('通知已删除。',{type:'success'})}return}
+    if(target.closest('[data-hub-settings-save]')){const btn=target.closest('[data-hub-settings-save]');ui().setBusy?.(btn,true,'保存中…');try{await EveraCloud.saveResourceSettings({title:$('[data-hub-title]')?.value,subtitle:$('[data-hub-subtitle]')?.value,avatar_url:$('[data-hub-avatar]')?.value,footer_note:$('[data-hub-footer]')?.value});ui().toast?.('资源页面设置已保存。',{type:'success'})}catch(err){ui().toast?.(err.message||'保存失败',{type:'error'})}finally{ui().setBusy?.(btn,false)}return}
+    if(target.closest('[data-hub-item-save]')){await saveHubItem(target.closest('[data-hub-item-save]'));return}
+    if(target.closest('[data-hub-item-reset]')){resetHubItem();return}
+    const hubEdit=target.closest('[data-hub-edit]');if(hubEdit){const x=resourceCache.find(r=>r.id===hubEdit.dataset.hubEdit);if(x){$('[data-hub-item-id]').value=x.id;$('[data-hub-item-title]').value=x.title;$('[data-hub-item-subtitle]').value=x.subtitle||'';$('[data-hub-item-url]').value=x.url;$('[data-hub-item-icon]').value=x.icon||'↗';$('[data-hub-item-group]').value=x.group_name||'常用入口';$('[data-hub-item-sort]').value=x.sort_order||100;$('[data-hub-item-enabled]').checked=Boolean(x.enabled);$('[data-resource-admin]').scrollIntoView({behavior:'smooth',block:'start'})}return}
+    const hubToggle=target.closest('[data-hub-toggle]');if(hubToggle){const x=resourceCache.find(r=>r.id===hubToggle.dataset.hubToggle);if(x){await EveraCloud.saveResourceItem({...x,enabled:!x.enabled});await loadResources();ui().toast?.(!x.enabled?'入口已启用。':'入口已停用。',{type:'success'})}return}
+    const hubDelete=target.closest('[data-hub-delete]');if(hubDelete){if(confirm('删除这个资源入口？')){await EveraCloud.deleteResourceItem(hubDelete.dataset.hubDelete);await loadResources();ui().toast?.('资源入口已删除。',{type:'success'})}return}
+
+    const createBtn=target.closest('[data-code-create]');if(createBtn){createBtn.disabled=true;try{const plan=$('[data-code-plan]')?.value||'member',maxUses=Number($('[data-code-uses]')?.value)||1,note=$('[data-code-note]')?.value||'';const out=await EveraCloud.membership('create-code',{plan,maxUses,note});const box=$('[data-code-created]');if(box){box.hidden=false;box.innerHTML=`新兑换码：<strong class="mono">${escapeHtml(out.code)}</strong>　请现在复制保存，之后后台只显示提示片段。`}await Promise.all([loadCodes(),loadAudit()])}catch(err){alert('生成失败：'+(err.message||String(err)))}finally{createBtn.disabled=false}return}
+    const disableBtn=target.closest('[data-code-disable]');if(disableBtn){if(!confirm('停用这个兑换码？已兑换的会员不会被取消。'))return;disableBtn.disabled=true;try{await EveraCloud.membership('disable-code',{codeId:disableBtn.dataset.codeDisable});await Promise.all([loadCodes(),loadAudit()])}catch(err){alert('停用失败：'+(err.message||String(err)))}finally{disableBtn.disabled=false}return}
+    const btn=target.closest('[data-user-action]');if(!btn)return;const action=btn.dataset.userAction,userId=btn.dataset.userId,text=action==='delete'?'永久删除这个账户及其云端学习数据？此操作不可撤销。':action==='ban'?'停用这个账户？':'解除该账户的停用状态？';if(!confirm(text))return;btn.disabled=true;try{await EveraCloud.ownerUsers(action,{userId});await refresh()}catch(err){alert('操作失败：'+(err.message||String(err)))}finally{btn.disabled=false}
   });
-  $('[data-control-refresh]')?.addEventListener('click',()=>refresh().catch(console.error));
-  document.addEventListener('everflow:auth-change',()=>boot().catch(console.error));
-  boot().catch(err=>{console.error(err);const root=$('[data-control-root]');if(root)root.hidden=true});
+  $('[data-control-refresh]')?.addEventListener('click',()=>refresh().catch(console.error));document.addEventListener('everflow:auth-change',()=>boot().catch(console.error));boot().catch(err=>{console.error(err);const root=$('[data-control-root]');if(root)root.hidden=true});
 })();
