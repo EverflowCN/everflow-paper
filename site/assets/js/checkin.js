@@ -4,14 +4,38 @@
   const LEGACY={ds:'408_checkin_ds',co:'408_checkin_co'};
   const REFRESH_MS=2*60*1000;
   let data=null,state={},active='ds',lastVersion='';
+  const noteTimers=new Map();
 
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const nowIso=()=>new Date().toISOString();
 
   function loadState(){try{state=JSON.parse(localStorage.getItem(STATE_KEY)||'{}')||{}}catch{state={}}}
   function saveState(){localStorage.setItem(STATE_KEY,JSON.stringify(state))}
-  function ensure(id){return state[id]||(state[id]={done:false,note:''})}
+  function ensure(id){return state[id]||(state[id]={done:false,note:'',updatedAt:''})}
+
+  async function hydrateFromStudyStore(){
+    if(!window.EveraStore)return;
+    try{
+      await EveraStore.init();
+      const rows=await EveraStore.listCourseStates();
+      let changed=false;
+      rows.forEach(r=>{
+        const local=state[r.id];
+        if(!local){state[r.id]={done:Boolean(r.done),note:String(r.note||''),updatedAt:r.updatedAt||''};changed=true;return}
+        if(local.updatedAt&&r.updatedAt&&String(r.updatedAt)>String(local.updatedAt)){
+          state[r.id]={done:Boolean(r.done),note:String(r.note||''),updatedAt:r.updatedAt};changed=true;
+        }
+      });
+      if(changed)saveState();
+    }catch(e){console.warn('study-store hydrate failed',e)}
+  }
+
+  function mirrorCourse(id,subject){
+    const st=ensure(id);
+    window.EveraStore?.putCourseState({id,subject,done:st.done,note:st.note}).catch?.(()=>{});
+  }
 
   function migrateLegacy(){
     let changed=false;
@@ -25,13 +49,20 @@
           old.forEach((v,i)=>{
             const item=items[i];if(!item)return;
             if(!state[item.id]){
-              state[item.id]={done:Boolean(v),note:Array.isArray(notes)?String(notes[i]||''):''};changed=true;
+              state[item.id]={done:Boolean(v),note:Array.isArray(notes)?String(notes[i]||''):'',updatedAt:nowIso()};changed=true;
             }
           });
         }
       }catch{}
     }
     if(changed)saveState();
+  }
+
+  function mirrorKnownStates(){
+    if(!window.EveraStore||!data)return;
+    SUBJECTS.forEach(key=>(data.subjects?.[key]?.items||[]).forEach(item=>{
+      if(state[item.id])mirrorCourse(item.id,key);
+    }));
   }
 
   function stats(){
@@ -114,7 +145,7 @@
       if(!initial&&document.activeElement?.matches?.('.note-input'))return;
       data=next;lastVersion=version;
       if(initial)migrateLegacy();
-      render();
+      render();mirrorKnownStates();
     }catch(err){
       console.error(err);
       if(initial)$('[data-checkin-root]').innerHTML='<div class="empty-state">强化表加载失败，请稍后刷新。</div>';
@@ -124,22 +155,26 @@
   document.addEventListener('click',e=>{
     const tab=e.target.closest('[data-tab]');if(tab){switchTab(tab.dataset.tab);return}
     const all=e.target.closest('[data-all]');if(all){
-      const key=all.dataset.all,val=all.dataset.val==='1';
-      (data.subjects?.[key]?.items||[]).forEach(i=>ensure(i.id).done=val);
+      const key=all.dataset.all,val=all.dataset.val==='1',stamp=nowIso();
+      (data.subjects?.[key]?.items||[]).forEach(i=>{const st=ensure(i.id);st.done=val;st.updatedAt=stamp;mirrorCourse(i.id,key)});
       saveState();renderSubject(key);stats();return;
     }
   });
   document.addEventListener('change',e=>{
     if(e.target.matches('[data-check]')){
-      const id=e.target.dataset.check;ensure(id).done=e.target.checked;saveState();
+      const id=e.target.dataset.check,st=ensure(id);st.done=e.target.checked;st.updatedAt=nowIso();saveState();mirrorCourse(id,active);
       e.target.closest('tr')?.classList.toggle('done',e.target.checked);stats();
     }
   });
   document.addEventListener('input',e=>{
-    if(e.target.matches('[data-note]')){ensure(e.target.dataset.note).note=e.target.value;saveState()}
+    if(e.target.matches('[data-note]')){
+      const id=e.target.dataset.note,st=ensure(id);st.note=e.target.value;st.updatedAt=nowIso();saveState();
+      clearTimeout(noteTimers.get(id));noteTimers.set(id,setTimeout(()=>mirrorCourse(id,active),450));
+    }
   });
 
-  loadState();
-  refreshData(true);
-  setInterval(()=>refreshData(false),REFRESH_MS);
+  async function boot(){
+    loadState();await hydrateFromStudyStore();await refreshData(true);setInterval(()=>refreshData(false),REFRESH_MS);
+  }
+  boot();
 })();
