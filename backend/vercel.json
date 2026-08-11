@@ -7,7 +7,7 @@
         { "key": "Access-Control-Allow-Origin", "value": "https://evera.top" },
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Methods", "value": "GET,POST,DELETE,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Authorization, Content-Type" },
+        { "key": "Access-Control-Allow-Headers", "value": "Authorization, Content-Type, X-Everflow-Device" },
         { "key": "Access-Control-Max-Age", "value": "86400" }
       ]
     }
