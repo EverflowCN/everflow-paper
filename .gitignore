@@ -1,0 +1,8 @@
+# Local / generated files
+.DS_Store
+Thumbs.db
+*.log
+*.aux
+*.out
+*.toc
+*.synctex.gz
