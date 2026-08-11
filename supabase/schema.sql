@@ -1,0 +1,127 @@
+-- Everflow Study v1 / Supabase schema
+-- Run this once in Supabase SQL Editor after creating the free project.
+-- Browser code must use ONLY the Publishable key. Never put a Secret/service-role key in site/.
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  display_name text,
+  created_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now()
+);
+
+create table if not exists public.focus_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  subject text not null default 'general' check (subject in ('ds','co','os','cn','general')),
+  started_at timestamptz not null,
+  ended_at timestamptz not null,
+  duration_seconds integer not null check (duration_seconds >= 0 and duration_seconds <= 86400),
+  note text not null default '',
+  device_id text not null default '',
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.course_states (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  course_id text not null,
+  subject text not null default 'unknown',
+  done boolean not null default false,
+  note text not null default '',
+  completed_at timestamptz,
+  device_id text not null default '',
+  updated_at timestamptz not null default now(),
+  primary key (user_id, course_id)
+);
+
+create index if not exists idx_focus_sessions_user on public.focus_sessions(user_id);
+create index if not exists idx_focus_sessions_user_end on public.focus_sessions(user_id, ended_at desc);
+create index if not exists idx_course_states_user on public.course_states(user_id);
+create index if not exists idx_course_states_user_updated on public.course_states(user_id, updated_at desc);
+create index if not exists idx_profiles_last_seen on public.profiles(last_seen_at desc);
+
+alter table public.profiles enable row level security;
+alter table public.focus_sessions enable row level security;
+alter table public.course_states enable row level security;
+
+-- Authorization role is stored in auth.users.raw_app_meta_data, not user-editable metadata.
+-- The owner account should have app_metadata.role = 'owner'.
+
+create or replace function public.is_everflow_owner()
+returns boolean
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'owner', false)
+$$;
+
+-- profiles
+create policy "profiles_select_own_or_owner"
+on public.profiles for select
+to authenticated
+using ((select auth.uid()) = user_id or (select public.is_everflow_owner()));
+
+create policy "profiles_insert_own"
+on public.profiles for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+create policy "profiles_update_own"
+on public.profiles for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+-- focus sessions
+create policy "focus_select_own_or_owner"
+on public.focus_sessions for select
+to authenticated
+using ((select auth.uid()) = user_id or (select public.is_everflow_owner()));
+
+create policy "focus_insert_own"
+on public.focus_sessions for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+create policy "focus_update_own"
+on public.focus_sessions for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+create policy "focus_delete_own"
+on public.focus_sessions for delete
+to authenticated
+using ((select auth.uid()) = user_id);
+
+-- course states
+create policy "courses_select_own_or_owner"
+on public.course_states for select
+to authenticated
+using ((select auth.uid()) = user_id or (select public.is_everflow_owner()));
+
+create policy "courses_insert_own"
+on public.course_states for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+create policy "courses_update_own"
+on public.course_states for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+create policy "courses_delete_own"
+on public.course_states for delete
+to authenticated
+using ((select auth.uid()) = user_id);
+
+-- ONE-TIME OWNER SETUP (run manually after registering your owner account):
+-- Replace the email below, then execute ONLY this UPDATE in Supabase SQL Editor.
+-- update auth.users
+-- set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"owner"}'::jsonb
+-- where email = 'YOUR_OWNER_EMAIL@example.com';
+-- Sign out and sign back in afterwards so the JWT gets the new app_metadata claim.
