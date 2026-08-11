@@ -25,6 +25,15 @@
       .evera-toast strong{display:block;font-size:14px;line-height:1.35}.evera-toast p{margin:3px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.evera-toast-x{border:0;background:transparent;color:var(--muted);width:28px;height:28px;border-radius:999px;cursor:pointer}.evera-toast-x:active{transform:scale(.9)}
       .is-busy{position:relative;cursor:wait!important}.is-busy:before{content:'';width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:-2px;animation:everaSpin .7s linear infinite}
       @keyframes everaSpin{to{transform:rotate(360deg)}}@keyframes everaToastIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+      @media(min-width:761px) and (max-width:900px){
+        .topbar .links{display:none!important}
+        .topbar .menu-btn{display:grid!important;margin-left:auto}
+        .mobile-panel{position:fixed;inset:calc(70px + env(safe-area-inset-top)) 0 auto 0;z-index:45;max-height:calc(100dvh - 70px - env(safe-area-inset-top));overflow:auto;padding:10px 16px calc(18px + env(safe-area-inset-bottom));background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 18px 42px rgba(0,0,0,.10)}
+        .mobile-panel.open{display:grid!important}
+        .mobile-panel a{min-height:46px;display:flex;align-items:center;padding:10px;border-bottom:1px solid var(--line);border-radius:10px}
+        .mobile-panel .icon-btn{margin-top:10px}
+        body.menu-open{overflow:hidden}
+      }
       @media(max-width:760px){.evera-toast-stack{bottom:calc(16px + env(safe-area-inset-bottom))}}
     `;
     document.head.appendChild(style);
@@ -53,29 +62,38 @@
   };
   window.EveraUI={toast,setBusy,complete};
 
-  // Merge “专注/统计” into one navigation item and rename the old article entry.
-  const normalizeNav=container=>{
+  // Navigation is rebuilt from one canonical definition so legacy page markup,
+  // deleted features and duplicate links cannot leak back into the header.
+  const pathNow=location.pathname.replace(/\/{2,}/g,'/');
+  const navItems=[
+    {href:'/',label:'首页',active:p=>p==='/'},
+    {href:'/408/',label:'408强化',active:p=>p.startsWith('/408/')},
+    {href:'/links/',label:'资源',active:p=>p.startsWith('/links/')},
+    {href:'/archive/',label:'通知通告',active:p=>p.startsWith('/archive/')||p.startsWith('/notice/')||p.startsWith('/post/')},
+    {href:'/account/',label:'账户',active:p=>p.startsWith('/account/')}
+  ];
+  const rebuildNav=container=>{
     if(!container)return;
-    const anchors=[...container.querySelectorAll('a')];
-    anchors.filter(a=>new URL(a.href,location.href).pathname.replace(/\/+$/,'')==='/stats').forEach(a=>a.remove());
-    const focus=[...container.querySelectorAll('a')].find(a=>new URL(a.href,location.href).pathname.replace(/\/+$/,'')==='/focus');
-    if(focus)focus.textContent='专注统计';
-    const archive=[...container.querySelectorAll('a')].find(a=>new URL(a.href,location.href).pathname.replace(/\/+$/,'')==='/archive');
-    if(archive)archive.textContent='通知通告';
-    if(archive&&!container.querySelector('[data-resources-nav]')){
-      const link=document.createElement('a');link.href='/links/';link.textContent='资源';link.dataset.resourcesNav='1';
-      if(location.pathname.startsWith('/links/'))link.classList.add('active');
-      archive.before(link);
-    }
+    const theme=container.querySelector('[data-theme]');
+    const frag=document.createDocumentFragment();
+    navItems.forEach(item=>{
+      const a=document.createElement('a');a.href=item.href;a.textContent=item.label;
+      if(item.active(pathNow))a.classList.add('active');
+      frag.appendChild(a);
+    });
+    if(theme)frag.appendChild(theme);
+    container.replaceChildren(frag);
   };
-  normalizeNav(document.querySelector('.links'));normalizeNav(document.querySelector('.mobile-panel'));
+  rebuildNav(document.querySelector('.links'));
+  rebuildNav(document.querySelector('.mobile-panel'));
 
   const membershipHidden=()=>localStorage.getItem('everflow-membership-nav-hidden-v1')==='1';
-  const accountAnchor=container=>[...(container?.querySelectorAll('a')||[])].find(a=>a.textContent.trim()==='账户');
+  const normalizedPath=a=>{try{return new URL(a.href,location.href).pathname.replace(/\/+$/,'')||'/'}catch{return''}};
+  const accountAnchor=container=>[...(container?.querySelectorAll('a')||[])].find(a=>normalizedPath(a)==='/account');
   const addMembershipEntry=container=>{
     const account=accountAnchor(container);if(!account||container.querySelector('.membership-nav-entry'))return;
     const wrap=document.createElement('span');wrap.className='membership-nav-entry'+(membershipHidden()?' is-hidden':'');
-    const link=document.createElement('a');link.href='/membership/';link.textContent='购买会员';if(location.pathname.startsWith('/membership/'))link.classList.add('active');
+    const link=document.createElement('a');link.href='/membership/';link.textContent='购买会员';if(pathNow.startsWith('/membership/'))link.classList.add('active');
     const close=document.createElement('button');close.type='button';close.className='membership-nav-close';close.setAttribute('aria-label','关闭购买会员入口');close.setAttribute('title','关闭');close.textContent='×';
     close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(x=>x.classList.add('is-hidden'))});
     wrap.append(link,close);account.before(wrap);
@@ -90,5 +108,5 @@
   menu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMenu(false)));
   document.addEventListener('click',e=>{if(menu?.classList.contains('open')&&!menu.contains(e.target)&&!e.target.closest('[data-menu]'))setMenu(false)});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
-  window.addEventListener('resize',()=>{if(window.innerWidth>760)setMenu(false)},{passive:true});
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
 })();
