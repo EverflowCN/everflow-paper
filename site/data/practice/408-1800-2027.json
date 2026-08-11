@@ -1,0 +1,18 @@
+{
+  "practiceId": "408-1800-2027-reinforcement",
+  "title": "《1800题》强化必刷",
+  "edition": "2027",
+  "category": "408",
+  "status": "structuring",
+  "source": {
+    "title": "学不完的408人有救了！《1800题》强化必刷题汇总！",
+    "note": "仅整理章节与必刷题号，不转载原题正文。"
+  },
+  "subjects": {
+    "ds": {"short": "DS", "label": "数据结构", "items": []},
+    "co": {"short": "CO", "label": "计算机组成原理", "items": []},
+    "os": {"short": "OS", "label": "操作系统", "items": []},
+    "cn": {"short": "CN", "label": "计算机网络", "items": []}
+  },
+  "updatedAt": "2026-08-12T02:05:00+08:00"
+}
