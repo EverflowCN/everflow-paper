@@ -41,6 +41,37 @@
     }).join('')||'<div class="muted">开始记录专注后，这里会显示四科时间占比。</div>';
   }
 
+  function renderDurationDonut(summary){
+    const donut=$('[data-duration-donut]'),legend=$('[data-duration-legend]');
+    if(!donut||!legend)return;
+    const buckets=[
+      {label:'≤ 25 分钟',color:'var(--red)',count:0},
+      {label:'26–50 分钟',color:'var(--orange)',count:0},
+      {label:'51–90 分钟',color:'var(--purple)',count:0},
+      {label:'> 90 分钟',color:'var(--cyan)',count:0}
+    ];
+    summary.focus.forEach(s=>{
+      const m=(Number(s.durationSeconds)||0)/60;
+      if(m<=25)buckets[0].count++;
+      else if(m<=50)buckets[1].count++;
+      else if(m<=90)buckets[2].count++;
+      else buckets[3].count++;
+    });
+    const total=buckets.reduce((a,b)=>a+b.count,0);
+    let acc=0;const parts=[];
+    buckets.forEach(b=>{
+      if(!b.count)return;
+      const from=acc/Math.max(1,total)*100;acc+=b.count;const to=acc/Math.max(1,total)*100;
+      parts.push(`${b.color} ${from}% ${to}%`);
+    });
+    donut.style.background=parts.length?`conic-gradient(${parts.join(',')})`:'var(--soft)';
+    $('[data-duration-total]').textContent=String(total);
+    legend.innerHTML=buckets.filter(b=>b.count>0).map(b=>{
+      const p=total?Math.round(b.count/total*100):0;
+      return `<div class="legend-row" style="--legend:${b.color}"><span>${b.label}</span><strong>${b.count} 次 · ${p}%</strong></div>`;
+    }).join('')||'<div class="muted">还没有专注记录。</div>';
+  }
+
   function renderTrend(summary){
     const el=$('[data-trend]');if(!el)return;
     const days=[];let max=0;
@@ -52,6 +83,7 @@
   }
 
   function renderMetrics(s){
+    const avg=s.focus.length?s.totalSeconds/s.focus.length:0;
     const map={
       '[data-stat-today]':fmtDuration(s.todaySeconds),
       '[data-stat-week]':fmtDuration(s.weekSeconds),
@@ -59,6 +91,7 @@
       '[data-stat-longest]':fmtDuration(s.longestSeconds),
       '[data-stat-total]':fmtDuration(s.totalSeconds),
       '[data-stat-sessions]':String(s.focus.length),
+      '[data-stat-average]':fmtDuration(avg),
       '[data-stat-courses]':String(s.completedCourses)
     };
     Object.entries(map).forEach(([sel,val])=>{const el=$(sel);if(el)el.textContent=val});
@@ -67,7 +100,7 @@
   async function render(){
     await EveraStore.init();
     const s=await EveraStore.getSummary();
-    renderMetrics(s);renderHeatmap(s);renderDonut(s);renderTrend(s);
+    renderMetrics(s);renderHeatmap(s);renderDonut(s);renderDurationDonut(s);renderTrend(s);
     const updated=$('[data-stats-updated]');if(updated)updated.textContent='本地统计 · '+new Date().toLocaleString('zh-CN',{hour12:false});
   }
 
