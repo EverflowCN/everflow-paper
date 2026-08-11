@@ -15,7 +15,7 @@ async function init(){
 
 async function getUser(){await ready;if(!client)return null;const {data,error}=await client.auth.getUser();if(error)return null;return data.user||null}
 async function requireOwner(){const user=await getUser();if(!client||!user||user.app_metadata?.role!=='owner')throw new Error('owner_required');return user}
-const ensure=(res)=>{if(res?.error)throw res.error;return res?.data??null};
+const ensure=res=>{if(res?.error)throw res.error;return res?.data??null};
 const nowIso=()=>new Date().toISOString();
 
 async function ownerUsers(action='list',payload={}){
@@ -31,17 +31,21 @@ async function membership(action='status',payload={}){
 
 async function snapshot(){
   await requireOwner();
-  const [profiles,focus,courses,memberships,notices,resources,audit]=await Promise.all([
+  const [profiles,memberships,notices,resources,audit]=await Promise.all([
     client.from('profiles').select('user_id,display_name,created_at,last_seen_at').order('last_seen_at',{ascending:false}).limit(1000),
-    client.from('focus_sessions').select('id,user_id,subject,duration_seconds,started_at,ended_at,note').order('ended_at',{ascending:false}).limit(5000),
-    client.from('course_states').select('user_id,course_id,subject,done,completed_at,updated_at').order('updated_at',{ascending:false}).limit(5000),
-    client.from('memberships').select('user_id,plan,status,source,started_at,expires_at,updated_at').limit(1000),
+    client.from('memberships').select('user_id,plan,status,source,starts_at,expires_at,updated_at').limit(1000),
     client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').order('pinned',{ascending:false}).order('updated_at',{ascending:false}).limit(200),
     client.from('resource_hub_items').select('id,title,subtitle,url,icon,group_name,sort_order,enabled,created_at,updated_at').order('sort_order',{ascending:true}).limit(300),
     client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(100)
   ]);
-  [profiles,focus,courses,memberships,notices,resources,audit].forEach(ensure);
-  return {profiles:profiles.data||[],focus:focus.data||[],courses:courses.data||[],memberships:memberships.data||[],notices:notices.data||[],resources:resources.data||[],audit:audit.data||[]};
+  [profiles,memberships,notices,resources,audit].forEach(ensure);
+  return {profiles:profiles.data||[],memberships:memberships.data||[],notices:notices.data||[],resources:resources.data||[],audit:audit.data||[]};
+}
+
+function membershipActive(row,cfg){
+  if(!row||row.status!=='active')return false;
+  const expiry=row.expires_at||(row.source==='promo_exam_2027'?cfg?.pro_free_until:null);
+  return !expiry||new Date(expiry)>new Date();
 }
 
 async function dashboard(){
@@ -49,25 +53,18 @@ async function dashboard(){
     ownerUsers('list',{page:1,perPage:100}),snapshot(),membership('list-codes'),getMembershipConfig(),getResourceSettings()
   ]);
   const now=Date.now(),week=7*864e5;
-  const totalSeconds=snap.focus.reduce((a,x)=>a+(Number(x.duration_seconds)||0),0);
-  const active7d=new Set(snap.focus.filter(x=>now-new Date(x.ended_at).getTime()<=week).map(x=>x.user_id)).size;
-  const activeMemberships=snap.memberships.filter(x=>x.status==='active'&&(!x.expires_at||new Date(x.expires_at)>new Date())).length;
+  const active7d=new Set(snap.profiles.filter(x=>x.last_seen_at&&now-new Date(x.last_seen_at).getTime()<=week).map(x=>x.user_id)).size;
+  const activeMemberships=snap.memberships.filter(x=>membershipActive(x,config)).length;
   const publishedNotices=snap.notices.filter(x=>x.published).length;
   const enabledResources=snap.resources.filter(x=>x.enabled).length;
   const activeCodes=(codes.codes||[]).filter(x=>x.active).length;
-  return {users:users.users||[],snap,codes:codes.codes||[],config,hub,metrics:{userCount:(users.users||[]).length,totalSeconds,focusCount:snap.focus.length,courseCount:snap.courses.length,active7d,activeMemberships,publishedNotices,enabledResources,activeCodes}};
+  return {users:users.users||[],snap,codes:codes.codes||[],config,hub,metrics:{userCount:(users.users||[]).length,active7d,activeMemberships,publishedNotices,enabledResources,activeCodes}};
 }
 
 async function getMembershipConfig(){await requireOwner();const {data,error}=await client.from('membership_config').select('id,pro_free_claim_enabled,pro_free_until,promo_title,promo_copy,updated_at').eq('id','default').single();if(error)throw error;return data}
 async function saveMembershipConfig(input={}){
   await requireOwner();
-  const row={
-    pro_free_claim_enabled:Boolean(input.pro_free_claim_enabled),
-    pro_free_until:input.pro_free_until||null,
-    promo_title:String(input.promo_title||'').trim(),
-    promo_copy:String(input.promo_copy||'').trim(),
-    updated_at:nowIso()
-  };
+  const row={pro_free_claim_enabled:Boolean(input.pro_free_claim_enabled),pro_free_until:input.pro_free_until||null,promo_title:String(input.promo_title||'').trim(),promo_copy:String(input.promo_copy||'').trim(),updated_at:nowIso()};
   const {data,error}=await client.from('membership_config').update(row).eq('id','default').select().single();if(error)throw error;return data;
 }
 
