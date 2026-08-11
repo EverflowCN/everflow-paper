@@ -1,11 +1,1 @@
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const sidebar=$('.sidebar');
-$('.mobile-menu')?.addEventListener('click',()=>sidebar.classList.toggle('open'));
-$('.theme-toggle')?.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('everflow-theme',document.body.classList.contains('dark')?'dark':'light')});
-if(localStorage.getItem('everflow-theme')==='dark')document.body.classList.add('dark');
-const panel=$('.search-panel'), input=$('#search-input'), results=$('#search-results');
-$('.search-open')?.addEventListener('click',()=>{panel.classList.add('open');setTimeout(()=>input.focus(),30)});
-panel?.addEventListener('click',e=>{if(e.target===panel)panel.classList.remove('open')});
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();panel.classList.add('open');input.focus()}if(e.key==='Escape')panel?.classList.remove('open')});
-const SITE_ROOT=new URL('../../',document.currentScript.src); let index=[]; fetch(new URL('assets/search.json',SITE_ROOT)).then(r=>r.json()).then(d=>index=d).catch(()=>{});
-input?.addEventListener('input',()=>{const q=input.value.trim().toLowerCase();if(!q){results.innerHTML='';return}results.innerHTML=index.filter(x=>(x.title+' '+x.text).toLowerCase().includes(q)).slice(0,8).map(x=>`<a class="result" href="${new URL(x.url.replace(/^\//,''),SITE_ROOT).href}"><b>${x.title}</b><br><small>${x.text.slice(0,90)}...</small></a>`).join('')||'<div class="result">没有匹配结果</div>'});
+(()=>{const body=document.body;const saved=localStorage.getItem('everflow-theme');if(saved==='dark')body.classList.add('dark');document.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>{body.classList.toggle('dark');localStorage.setItem('everflow-theme',body.classList.contains('dark')?'dark':'light')}));const menu=document.querySelector('.mobile-panel');document.querySelectorAll('[data-menu]').forEach(btn=>btn.addEventListener('click',()=>menu&&menu.classList.toggle('open')));})();

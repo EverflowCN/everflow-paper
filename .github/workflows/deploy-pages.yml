@@ -1,9 +1,8 @@
-name: Deploy Everflow Docs to GitHub Pages
+name: Deploy Everflow Blog to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'site/**'
       - '.github/workflows/deploy-pages.yml'
@@ -27,15 +26,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

@@ -1,10 +1,8 @@
-# Everflow Docs Website
+# Everflow · 彼时流年若水
 
-这是 Everflow · 彼时流年若水 
+个人博客静态站点。
 
-- `docs/`：Markdown 源文件
-- `site/`：已生成的网站
-- `site/assets/`：Logo、PDF 实际页面预览、CSS 与 JS
+- `site/`：GitHub Pages 发布目录
+- `.github/workflows/deploy-pages.yml`：自动部署
 
-
-- `DEPLOY.md`：GitHub Pages 部署说明
+当前站点仅保留个人博客内容，不再包含原有做题本、考试排版或文档系统页面。
