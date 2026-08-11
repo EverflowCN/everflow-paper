@@ -1,1 +1,572 @@
-{"schema":2,"updatedAt":"2026-08-11T16:51:00+08:00","source":{"up":"就是氧气11","mid":378777885,"collection":"27考研408计算机基础综合合集","auto":true,"syncStatus":"seed","message":"DS/CO 由 2026-08-10 打卡表迁移；OS/CN 将由 GitHub Actions 自动补全。"},"subjects":{"ds":{"label":"数据结构","short":"DS","items":[{"id":"ds|27考研408强化更新内容与方法论-氧气版","title":"27考研408强化更新内容与方法论-氧气版","duration":"08:46","url":"","bvid":"","publishedAt":""},{"id":"ds|时间复杂度专题","title":"时间复杂度专题","duration":"40:25","url":"","bvid":"","publishedAt":""},{"id":"ds|顺序表专题","title":"顺序表专题","duration":"32:32","url":"","bvid":"","publishedAt":""},{"id":"ds|链表专题","title":"链表专题","duration":"23:38","url":"","bvid":"","publishedAt":""},{"id":"ds|链表选择题专题","title":"链表选择题专题","duration":"36:51","url":"","bvid":"","publishedAt":""},{"id":"ds|栈专题","title":"栈专题","duration":"23:51","url":"","bvid":"","publishedAt":""},{"id":"ds|卡特兰数专题","title":"卡特兰数专题","duration":"22:47","url":"","bvid":"","publishedAt":""},{"id":"ds|栈选择题专题","title":"栈选择题专题","duration":"21:32","url":"","bvid":"","publishedAt":""},{"id":"ds|队列专题","title":"队列专题","duration":"31:54","url":"","bvid":"","publishedAt":""},{"id":"ds|字符串匹配KMP专题","title":"字符串匹配KMP专题","duration":"36:32","url":"","bvid":"","publishedAt":""},{"id":"ds|数组与矩阵专题","title":"数组与矩阵专题","duration":"23:19","url":"","bvid":"","publishedAt":""},{"id":"ds|数组与矩阵选择题专题","title":"数组与矩阵选择题专题","duration":"31:54","url":"","bvid":"","publishedAt":""},{"id":"ds|二叉树的性质与遍历专题","title":"二叉树的性质与遍历专题","duration":"36:10","url":"","bvid":"","publishedAt":""},{"id":"ds|二叉树的性质与遍历选择题专题","title":"二叉树的性质与遍历选择题专题","duration":"40:39","url":"","bvid":"","publishedAt":""},{"id":"ds|线索二叉树，树与森林专题","title":"线索二叉树，树与森林专题","duration":"24:12","url":"","bvid":"","publishedAt":""},{"id":"ds|线索二叉树，树与森林选择题专题","title":"线索二叉树，树与森林选择题专题","duration":"26:08","url":"","bvid":"","publishedAt":""},{"id":"ds|树的应用专题","title":"树的应用专题","duration":"35:59","url":"","bvid":"","publishedAt":""},{"id":"ds|树的应用选择题专题","title":"树的应用选择题专题","duration":"31:12","url":"","bvid":"","publishedAt":""},{"id":"ds|树的应用综合大题专题","title":"树的应用综合大题专题","duration":"40:21","url":"","bvid":"","publishedAt":""},{"id":"ds|图的概念与存储专题","title":"图的概念与存储专题","duration":"50:13","url":"","bvid":"","publishedAt":""},{"id":"ds|图的概念与存储选择题专题","title":"图的概念与存储选择题专题","duration":"32:44","url":"","bvid":"","publishedAt":""},{"id":"ds|图的遍历专题","title":"图的遍历专题","duration":"20:47","url":"","bvid":"","publishedAt":""},{"id":"ds|最小生成树专题","title":"最小生成树专题","duration":"31:26","url":"","bvid":"","publishedAt":""},{"id":"ds|最短路径算法专题","title":"最短路径算法专题","duration":"38:15","url":"","bvid":"","publishedAt":""},{"id":"ds|有向无环图的应用专题","title":"有向无环图的应用专题","duration":"42:59","url":"","bvid":"","publishedAt":""},{"id":"ds|图的应用综合大题专题","title":"图的应用综合大题专题","duration":"01:01:29","url":"","bvid":"","publishedAt":""},{"id":"ds|顺序与二分查找专题","title":"顺序与二分查找专题","duration":"25:17","url":"","bvid":"","publishedAt":""},{"id":"ds|二叉排序树与平衡二叉树专题","title":"二叉排序树与平衡二叉树专题","duration":"31:53","url":"","bvid":"","publishedAt":""},{"id":"ds|B树专题","title":"B树专题","duration":"34:32","url":"","bvid":"","publishedAt":""},{"id":"ds|红黑树的插入与删除专题","title":"红黑树的插入与删除专题","duration":"56:29","url":"","bvid":"","publishedAt":""},{"id":"ds|散列表专题","title":"散列表专题","duration":"27:59","url":"","bvid":"","publishedAt":""},{"id":"ds|查找选择题专题","title":"查找选择题专题","duration":"01:00:28","url":"","bvid":"","publishedAt":""},{"id":"ds|查找综合大题专题","title":"查找综合大题专题","duration":"35:52","url":"","bvid":"","publishedAt":""},{"id":"ds|内部排序专题（上）","title":"内部排序专题（上）","duration":"31:47","url":"","bvid":"","publishedAt":""},{"id":"ds|内部排序专题（下）","title":"内部排序专题（下）","duration":"33:03","url":"","bvid":"","publishedAt":""},{"id":"ds|外部排序专题","title":"外部排序专题","duration":"38:00","url":"","bvid":"","publishedAt":""},{"id":"ds|排序选择题专题","title":"排序选择题专题","duration":"49:27","url":"","bvid":"","publishedAt":""},{"id":"ds|排序综合大题专题","title":"排序综合大题专题","duration":"33:59","url":"","bvid":"","publishedAt":""}]},"co":{"label":"计算机组成原理","short":"CO","items":[{"id":"co|计算机组成原理强化课更新指南","title":"计算机组成原理强化课更新指南","duration":"05:23","url":"","bvid":"","publishedAt":""},{"id":"co|计算机组成与性能指标专题","title":"计算机组成与性能指标专题","duration":"37:15","url":"","bvid":"","publishedAt":""},{"id":"co|计算机组成与性能指标选择题专题","title":"计算机组成与性能指标选择题专题","duration":"26:00","url":"","bvid":"","publishedAt":""},{"id":"co|数据的机器级表示专题（上）","title":"数据的机器级表示专题（上）","duration":"26:26","url":"","bvid":"","publishedAt":""},{"id":"co|数据的机器级表示专题（下）","title":"数据的机器级表示专题（下）","duration":"52:01","url":"","bvid":"","publishedAt":""},{"id":"co|数据的机器级表示选择题专题","title":"数据的机器级表示选择题专题","duration":"49:37","url":"","bvid":"","publishedAt":""},{"id":"co|IEEE754浮点数专题","title":"IEEE754浮点数专题","duration":"38:30","url":"","bvid":"","publishedAt":""},{"id":"co|IEEE754浮点数选择题专题","title":"IEEE754浮点数选择题专题","duration":"30:41","url":"","bvid":"","publishedAt":""},{"id":"co|乘除法运算及其电路专题","title":"乘除法运算及其电路专题","duration":"01:20:22","url":"","bvid":"","publishedAt":""},{"id":"co|数据的表示与运算综合大题专题","title":"数据的表示与运算综合大题专题","duration":"54:10","url":"","bvid":"","publishedAt":""},{"id":"co|存储器专题","title":"存储器专题","duration":"41:48","url":"","bvid":"","publishedAt":""},{"id":"co|总线专题","title":"总线专题","duration":"32:12","url":"","bvid":"","publishedAt":""},{"id":"co|存储器与总线选择题专题","title":"存储器与总线选择题专题","duration":"33:56","url":"","bvid":"","publishedAt":""},{"id":"co|Cache专题","title":"Cache专题","duration":"44:00","url":"","bvid":"","publishedAt":""},{"id":"co|Cache，存储器与总线综合大题专题","title":"Cache，存储器与总线综合大题专题","duration":"01:20:02","url":"","bvid":"","publishedAt":""},{"id":"co|CPU组成与指令寻址专题","title":"CPU组成与指令寻址专题","duration":"33:38","url":"","bvid":"","publishedAt":""},{"id":"co|CPU组成与指令寻址选择题专题","title":"CPU组成与指令寻址选择题专题","duration":"24:11","url":"","bvid":"","publishedAt":""},{"id":"co|单总线多周期数据通路专题","title":"单总线多周期数据通路专题","duration":"37:04","url":"","bvid":"","publishedAt":""},{"id":"co|MIPS与单周期数据通路专题","title":"MIPS与单周期数据通路专题","duration":"47:29","url":"","bvid":"","publishedAt":""},{"id":"co|数据通路综合大题专题","title":"数据通路综合大题专题","duration":"01:01:36","url":"","bvid":"","publishedAt":""},{"id":"co|MIPS指令流水线及其数据通路专题","title":"MIPS指令流水线及其数据通路专题","duration":"01:12:11","url":"","bvid":"","publishedAt":""},{"id":"co|指令流水线选择题专题","title":"指令流水线选择题专题","duration":"40:29","url":"","bvid":"","publishedAt":""},{"id":"co|MIPS与过程调用专题","title":"MIPS与过程调用专题","duration":"01:04:32","url":"","bvid":"","publishedAt":""},{"id":"co|C程序机器级表示综合大题专题","title":"C程序机器级表示综合大题专题","duration":"01:16:43","url":"","bvid":"","publishedAt":""},{"id":"co|微程序控制器专题","title":"微程序控制器专题","duration":"46:03","url":"","bvid":"","publishedAt":""},{"id":"co|IO接口与DMA专题","title":"IO接口与DMA专题","duration":"51:59","url":"","bvid":"","publishedAt":""},{"id":"co|中断与异常专题","title":"中断与异常专题","duration":"58:53","url":"","bvid":"","publishedAt":""},{"id":"co|IO选择题专题","title":"IO选择题专题","duration":"50:56","url":"","bvid":"","publishedAt":""},{"id":"co|IO综合大题专题","title":"IO综合大题专题","duration":"38:25","url":"","bvid":"","publishedAt":""}]},"os":{"label":"操作系统","short":"OS","items":[]},"cn":{"label":"计算机网络","short":"CN","items":[]}}}
+{
+  "schema": 2,
+  "updatedAt": "2026-08-11T17:09:47+08:00",
+  "source": {
+    "up": "就是氧气11",
+    "mid": 378777885,
+    "collection": "27考研408计算机基础综合合集",
+    "auto": true,
+    "syncStatus": "ok",
+    "message": "本次 1/4 科同步成功；失败：co: HTTPError: HTTP Error 412: Precondition Failed | os: HTTPError: HTTP Error 412: Precondition Failed | cn: HTTPError: HTTP Error 412: Precondition Failed"
+  },
+  "subjects": {
+    "ds": {
+      "label": "数据结构",
+      "short": "DS",
+      "items": [
+        {
+          "id": "ds|27考研408强化更新内容与方法论-氧气版",
+          "title": "27考研408强化更新内容与方法论-氧气版",
+          "duration": "8:46",
+          "url": "http://www.bilibili.com/video/av116559003521484",
+          "bvid": "BV1JP5T69Eni",
+          "publishedAt": 1778549530
+        },
+        {
+          "id": "ds|时间复杂度专题",
+          "title": "时间复杂度专题",
+          "duration": "40:25",
+          "url": "http://www.bilibili.com/video/av116561151070231",
+          "bvid": "BV1Pn5g66EXp",
+          "publishedAt": 1778582180
+        },
+        {
+          "id": "ds|顺序表专题",
+          "title": "顺序表专题",
+          "duration": "32:32",
+          "url": "http://www.bilibili.com/video/av116565076874260",
+          "bvid": "BV1Cb556SEyk",
+          "publishedAt": 1778642113
+        },
+        {
+          "id": "ds|链表专题",
+          "title": "链表专题",
+          "duration": "23:38",
+          "url": "http://www.bilibili.com/video/av116567056584923",
+          "bvid": "BV18X5y61EPn",
+          "publishedAt": 1778672370
+        },
+        {
+          "id": "ds|链表选择题专题",
+          "title": "链表选择题专题",
+          "duration": "36:51",
+          "url": "http://www.bilibili.com/video/av116570814684516",
+          "bvid": "BV1R55X6CE4W",
+          "publishedAt": 1778729722
+        },
+        {
+          "id": "ds|栈专题",
+          "title": "栈专题",
+          "duration": "23:51",
+          "url": "http://www.bilibili.com/video/av116576065950098",
+          "bvid": "BV1oe5h6nEnH",
+          "publishedAt": 1778809884
+        },
+        {
+          "id": "ds|卡特兰数专题",
+          "title": "卡特兰数专题",
+          "duration": "22:47",
+          "url": "http://www.bilibili.com/video/av116581552101448",
+          "bvid": "BV16x5k6xE4t",
+          "publishedAt": 1778893497
+        },
+        {
+          "id": "ds|栈选择题专题",
+          "title": "栈选择题专题",
+          "duration": "21:32",
+          "url": "http://www.bilibili.com/video/av116587759672187",
+          "bvid": "BV1kWLj6REG1",
+          "publishedAt": 1778988267
+        },
+        {
+          "id": "ds|队列专题",
+          "title": "队列专题",
+          "duration": "31:54",
+          "url": "http://www.bilibili.com/video/av116592960606369",
+          "bvid": "BV1Ag5f6rEB1",
+          "publishedAt": 1779067709
+        },
+        {
+          "id": "ds|字符串匹配KMP专题",
+          "title": "字符串匹配KMP专题",
+          "duration": "36:32",
+          "url": "http://www.bilibili.com/video/av116593010939531",
+          "bvid": "BV1MF5f6EE8m",
+          "publishedAt": 1779068446
+        },
+        {
+          "id": "ds|数组与矩阵专题",
+          "title": "数组与矩阵专题",
+          "duration": "23:19",
+          "url": "http://www.bilibili.com/video/av116598715323929",
+          "bvid": "BV1kaLu6TEir",
+          "publishedAt": 1779155376
+        },
+        {
+          "id": "ds|数组与矩阵选择题专题",
+          "title": "数组与矩阵选择题专题",
+          "duration": "31:54",
+          "url": "http://www.bilibili.com/video/av116600476997424",
+          "bvid": "BV1SULq6FEQ6",
+          "publishedAt": 1779182317
+        },
+        {
+          "id": "ds|二叉树的性质与遍历专题",
+          "title": "二叉树的性质与遍历专题",
+          "duration": "36:10",
+          "url": "http://www.bilibili.com/video/av116604436290423",
+          "bvid": "BV1d4Ly64EDC",
+          "publishedAt": 1779242756
+        },
+        {
+          "id": "ds|二叉树的性质与遍历选择题专题",
+          "title": "二叉树的性质与遍历选择题专题",
+          "duration": "40:39",
+          "url": "http://www.bilibili.com/video/av116610023036525",
+          "bvid": "BV1bTLx6tEaZ",
+          "publishedAt": 1779327863
+        },
+        {
+          "id": "ds|线索二叉树，树与森林专题",
+          "title": "线索二叉树，树与森林专题",
+          "duration": "24:12",
+          "url": "http://www.bilibili.com/video/av116611851753042",
+          "bvid": "BV1k2Lb6tES8",
+          "publishedAt": 1779355873
+        },
+        {
+          "id": "ds|线索二叉树，树与森林选择题专题",
+          "title": "线索二叉树，树与森林选择题专题",
+          "duration": "26:8",
+          "url": "http://www.bilibili.com/video/av116616331269712",
+          "bvid": "BV1xYLi6nE8R",
+          "publishedAt": 1779424208
+        },
+        {
+          "id": "ds|树的应用专题",
+          "title": "树的应用专题",
+          "duration": "35:59",
+          "url": "http://www.bilibili.com/video/av116621230283618",
+          "bvid": "BV1moGa6qE2a",
+          "publishedAt": 1779498993
+        },
+        {
+          "id": "ds|树的应用选择题专题",
+          "title": "树的应用选择题专题",
+          "duration": "31:12",
+          "url": "http://www.bilibili.com/video/av116627387453895",
+          "bvid": "BV13wGj6FEMY",
+          "publishedAt": 1779592929
+        },
+        {
+          "id": "ds|树的应用综合大题专题",
+          "title": "树的应用综合大题专题",
+          "duration": "40:21",
+          "url": "http://www.bilibili.com/video/av116632655502123",
+          "bvid": "BV13LGs6pEb1",
+          "publishedAt": 1779673154
+        },
+        {
+          "id": "ds|图的概念与存储专题",
+          "title": "图的概念与存储专题",
+          "duration": "50:13",
+          "url": "http://www.bilibili.com/video/av116638561147828",
+          "bvid": "BV1rPVA65Eyc",
+          "publishedAt": 1779763464
+        },
+        {
+          "id": "ds|图的概念与存储选择题专题",
+          "title": "图的概念与存储选择题专题",
+          "duration": "32:44",
+          "url": "http://www.bilibili.com/video/av116640356243654",
+          "bvid": "BV157VA6vEaa",
+          "publishedAt": 1779790924
+        },
+        {
+          "id": "ds|图的遍历专题",
+          "title": "图的遍历专题",
+          "duration": "20:47",
+          "url": "http://www.bilibili.com/video/av116644382840093",
+          "bvid": "BV19PGC6kEaM",
+          "publishedAt": 1779852199
+        },
+        {
+          "id": "ds|最小生成树专题",
+          "title": "最小生成树专题",
+          "duration": "33:41",
+          "url": "http://www.bilibili.com/video/av116650070316877",
+          "bvid": "BV1g1GD6ZEbd",
+          "publishedAt": 1779939050
+        },
+        {
+          "id": "ds|最短路径算法专题",
+          "title": "最短路径算法专题",
+          "duration": "38:15",
+          "url": "http://www.bilibili.com/video/av116650238023916",
+          "bvid": "BV1s6G96ZEe2",
+          "publishedAt": 1779941624
+        },
+        {
+          "id": "ds|有向无环图的应用专题",
+          "title": "有向无环图的应用专题",
+          "duration": "42:59",
+          "url": "http://www.bilibili.com/video/av116655959054439",
+          "bvid": "BV1w8Vb6pE4j",
+          "publishedAt": 1780028917
+        },
+        {
+          "id": "ds|图的应用综合大题专题",
+          "title": "图的应用综合大题专题",
+          "duration": "61:29",
+          "url": "http://www.bilibili.com/video/av116660623252392",
+          "bvid": "BV15UVM6SEqi",
+          "publishedAt": 1780100128
+        },
+        {
+          "id": "ds|顺序与二分查找专题",
+          "title": "顺序与二分查找专题",
+          "duration": "25:17",
+          "url": "http://www.bilibili.com/video/av116667166298590",
+          "bvid": "BV1bZV76eE4k",
+          "publishedAt": 1780199999
+        },
+        {
+          "id": "ds|二叉排序树与平衡二叉树专题",
+          "title": "二叉排序树与平衡二叉树专题",
+          "duration": "31:53",
+          "url": "http://www.bilibili.com/video/av116667199788763",
+          "bvid": "BV1TcVE6aEEM",
+          "publishedAt": 1780200535
+        },
+        {
+          "id": "ds|B树专题",
+          "title": "B树专题",
+          "duration": "34:32",
+          "url": "http://www.bilibili.com/video/av116674850198774",
+          "bvid": "BV1mDVo6rE5x",
+          "publishedAt": 1780317851
+        },
+        {
+          "id": "ds|红黑树的插入与删除专题",
+          "title": "红黑树的插入与删除专题",
+          "duration": "56:29",
+          "url": "http://www.bilibili.com/video/av116678323081659",
+          "bvid": "BV1ktVB6yEc4",
+          "publishedAt": 1780370290
+        },
+        {
+          "id": "ds|散列表专题",
+          "title": "散列表专题",
+          "duration": "27:59",
+          "url": "http://www.bilibili.com/video/av116684178396563",
+          "bvid": "BV1q8V164ErM",
+          "publishedAt": 1780459818
+        },
+        {
+          "id": "ds|查找选择题专题",
+          "title": "查找选择题专题",
+          "duration": "60:28",
+          "url": "http://www.bilibili.com/video/av116689748498286",
+          "bvid": "BV1wo7o6VEjR",
+          "publishedAt": 1780544509
+        },
+        {
+          "id": "ds|查找综合大题专题",
+          "title": "查找综合大题专题",
+          "duration": "35:52",
+          "url": "http://www.bilibili.com/video/av116695016411465",
+          "bvid": "BV1Qs7z6gEMC",
+          "publishedAt": 1780624909
+        },
+        {
+          "id": "ds|内部排序专题（上）",
+          "title": "内部排序专题（上）",
+          "duration": "31:47",
+          "url": "http://www.bilibili.com/video/av116696710910320",
+          "bvid": "BV1NP7C63E4t",
+          "publishedAt": 1780650790
+        },
+        {
+          "id": "ds|内部排序专题（下）",
+          "title": "内部排序专题（下）",
+          "duration": "33:3",
+          "url": "http://www.bilibili.com/video/av116701005944883",
+          "bvid": "BV15i7S6CEsF",
+          "publishedAt": 1780716225
+        },
+        {
+          "id": "ds|外部排序专题",
+          "title": "外部排序专题",
+          "duration": "38:0",
+          "url": "http://www.bilibili.com/video/av116706626246418",
+          "bvid": "BV18bEs6NEDJ",
+          "publishedAt": 1780801990
+        },
+        {
+          "id": "ds|排序选择题专题",
+          "title": "排序选择题专题",
+          "duration": "49:27",
+          "url": "http://www.bilibili.com/video/av116712447938918",
+          "bvid": "BV1HGEK6PE8W",
+          "publishedAt": 1780890844
+        },
+        {
+          "id": "ds|排序综合大题专题",
+          "title": "排序综合大题专题",
+          "duration": "33:59",
+          "url": "http://www.bilibili.com/video/av116718135416851",
+          "bvid": "BV1fjE76FEDg",
+          "publishedAt": 1780977900
+        }
+      ]
+    },
+    "co": {
+      "label": "计算机组成原理",
+      "short": "CO",
+      "items": [
+        {
+          "id": "co|计算机组成原理强化课更新指南",
+          "title": "计算机组成原理强化课更新指南",
+          "duration": "05:23",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|计算机组成与性能指标专题",
+          "title": "计算机组成与性能指标专题",
+          "duration": "37:15",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|计算机组成与性能指标选择题专题",
+          "title": "计算机组成与性能指标选择题专题",
+          "duration": "26:00",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|数据的机器级表示专题（上）",
+          "title": "数据的机器级表示专题（上）",
+          "duration": "26:26",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|数据的机器级表示专题（下）",
+          "title": "数据的机器级表示专题（下）",
+          "duration": "52:01",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|数据的机器级表示选择题专题",
+          "title": "数据的机器级表示选择题专题",
+          "duration": "49:37",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|IEEE754浮点数专题",
+          "title": "IEEE754浮点数专题",
+          "duration": "38:30",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|IEEE754浮点数选择题专题",
+          "title": "IEEE754浮点数选择题专题",
+          "duration": "30:41",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|乘除法运算及其电路专题",
+          "title": "乘除法运算及其电路专题",
+          "duration": "01:20:22",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|数据的表示与运算综合大题专题",
+          "title": "数据的表示与运算综合大题专题",
+          "duration": "54:10",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|存储器专题",
+          "title": "存储器专题",
+          "duration": "41:48",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|总线专题",
+          "title": "总线专题",
+          "duration": "32:12",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|存储器与总线选择题专题",
+          "title": "存储器与总线选择题专题",
+          "duration": "33:56",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|Cache专题",
+          "title": "Cache专题",
+          "duration": "44:00",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|Cache，存储器与总线综合大题专题",
+          "title": "Cache，存储器与总线综合大题专题",
+          "duration": "01:20:02",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|CPU组成与指令寻址专题",
+          "title": "CPU组成与指令寻址专题",
+          "duration": "33:38",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|CPU组成与指令寻址选择题专题",
+          "title": "CPU组成与指令寻址选择题专题",
+          "duration": "24:11",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|单总线多周期数据通路专题",
+          "title": "单总线多周期数据通路专题",
+          "duration": "37:04",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|MIPS与单周期数据通路专题",
+          "title": "MIPS与单周期数据通路专题",
+          "duration": "47:29",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|数据通路综合大题专题",
+          "title": "数据通路综合大题专题",
+          "duration": "01:01:36",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|MIPS指令流水线及其数据通路专题",
+          "title": "MIPS指令流水线及其数据通路专题",
+          "duration": "01:12:11",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|指令流水线选择题专题",
+          "title": "指令流水线选择题专题",
+          "duration": "40:29",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|MIPS与过程调用专题",
+          "title": "MIPS与过程调用专题",
+          "duration": "01:04:32",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|C程序机器级表示综合大题专题",
+          "title": "C程序机器级表示综合大题专题",
+          "duration": "01:16:43",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|微程序控制器专题",
+          "title": "微程序控制器专题",
+          "duration": "46:03",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|IO接口与DMA专题",
+          "title": "IO接口与DMA专题",
+          "duration": "51:59",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|中断与异常专题",
+          "title": "中断与异常专题",
+          "duration": "58:53",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|IO选择题专题",
+          "title": "IO选择题专题",
+          "duration": "50:56",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        },
+        {
+          "id": "co|IO综合大题专题",
+          "title": "IO综合大题专题",
+          "duration": "38:25",
+          "url": "",
+          "bvid": "",
+          "publishedAt": ""
+        }
+      ]
+    },
+    "os": {
+      "label": "操作系统",
+      "short": "OS",
+      "items": []
+    },
+    "cn": {
+      "label": "计算机网络",
+      "short": "CN",
+      "items": []
+    }
+  }
+}
