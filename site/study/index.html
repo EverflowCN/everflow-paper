@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow 学习中心：课程、刷题与学习计划统一入口">
+  <meta name="description" content="Everflow 学习中心：课程、刷题与学习数据统一入口">
   <title>学习中心 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
   <link rel="stylesheet" href="../assets/css/site.css">
@@ -19,13 +19,24 @@
     <div class="learning-hero-main">
       <div class="eyebrow">LEARNING CENTER</div>
       <h1>学习，不混在一起。</h1>
-      <p>把“听课”和“做题”分开管理。课程记录跟课进度，刷题记录题单、错题和二刷；408 与数学题单都进入刷题中心，不再不断增加顶部导航。</p>
-      <div class="learning-hero-actions"><a class="learning-btn primary" href="courses/">进入课程</a><a class="learning-btn" href="practice/">进入刷题</a></div>
+      <p>把“听课”和“做题”分开管理，再用学习热力图统一汇总每天真正完成了多少学习动作。课程记录跟课进度，刷题记录题单与二刷，热力图只负责学习节奏。</p>
+      <div class="learning-hero-actions"><a class="learning-btn primary" href="courses/">进入课程</a><a class="learning-btn" href="practice/">进入刷题</a><a class="learning-btn" href="heatmap/">查看热力图</a></div>
     </div>
     <aside class="learning-summary">
-      <div><div class="eyebrow">EVERFLOW STUDY</div><h2>课程 × 刷题<br>分轨管理</h2><p>一个学习入口，两类完全不同的数据。</p></div>
-      <div class="learning-summary-grid"><div class="learning-summary-chip"><strong>课程</strong><span>课时 · 视频 · 跟课进度</span></div><div class="learning-summary-chip"><strong>刷题</strong><span>题单 · 错题 · 二刷状态</span></div></div>
+      <div><div class="eyebrow">EVERFLOW STUDY</div><h2>课程 × 刷题<br>分轨管理</h2><p>一个学习入口，两类进度，再用一张热力图汇总每天的学习密度。</p></div>
+      <div class="learning-summary-grid"><div class="learning-summary-chip"><strong>课程</strong><span>课时 · 视频 · 跟课进度</span></div><div class="learning-summary-chip"><strong>刷题</strong><span>题单 · 错题 · 二刷状态</span></div><div class="learning-summary-chip"><strong>热力图</strong><span>每日次数 · 连续天数</span></div><div class="learning-summary-chip"><strong>云端</strong><span>登录后跨设备汇总</span></div></div>
     </aside>
+  </section>
+
+  <section class="learning-section">
+    <div class="learning-section-head"><div><div class="eyebrow">LEARNING DATA</div><h2>学习数据</h2></div><p>只看节奏，不打乱课程和刷题原有结构。</p></div>
+    <div class="learning-lanes" style="grid-template-columns:1fr">
+      <article class="learning-lane">
+        <div class="learning-lane-head"><div><h3>学习热力图 <span class="learning-badge live">已接入</span></h3><p>课程、刷题和手动补录统一按天计数；支持月视图、年视图、连续打卡、来源拆分和当天详情。</p></div><div class="learning-lane-icon">▦</div></div>
+        <div class="learning-note"><strong>统计口径：</strong>完成 1 个课程课时 = 1 次；完成 1 个刷题条目 = 1 次；手动补录 = 1 次。登录后使用 Supabase 云端事件记录，未登录时读取本机可识别进度。</div>
+        <div class="learning-hero-actions"><a class="learning-btn primary" href="heatmap/">查看学习热力图</a></div>
+      </article>
+    </div>
   </section>
 
   <section class="learning-section">
