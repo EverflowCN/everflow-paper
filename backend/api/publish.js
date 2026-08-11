@@ -1,8 +1,9 @@
-import { handleOptions, json, loadPosts, parseBody, requireSession, savePosts } from '../lib/common.js';
+import { handleOptions, json, loadPosts, parseBody, requireSession, requireTrustedOrigin, savePosts } from '../lib/common.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'POST') return json(req, res, 405, { error: 'Method not allowed' });
+  if (!requireTrustedOrigin(req, res)) return;
   const session = requireSession(req, res);
   if (!session) return;
 
