@@ -5,22 +5,10 @@ let readyResolve;
 let syncing=false;
 const ready=new Promise(r=>readyResolve=r);
 
-const fromFocus=r=>({
-  id:r.id,subject:r.subject,startedAt:r.started_at,endedAt:r.ended_at,
-  durationSeconds:r.duration_seconds,note:r.note||'',deviceId:r.device_id||'',updatedAt:r.updated_at,syncState:'cloud'
-});
-const fromCourse=r=>({
-  id:r.course_id,subject:r.subject,done:r.done,note:r.note||'',completedAt:r.completed_at,
-  updatedAt:r.updated_at,deviceId:r.device_id||'',syncState:'cloud'
-});
-const toFocus=(r,userId)=>({
-  id:r.id,user_id:userId,subject:r.subject,started_at:r.startedAt,ended_at:r.endedAt,
-  duration_seconds:r.durationSeconds,note:r.note||'',device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()
-});
-const toCourse=(r,userId)=>({
-  user_id:userId,course_id:r.id,subject:r.subject||'unknown',done:Boolean(r.done),note:r.note||'',
-  completed_at:r.completedAt||null,device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()
-});
+const fromFocus=r=>({id:r.id,subject:r.subject,startedAt:r.started_at,endedAt:r.ended_at,durationSeconds:r.duration_seconds,note:r.note||'',deviceId:r.device_id||'',updatedAt:r.updated_at,syncState:'cloud'});
+const fromCourse=r=>({id:r.course_id,subject:r.subject,done:r.done,note:r.note||'',completedAt:r.completed_at,updatedAt:r.updated_at,deviceId:r.device_id||'',syncState:'cloud'});
+const toFocus=(r,userId)=>({id:r.id,user_id:userId,subject:r.subject,started_at:r.startedAt,ended_at:r.endedAt,duration_seconds:r.durationSeconds,note:r.note||'',device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()});
+const toCourse=(r,userId)=>({user_id:userId,course_id:r.id,subject:r.subject||'unknown',done:Boolean(r.done),note:r.note||'',completed_at:r.completedAt||null,device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()});
 const isRlsConflict=e=>/row-level security|violates row-level security|42501/i.test(`${e?.code||''} ${e?.message||''}`);
 
 async function init(){
@@ -73,15 +61,10 @@ async function syncAll(){
       client.from('course_states').select('*').eq('user_id',user.id)
     ]);
     if(remoteFocus.error)throw remoteFocus.error;if(remoteCourse.error)throw remoteCourse.error;
-
     const mapped={focusSessions:(remoteFocus.data||[]).map(fromFocus),courseStates:(remoteCourse.data||[]).map(fromCourse)};
     const scope=await EveraStore.prepareForUser?.(user.id,{remoteFocusCount:mapped.focusSessions.length,remoteCourseCount:mapped.courseStates.length});
-    if(scope?.recoveredLegacy){
-      document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'检测到账户切换，已隔离上一账号的本机数据并载入当前账号。'}}));
-    }else if(scope?.changed&&scope?.from){
-      document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'已切换本机数据空间，当前账号不会混入上一账号的数据。'}}));
-    }
-
+    if(scope?.recoveredLegacy)document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'检测到账户切换，已隔离上一账号的本机数据并载入当前账号。'}}));
+    else if(scope?.changed&&scope?.from)document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'已切换本机数据空间，当前账号不会混入上一账号的数据。'}}));
     await EveraStore.importAll(mapped);
     let pushed;
     try{pushed=await pushLocal(user.id)}catch(error){
@@ -90,7 +73,6 @@ async function syncAll(){
       document.dispatchEvent(new CustomEvent('everflow:cloud-recovery',{detail:{message:'发现旧版跨账号本机记录，已安全隔离并恢复当前账号云端数据。'}}));
       pushed=await pushLocal(user.id);
     }
-
     const {error:profileError}=await client.from('profiles').upsert({user_id:user.id,last_seen_at:new Date().toISOString()},{onConflict:'user_id'});
     if(profileError)throw profileError;
     const out={ok:true,at:new Date().toISOString(),userId:user.id,focus:pushed.focusRows.length,courses:pushed.courseRows.length};
@@ -106,8 +88,9 @@ async function syncAll(){
 }
 
 async function isOwner(){const u=await getUser();return Boolean(u?.app_metadata?.role==='owner')}
+async function requireOwner(){await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');return true}
 async function getOwnerOverview(){
-  await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
+  await requireOwner();
   const [profiles,focus,courses,recent]=await Promise.all([
     client.from('profiles').select('*',{count:'exact',head:true}),
     client.from('focus_sessions').select('*',{count:'exact',head:true}),
@@ -117,25 +100,38 @@ async function getOwnerOverview(){
   if(profiles.error)throw profiles.error;if(focus.error)throw focus.error;if(courses.error)throw courses.error;if(recent.error)throw recent.error;
   return {users:profiles.count||0,focus:focus.count||0,courses:courses.count||0,recent:recent.data||[]};
 }
+async function ownerUsers(action,payload={}){await requireOwner();const {data,error}=await client.functions.invoke('owner-users',{body:{action,...payload}});if(error)throw error;if(data?.error)throw new Error(data.error);return data}
+async function membership(action='status',payload={}){await ready;if(!client)throw new Error('云同步尚未配置');const user=await getUser();if(!user)throw new Error('login_required');const {data,error}=await client.functions.invoke('membership',{body:{action,...payload}});if(error)throw error;if(data?.error)throw new Error(data.error);return data}
 
-async function ownerUsers(action,payload={}){
-  await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
-  const {data,error}=await client.functions.invoke('owner-users',{body:{action,...payload}});
-  if(error)throw error;if(data?.error)throw new Error(data.error);return data;
+async function listNotices({limit=50,owner=false}={}){
+  await ready;if(!client)return [];
+  if(owner)await requireOwner();
+  let q=client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').order('pinned',{ascending:false}).order('published_at',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false}).limit(Math.max(1,Math.min(100,Number(limit)||50)));
+  if(!owner)q=q.eq('published',true);
+  const {data,error}=await q;if(error)throw error;return data||[];
 }
+async function getNotice(id){await ready;if(!client||!id)return null;const {data,error}=await client.from('notices').select('id,title,summary,content,level,pinned,published,published_at,created_at,updated_at').eq('id',id).maybeSingle();if(error)throw error;return data||null}
+async function saveNotice(input={}){
+  await requireOwner();const user=await getUser();const id=input.id||undefined;const row={title:String(input.title||'').trim(),summary:String(input.summary||''),content:String(input.content||''),level:['info','important','update','event'].includes(input.level)?input.level:'info',pinned:Boolean(input.pinned),published:Boolean(input.published),published_at:input.published?(input.published_at||new Date().toISOString()):null,updated_at:new Date().toISOString(),created_by:user.id};
+  if(!row.title)throw new Error('通知标题不能为空');
+  const q=id?client.from('notices').update(row).eq('id',id):client.from('notices').insert(row);
+  const {data,error}=await q.select().single();if(error)throw error;return data;
+}
+async function deleteNotice(id){await requireOwner();const {error}=await client.from('notices').delete().eq('id',id);if(error)throw error;return true}
 
-async function membership(action='status',payload={}){
-  await ready;if(!client)throw new Error('云同步尚未配置');
-  const user=await getUser();if(!user)throw new Error('login_required');
-  const {data,error}=await client.functions.invoke('membership',{body:{action,...payload}});
-  if(error)throw error;if(data?.error)throw new Error(data.error);return data;
+async function getResourceHub(){
+  await ready;if(!client)return {settings:null,items:[]};
+  const [settings,items]=await Promise.all([
+    client.from('resource_hub_settings').select('id,title,subtitle,avatar_url,footer_note,updated_at').eq('id','default').maybeSingle(),
+    client.from('resource_hub_items').select('id,title,subtitle,url,icon,group_name,sort_order,enabled,created_at,updated_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+  ]);
+  if(settings.error)throw settings.error;if(items.error)throw items.error;return {settings:settings.data||null,items:items.data||[]};
 }
+async function saveResourceSettings(input={}){await requireOwner();const user=await getUser();const row={id:'default',title:String(input.title||'Everflow 资源导航'),subtitle:String(input.subtitle||''),avatar_url:String(input.avatar_url||''),footer_note:String(input.footer_note||''),updated_at:new Date().toISOString(),updated_by:user.id};const {data,error}=await client.from('resource_hub_settings').upsert(row,{onConflict:'id'}).select().single();if(error)throw error;return data}
+async function saveResourceItem(input={}){await requireOwner();const user=await getUser();const row={title:String(input.title||'').trim(),subtitle:String(input.subtitle||''),url:String(input.url||'').trim(),icon:String(input.icon||'↗').slice(0,12),group_name:String(input.group_name||'常用入口'),sort_order:Number(input.sort_order)||100,enabled:input.enabled!==false,updated_at:new Date().toISOString(),created_by:user.id};if(!row.title||!row.url)throw new Error('标题和链接不能为空');const q=input.id?client.from('resource_hub_items').update(row).eq('id',input.id):client.from('resource_hub_items').insert(row);const {data,error}=await q.select().single();if(error)throw error;return data}
+async function deleteResourceItem(id){await requireOwner();const {error}=await client.from('resource_hub_items').delete().eq('id',id);if(error)throw error;return true}
 
-async function getOwnerAudit(){
-  await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
-  const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(30);
-  if(error)throw error;return data||[];
-}
+async function getOwnerAudit(){await requireOwner();const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(30);if(error)throw error;return data||[]}
 
 let syncTimer;
 document.addEventListener('everflow:study-change',()=>{if(syncing)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200)});
@@ -143,5 +139,5 @@ addEventListener('online',()=>syncAll().catch(()=>{}));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})});
 setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})},5*60*1000);
 
-window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,membership,getOwnerAudit};
+window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,membership,listNotices,getNotice,saveNotice,deleteNotice,getResourceHub,saveResourceSettings,saveResourceItem,deleteResourceItem,getOwnerAudit};
 init();
