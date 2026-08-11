@@ -2,7 +2,8 @@
   const SUBJECTS=['ds','co','os','cn'];
   const STATE_KEY='oxygen408-progress-v2';
   const LEGACY={ds:'408_checkin_ds',co:'408_checkin_co'};
-  let data=null,state={},active='ds';
+  const REFRESH_MS=2*60*1000;
+  let data=null,state={},active='ds',lastVersion='';
 
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
@@ -92,7 +93,7 @@
     SUBJECTS.forEach(renderSubject);stats();
     const dt=data.updatedAt?new Date(data.updatedAt):null;
     $('[data-sync-time]').textContent=dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步';
-    $('[data-sync-status]').textContent=syncLabel(data.source);
+    $('[data-sync-status]').textContent=syncLabel(data.source)+' · 页面每2分钟自动刷新';
     $('[data-sync-status]').title=String(data.source?.message||'');
     switchTab(active);
   }
@@ -101,6 +102,23 @@
     active=key;
     $$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===key));
     $$('[data-panel]').forEach(p=>p.classList.toggle('active',p.dataset.panel===key));
+  }
+
+  async function refreshData(initial=false){
+    try{
+      const r=await fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'});
+      if(!r.ok)throw new Error('oxygen data');
+      const next=await r.json();
+      const version=String(next.updatedAt||'')+'|'+SUBJECTS.map(k=>(next.subjects?.[k]?.items||[]).length).join(',');
+      if(!initial&&version===lastVersion)return;
+      if(!initial&&document.activeElement?.matches?.('.note-input'))return;
+      data=next;lastVersion=version;
+      if(initial)migrateLegacy();
+      render();
+    }catch(err){
+      console.error(err);
+      if(initial)$('[data-checkin-root]').innerHTML='<div class="empty-state">强化表加载失败，请稍后刷新。</div>';
+    }
   }
 
   document.addEventListener('click',e=>{
@@ -122,8 +140,6 @@
   });
 
   loadState();
-  fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'})
-    .then(r=>{if(!r.ok)throw new Error('oxygen data');return r.json()})
-    .then(d=>{data=d;migrateLegacy();render()})
-    .catch(err=>{console.error(err);$('[data-checkin-root]').innerHTML='<div class="empty-state">强化表加载失败，请稍后刷新。</div>'});
+  refreshData(true);
+  setInterval(()=>refreshData(false),REFRESH_MS);
 })();
