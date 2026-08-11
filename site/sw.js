@@ -1,4 +1,4 @@
-const CACHE='everflow-study-shell-v6';
+const CACHE='everflow-study-shell-v7';
 const APP_SHELL=[
   '/',
   '/408/',
