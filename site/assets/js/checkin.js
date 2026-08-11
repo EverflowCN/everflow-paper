@@ -114,7 +114,7 @@
     const status=source.syncStatus||'seed';
     const states=source.subjectStatus||{};
     const okCount=SUBJECTS.filter(k=>states[k]?.ok).length;
-    if(status==='ok')return '自动同步正常 · 4/4';
+    if(status==='ok')return source.mode==='supabase-native'?'云端即时同步正常 · 4/4':'自动同步正常 · 4/4';
     if(status==='partial')return `部分同步 · ${okCount}/4，失败科目将自动重试`;
     if(status==='error')return '本轮同步失败，系统将自动重试';
     return '自动同步已启用';
@@ -135,11 +135,41 @@
     $$('[data-panel]').forEach(p=>p.classList.toggle('active',p.dataset.panel===key));
   }
 
+  async function fetchStatic(){
+    const r=await fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error('oxygen data');
+    return r.json();
+  }
+
+  async function fetchNativeCatalog(){
+    const cfg=window.EVERFLOW_CLOUD||{};
+    if(!cfg.url||!cfg.publishableKey)return null;
+    const h={apikey:cfg.publishableKey,Authorization:`Bearer ${cfg.publishableKey}`};
+    const [rowsRes,metaRes]=await Promise.all([
+      fetch(`${cfg.url}/rest/v1/oxygen_catalog?select=subject,item_id,title,duration,url,bvid,published_at&order=published_at.asc,item_id.asc`,{headers:h,cache:'no-store'}),
+      fetch(`${cfg.url}/rest/v1/oxygen_catalog_meta?id=eq.default&select=updated_at,sync_status,message,subject_status,source`,{headers:h,cache:'no-store'})
+    ]);
+    if(!rowsRes.ok||!metaRes.ok)return null;
+    const rows=await rowsRes.json(),metas=await metaRes.json();
+    if(!Array.isArray(rows)||!rows.length)return null;
+    const meta=Array.isArray(metas)?metas[0]||{}:{};
+    const labels={ds:['数据结构','DS'],co:['计算机组成原理','CO'],os:['操作系统','OS'],cn:['计算机网络','CN']};
+    const subjects={};
+    for(const key of SUBJECTS){
+      subjects[key]={label:labels[key][0],short:labels[key][1],items:rows.filter(r=>r.subject===key).map(r=>({id:r.item_id,title:r.title,duration:r.duration||'',url:r.url||'',bvid:r.bvid||'',publishedAt:Number(r.published_at||0)}))};
+    }
+    return {updatedAt:meta.updated_at||null,subjects,source:{syncStatus:meta.sync_status||'seed',message:meta.message||'',subjectStatus:meta.subject_status||{},mode:'supabase-native',...(meta.source||{})}};
+  }
+
   async function refreshData(initial=false){
     try{
-      const r=await fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'});
-      if(!r.ok)throw new Error('oxygen data');
-      const next=await r.json();
+      const [staticResult,nativeResult]=await Promise.allSettled([fetchStatic(),fetchNativeCatalog()]);
+      const staticData=staticResult.status==='fulfilled'?staticResult.value:null;
+      const nativeData=nativeResult.status==='fulfilled'?nativeResult.value:null;
+      if(!staticData&&!nativeData)throw new Error('oxygen data');
+      const staticTime=staticData?.updatedAt?new Date(staticData.updatedAt).getTime():0;
+      const nativeTime=nativeData?.updatedAt?new Date(nativeData.updatedAt).getTime():0;
+      const next=nativeData&&nativeTime>=staticTime?nativeData:(staticData||nativeData);
       const version=String(next.updatedAt||'')+'|'+SUBJECTS.map(k=>(next.subjects?.[k]?.items||[]).length).join(',');
       if(!initial&&version===lastVersion)return;
       if(!initial&&document.activeElement?.matches?.('.note-input'))return;
