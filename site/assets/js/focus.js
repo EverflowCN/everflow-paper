@@ -6,6 +6,7 @@
 
   const fmt=sec=>{sec=Math.max(0,Math.floor(sec));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`};
   const now=()=>Date.now();
+  const makeId=()=>{if(globalThis.crypto?.randomUUID)return crypto.randomUUID();return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g,c=>(Number(c)^crypto.getRandomValues(new Uint8Array(1))[0]&15>>Number(c)/4).toString(16))};
   const load=()=>{try{return JSON.parse(localStorage.getItem(ACTIVE_KEY)||'null')}catch{return null}};
   const save=()=>timer?localStorage.setItem(ACTIVE_KEY,JSON.stringify(timer)):localStorage.removeItem(ACTIVE_KEY);
 
@@ -34,7 +35,7 @@
     }else{
       const minutes=Math.max(1,Number($('[data-focus-minutes]')?.value)||50);
       timer={
-        id:crypto.randomUUID?crypto.randomUUID():`focus-${Date.now()}`,
+        id:makeId(),
         subject:$('[data-focus-subject]')?.value||'general',
         note:$('[data-focus-note]')?.value||'',
         targetSeconds:minutes*60,
