@@ -1,0 +1,100 @@
+const cfg=window.EVERFLOW_CLOUD||{};
+const enabled=Boolean(cfg.url&&cfg.publishableKey);
+let client=null;
+let readyResolve;
+const ready=new Promise(r=>readyResolve=r);
+
+const fromFocus=r=>({
+  id:r.id,subject:r.subject,startedAt:r.started_at,endedAt:r.ended_at,
+  durationSeconds:r.duration_seconds,note:r.note||'',deviceId:r.device_id||'',updatedAt:r.updated_at,syncState:'cloud'
+});
+const fromCourse=r=>({
+  id:r.course_id,subject:r.subject,done:r.done,note:r.note||'',completedAt:r.completed_at,
+  updatedAt:r.updated_at,deviceId:r.device_id||'',syncState:'cloud'
+});
+const toFocus=(r,userId)=>({
+  id:r.id,user_id:userId,subject:r.subject,started_at:r.startedAt,ended_at:r.endedAt,
+  duration_seconds:r.durationSeconds,note:r.note||'',device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()
+});
+const toCourse=(r,userId)=>({
+  user_id:userId,course_id:r.id,subject:r.subject||'unknown',done:Boolean(r.done),note:r.note||'',
+  completed_at:r.completedAt||null,device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()
+});
+
+async function init(){
+  if(!enabled){readyResolve(null);document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false}}));return null}
+  try{
+    const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm');
+    client=createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    client.auth.onAuthStateChange((event,session)=>{
+      document.dispatchEvent(new CustomEvent('everflow:auth-change',{detail:{event,user:session?.user||null}}));
+      if(session?.user)setTimeout(()=>syncAll().catch(console.error),0);
+    });
+    readyResolve(client);
+    document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:true}}));
+    const {data}=await client.auth.getSession();
+    if(data?.session?.user)syncAll().catch(console.error);
+    return client;
+  }catch(err){
+    console.error('Everflow cloud init failed',err);readyResolve(null);
+    document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false,error:String(err)}}));
+    return null;
+  }
+}
+
+async function getUser(){
+  await ready;if(!client)return null;
+  const {data,error}=await client.auth.getUser();if(error)return null;return data.user||null;
+}
+async function signIn(email,password){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signInWithPassword({email,password})}
+async function signUp(email,password){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signUp({email,password})}
+async function signInOtp(email){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}})}
+async function signOut(){await ready;if(!client)return;return client.auth.signOut()}
+
+async function syncAll(){
+  await ready;if(!client||!window.EveraStore)return {ok:false,reason:'disabled'};
+  const user=await getUser();if(!user)return {ok:false,reason:'guest'};
+  await EveraStore.init();
+
+  const [remoteFocus,remoteCourse]=await Promise.all([
+    client.from('focus_sessions').select('*').eq('user_id',user.id),
+    client.from('course_states').select('*').eq('user_id',user.id)
+  ]);
+  if(remoteFocus.error)throw remoteFocus.error;if(remoteCourse.error)throw remoteCourse.error;
+
+  await EveraStore.importAll({
+    focusSessions:(remoteFocus.data||[]).map(fromFocus),
+    courseStates:(remoteCourse.data||[]).map(fromCourse)
+  });
+  const local=await EveraStore.exportAll();
+  const focusRows=local.focusSessions.map(r=>toFocus(r,user.id));
+  const courseRows=local.courseStates.map(r=>toCourse(r,user.id));
+
+  if(focusRows.length){const {error}=await client.from('focus_sessions').upsert(focusRows,{onConflict:'id'});if(error)throw error}
+  if(courseRows.length){const {error}=await client.from('course_states').upsert(courseRows,{onConflict:'user_id,course_id'});if(error)throw error}
+  await client.from('profiles').upsert({user_id:user.id,last_seen_at:new Date().toISOString()},{onConflict:'user_id'});
+  const out={ok:true,at:new Date().toISOString(),focus:focusRows.length,courses:courseRows.length};
+  localStorage.setItem('everflow-last-cloud-sync',JSON.stringify(out));
+  document.dispatchEvent(new CustomEvent('everflow:cloud-sync',{detail:out}));
+  return out;
+}
+
+async function isOwner(){const u=await getUser();return Boolean(u?.app_metadata?.role==='owner')}
+async function getOwnerOverview(){
+  await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
+  const [profiles,focus,courses,recent]=await Promise.all([
+    client.from('profiles').select('*',{count:'exact',head:true}),
+    client.from('focus_sessions').select('*',{count:'exact',head:true}),
+    client.from('course_states').select('*',{count:'exact',head:true}),
+    client.from('profiles').select('user_id,display_name,created_at,last_seen_at').order('last_seen_at',{ascending:false}).limit(20)
+  ]);
+  return {users:profiles.count||0,focus:focus.count||0,courses:courses.count||0,recent:recent.data||[]};
+}
+
+let syncTimer;
+document.addEventListener('everflow:study-change',()=>{
+  clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200);
+});
+
+window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview};
+init();
