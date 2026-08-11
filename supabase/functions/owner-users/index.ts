@@ -1,19 +1,31 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.111.0'
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')||''
-const SERVICE_KEY=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||''
+const SERVICE_KEY=(()=>{
+  try{
+    const modern=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')||'{}')
+    if(modern?.default)return String(modern.default)
+  }catch{}
+  return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||''
+})()
 
-const cors={
-  'Access-Control-Allow-Origin':'*',
-  'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods':'POST, OPTIONS'
+const allowedOrigins=new Set(['https://evera.top','https://www.evera.top'])
+const corsFor=(req:Request)=>{
+  const origin=req.headers.get('Origin')||''
+  return {
+    'Access-Control-Allow-Origin':allowedOrigins.has(origin)?origin:'https://evera.top',
+    'Vary':'Origin',
+    'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods':'POST, OPTIONS'
+  }
 }
 
-const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{
-  status,headers:{...cors,'Content-Type':'application/json; charset=utf-8'}
-})
-
 Deno.serve(async req=>{
+  const cors=corsFor(req)
+  const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{
+    status,headers:{...cors,'Content-Type':'application/json; charset=utf-8'}
+  })
+
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
   if(req.method!=='POST')return json({error:'not_found'},404)
   if(!SUPABASE_URL||!SERVICE_KEY)return json({error:'service_unavailable'},503)
