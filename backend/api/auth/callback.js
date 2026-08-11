@@ -5,7 +5,8 @@ export default async function handler(req, res) {
     const url = new URL(req.url, 'https://api.evera.top');
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
-    if (!code || !verifyState(state)) {
+    const stateData = verifyState(state);
+    if (!code || !stateData) {
       res.statusCode = 400;
       res.setHeader('Cache-Control', 'no-store');
       return res.end('Invalid OAuth callback');
@@ -43,7 +44,7 @@ export default async function handler(req, res) {
       return res.end('This GitHub account is not allowed');
     }
 
-    const session = createSession(user.login, tokenData.access_token);
+    const session = createSession(user.login, tokenData.access_token, stateData.deviceHash);
     setSessionCookie(res, session);
     res.statusCode = 302;
     res.setHeader('Cache-Control', 'no-store');
