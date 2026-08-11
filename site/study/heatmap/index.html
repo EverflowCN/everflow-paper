@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Everflow 学习中心打卡热力图：汇总课程、刷题与手动补录的每日学习打卡次数">
+  <meta name="robots" content="noindex,nofollow">
+  <title>学习热力图 · Everflow</title>
+  <link rel="icon" href="../../assets/everflow-icon.svg">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <link rel="stylesheet" href="../../assets/css/study.css">
+  <link rel="stylesheet" href="../../assets/css/learning-center.css">
+  <link rel="stylesheet" href="../../assets/css/app-ui.css">
+  <link rel="stylesheet" href="../../assets/css/study-heatmap.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="../../"><img src="../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
+<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+
+<main class="wrap heatmap-shell" data-heatmap-root>
+  <header class="heatmap-hero">
+    <div>
+      <div class="eyebrow">学习中心 / 学习数据</div>
+      <h1>学习热力图</h1>
+      <p>按天汇总课程、刷题与手动补录的打卡次数。颜色越深，表示当天完成的学习动作越多。</p>
+    </div>
+    <div class="heatmap-hero-actions">
+      <button type="button" class="learning-btn" data-manual-open>＋ 手动补录</button>
+      <a class="learning-btn" href="../">返回学习中心</a>
+    </div>
+  </header>
+
+  <section class="heatmap-metrics" aria-label="学习热力图统计">
+    <article><span>本月打卡次数</span><strong data-kpi-total>0</strong><small>课程 + 刷题 + 手动</small></article>
+    <article><span>本月打卡天数</span><strong data-kpi-days>0</strong><small>至少 1 次即计一天</small></article>
+    <article><span>当前连续</span><strong data-kpi-streak>0 天</strong><small>从今天或昨天开始计算</small></article>
+    <article><span>单日最高</span><strong data-kpi-max>0</strong><small>本月最高打卡次数</small></article>
+  </section>
+
+  <section class="heatmap-layout">
+    <article class="heatmap-panel">
+      <div class="heatmap-panel-head">
+        <div>
+          <div class="eyebrow">CHECK-IN HEATMAP</div>
+          <h2>每日打卡次数</h2>
+          <p data-source-status>正在读取学习记录…</p>
+        </div>
+        <div class="heatmap-segment" role="tablist" aria-label="热力图视图">
+          <button type="button" class="active" data-view="month">月视图</button>
+          <button type="button" data-view="year">年视图</button>
+        </div>
+      </div>
+
+      <section data-month-view>
+        <div class="heatmap-calendar-head">
+          <button type="button" class="heatmap-nav-btn" data-prev-month aria-label="上个月">‹</button>
+          <button type="button" class="heatmap-month-label" data-jump-current title="返回本月">2026年8月</button>
+          <button type="button" class="heatmap-nav-btn" data-next-month aria-label="下个月">›</button>
+        </div>
+        <div class="heatmap-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+        <div class="heatmap-month-grid" data-month-grid></div>
+        <div class="heatmap-legend"><span>少</span><i data-lv="0"></i><i data-lv="1"></i><i data-lv="2"></i><i data-lv="3"></i><i data-lv="4"></i><span>多</span></div>
+        <div class="heatmap-summary">
+          <div><span>本月活跃率</span><strong data-summary-rate>0%</strong></div>
+          <div><b data-summary-title>开始记录</b><p data-summary-desc>每天完成一点，就会留下颜色。</p></div>
+        </div>
+      </section>
+
+      <section data-year-view hidden>
+        <div class="heatmap-calendar-head heatmap-year-head">
+          <button type="button" class="heatmap-nav-btn" data-prev-year aria-label="上一年">‹</button>
+          <button type="button" class="heatmap-month-label" data-jump-year title="返回今年">2026 年</button>
+          <button type="button" class="heatmap-nav-btn" data-next-year aria-label="下一年">›</button>
+        </div>
+        <div class="heatmap-year-grid" data-year-grid></div>
+      </section>
+    </article>
+
+    <aside class="heatmap-side">
+      <section class="heatmap-side-card">
+        <div class="eyebrow">TODAY</div>
+        <h3>今天</h3>
+        <strong class="heatmap-today-number" data-today-count>0</strong>
+        <span>次打卡</span>
+        <div class="heatmap-source-bars" data-today-sources></div>
+      </section>
+
+      <section class="heatmap-side-card">
+        <div class="eyebrow">SOURCE</div>
+        <h3>本月来源</h3>
+        <div class="heatmap-source-list" data-month-sources></div>
+      </section>
+
+      <section class="heatmap-side-card heatmap-tip">
+        <strong>统计规则</strong>
+        <p>完成 1 个课程课时 = 1 次；完成 1 个刷题条目 = 1 次；手动补录 = 1 次。重复完成同一条目时，只在状态从未完成重新变为完成时新增一次。</p>
+      </section>
+    </aside>
+  </section>
+</main>
+
+<dialog class="heatmap-dialog" data-day-dialog>
+  <form method="dialog" class="heatmap-dialog-card">
+    <header><div><span data-day-label>当天详情</span><h3 data-day-count>0 次打卡</h3></div><button value="cancel" aria-label="关闭">×</button></header>
+    <div class="heatmap-day-events" data-day-events></div>
+  </form>
+</dialog>
+
+<dialog class="heatmap-dialog" data-manual-dialog>
+  <form class="heatmap-dialog-card" data-manual-form>
+    <header><div><span>MANUAL CHECK-IN</span><h3>手动补录</h3></div><button type="button" data-manual-close aria-label="关闭">×</button></header>
+    <label class="heatmap-field"><span>日期与时间</span><input type="datetime-local" data-manual-time required></label>
+    <label class="heatmap-field"><span>科目</span><select data-manual-subject data-pretty-select><option value="study">学习</option><option value="ds">数据结构</option><option value="co">组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option><option value="math2">数学二</option><option value="english">英语</option><option value="politics">政治</option></select></label>
+    <label class="heatmap-field"><span>备注</span><textarea data-manual-note maxlength="200" placeholder="例如：补录晚间复盘 / 纸质题本打卡"></textarea></label>
+    <div class="heatmap-dialog-actions"><button type="button" class="learning-btn" data-manual-close>取消</button><button type="submit" class="learning-btn primary">保存补录</button></div>
+    <p class="heatmap-manual-hint" data-manual-hint>手动补录需要登录；未登录时仍可查看本机已有打卡。</p>
+  </form>
+</dialog>
+
+<footer class="footer"><div class="wrap footer-inner"><span>Everflow Study · 学习热力图</span><span><a href="../practice/">去刷题 →</a></span></div></footer>
+<script src="../../assets/js/site-runtime-v2.js"></script>
+<script src="../../assets/js/cloud-config.js"></script>
+<script src="../../assets/js/pretty-select.js"></script>
+<script type="module" src="../../assets/js/study-heatmap.js"></script>
+</body>
+</html>
