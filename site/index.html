@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow · 27考研倒计时与408强化进度">
+  <meta name="description" content="Everflow · 27考研倒计时、408强化与专注统计">
   <title>27考研倒计时 · Everflow</title>
   <link rel="icon" href="assets/everflow-icon.svg">
   <link rel="stylesheet" href="assets/css/site.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
+  <link rel="stylesheet" href="assets/css/study.css">
 </head>
 <body data-root="./" data-view="home">
 <header class="topbar">
@@ -16,15 +17,17 @@
     <nav class="links">
       <a class="active" href="./">首页</a>
       <a href="408/">408强化</a>
+      <a href="focus/">专注</a>
+      <a href="stats/">统计</a>
       <a href="archive/">文章</a>
-      <a href="about/">关于</a>
+      <a href="account/">账户</a>
       <button class="icon-btn" data-theme aria-label="切换主题">◐</button>
     </nav>
     <button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button>
   </div>
 </header>
 <div class="mobile-panel">
-  <a href="./">首页</a><a href="408/">408强化</a><a href="archive/">文章</a><a href="about/">关于</a><button class="icon-btn" data-theme>◐</button>
+  <a href="./">首页</a><a href="408/">408强化</a><a href="focus/">专注</a><a href="stats/">统计</a><a href="archive/">文章</a><a href="account/">账户</a><button class="icon-btn" data-theme>◐</button>
 </div>
 
 <main class="wrap">
@@ -32,7 +35,7 @@
     <div class="countdown-panel">
       <div class="eyebrow">27考研 · COUNTDOWN</div>
       <h1 data-countdown-label>距离 27 考研</h1>
-      <p>把每天的学习变成看得见的进度。倒计时、408强化更新和打卡记录都放在这里。</p>
+      <p>把每天的学习变成看得见的进度。倒计时、408强化、专注时间和学习统计都放在这里。</p>
       <div class="countdown" aria-label="考研倒计时">
         <div class="countdown-unit"><strong data-countdown-days>--</strong><span>天 DAYS</span></div>
         <div class="countdown-unit"><strong data-countdown-hours>--</strong><span>时 HOURS</span></div>
@@ -47,10 +50,20 @@
         <div class="eyebrow">CURRENT FOCUS</div>
         <h2>408 强化<br>持续推进</h2>
         <p>数据结构 · 计算机组成原理 · 操作系统 · 计算机网络</p>
-        <div class="study-meta"><span class="study-chip" data-overall-study>读取进度…</span><span class="study-chip">本机自动保存打卡</span></div>
+        <div class="study-meta"><span class="study-chip" data-overall-study>读取进度…</span><span class="study-chip">本地优先保存</span></div>
       </div>
-      <a class="primary-link" href="408/">打开氧气11强化表 →</a>
+      <div class="quick-links"><a class="primary-link" href="focus/">开始专注 →</a><a class="ghost-link" href="408/">408 打卡</a></div>
     </aside>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="section-head"><div><div class="eyebrow">TODAY</div><h2>学习状态</h2></div><a href="stats/">查看完整统计 →</a></div>
+    <div class="home-study-strip">
+      <div class="home-study-item"><span>今日专注</span><strong data-home-focus>0m</strong></div>
+      <div class="home-study-item"><span>连续学习</span><strong data-home-streak>0 天</strong></div>
+      <div class="home-study-item"><span>最近 7 天</span><strong data-home-week>0m</strong></div>
+      <div class="home-study-item"><span>累计专注次数</span><strong data-home-sessions>0 次</strong></div>
+    </div>
   </section>
 
   <section class="section">
@@ -81,7 +94,11 @@
 
 <footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>27考研 · Keep moving.</span></div></footer>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/study-store.js"></script>
+<script src="assets/js/cloud-config.js"></script>
+<script type="module" src="assets/js/cloud.js"></script>
 <script src="assets/js/dashboard.js"></script>
+<script src="assets/js/home-study.js"></script>
 <script src="assets/js/blog.js"></script>
 </body>
 </html>
