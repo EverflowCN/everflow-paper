@@ -23,7 +23,7 @@ export function applyCors(req, res) {
   }
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-Everflow-Device');
   res.setHeader('Access-Control-Max-Age', '86400');
 }
 
@@ -68,9 +68,22 @@ function unb64url(input) {
   return Buffer.from(input, 'base64url');
 }
 
-export function createState() {
+function normalizeDeviceId(value) {
+  const deviceId = String(value || '').trim();
+  return /^[A-Za-z0-9._-]{24,160}$/.test(deviceId) ? deviceId : '';
+}
+
+function deviceHash(value) {
+  const deviceId = normalizeDeviceId(value);
+  return deviceId ? crypto.createHash('sha256').update(deviceId).digest('base64url') : '';
+}
+
+export function createState(deviceId) {
+  const boundDevice = deviceHash(deviceId);
+  if (!boundDevice) throw new Error('Invalid device id');
   const payload = b64url(JSON.stringify({
     nonce: crypto.randomBytes(16).toString('hex'),
+    deviceHash: boundDevice,
     exp: Date.now() + 10 * 60 * 1000
   }));
   const sig = crypto.createHmac('sha256', secret()).update(payload).digest('base64url');
@@ -78,17 +91,19 @@ export function createState() {
 }
 
 export function verifyState(state) {
-  if (!state || !state.includes('.')) return false;
+  if (!state || !state.includes('.')) return null;
   const [payload, sig] = state.split('.');
   const expected = crypto.createHmac('sha256', secret()).update(payload).digest();
   let actual;
-  try { actual = Buffer.from(sig, 'base64url'); } catch { return false; }
-  if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return false;
+  try { actual = Buffer.from(sig, 'base64url'); } catch { return null; }
+  if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return null;
   try {
     const data = JSON.parse(unb64url(payload).toString('utf8'));
-    return Number(data.exp) > Date.now();
+    if (Number(data.exp) <= Date.now()) return null;
+    if (!/^[A-Za-z0-9_-]{43}$/.test(String(data.deviceHash || ''))) return null;
+    return data;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -96,23 +111,27 @@ function sessionKey() {
   return crypto.createHash('sha256').update(secret()).digest();
 }
 
-export function createSession(login, githubToken) {
+export function createSession(login, githubToken, boundDeviceHash) {
+  if (!/^[A-Za-z0-9_-]{43}$/.test(String(boundDeviceHash || ''))) {
+    throw new Error('Invalid device binding');
+  }
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', sessionKey(), iv);
   const plaintext = Buffer.from(JSON.stringify({
     login,
     githubToken,
+    deviceHash: boundDeviceHash,
     exp: Date.now() + SESSION_TTL_SECONDS * 1000
   }), 'utf8');
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
-  return ['v1', iv.toString('base64url'), tag.toString('base64url'), encrypted.toString('base64url')].join('.');
+  return ['v2', iv.toString('base64url'), tag.toString('base64url'), encrypted.toString('base64url')].join('.');
 }
 
 export function readSession(token) {
   try {
     const [version, ivB64, tagB64, encryptedB64] = String(token || '').split('.');
-    if (version !== 'v1') return null;
+    if (version !== 'v2') return null;
     const decipher = crypto.createDecipheriv('aes-256-gcm', sessionKey(), Buffer.from(ivB64, 'base64url'));
     decipher.setAuthTag(Buffer.from(tagB64, 'base64url'));
     const plaintext = Buffer.concat([
@@ -122,6 +141,7 @@ export function readSession(token) {
     const data = JSON.parse(plaintext);
     if (!data.exp || data.exp < Date.now()) return null;
     if (String(data.login).toLowerCase() !== ADMIN.toLowerCase()) return null;
+    if (!/^[A-Za-z0-9_-]{43}$/.test(String(data.deviceHash || ''))) return null;
     return data;
   } catch {
     return null;
@@ -152,7 +172,8 @@ export function clearSessionCookie(res) {
 
 export function requireSession(req, res) {
   const session = readSession(parseCookies(req)[SESSION_COOKIE]);
-  if (!session) {
+  const requestDeviceHash = deviceHash(req.headers['x-everflow-device']);
+  if (!session || !requestDeviceHash || session.deviceHash !== requestDeviceHash) {
     json(req, res, 401, { error: 'Unauthorized' });
     return null;
   }
