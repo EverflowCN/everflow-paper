@@ -9,7 +9,7 @@
   const makeId=()=>{if(globalThis.crypto?.randomUUID)return crypto.randomUUID();return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g,c=>(Number(c)^crypto.getRandomValues(new Uint8Array(1))[0]&15>>Number(c)/4).toString(16))};
   const load=()=>{try{return JSON.parse(localStorage.getItem(ACTIVE_KEY)||'null')}catch{return null}};
   const save=()=>timer?localStorage.setItem(ACTIVE_KEY,JSON.stringify(timer)):localStorage.removeItem(ACTIVE_KEY);
-  const selectedSubject=kind=>$(`[data-${kind}-subject] input[type="radio"]:checked`)?.value||'general';
+  const selectedSubject=kind=>{const el=$(`[data-${kind}-subject]`);if(!el)return'general';if(el.tagName==='SELECT')return el.value||'general';return el.querySelector?.('input[type="radio"]:checked')?.value||'general'};
   const feedback=(sel,text,type='success')=>{const el=$(sel);if(el){el.textContent=text;el.className=`focus-feedback ${type}`}};
 
   function elapsed(){if(!timer)return 0;return Math.max(0,Number(timer.accumulated)||0)+(timer.running?Math.max(0,(now()-timer.startedTick)/1000):0)}
