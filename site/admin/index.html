@@ -20,7 +20,7 @@
 <body>
 <header class="bar"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>博客管理后台</small></span></a><div class="right"><a class="btn" href="../">查看博客</a><button class="btn" id="logout" style="display:none">退出</button></div></header>
 <main class="shell">
-  <section class="login" id="login"><img src="../assets/everflow-icon.svg" alt=""><h1>博客管理后台</h1><p>仅允许 GitHub 账号 <strong>EverflowCN</strong> 登录。登录后可以发布、修改和删除文章。</p><button class="btn red" id="loginBtn">使用 GitHub 登录</button><div class="status" id="setupStatus">正在检查后台服务…</div></section>
+  <section class="login" id="login"><img src="../assets/everflow-icon.svg" alt=""><h1>博客管理后台</h1><p>仅允许 GitHub 账号 <strong>EverflowCN</strong> 登录。每台设备必须单独完成一次登录授权。</p><button class="btn red" id="loginBtn">使用 GitHub 登录</button><div class="status" id="setupStatus">正在检查后台服务…</div></section>
   <section class="dashboard" id="dashboard">
     <aside class="panel"><div class="topline"><h2>文章</h2><span id="count"></span></div><button class="btn red" id="newBtn" style="width:100%;margin-bottom:12px">＋ 新建文章</button><div class="post-list" id="postList"></div></aside>
     <section class="panel"><div class="topline"><h1 id="editorTitle">新建文章</h1><span id="identity"></span></div><div class="notice" id="notice"></div><div class="row"><div><label>标题</label><input id="title" placeholder="文章标题"></div><div><label>Slug</label><input id="slug" placeholder="example-post"></div></div><div class="row"><div><label>日期</label><input id="date" type="date"></div><div><label>标签</label><input id="tags" placeholder="随笔, 技术"></div></div><label>摘要</label><input id="excerpt" placeholder="首页显示的一句话摘要"><label>正文</label><textarea id="content" placeholder="支持简单 Markdown：## 标题、**加粗**、`代码`、> 引用"></textarea><div class="actions"><button class="btn red" id="publishBtn">发布 / 更新</button><button class="btn" id="clearBtn">清空</button><button class="btn danger" id="deleteBtn">删除当前文章</button></div></section>
@@ -29,10 +29,18 @@
 <script>
 const API='https://api.evera.top';
 const $=id=>document.getElementById(id);
+const DEVICE_KEY='everflow-admin-device';
 let posts=[],current=null;
 localStorage.removeItem('everflow-admin-token');
 if(location.hash.startsWith('#token='))history.replaceState(null,'',location.pathname);
-const apiFetch=(path,options={})=>fetch(API+path,{credentials:'include',...options});
+function makeDeviceId(){
+  if(globalThis.crypto?.randomUUID)return 'dev-'+crypto.randomUUID();
+  const bytes=new Uint8Array(24);globalThis.crypto?.getRandomValues?.(bytes);
+  return 'dev-'+Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+}
+let deviceId=localStorage.getItem(DEVICE_KEY)||'';
+if(!/^[A-Za-z0-9._-]{24,160}$/.test(deviceId)){deviceId=makeDeviceId();localStorage.setItem(DEVICE_KEY,deviceId)}
+const apiFetch=(path,options={})=>{const headers=new Headers(options.headers||{});headers.set('X-Everflow-Device',deviceId);return fetch(API+path,{...options,credentials:'include',headers})};
 const jsonHeaders=()=>({'Content-Type':'application/json'});
 function note(msg,ok=false){const n=$('notice');n.textContent=msg;n.className='notice'+(ok?' ok':'');n.style.display='block'}
 function slugify(s){return String(s).trim().toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
@@ -45,7 +53,7 @@ function edit(p){current=p;$('editorTitle').textContent='编辑文章';$('title'
 function localDate(){const d=new Date();const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
 function clearForm(){current=null;$('editorTitle').textContent='新建文章';['title','slug','tags','excerpt','content'].forEach(id=>$(id).value='');$('date').value=localDate();$('notice').style.display='none'}
 $('title').addEventListener('input',()=>{if(!current&&!$('slug').value)$('slug').value=slugify($('title').value)});
-$('loginBtn').onclick=()=>location.href=API+'/api/auth/login';
+$('loginBtn').onclick=()=>location.href=API+'/api/auth/login?device='+encodeURIComponent(deviceId);
 $('logout').onclick=async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'});}finally{location.reload()}};
 $('newBtn').onclick=clearForm;$('clearBtn').onclick=clearForm;
 $('publishBtn').onclick=async()=>{const payload={title:$('title').value.trim(),slug:$('slug').value.trim(),date:$('date').value,tags:$('tags').value,excerpt:$('excerpt').value.trim(),content:$('content').value};if(!payload.title||!payload.slug)return note('标题和 Slug 不能为空。');try{$('publishBtn').disabled=true;note('正在提交到 GitHub…');const r=await apiFetch('/api/publish',{method:'POST',headers:jsonHeaders(),body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.error||'发布失败');note('发布成功。GitHub Pages 正在自动部署。',true);await loadPosts();if(d.post)edit(d.post)}catch(e){note(e.message)}finally{$('publishBtn').disabled=false}};
