@@ -23,7 +23,7 @@
     const account=accountAnchor(container);if(!account||container.querySelector('.membership-nav-entry'))return;
     ensurePromoStyle();
     const wrap=document.createElement('span');wrap.className='membership-nav-entry'+(membershipHidden()?' is-hidden':'');
-    const link=document.createElement('a');link.href='/membership/';link.textContent='会员';if(location.pathname.startsWith('/membership/'))link.classList.add('active');
+    const link=document.createElement('a');link.href='/membership/';link.textContent='购买会员';if(location.pathname.startsWith('/membership/'))link.classList.add('active');
     const close=document.createElement('button');close.type='button';close.className='membership-nav-close';close.setAttribute('aria-label','关闭会员入口');close.textContent='×';
     close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(x=>x.classList.add('is-hidden'));});
     wrap.append(link,close);account.before(wrap);
