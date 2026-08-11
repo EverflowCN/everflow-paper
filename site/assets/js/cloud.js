@@ -97,11 +97,25 @@ async function getOwnerOverview(){
   return {users:profiles.count||0,focus:focus.count||0,courses:courses.count||0,recent:recent.data||[]};
 }
 
+async function ownerUsers(action,payload={}){
+  await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
+  const {data,error}=await client.functions.invoke('owner-users',{body:{action,...payload}});
+  if(error)throw error;
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+
+async function getOwnerAudit(){
+  await ready;if(!client||!(await isOwner()))throw new Error('无管理权限');
+  const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(30);
+  if(error)throw error;return data||[];
+}
+
 let syncTimer;
 document.addEventListener('everflow:study-change',()=>{
   if(syncing)return;
   clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200);
 });
 
-window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview};
+window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,signOut,syncAll,isOwner,getOwnerOverview,ownerUsers,getOwnerAudit};
 init();
