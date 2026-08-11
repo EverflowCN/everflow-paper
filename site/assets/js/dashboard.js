@@ -1,7 +1,7 @@
 (()=>{
   const $=s=>document.querySelector(s);
   const pad=n=>String(Math.max(0,n)).padStart(2,'0');
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const progressKey='oxygen408-progress-v2';
 
   async function loadJson(path){
@@ -32,6 +32,16 @@
     try{return JSON.parse(localStorage.getItem(progressKey)||'{}')||{}}catch{return{}}
   }
 
+  function syncLabel(source={}){
+    const status=source.syncStatus||'seed';
+    const states=source.subjectStatus||{};
+    const okCount=['ds','co','os','cn'].filter(k=>states[k]?.ok).length;
+    if(status==='ok')return '自动同步正常 · 4/4';
+    if(status==='partial')return `部分同步 · ${okCount}/4（将自动重试）`;
+    if(status==='error')return '本轮同步失败 · 将自动重试';
+    return '自动同步已启用';
+  }
+
   function renderOxygen(data){
     const progress=readProgress();
     const subjects=data.subjects||{};
@@ -55,7 +65,8 @@
     const sync=$('[data-oxygen-sync]');
     if(sync){
       const dt=data.updatedAt?new Date(data.updatedAt):null;
-      sync.innerHTML=`<span class="status-dot"></span>${esc(data.source?.syncStatus==='ok'?'自动同步正常':'自动同步已配置')} · ${dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步'}`;
+      sync.innerHTML=`<span class="status-dot"></span>${esc(syncLabel(data.source))} · ${dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步'}`;
+      sync.title=String(data.source?.message||'');
     }
   }
 
