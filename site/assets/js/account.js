@@ -3,6 +3,21 @@ import './cloud.js';
 (()=>{
   const $=s=>document.querySelector(s);
   const msg=(text,bad=false)=>{const el=$('[data-account-message]');if(el){el.textContent=text;el.style.color=bad?'var(--red)':'var(--muted)'}};
+  const planLabel=p=>p==='pro'?'Pro':p==='member'?'普通会员':'普通用户';
+
+  async function renderMembership(user){
+    const plan=$('[data-account-membership]'),detail=$('[data-account-membership-detail]');
+    if(!plan||!detail)return;
+    if(!user){plan.textContent='普通用户';detail.textContent='登录后可查看会员状态';return}
+    try{
+      const status=await EveraCloud.membership('status');
+      plan.textContent=planLabel(status.plan);
+      const expiry=status.membership?.effective_expires_at;
+      detail.textContent=status.active?(expiry?`有效至 ${new Date(expiry).toLocaleString('zh-CN',{hour12:false})}`:'当前有效'):'当前无有效会员';
+      try{localStorage.setItem('everflow-membership-cache-v1',JSON.stringify({plan:status.plan,active:status.active,at:new Date().toISOString()}))}catch{}
+      if(status.active){localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.dispatchEvent(new CustomEvent('everflow:membership-change',{detail:{active:true,plan:status.plan}}));}
+    }catch{plan.textContent='普通用户';detail.textContent='会员状态暂时无法读取'}
+  }
 
   async function renderAuth(){
     await EveraCloud.ready;
@@ -15,6 +30,7 @@ import './cloud.js';
     const email=$('[data-user-email]');if(email)email.textContent=user?.email||'';
     const role=$('[data-user-role]');if(role)role.textContent=user?.app_metadata?.role==='owner'?'Owner':'User';
     const sync=$('[data-last-sync]');if(sync){try{const x=JSON.parse(localStorage.getItem('everflow-last-cloud-sync')||'null');sync.textContent=x?.at?new Date(x.at).toLocaleString('zh-CN',{hour12:false}):'尚未同步'}catch{sync.textContent='尚未同步'}}
+    await renderMembership(user);
   }
 
   function saveCloudConfig(){
@@ -74,6 +90,7 @@ import './cloud.js';
   $('[data-import-file]')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importData(f)});
   document.addEventListener('everflow:auth-change',renderAuth);
   document.addEventListener('everflow:cloud-sync',renderAuth);
+  document.addEventListener('everflow:membership-change',renderAuth);
   document.addEventListener('everflow:cloud-error',e=>msg(`云同步失败，本机数据仍安全：${e.detail?.message||'请稍后重试'}`,true));
   addEventListener('online',renderAuth);addEventListener('offline',renderAuth);
   Promise.resolve(window.EveraStore?.init()).then(renderAuth).catch(console.error);
