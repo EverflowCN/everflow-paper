@@ -29,6 +29,7 @@ function loadState(){
     const now=new Date().toISOString();
     for(const id of new Set([...Object.keys(state.done),...Object.keys(state.notes)]))state.updated[id]=state.updated[id]||state.done[id]||now;
   }catch{state=normalizeState()}
+  active=state.activeKey||'alg';
   saveState();
 }
 function saveState(){state.activeKey=active;localStorage.setItem(LOCAL_KEY,JSON.stringify(state));const scope=localStorage.getItem(SCOPE_KEY);if(scope)saveSnapshot(scope)}
