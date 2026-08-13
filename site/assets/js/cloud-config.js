@@ -43,5 +43,10 @@
     userAdmin.src='../assets/js/workspace-user-admin-v1.js?v=1';
     userAdmin.async=true;
     document.head.appendChild(userAdmin);
+
+    const quotaEntry=document.createElement('script');
+    quotaEntry.src='../assets/js/workspace-quota-entry-v1.js?v=1';
+    quotaEntry.async=true;
+    document.head.appendChild(quotaEntry);
   }
 })();
