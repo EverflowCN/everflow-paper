@@ -2,7 +2,7 @@
   function inject(){
     if(!location.pathname.startsWith('/workspace/'))return;
     const nav=document.querySelector('.ws-side .ws-nav');
-    if(!nav||nav.querySelector('[data-ws-quota-entry]'))return;
+    if(!nav||nav.querySelector('[data-ws-quota-entry]')||nav.querySelector('[data-quota-active]'))return;
     const link=document.createElement('a');
     link.href='./limits.html';
     link.dataset.wsQuotaEntry='1';
