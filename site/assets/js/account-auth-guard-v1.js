@@ -49,7 +49,7 @@
         const text=String(error?.message||error||'');
         if(/rate limit|too many|email rate|over_email_send_rate_limit|429/i.test(text)){
           setCooldown(300);
-          throw new Error('邮件服务当前达到发送频率限制，请稍后再试。已有验证码请直接使用；也可以直接使用密码登录。');
+          throw new Error('邮件服务当前达到发送频率限制，请稍后再试。已有验证码请直接使用；已有密码可直接登录。若还没有账号，可联系 QQ 1504615378 免费人工增加账号。');
         }
         setCooldown(15);
         throw error;
