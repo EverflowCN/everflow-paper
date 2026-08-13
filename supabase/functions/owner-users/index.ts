@@ -16,12 +16,23 @@ Deno.serve(async req=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'not_found'},404);if(!SUPABASE_URL||!SERVICE_KEY)return json({error:'service_unavailable'},503)
   const authHeader=req.headers.get('Authorization')||'';const token=authHeader.startsWith('Bearer ')?authHeader.slice(7):'';if(!token)return json({error:'not_found'},404)
   const admin=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});const {data:{user:actor},error:actorError}=await admin.auth.getUser(token);if(actorError||!actor||actor.app_metadata?.role!=='owner')return json({error:'not_found'},404)
-  let body:{action?:string;userId?:string;page?:number;perPage?:number}={};try{body=await req.json()}catch{return json({error:'bad_request'},400)};const action=String(body.action||'')
+  let body:{action?:string;userId?:string;email?:string;page?:number;perPage?:number}={};try{body=await req.json()}catch{return json({error:'bad_request'},400)};const action=String(body.action||'')
   try{
     if(action==='list'){
       const page=Math.max(1,Math.min(1000,Number(body.page)||1)),perPage=Math.max(1,Math.min(100,Number(body.perPage)||50));const {data,error}=await admin.auth.admin.listUsers({page,perPage});if(error)throw error
       const ids=(data.users||[]).map(u=>u.id);let creds:any[]=[];if(ids.length){const res=await admin.from('user_temp_credentials').select('user_id,created_at,version,active').in('user_id',ids);if(res.error)throw res.error;creds=res.data||[]}const cm=new Map(creds.map((x:any)=>[x.user_id,x]));
       const users=(data.users||[]).map(u=>({id:u.id,email:u.email||'',createdAt:u.created_at,lastSignInAt:u.last_sign_in_at||null,bannedUntil:u.banned_until||null,role:u.app_metadata?.role||'user',tempCredential:cm.get(u.id)||null}));return json({users,page,perPage})
+    }
+    if(action==='create'){
+      const email=String(body.email||'').trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email))return json({error:'invalid_email'},400)
+      const password=makeTempPassword();const {data,error}=await admin.auth.admin.createUser({email,password,email_confirm:true,app_metadata:{role:'user'}})
+      if(error){const msg=String(error.message||'');if(/already|registered|exists/i.test(msg))return json({error:'user_already_exists'},409);throw error}
+      const created=data.user;if(!created)return json({error:'operation_failed'},500)
+      try{
+        const enc=await encryptSecret(password,'everflow-temp-password-v1');const {error:storeError}=await admin.from('user_temp_credentials').upsert({user_id:created.id,password_ciphertext:enc.ciphertext,password_iv:enc.iv,cipher_version:1,created_at:new Date().toISOString(),created_by:actor.id,version:1,active:true},{onConflict:'user_id'});if(storeError)throw storeError
+      }catch(storeError){await admin.auth.admin.deleteUser(created.id,false).catch(()=>{});throw storeError}
+      await admin.from('admin_audit').insert({actor_user_id:actor.id,action:'user_create',target_user_id:created.id,detail:{email:created.email||email,version:1}})
+      return json({ok:true,user:{id:created.id,email:created.email||email,createdAt:created.created_at},password,version:1,createdAt:new Date().toISOString()})
     }
     const userId=String(body.userId||'');if(!userId)return json({error:'missing_user'},400);if(userId===actor.id&&['ban','delete','reset-password'].includes(action))return json({error:'self_action_blocked'},400)
     if(action==='ban'||action==='unban'){
