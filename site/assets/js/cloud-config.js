@@ -38,5 +38,10 @@
     oxygenGuard.src='../assets/js/workspace-oxygen-guard-v1.js?v=2';
     oxygenGuard.async=true;
     document.head.appendChild(oxygenGuard);
+
+    const userAdmin=document.createElement('script');
+    userAdmin.src='../assets/js/workspace-user-admin-v1.js?v=1';
+    userAdmin.async=true;
+    document.head.appendChild(userAdmin);
   }
 })();
