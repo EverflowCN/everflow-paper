@@ -1,13 +1,13 @@
 {
   "schema": 2,
-  "updatedAt": "2026-08-13T15:58:01+08:00",
+  "updatedAt": "2026-08-13T18:32:07+08:00",
   "source": {
     "up": "就是氧气11",
     "mid": 378777885,
     "collection": "27考研408计算机基础综合合集",
     "auto": true,
     "syncStatus": "ok",
-    "message": "27强化合集四科同步成功；新增 3 条，补全 0 条课程元数据。",
+    "message": "27强化合集四科同步成功；新增 2 条，补全 0 条课程元数据。",
     "subjectStatus": {
       "ds": {
         "ok": true,
