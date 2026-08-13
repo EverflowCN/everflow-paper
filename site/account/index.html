@@ -1,1 +1,86 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Everflow 账户、验证码登录与云同步"><link rel="manifest" href="../manifest.webmanifest"><title>账户 · Everflow</title><link rel="icon" href="../assets/everflow-icon.svg"><link rel="stylesheet" href="../assets/css/site.css"><link rel="stylesheet" href="../assets/css/responsive.css"><link rel="stylesheet" href="../assets/css/study.css"><link rel="stylesheet" href="../assets/css/account-membership.css"></head><body><header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header><div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div><main class="wrap study-dashboard"><div class="auth-shell account-shell"><div class="page-head compact-head"><div class="eyebrow">ACCOUNT</div><h1>账户</h1><p>默认使用邮箱验证码登录；408 打卡仍优先保存在本机，登录后再同步到对应账号。</p></div><nav class="account-switcher" aria-label="账户与会员"><a class="active" href="./" aria-current="page">账户</a><a href="../membership/">会员</a></nav><section class="study-card auth-primary" data-auth-guest><div class="eyebrow">EMAIL OTP</div><h2>验证码登录 / 注册</h2><p class="muted">输入邮箱获取 6 位验证码。新邮箱验证成功后会自动创建账号，不需要先设置密码。</p><div class="study-form otp-form"><label>邮箱<input type="email" autocomplete="email" inputmode="email" data-auth-email placeholder="you@example.com"></label><button class="timer-btn primary" type="button" data-otp-send>发送验证码</button><div class="otp-stage" data-otp-stage hidden><div class="field-label">6 位验证码</div><div class="otp-boxes" data-otp-boxes><input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="验证码第1位"><input inputmode="numeric" maxlength="1" aria-label="验证码第2位"><input inputmode="numeric" maxlength="1" aria-label="验证码第3位"><input inputmode="numeric" maxlength="1" aria-label="验证码第4位"><input inputmode="numeric" maxlength="1" aria-label="验证码第5位"><input inputmode="numeric" maxlength="1" aria-label="验证码第6位"></div><div class="otp-actions"><button class="timer-btn primary" type="button" data-otp-verify>验证并登录</button><button class="timer-btn" type="button" data-otp-resend disabled>60 秒后重发</button></div></div><div class="auth-feedback" data-auth-feedback role="status" aria-live="polite"></div></div><details class="password-fallback"><summary>管理员临时密码 / 密码登录</summary><div class="study-form"><label>密码<input type="password" autocomplete="current-password" data-auth-password placeholder="输入密码或管理员提供的临时密码"></label><button class="timer-btn" type="button" data-login-password>使用密码登录</button><p class="muted">普通情况下无需使用。管理员重置的临时密码每个账号、每次重置都不同。</p></div></details></section><section class="study-card" data-auth-signed hidden><div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h2>已登录</h2></div><span class="sync-badge" data-cloud-status>正在检查…</span></div><p><strong data-user-email></strong> · <span data-user-role>User</span></p><div class="metric-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="metric-card"><span>最近云同步</span><strong style="font-size:14px" data-last-sync>尚未同步</strong></div><div class="metric-card"><span>当前会员</span><strong style="font-size:14px" data-account-membership>普通用户</strong></div></div><p class="muted" data-account-membership-detail>正在读取会员状态</p><div class="auth-actions centered"><button class="timer-btn primary" type="button" data-sync-now>立即同步</button><button class="timer-btn" type="button" data-logout>退出登录</button></div><div class="auth-feedback" data-auth-feedback-signed role="status" aria-live="polite"></div></section><section class="study-card" style="margin-top:14px" data-owner-workspace hidden><div class="membership-summary-row"><div><div class="eyebrow">OWNER</div><h2>管理工作台</h2><p>用户、会员、兑换码、通知、资源与 408 更新。</p></div><a class="membership-manage-btn" href="../workspace/">进入工作台 →</a></div></section><section class="study-card" style="margin-top:14px"><div class="membership-summary-row"><div><div class="eyebrow">MEMBERSHIP</div><h2>会员</h2><p>查看 Member / Pro 状态与兑换码。</p></div><a class="membership-manage-btn" href="../membership/">会员中心 →</a></div></section><section class="study-card" style="margin-top:14px"><div class="eyebrow">BACKUP</div><h2>本地备份</h2><p>导出或恢复 408 打卡 JSON；恢复时按更新时间合并。</p><div class="data-actions centered"><button class="timer-btn" type="button" data-export>导出 JSON</button><label class="timer-btn" style="cursor:pointer;text-align:center">导入 JSON<input type="file" accept="application/json,.json" data-import-file hidden></label></div><p class="muted" data-account-message role="status" aria-live="polite"></p></section></div></main><footer class="footer"><div class="wrap footer-inner"><span>Everflow Account</span><span><a href="../408/">408强化 →</a></span></div></footer><script src="../assets/js/site-runtime-v2.js"></script><script src="../assets/js/study-store.js"></script><script src="../assets/js/cloud-config.js"></script><script type="module" src="../assets/js/account.js"></script><script type="module" src="../assets/js/account-owner.js"></script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Everflow 账户、密码登录、验证码登录与云同步">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <title>账户 · Everflow</title>
+  <link rel="icon" href="../assets/everflow-icon.svg">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/study.css">
+  <link rel="stylesheet" href="../assets/css/account-membership.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
+<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+
+<main class="wrap study-dashboard">
+  <div class="auth-shell account-shell">
+    <div class="page-head compact-head">
+      <div class="eyebrow">ACCOUNT</div>
+      <h1>账户</h1>
+      <p>默认使用邮箱 + 密码登录；没有密码、首次注册或忘记密码时，再使用邮箱验证码。学习数据仍优先保存在本机，登录后同步到对应账号。</p>
+    </div>
+
+    <nav class="account-switcher" aria-label="账户与会员"><a class="active" href="./" aria-current="page">账户</a><a href="../membership/">会员</a></nav>
+
+    <section class="study-card auth-primary" data-auth-guest>
+      <div class="eyebrow">PASSWORD</div>
+      <h2>密码登录</h2>
+      <p class="muted">这是默认登录方式。已有密码或管理员提供的临时密码时，直接登录即可，不会发送邮件。</p>
+
+      <div class="study-form password-login-form">
+        <label>邮箱<input type="email" autocomplete="email" inputmode="email" data-auth-email placeholder="you@example.com"></label>
+        <label>密码<input type="password" autocomplete="current-password" data-auth-password placeholder="输入账号密码"></label>
+        <button class="timer-btn primary" type="button" data-login-password>密码登录</button>
+      </div>
+
+      <details class="password-fallback otp-fallback">
+        <summary>验证码登录 / 注册 / 无密码账号</summary>
+        <div class="study-form otp-form">
+          <p class="muted">验证码会发送到上方填写的邮箱。新邮箱验证成功后会自动创建账号；邮件服务限流时可以继续使用密码登录。</p>
+          <button class="timer-btn" type="button" data-otp-send>发送验证码</button>
+          <div class="otp-stage" data-otp-stage hidden>
+            <div class="field-label">6 位验证码</div>
+            <div class="otp-boxes" data-otp-boxes>
+              <input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="验证码第1位">
+              <input inputmode="numeric" maxlength="1" aria-label="验证码第2位">
+              <input inputmode="numeric" maxlength="1" aria-label="验证码第3位">
+              <input inputmode="numeric" maxlength="1" aria-label="验证码第4位">
+              <input inputmode="numeric" maxlength="1" aria-label="验证码第5位">
+              <input inputmode="numeric" maxlength="1" aria-label="验证码第6位">
+            </div>
+            <div class="otp-actions">
+              <button class="timer-btn primary" type="button" data-otp-verify>验证并登录</button>
+              <button class="timer-btn" type="button" data-otp-resend disabled>60 秒后重发</button>
+            </div>
+          </div>
+          <div class="auth-feedback" data-auth-feedback role="status" aria-live="polite"></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="study-card" data-auth-signed hidden>
+      <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h2>已登录</h2></div><span class="sync-badge" data-cloud-status>正在检查…</span></div>
+      <p><strong data-user-email></strong> · <span data-user-role>User</span></p>
+      <div class="metric-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="metric-card"><span>最近云同步</span><strong style="font-size:14px" data-last-sync>尚未同步</strong></div><div class="metric-card"><span>当前会员</span><strong style="font-size:14px" data-account-membership>普通用户</strong></div></div>
+      <p class="muted" data-account-membership-detail>正在读取会员状态</p>
+      <div class="auth-actions centered"><button class="timer-btn primary" type="button" data-sync-now>立即同步</button><button class="timer-btn" type="button" data-logout>退出登录</button></div>
+      <div class="auth-feedback" data-auth-feedback-signed role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="study-card" style="margin-top:14px" data-owner-workspace hidden><div class="membership-summary-row"><div><div class="eyebrow">OWNER</div><h2>管理工作台</h2><p>用户、会员、兑换码、通知、资源与 408 更新。</p></div><a class="membership-manage-btn" href="../workspace/">进入工作台 →</a></div></section>
+    <section class="study-card" style="margin-top:14px"><div class="membership-summary-row"><div><div class="eyebrow">MEMBERSHIP</div><h2>会员</h2><p>查看 Member / Pro 状态与兑换码。</p></div><a class="membership-manage-btn" href="../membership/">会员中心 →</a></div></section>
+    <section class="study-card" style="margin-top:14px"><div class="eyebrow">BACKUP</div><h2>本地备份</h2><p>导出或恢复 408 打卡 JSON；恢复时按更新时间合并。</p><div class="data-actions centered"><button class="timer-btn" type="button" data-export>导出 JSON</button><label class="timer-btn" style="cursor:pointer;text-align:center">导入 JSON<input type="file" accept="application/json,.json" data-import-file hidden></label></div><p class="muted" data-account-message role="status" aria-live="polite"></p></section>
+  </div>
+</main>
+<footer class="footer"><div class="wrap footer-inner"><span>Everflow Account</span><span><a href="../study/">学习中心 →</a></span></div></footer>
+<script src="../assets/js/site-runtime-v2.js"></script>
+<script src="../assets/js/study-store.js"></script>
+<script src="../assets/js/cloud-config.js"></script>
+<script type="module" src="../assets/js/account.js"></script>
+<script type="module" src="../assets/js/account-owner.js"></script>
+</body>
+</html>
