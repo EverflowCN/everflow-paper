@@ -1,13 +1,13 @@
 {
   "schema": 2,
-  "updatedAt": "2026-08-14T11:03:41+08:00",
+  "updatedAt": "2026-08-14T13:10:01+08:00",
   "source": {
     "up": "就是氧气11",
     "mid": 378777885,
     "collection": "27考研408计算机基础综合合集",
     "auto": true,
-    "syncStatus": "partial",
-    "message": "本次 3/4 科同步成功；优先读取27强化合集；已有数据均保留。失败：os: HTTPError: HTTP Error 412: Precondition Failed",
+    "syncStatus": "ok",
+    "message": "27强化合集四科同步成功；新增 3 条，补全 0 条课程元数据。",
     "subjectStatus": {
       "ds": {
         "ok": true,
@@ -20,9 +20,9 @@
         "method": "search"
       },
       "os": {
-        "ok": false,
-        "error": "HTTPError: HTTP Error 412: Precondition Failed",
-        "method": ""
+        "ok": true,
+        "error": "",
+        "method": "search"
       },
       "cn": {
         "ok": true,
@@ -950,6 +950,14 @@
           "url": "https://www.bilibili.com/video/BV1MBgn6PE7T/",
           "bvid": "BV1MBgn6PE7T",
           "publishedAt": 1786601823
+        },
+        {
+          "id": "cn|网络层选择题专题(上)",
+          "title": "网络层选择题专题(上)",
+          "duration": "47:36",
+          "url": "https://www.bilibili.com/video/BV1JkgA6qE19/",
+          "bvid": "BV1JkgA6qE19",
+          "publishedAt": 1786678084
         }
       ]
     }
