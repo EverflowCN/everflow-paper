@@ -1,0 +1,92 @@
+/* LL880 24套仿真卷：阶段筛选专用样式。
+   使用全站 pretty-select，避免 iPhone / iPad 触发系统原生大弹层。 */
+.sim880-controls .pretty-select-host{
+  flex:0 1 236px;
+  width:auto;
+  min-width:210px;
+}
+.sim880-controls .pretty-select-trigger{
+  min-height:44px;
+  border-radius:13px;
+  padding:0 12px;
+  font-size:11px;
+  font-weight:800;
+  background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 95%,var(--soft)));
+  box-shadow:0 1px 0 rgba(17,18,23,.02),0 7px 20px rgba(17,18,23,.04);
+}
+.sim880-controls .pretty-select-trigger[aria-expanded="true"]{
+  border-color:color-mix(in srgb,var(--red) 42%,var(--line));
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--red) 8%,transparent),0 12px 28px rgba(17,18,23,.07);
+}
+.sim880-controls .pretty-select-menu{
+  min-width:280px;
+  border-radius:16px;
+  padding:7px;
+}
+.sim880-controls .pretty-select-option{
+  min-height:46px;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:720;
+}
+.sim880-controls .pretty-select-option.is-selected{
+  font-weight:850;
+}
+.sim880-load-error{
+  display:grid;
+  justify-items:center;
+  gap:8px;
+}
+.sim880-load-error strong{
+  color:var(--ink);
+  font-size:14px;
+}
+.sim880-load-error span{
+  max-width:520px;
+  line-height:1.7;
+}
+.sim880-load-error button{
+  margin-top:4px;
+  min-height:40px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--ink);
+  color:var(--card);
+  font:inherit;
+  font-size:10px;
+  font-weight:850;
+}
+
+@media(max-width:700px){
+  .sim880-controls .pretty-select-host{
+    flex:1 1 190px;
+    min-width:0;
+  }
+  .sim880-controls .pretty-select-trigger{
+    min-height:44px;
+    border-radius:13px;
+  }
+  .sim880-controls .pretty-select-menu{
+    position:fixed;
+    z-index:620;
+    left:12px;
+    right:12px;
+    top:auto;
+    bottom:calc(12px + env(safe-area-inset-bottom));
+    min-width:0;
+    max-height:min(52dvh,430px);
+    border-radius:22px;
+    padding:9px;
+    background:color-mix(in srgb,var(--card) 97%,transparent);
+    box-shadow:0 28px 90px rgba(17,18,23,.23);
+    backdrop-filter:blur(22px);
+    -webkit-backdrop-filter:blur(22px);
+  }
+  .sim880-controls .pretty-select-option{
+    min-height:52px;
+    border-radius:14px;
+    padding:10px 13px;
+    font-size:13px;
+  }
+}
