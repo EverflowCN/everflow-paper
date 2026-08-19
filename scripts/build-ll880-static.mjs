@@ -6,6 +6,7 @@ const dataPath = path.join(root, 'site/data/practice/math2-lilin880-24sets.json'
 const htmlPath = path.join(root, 'site/study/practice/math-880/simulations.html');
 const downloadDir = path.join(root, 'site/study/practice/math-880/downloads');
 const downloadPath = path.join(downloadDir, 'll880-math2-24-papers.xls');
+const assetVersion = '20260819-ui-modal-v2';
 
 const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 const sets = [...(data.sets || [])].sort((a, b) => a.number - b.number);
@@ -24,21 +25,6 @@ function searchText(p) {
     `第${p.number}套`, p.position, p.difficulty, p.relative, p.scoreRange, p.note,
     ...(p.questions || []).flatMap(q => [q.source, q.bPart, q.bSection, q.realExam, q.realType, q.method, q.level, q.qid])
   ].filter(Boolean).join(' ').toLowerCase();
-}
-
-function detailRows(p) {
-  return p.questions.map(q => `<tr>
-    <td>${esc(q.no)}</td>
-    <td>${esc(q.source)}</td>
-    <td>${esc(q.page)}</td>
-    <td>${esc(q.bPart)}</td>
-    <td>${esc(q.bSection)}</td>
-    <td>${esc(q.realExam)}</td>
-    <td>${esc(q.realType)}</td>
-    <td>${esc(q.method)}</td>
-    <td><span class="sim880-level">${esc(q.level)}</span></td>
-    <td><code>${esc(q.qid)}</code></td>
-  </tr>`).join('\n');
 }
 
 function cardHtml(p) {
@@ -62,22 +48,25 @@ function cardHtml(p) {
       <label class="sim880-field"><span>用时/min</span><input inputmode="decimal" type="number" min="1" max="360" step="1" placeholder="—" data-time="${esc(p.number)}"></label>
     </div>
     <div class="sim880-eval" data-eval="${esc(p.number)}"><strong>未记录</strong><span>未记录</span></div>
-    <details class="sim880-static-detail">
-      <summary>查看 22 题逐题表</summary>
-      <div class="sim880-detail-summary">
-        <div><span>定位</span><strong>${esc(p.position)}</strong></div>
-        <div><span>难度</span><strong>${esc(p.difficulty)}</strong></div>
-        <div><span>合理得分</span><strong>${esc(p.scoreRange)}</strong></div>
-        <div><span>合格 / 目标 / 优秀</span><strong>${esc(p.pass)} / ${esc(p.target)} / ${esc(p.excellent)}</strong></div>
-        <div><span>真题映射 A/B/C</span><strong>${esc(p.abc?.A ?? 0)} / ${esc(p.abc?.B ?? 0)} / ${esc(p.abc?.C ?? 0)}</strong></div>
-      </div>
-      <div class="sim880-table-wrap"><table class="sim880-table">
-        <thead><tr><th>#</th><th>880定位</th><th>书内页</th><th>B站</th><th>具体小节</th><th>真题对应</th><th>真题题型</th><th>具体考法</th><th>级别</th><th>QID</th></tr></thead>
-        <tbody>${detailRows(p)}</tbody>
-      </table></div>
-    </details>
+    <div class="sim880-card-actions"><button type="button" data-open="${esc(p.number)}">查看 22 题逐题表</button></div>
   </article>`;
 }
+
+const dialogBlock = `<!-- LL880_DIALOG_START -->
+<dialog class="sim880-dialog" data-paper-dialog aria-labelledby="sim880-dialog-title">
+  <div class="sim880-dialog-shell">
+    <header class="sim880-dialog-head">
+      <div>
+        <span data-dialog-kicker>PAPER</span>
+        <h2 id="sim880-dialog-title" data-dialog-title>逐题对照</h2>
+        <p data-dialog-meta></p>
+      </div>
+      <button type="button" data-dialog-close aria-label="关闭逐题表">×</button>
+    </header>
+    <div class="sim880-dialog-body" data-dialog-body></div>
+  </div>
+</dialog>
+<!-- LL880_DIALOG_END -->`;
 
 let html = fs.readFileSync(htmlPath, 'utf8');
 const cards = sets.map(cardHtml).join('\n');
@@ -94,6 +83,18 @@ if (!html.includes('<!-- LL880_EMBED_START -->') || !html.includes('<!-- LL880_E
 
 html = html.replace(/<!-- LL880_STATIC_START -->[\s\S]*?<!-- LL880_STATIC_END -->/, staticBlock);
 html = html.replace(/<!-- LL880_EMBED_START -->[\s\S]*?<!-- LL880_EMBED_END -->/, dataBlock);
+if (html.includes('<!-- LL880_DIALOG_START -->') && html.includes('<!-- LL880_DIALOG_END -->')) {
+  html = html.replace(/<!-- LL880_DIALOG_START -->[\s\S]*?<!-- LL880_DIALOG_END -->/, dialogBlock);
+} else {
+  html = html.replace('<!-- LL880_EMBED_START -->', `${dialogBlock}\n<!-- LL880_EMBED_START -->`);
+}
+
+// 强制刷新 iPad / Safari 上的旧 CSS 与旧 JS 缓存。
+html = html.replace(/practice-math880-simulations\.css(?:\?v=[^"']*)?/g, `practice-math880-simulations.css?v=${assetVersion}`);
+html = html.replace(/practice-math880-simulations\.js(?:\?v=[^"']*)?/g, `practice-math880-simulations.js?v=${assetVersion}`);
+
+// 静态页不再把 1040px 的逐题表塞进三列卡片里，详情统一走弹窗。
+html = html.replace('24 套卷和逐题表仍可直接查看；搜索、筛选、分数记录功能不可用。', '24 套卷仍可直接查看；逐题明细请启用 JavaScript 或下载 Excel。');
 fs.writeFileSync(htmlPath, html);
 
 // Generate a static Excel-compatible SpreadsheetML file so downloading does not depend on browser JavaScript.
