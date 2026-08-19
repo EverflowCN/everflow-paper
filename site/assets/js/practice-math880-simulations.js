@@ -2,7 +2,6 @@
 'use strict';
 
 const DATA_B64_GZIP='/data/practice/math2-lilin880-24sets.json.gz.b64';
-const XLSX_PARTS=Array.from({length:8},(_,i)=>`downloads/ll880-24/part-${String(i+1).padStart(2,'0')}.b64`);
 const RECORD_KEY='everflow-ll880-24sets-record-v1';
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -119,19 +118,57 @@ function openPaper(n){
 async function downloadWorkbook(){
   const btn=$('[data-download-xlsx]'),old=btn?.textContent;
   try{
+    if(!data?.sets?.length)throw new Error('data not ready');
     if(btn){btn.disabled=true;btn.textContent='正在生成 Excel…'}
-    const parts=await Promise.all(XLSX_PARTS.map(async url=>{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(`${url}: HTTP ${r.status}`);return r.text()}));
-    const b64=parts.join('').replace(/\s+/g,'');
-    const raw=atob(b64),bytes=new Uint8Array(raw.length);
-    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-    if(bytes[0]!==0x50||bytes[1]!==0x4b)throw new Error('XLSX signature mismatch');
-    const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='2027数学二_李林880_24套仿真卷_三部分逐题对照_含难度分数.xlsx';
+
+    const xmlEsc=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+    const cell=(v,style='')=>`<Cell${style?` ss:StyleID="${style}"`:''}><Data ss:Type="${typeof v==='number'?'Number':'String'}">${xmlEsc(v)}</Data></Cell>`;
+    const row=(vals,header=false)=>`<Row>${vals.map(v=>cell(v,header?'Header':'')).join('')}</Row>`;
+    const sheet=(name,rows)=>`<Worksheet ss:Name="${xmlEsc(name)}"><Table>${rows.join('')}</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions></Worksheet>`;
+
+    const detailHeader=['卷号','卷内题号','QID','880定位','书内页码','B站分P','B站具体小节','真题对应','真题题型','具体考法','等级'];
+    const detailRows=[row(detailHeader,true)];
+    data.sets.forEach(p=>p.questions.forEach(q=>detailRows.push(row([
+      p.number,q.no,q.qid,q.source,q.page,q.bPart,q.bSection,q.realExam,q.realType,q.method,q.level
+    ]))));
+
+    const paperHeader=['卷号','定位','难度','相对真题','合理得分区间','合格线','目标分','优秀线','B站定位','A','B','C','高频章节','说明'];
+    const paperRows=[row(paperHeader,true),...data.sets.map(p=>row([
+      p.number,p.position,p.difficulty,p.relative,p.scoreRange,p.pass,p.target,p.excellent,p.bilibiliLocated,
+      p.abc?.A??0,p.abc?.B??0,p.abc?.C??0,(p.topChapters||[]).map(x=>`${x.name} ×${x.count}`).join('；'),p.note||''
+    ]))];
+
+    const examMap=new Map();
+    data.sets.forEach(p=>p.questions.forEach(q=>{
+      const key=[q.realExam,q.realType,q.method,q.level].join('｜');
+      const cur=examMap.get(key)||{realExam:q.realExam,realType:q.realType,method:q.method,level:q.level,count:0,papers:new Set(),qids:[]};
+      cur.count++;cur.papers.add(p.number);cur.qids.push(q.qid);examMap.set(key,cur);
+    }));
+    const examRows=[row(['真题对应','真题题型','具体考法','等级','映射次数','涉及套卷','QID'],true),
+      ...[...examMap.values()].sort((a,b)=>b.count-a.count||String(a.realExam).localeCompare(String(b.realExam),'zh-CN')).map(x=>row([
+        x.realExam,x.realType,x.method,x.level,x.count,[...x.papers].sort((a,b)=>a-b).join('、'),x.qids.join('、')
+      ]))];
+
+    const scoreRows=[row(['卷号','定位','难度','相对真题','合理得分区间','合格线','目标分','优秀线','说明'],true),
+      ...data.sets.map(p=>row([p.number,p.position,p.difficulty,p.relative,p.scoreRange,p.pass,p.target,p.excellent,p.note||'']))];
+
+    const xml=`<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Styles><Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Top" ss:WrapText="1"/><Font ss:FontName="Microsoft YaHei" ss:Size="10"/></Style><Style ss:ID="Header"><Font ss:FontName="Microsoft YaHei" ss:Size="10" ss:Bold="1"/><Interior ss:Color="#EDEDED" ss:Pattern="Solid"/><Alignment ss:Vertical="Center" ss:WrapText="1"/></Style></Styles>
+${sheet('01-24套逐题对照总表',detailRows)}
+${sheet('02-24套卷画像',paperRows)}
+${sheet('03-真题映射统计',examRows)}
+${sheet('04-难度与分数标准',scoreRows)}
+</Workbook>`;
+
+    const blob=new Blob(['\ufeff',xml],{type:'application/vnd.ms-excel;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='2027数学二_李林880_24套仿真卷_逐题对照_网站导出版.xls';
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
   }catch(e){
-    console.error(e);alert('Excel 下载生成失败，请稍后刷新页面重试。');
+    console.error(e);alert('Excel 生成失败，请刷新页面后重试。');
   }finally{if(btn){btn.disabled=false;btn.textContent=old}}
 }
+
 function bind(){
   $('[data-search]')?.addEventListener('input',applyFilters);
   $('[data-position]')?.addEventListener('change',applyFilters);
