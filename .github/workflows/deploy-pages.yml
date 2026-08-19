@@ -28,8 +28,29 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      # 将通过文本方式存储的二进制下载资源恢复为浏览器可直接下载的 Excel。
-      # 若仓库已经直接包含 xlsx，则此步骤不会覆盖它。
+
+      # 24 套仿真卷数据在仓库中保留 gzip+base64 文本版本，
+      # 部署时解出普通 JSON，避免 iOS Safari 依赖 DecompressionStream。
+      - name: Materialize LL880 simulation JSON
+        shell: bash
+        run: |
+          SRC="site/data/practice/math2-lilin880-24sets.json.gz.b64"
+          OUT="site/data/practice/math2-lilin880-24sets.json"
+          if [ -f "$SRC" ]; then
+            tr -d '\r\n ' < "$SRC" | base64 --decode | gzip -dc > "$OUT"
+            python - <<'PY'
+          import json
+          path = "site/data/practice/math2-lilin880-24sets.json"
+          with open(path, "r", encoding="utf-8") as f:
+              data = json.load(f)
+          sets = data.get("sets", [])
+          if len(sets) != 24 or any(len(x.get("questions", [])) != 22 for x in sets):
+              raise SystemExit("LL880 simulation data validation failed")
+          print("LL880 simulation data OK:", len(sets), "papers")
+          PY
+          fi
+
+      # 旧版 Excel 分片若仍存在，则恢复为可下载文件；不存在时不影响部署。
       - name: Materialize downloadable Excel assets
         shell: bash
         run: |
@@ -38,6 +59,7 @@ jobs:
           if [ ! -f "$OUT" ] && compgen -G "$PART_DIR/part-*.b64" > /dev/null; then
             cat "$PART_DIR"/part-*.b64 | tr -d '\r\n ' | base64 --decode > "$OUT"
           fi
+
       # 同步工作流的数据提交不会递归触发 push；update-oxygen.yml 会显式 workflow_dispatch 本工作流。
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
