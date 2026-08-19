@@ -1,13 +1,8 @@
 (()=>{
 'use strict';
 
-const DATA_URLS=[
-  '/data/practice/math2-lilin880-24sets/phase-01.json',
-  '/data/practice/math2-lilin880-24sets/phase-02.json',
-  '/data/practice/math2-lilin880-24sets/phase-03.json',
-  '/data/practice/math2-lilin880-24sets/phase-04.json'
-];
-const XLSX_PARTS=Array.from({length:10},(_,i)=>`downloads/ll880-24/part-${String(i+1).padStart(2,'0')}.b64`);
+const DATA_B64_GZIP='/data/practice/math2-lilin880-24sets.json.gz.b64';
+const XLSX_PARTS=Array.from({length:8},(_,i)=>`downloads/ll880-24/part-${String(i+1).padStart(2,'0')}.b64`);
 const RECORD_KEY='everflow-ll880-24sets-record-v1';
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -156,8 +151,15 @@ function bind(){
 async function init(){
   loadRecords();bind();
   try{
-    const phases=await Promise.all(DATA_URLS.map(async url=>{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(`${url}: HTTP ${r.status}`);return r.json()}));
-    data={title:phases[0]?.title||'880 · 24套仿真卷',sets:phases.flatMap(x=>x.sets||[]).sort((a,b)=>a.number-b.number)};
+    const r=await fetch(DATA_B64_GZIP,{cache:'no-store'});if(!r.ok)throw new Error(`${DATA_B64_GZIP}: HTTP ${r.status}`);
+    const b64=(await r.text()).replace(/\s+/g,'');
+    const raw=atob(b64),bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    if(typeof DecompressionStream!=='function')throw new Error('DecompressionStream unavailable');
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const text=await new Response(stream).text();
+    data=JSON.parse(text);
+    data.sets=(data.sets||[]).sort((a,b)=>a.number-b.number);
     if(data.sets.length!==24)throw new Error(`expected 24 papers, got ${data.sets.length}`);
     render();
   }
