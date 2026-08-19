@@ -1,0 +1,1 @@
+window.LL88024={papers:Array.from({length:24},(_,i)=>({number:i+1,title:`第${String(i+1).padStart(2,'0')}套`}))};
