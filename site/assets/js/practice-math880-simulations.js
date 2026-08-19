@@ -4,6 +4,7 @@
 const RECORD_KEY='everflow-ll880-24sets-record-v1';
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let data={sets:[]};
 let records={};
 let activePhase='all';
@@ -45,7 +46,7 @@ function hydrateRecords(){
 }
 function refreshEval(n){
   const p=paperFor(n),r=recordFor(n),el=$(`[data-eval="${n}"]`);
-  if(el)el.innerHTML=`<strong>${evalScore(p,r.score??'')}</strong><span>${evalTime(r.time??'')}</span>`;
+  if(el)el.innerHTML=`<strong>${esc(evalScore(p,r.score??''))}</strong><span>${esc(evalTime(r.time??''))}</span>`;
 }
 function updateRecord(n,field,value){
   const key=String(n);
@@ -69,6 +70,43 @@ function applyFilters(){
     if(!empty){empty=document.createElement('div');empty.className='sim880-empty sim880-empty-filter';empty.textContent='没有匹配的仿真卷。';$('[data-papers]')?.appendChild(empty)}
   }else empty?.remove();
 }
+function detailHtml(p){
+  if(!p)return '';
+  return `<div class="sim880-detail-summary">
+    <div><span>定位</span><strong>${esc(p.position)}</strong></div>
+    <div><span>难度</span><strong>${esc(p.difficulty)}</strong></div>
+    <div><span>合理得分</span><strong>${esc(p.scoreRange)}</strong></div>
+    <div><span>合格 / 目标 / 优秀</span><strong>${esc(p.pass)} / ${esc(p.target)} / ${esc(p.excellent)}</strong></div>
+    <div><span>真题映射 A/B/C</span><strong>${esc(p.abc?.A??0)} / ${esc(p.abc?.B??0)} / ${esc(p.abc?.C??0)}</strong></div>
+  </div>
+  <div class="sim880-table-wrap"><table class="sim880-table">
+    <thead><tr><th>#</th><th>880定位</th><th>书内页</th><th>B站</th><th>具体小节</th><th>真题对应</th><th>真题题型</th><th>具体考法</th><th>级别</th><th>QID</th></tr></thead>
+    <tbody>${(p.questions||[]).map(q=>`<tr><td>${esc(q.no)}</td><td>${esc(q.source)}</td><td>${esc(q.page)}</td><td>${esc(q.bPart)}</td><td>${esc(q.bSection)}</td><td>${esc(q.realExam)}</td><td>${esc(q.realType)}</td><td>${esc(q.method)}</td><td><span class="sim880-level">${esc(q.level)}</span></td><td><code>${esc(q.qid)}</code></td></tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function openPaper(n){
+  const p=paperFor(n),dialog=$('[data-paper-dialog]');
+  if(!p||!dialog)return;
+  const kicker=$('[data-dialog-kicker]'),title=$('[data-dialog-title]'),meta=$('[data-dialog-meta]'),body=$('[data-dialog-body]');
+  if(kicker)kicker.textContent=`PAPER ${String(p.number).padStart(2,'0')} · ${p.difficulty}`;
+  if(title)title.textContent=`第 ${String(p.number).padStart(2,'0')} 套 · 22题逐题对照`;
+  if(meta)meta.textContent=`${p.position} · ${p.relative} · 合理得分 ${p.scoreRange}`;
+  if(body){body.innerHTML=detailHtml(p);body.scrollTop=0}
+  document.documentElement.classList.add('sim880-dialog-open');
+  if(typeof dialog.showModal==='function'){
+    if(!dialog.open)dialog.showModal();
+  }else{
+    dialog.setAttribute('open','');dialog.classList.add('is-fallback-open');
+  }
+  requestAnimationFrame(()=>dialog.querySelector('[data-dialog-close]')?.focus({preventScroll:true}));
+}
+function closeDialog(){
+  const dialog=$('[data-paper-dialog]');
+  if(!dialog)return;
+  if(typeof dialog.close==='function'&&dialog.open)dialog.close();
+  else{dialog.removeAttribute('open');dialog.classList.remove('is-fallback-open')}
+  document.documentElement.classList.remove('sim880-dialog-open');
+}
 function bind(){
   $('[data-search]')?.addEventListener('input',applyFilters);
   $$('[data-phase-chip]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -80,6 +118,14 @@ function bind(){
     if(e.target.matches('[data-score]'))updateRecord(e.target.dataset.score,'score',e.target.value);
     if(e.target.matches('[data-time]'))updateRecord(e.target.dataset.time,'time',e.target.value);
   });
+  document.addEventListener('click',e=>{
+    const open=e.target.closest('[data-open]');
+    if(open){e.preventDefault();openPaper(open.dataset.open);return}
+    if(e.target.closest('[data-dialog-close]')){e.preventDefault();closeDialog()}
+  });
+  const dialog=$('[data-paper-dialog]');
+  dialog?.addEventListener('click',e=>{if(e.target===dialog)closeDialog()});
+  dialog?.addEventListener('close',()=>document.documentElement.classList.remove('sim880-dialog-open'));
   $('[data-clear-record]')?.addEventListener('click',()=>{
     if(!confirm('清空 24 套仿真卷的本机分数和用时记录？'))return;
     records={};saveRecords();
