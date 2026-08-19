@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -30,7 +30,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       # 24 套仿真卷数据在仓库中保留 gzip+base64 文本版本，
-      # 部署时解出普通 JSON，避免 iOS Safari 依赖 DecompressionStream。
+      # 部署时解出普通 JSON，避免浏览器端依赖 DecompressionStream。
       - name: Materialize LL880 simulation JSON
         shell: bash
         run: |
@@ -50,6 +50,23 @@ jobs:
           PY
           fi
 
+      # 将解包后的普通 JSON 尝试同步回 main。
+      # 这样即便 evera.top 不是直接读取本次 Pages artifact，而是读取仓库静态文件，
+      # 24 套数据仍然真实存在于仓库路径中。推送失败不会阻断 Pages 部署。
+      - name: Persist LL880 plain JSON to repository
+        shell: bash
+        run: |
+          OUT="site/data/practice/math2-lilin880-24sets.json"
+          if [ -f "$OUT" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$OUT"
+            if ! git diff --cached --quiet; then
+              git commit -m "chore(math880): persist generated 24-set JSON" || true
+              git push origin HEAD:main || echo "WARN: unable to persist generated LL880 JSON; Pages artifact still contains it"
+            fi
+          fi
+
       # 旧版 Excel 分片若仍存在，则恢复为可下载文件；不存在时不影响部署。
       - name: Materialize downloadable Excel assets
         shell: bash
@@ -60,7 +77,6 @@ jobs:
             cat "$PART_DIR"/part-*.b64 | tr -d '\r\n ' | base64 --decode > "$OUT"
           fi
 
-      # 同步工作流的数据提交不会递归触发 push；update-oxygen.yml 会显式 workflow_dispatch 本工作流。
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
