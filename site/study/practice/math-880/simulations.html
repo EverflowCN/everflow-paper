@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../../../assets/css/learning-center.css">
   <link rel="stylesheet" href="../../../assets/css/app-ui.css">
   <link rel="stylesheet" href="../../../assets/css/practice-math880-simulations.css">
+  <link rel="stylesheet" href="../../../assets/css/practice-math880-simulations-select.css">
 </head>
 <body>
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../../../"><img src="../../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
@@ -48,7 +49,7 @@
 
   <section class="sim880-controls">
     <label class="sim880-search"><span aria-hidden="true">⌕</span><input type="search" data-search placeholder="搜索卷号、章节、考法、真题年份…" autocomplete="off"></label>
-    <select data-position>
+    <select data-position data-pretty-select aria-label="仿真卷阶段筛选">
       <option value="all">全部阶段</option>
       <option value="基础回归卷">基础回归卷 · 01–06</option>
       <option value="常规仿真卷">常规仿真卷 · 07–12</option>
@@ -60,7 +61,7 @@
 
   <div class="sim880-tip">
     <strong>训练建议</strong>
-    <p>01–06 用于把基础题失分压下去；07–12 最适合判断当前正常应试水平；13–20 看综合转化；21–24 只用于抗压和查漏，不建议把分数机械换算成真实考研分数。Excel 由当前 24 套逐题数据在浏览器内生成，不依赖额外下载分片。</p>
+    <p>01–06 用于把基础题失分压下去；07–12 最适合判断当前正常应试水平；13–20 看综合转化；21–24 只用于抗压和查漏，不建议把分数机械换算成真实考研分数。Excel 由当前 24 套逐题数据在浏览器内生成。</p>
   </div>
 
   <section class="sim880-grid" data-papers><div class="sim880-empty">正在读取 24 套逐题数据…</div></section>
