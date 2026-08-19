@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Build LL880 static simulation pages
         run: node scripts/build-ll880-static.mjs
@@ -45,9 +47,30 @@ jobs:
             echo "Expected 24 static paper cards, got $COUNT"
             exit 1
           fi
-          ROWS=$(grep -o 'data-paper="[0-9][0-9]*"' "$PAGE" | wc -l | tr -d ' ')
-          echo "LL880 static cards: $COUNT"
-          echo "LL880 data-paper markers: $ROWS"
+          DETAIL_COUNT=$(grep -o '<summary>查看 22 题逐题表</summary>' "$PAGE" | wc -l | tr -d ' ')
+          if [ "$DETAIL_COUNT" != "24" ]; then
+            echo "Expected 24 static detail tables, got $DETAIL_COUNT"
+            exit 1
+          fi
+          echo "LL880 static output OK: 24 cards / 24 detail tables / 528 mapped questions"
+
+      # 关键：把“构建完成后的 HTML”本身回写 main。
+      # 这样无论生产域名由 GitHub Pages、仓库镜像还是其它纯静态托管读取，
+      # 都不需要在浏览器运行 fetch，也不需要托管端执行 Node 才能看到 24 套数据。
+      - name: Persist LL880 pre-rendered output to main
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            site/study/practice/math-880/simulations.html \
+            site/study/practice/math-880/downloads/ll880-math2-24-papers.xls
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(math880): persist static 24-set output"
+            git push origin HEAD:main
+          else
+            echo "LL880 static output already persisted in main."
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
