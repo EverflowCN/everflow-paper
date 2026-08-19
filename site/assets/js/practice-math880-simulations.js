@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
 
+const DATA_JSON='/data/practice/math2-lilin880-24sets.json';
 const DATA_B64_GZIP='/data/practice/math2-lilin880-24sets.json.gz.b64';
 const RECORD_KEY='everflow-ll880-24sets-record-v1';
 const $=s=>document.querySelector(s);
@@ -121,7 +122,7 @@ async function downloadWorkbook(){
     if(!data?.sets?.length)throw new Error('data not ready');
     if(btn){btn.disabled=true;btn.textContent='正在生成 Excel…'}
 
-    const xmlEsc=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+    const xmlEsc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     const cell=(v,style='')=>`<Cell${style?` ss:StyleID="${style}"`:''}><Data ss:Type="${typeof v==='number'?'Number':'String'}">${xmlEsc(v)}</Data></Cell>`;
     const row=(vals,header=false)=>`<Row>${vals.map(v=>cell(v,header?'Header':'')).join('')}</Row>`;
     const sheet=(name,rows)=>`<Worksheet ss:Name="${xmlEsc(name)}"><Table>${rows.join('')}</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions></Worksheet>`;
@@ -169,13 +170,54 @@ ${sheet('04-难度与分数标准',scoreRows)}
   }finally{if(btn){btn.disabled=false;btn.textContent=old}}
 }
 
+async function loadData(){
+  let plainError=null;
+  try{
+    const r=await fetch(DATA_JSON,{cache:'no-store'});
+    if(!r.ok)throw new Error(`${DATA_JSON}: HTTP ${r.status}`);
+    return await r.json();
+  }catch(e){
+    plainError=e;
+    console.warn('LL880 plain JSON unavailable, trying gzip fallback.',e);
+  }
+
+  const r=await fetch(DATA_B64_GZIP,{cache:'no-store'});
+  if(!r.ok)throw new Error(`${DATA_B64_GZIP}: HTTP ${r.status}; plain=${plainError?.message||'unknown'}`);
+  if(typeof DecompressionStream!=='function'){
+    throw new Error(`plain JSON unavailable and browser has no DecompressionStream; plain=${plainError?.message||'unknown'}`);
+  }
+  const b64=(await r.text()).replace(/\s+/g,'');
+  const raw=atob(b64),bytes=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const text=await new Response(stream).text();
+  return JSON.parse(text);
+}
+
+async function init(){
+  loadRecords();bind();
+  const host=$('[data-papers]');
+  try{
+    data=await loadData();
+    data.sets=(data.sets||[]).sort((a,b)=>a.number-b.number);
+    if(data.sets.length!==24)throw new Error(`expected 24 papers, got ${data.sets.length}`);
+    render();
+  }catch(e){
+    console.error(e);
+    if(host)host.innerHTML='<div class="sim880-empty sim880-load-error"><strong>24套数据读取失败</strong><span>已尝试兼容模式。请刷新页面；若仍失败，稍后重新进入。</span><button type="button" data-retry-load>重新加载</button></div>';
+  }
+}
 function bind(){
   $('[data-search]')?.addEventListener('input',applyFilters);
   $('[data-position]')?.addEventListener('change',applyFilters);
-  $$('[data-phase-filter]').forEach(x=>x.addEventListener('click',()=>{const s=$('[data-position]');if(s){s.value=x.dataset.phaseFilter;s.dispatchEvent(new Event('change'))}}));
+  $$('[data-phase-filter]').forEach(x=>x.addEventListener('click',()=>{
+    const s=$('[data-position]');
+    if(s){s.value=x.dataset.phaseFilter;s.dispatchEvent(new Event('change',{bubbles:true}));window.EveraPrettySelect?.refresh?.();}
+  }));
   document.addEventListener('click',e=>{
     const open=e.target.closest('[data-open]');if(open)openPaper(open.dataset.open);
     if(e.target.closest('[data-dialog-close]'))$('[data-paper-dialog]')?.close();
+    if(e.target.closest('[data-retry-load]')){const host=$('[data-papers]');if(host)host.innerHTML='<div class="sim880-empty">正在重新读取 24 套逐题数据…</div>';init();}
   });
   document.addEventListener('input',e=>{
     if(e.target.matches('[data-score]'))updateRecord(e.target.dataset.score,'score',e.target.value);
@@ -185,22 +227,6 @@ function bind(){
   $('[data-download-xlsx]')?.addEventListener('click',downloadWorkbook);
   $('[data-paper-dialog]')?.addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close()});
 }
-async function init(){
-  loadRecords();bind();
-  try{
-    const r=await fetch(DATA_B64_GZIP,{cache:'no-store'});if(!r.ok)throw new Error(`${DATA_B64_GZIP}: HTTP ${r.status}`);
-    const b64=(await r.text()).replace(/\s+/g,'');
-    const raw=atob(b64),bytes=new Uint8Array(raw.length);
-    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-    if(typeof DecompressionStream!=='function')throw new Error('DecompressionStream unavailable');
-    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-    const text=await new Response(stream).text();
-    data=JSON.parse(text);
-    data.sets=(data.sets||[]).sort((a,b)=>a.number-b.number);
-    if(data.sets.length!==24)throw new Error(`expected 24 papers, got ${data.sets.length}`);
-    render();
-  }
-  catch(e){console.error(e);$('[data-papers]').innerHTML='<div class="sim880-empty">24套数据读取失败，请刷新页面重试。</div>'}
-}
+
 init();
 })();
