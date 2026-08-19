@@ -28,6 +28,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      # 将通过文本方式存储的二进制下载资源恢复为浏览器可直接下载的 Excel。
+      # 若仓库已经直接包含 xlsx，则此步骤不会覆盖它。
+      - name: Materialize downloadable Excel assets
+        shell: bash
+        run: |
+          PART_DIR="site/study/practice/math-880/downloads/ll880-24"
+          OUT="site/study/practice/math-880/downloads/ll880-math2-24-papers.xlsx"
+          if [ ! -f "$OUT" ] && compgen -G "$PART_DIR/part-*.b64" > /dev/null; then
+            cat "$PART_DIR"/part-*.b64 | tr -d '\r\n ' | base64 --decode > "$OUT"
+          fi
       # 同步工作流的数据提交不会递归触发 push；update-oxygen.yml 会显式 workflow_dispatch 本工作流。
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
