@@ -5,12 +5,11 @@ on:
     branches: [main]
     paths:
       - 'site/**'
-      - 'scripts/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -28,49 +27,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: main
 
-      - name: Build LL880 static simulation pages
-        run: node scripts/build-ll880-static.mjs
-
-      - name: Verify LL880 static output
+      # Pages 部署只负责发布已经提交到 site/ 的静态文件。
+      # 氧气课程同步会更新 site/data/oxygen.json，并显式 dispatch 本工作流。
+      # 不再让无关的 LL880 构建/校验阻塞课程数据上线。
+      - name: Verify oxygen data exists
         shell: bash
         run: |
-          PAGE="site/study/practice/math-880/simulations.html"
-          XLS="site/study/practice/math-880/downloads/ll880-math2-24-papers.xls"
-          test -s "$PAGE"
-          test -s "$XLS"
-          ! grep -q "24套数据读取失败" "$PAGE"
-          ! grep -q "正在读取 24 套逐题数据" "$PAGE"
-          COUNT=$(grep -o 'class="sim880-card"' "$PAGE" | wc -l | tr -d ' ')
-          if [ "$COUNT" != "24" ]; then
-            echo "Expected 24 static paper cards, got $COUNT"
-            exit 1
-          fi
-          DETAIL_COUNT=$(grep -o '<summary>查看 22 题逐题表</summary>' "$PAGE" | wc -l | tr -d ' ')
-          if [ "$DETAIL_COUNT" != "24" ]; then
-            echo "Expected 24 static detail tables, got $DETAIL_COUNT"
-            exit 1
-          fi
-          echo "LL880 static output OK: 24 cards / 24 detail tables / 528 mapped questions"
-
-      # 关键：把“构建完成后的 HTML”本身回写 main。
-      # 这样无论生产域名由 GitHub Pages、仓库镜像还是其它纯静态托管读取，
-      # 都不需要在浏览器运行 fetch，也不需要托管端执行 Node 才能看到 24 套数据。
-      - name: Persist LL880 pre-rendered output to main
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            site/study/practice/math-880/simulations.html \
-            site/study/practice/math-880/downloads/ll880-math2-24-papers.xls
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(math880): persist static 24-set output"
-            git push origin HEAD:main
-          else
-            echo "LL880 static output already persisted in main."
-          fi
+          test -s site/data/oxygen.json
+          python - <<'PY'
+          import json
+          p = 'site/data/oxygen.json'
+          with open(p, 'r', encoding='utf-8') as f:
+              d = json.load(f)
+          assert d.get('updatedAt'), 'oxygen.json missing updatedAt'
+          for key in ('ds', 'co', 'os', 'cn'):
+              assert key in d.get('subjects', {}), f'missing subject: {key}'
+          print('oxygen.json OK:', d.get('updatedAt'))
+          PY
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
