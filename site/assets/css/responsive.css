@@ -1,6 +1,6 @@
 /* Everflow cross-device responsive layer
- * Loaded after site.css. Keep core visual language unchanged; this file only
- * improves layout, touch targets, safe areas and small-screen readability.
+ * Loaded after site.css. All cross-device breakpoints live here so base
+ * visual styles stay single-source and do not compete across files.
  */
 
 html{
@@ -56,22 +56,30 @@ button,.icon-btn,.primary-link,.ghost-link,.small-btn,.checkin-tab{touch-action:
   .about-box{grid-template-columns:150px 1fr;gap:26px}
 }
 
-/* Navigation switches to mobile */
+/* Tablet navigation uses the compact menu without inheriting phone sizing. */
+@media(min-width:761px) and (max-width:900px){
+  .topbar .links{display:none!important}
+  .topbar .menu-btn{display:grid!important;margin-left:auto}
+  .mobile-panel{position:fixed;inset:calc(70px + env(safe-area-inset-top)) 0 auto 0;z-index:45;max-height:calc(100dvh - 70px - env(safe-area-inset-top));overflow:auto;padding:10px 16px calc(18px + env(safe-area-inset-bottom));background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 18px 42px rgba(0,0,0,.10)}
+  .mobile-panel.open{display:grid!important}
+  .mobile-panel a{min-height:46px;display:flex;align-items:center;padding:10px;border-bottom:1px solid var(--line);border-radius:10px}
+  body.menu-open{overflow:hidden}
+}
+
+/* Navigation switches to phone layout */
 @media(max-width:760px){
   html{scroll-padding-top:calc(76px + env(safe-area-inset-top))}
   .wrap{width:calc(100% - 24px)}
   .nav{height:62px}
   .brand{font-size:18px;gap:9px}
+  .brand small{display:none}
   .brand img{width:34px;height:34px;border-radius:9px}
+  .links{display:none}
+  .menu-btn{display:grid;margin-left:auto}
   .icon-btn{width:44px;height:44px}
-  .mobile-panel{
-    inset:calc(62px + env(safe-area-inset-top)) 0 auto 0;
-    max-height:calc(100dvh - 62px - env(safe-area-inset-top));
-    overflow:auto;
-    padding:10px 12px calc(16px + env(safe-area-inset-bottom));
-    box-shadow:0 18px 42px rgba(0,0,0,.10);
-  }
-  .mobile-panel a{min-height:46px;display:flex;align-items:center;border-radius:10px;padding:10px 10px}
+  .mobile-panel{display:none;position:fixed;inset:calc(62px + env(safe-area-inset-top)) 0 auto 0;z-index:45;max-height:calc(100dvh - 62px - env(safe-area-inset-top));overflow:auto;padding:10px 12px calc(16px + env(safe-area-inset-bottom));background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 18px 42px rgba(0,0,0,.10)}
+  .mobile-panel.open{display:grid}
+  .mobile-panel a{min-height:46px;display:flex;align-items:center;border-radius:10px;padding:10px}
   .mobile-panel .icon-btn{margin-top:10px}
   body.menu-open{overflow:hidden}
 
@@ -96,27 +104,31 @@ button,.icon-btn,.primary-link,.ghost-link,.small-btn,.checkin-tab{touch-action:
   .subject-code{width:36px;height:36px}
   .subject-number{font-size:25px}
   .subject-card h3{font-size:15px;line-height:1.4;overflow-wrap:anywhere}
-  .sync-card{border-radius:20px;padding:18px;gap:12px}
+  .sync-card{grid-template-columns:1fr;border-radius:20px;padding:18px;gap:12px}
+  .post{grid-template-columns:1fr;gap:7px;padding:20px 0}
+  .post .tag{justify-self:start}
   .post h3{font-size:20px;line-height:1.45}
+  .grid{grid-template-columns:1fr}
 
   .page{padding:40px 0 66px}
   .page-head{margin-bottom:32px}
   .page-head h1{font-size:clamp(36px,10.5vw,43px)}
-  .page-head p{line-height:1.7}
+  .page-head p{font-size:16px;line-height:1.7}
   .article{max-width:100%}
   .article h2{font-size:25px;margin-top:38px}
-  .article p,.article li{line-height:1.9}
+  .article p,.article li{font-size:16px;line-height:1.9}
   .article blockquote{margin:24px 0;padding:16px 18px}
   .archive-item{grid-template-columns:76px minmax(0,1fr);gap:14px}
   .about-box{grid-template-columns:1fr;gap:20px;border-radius:22px;padding:20px}
   .about-mark{width:96px;border-radius:20px}
 
   .checkin-shell{padding:30px 0 62px}
-  .checkin-head{gap:14px;margin-bottom:20px}
+  .checkin-head{grid-template-columns:1fr;align-items:start;gap:14px;margin-bottom:20px}
   .checkin-head h1{font-size:clamp(35px,10vw,42px)}
   .checkin-head p{font-size:14px;line-height:1.7}
   .checkin-head .ghost-link{justify-self:start}
   .overall-card{border-radius:21px;padding:18px;margin-bottom:12px}
+  .overall-row{align-items:flex-start;flex-direction:column;gap:4px}
   .overall-row strong{font-size:20px}
   .big-progress{height:10px}
   .sync-line{line-height:1.65}
@@ -133,13 +145,14 @@ button,.icon-btn,.primary-link,.ghost-link,.small-btn,.checkin-tab{touch-action:
     scroll-snap-type:x proximity;
   }
   .checkin-tab{min-height:42px;padding:8px 14px;scroll-snap-align:start}
-  .checkin-toolbar{gap:10px;margin-bottom:12px}
+  .checkin-toolbar{align-items:flex-start;flex-direction:column;gap:10px;margin-bottom:12px}
   .toolbar-actions{width:100%}
   .small-btn{min-height:42px}
   .course-table{min-width:650px}
   .course-table th,.course-table td{padding:10px;font-size:12px}
   .course-table th{font-size:10px}
   .footer-inner{display:flex;flex-direction:column;gap:4px}
+  .evera-toast-stack{bottom:calc(16px + env(safe-area-inset-bottom))}
 }
 
 /* Phone: table becomes native-feeling course cards instead of horizontal scrolling */
