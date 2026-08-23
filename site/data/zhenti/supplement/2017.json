@@ -1,0 +1,27 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2017,
+  "verifiedAt":"2026-08-23",
+  "questions":{
+    "43":{
+      "number":43,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"已知 f(n)=Σ(i=0..n)2^i=2^(n+1)-1。函数 f1 使用 unsigned n、unsigned i 和 int sum、power 循环计算该值；将 f1 中的 int 改为 float 得到 f2。假设 unsigned、int 均为32位，float 采用 IEEE754 单精度。分析 n=0 时循环、f1(23)/f2(23) 的机器数、n=24 的舍入差异、f1(31) 的整数溢出，以及 f2(127) 的值、最大不溢出 n 和最大精确 n。",
+      "answer":"n=0 时 unsigned 的 n-1 下溢为 2^32-1，i<=n-1 会持续很久；若 i、n 改为 int，则 n-1=-1，i=0 时循环条件不成立。f1(23)=f2(23)=2^24-1，机器数分别为 00FFFFFFH 和 4B7FFFFFH。n=24 时数学值含25个连续有效二进制1，超过单精度24位有效精度，舍入使 f2(24)=33554432.0，而 f1(24)=33554431。f1(31) 的32位结果全1，按有符号补码解释为-1；要保持与数学值相等，最大 n=30。f2(127) 的 7F800000H 表示 +∞；不溢出的最大 n=126，保持精确无舍入的最大 n=23。",
+      "analysis":"本题同时考察无符号下溢、32位补码范围和 IEEE754 单精度的24位有效精度。2^(n+1)-1 的位模式使边界值可直接由机器数和阶码/尾数容量判断。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"某进程有三个并发线程。全局复数变量 x、y、z；thread1 计算 w=add(x,y)，thread2 计算 w=add(y,z)，thread3 先执行 z=add(z,w)，再执行 y=add(y,w)，各线程中的 w 为局部变量。请添加必要的信号量和 P/V 操作，既保证共享变量互斥访问，又使并发度尽可能高。",
+      "answer":"设置三个初值均为1的互斥信号量 mutex_y1、mutex_y2、mutex_z。thread1 在读取 y 的 add(x,y) 前后 P/V mutex_y1；thread2 在 add(y,z) 前依次 P mutex_y2、mutex_z，完成后释放；thread3 更新 z 时 P/V mutex_z，更新 y 时同时 P mutex_y1 和 mutex_y2，完成后释放。局部变量 w 不需要互斥。",
+      "analysis":"thread1 与 thread3 在 y 上构成读写冲突，thread2 与 thread3 在 y 上也构成读写冲突，而 thread1、thread2 对 y 都是读，可并发；thread2 与 thread3 在 z 上冲突。因此使用两把分别约束 y 的读写关系的锁和一把 z 锁，可以避免把两个只读线程不必要地串行化。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    }
+  }
+}
