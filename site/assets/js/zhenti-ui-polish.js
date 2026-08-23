@@ -1,5 +1,6 @@
 (()=>{
   if(document.body?.dataset?.view!=='zhenti')return;
+  if(!document.querySelector('link[data-zhenti-ui-polish]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/zhenti-ui-polish.css?v=20260823a';link.dataset.zhentiUiPolish='';document.head.appendChild(link)}
   const WALL_KEY='everflow-408-zhenti-wall-v1';
   const GROUPS={ds:{label:'数据结构',short:'DS',qs:[1,2,3,4,5,6,7,8,9,10,41,42]},co:{label:'计算机组成原理',short:'CO',qs:[11,12,13,14,15,16,17,18,19,20,21,22,43,44]},os:{label:'操作系统',short:'OS',qs:[23,24,25,26,27,28,29,30,31,32,45,46]},cn:{label:'计算机网络',short:'CN',qs:[33,34,35,36,37,38,39,40,47]}};
   const allQs=Array.from({length:47},(_,i)=>i+1);
