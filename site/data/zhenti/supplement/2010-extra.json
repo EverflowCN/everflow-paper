@@ -1,0 +1,18 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2010,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "3":{
+      "number":3,
+      "subject":"ds",
+      "type":"single",
+      "stem":"下列线索二叉树中（用虚线表示线索），符合后序线索树定义的是（ ）。",
+      "options":{"A":"见图 A","B":"见图 B","C":"见图 C","D":"见图 D"},
+      "answer":"D",
+      "analysis":"四个选项的实线孩子关系相同，后序序列为 d、b、c、a。d 无前驱且无左孩子，所以左线索为空；d 无右孩子，右线索应指向后继 b。b 无左孩子，左线索应指向前驱 d。c 无左右孩子，左线索应指向前驱 b、右线索应指向后继 a。只有 D 同时满足这些条件。",
+      "figures":[{"src":"/data/zhenti/assets/2010/q03-postorder-threaded-options.svg","alt":"2010年第3题后序线索二叉树四个选项","caption":"依据2010年原卷第1页逐项重绘；实线为孩子指针，虚线为线索。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["noobdream","csgraduates","foreverlink","csyanku"]}
+    }
+  }
+}
