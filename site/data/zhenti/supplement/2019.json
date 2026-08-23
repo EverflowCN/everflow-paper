@@ -1,8 +1,32 @@
 {
   "schema":"everflow-408-paper-supplement-v1",
   "year":2019,
-  "verifiedAt":"2026-08-23",
+  "verifiedAt":"2026-08-24",
   "questions":{
+    "5":{
+      "number":5,
+      "subject":"ds",
+      "type":"single",
+      "score":2,
+      "stem":"下图所示的 AOE 网表示一项包含 8 个活动的工程。活动 d 的最早开始时间和最迟开始时间分别是（ ）。",
+      "options":{"A":"3 和 7","B":"12 和 12","C":"12 和 14","D":"15 和 15"},
+      "answer":"C",
+      "analysis":"由图计算事件最早发生时间：ve(1)=0，ve(2)=max(3,8+4)=12，ve(3)=8，ve(4)=19，ve(5)=max(12+6,8+10)=18，ve(6)=max(19+6,18+9)=27。逆推事件最迟发生时间得到 vl(4)=21，因此活动 d(2→4,7) 的最早开始时间 e(d)=ve(2)=12，最迟开始时间 l(d)=vl(4)-7=14，选 C。",
+      "figures":[{"src":"/data/zhenti/assets/2019/q05-aoe.svg","alt":"2019年第5题AOE网","caption":"依据2019年原卷第1页逐边重绘，活动a~h及权值保持原题数据。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["csgraduates","csyanku"]}
+    },
+    "38":{
+      "number":38,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"某客户通过一个 TCP 连接向服务器发送数据的部分过程如图。客户在 t0 时刻第一次收到确认序列号 ack_seq=100 的段，并发送 seq=100 的段，但该段丢失。若 TCP 支持快速重传，则客户重新发送 seq=100 段的时刻是（ ）。",
+      "options":{"A":"t1","B":"t2","C":"t3","D":"t4"},
+      "answer":"C",
+      "analysis":"seq=100 丢失后，后续 seq=200、300、400 到达服务器，服务器连续返回 ack_seq=100。第一次在 t0 收到的 ACK=100 是正常确认，不计入重复 ACK；t1、t2、t3 分别到达第1、第2、第3个重复 ACK。收到3个重复 ACK 时立即快速重传，因此在 t3 重发 seq=100，早于 t4 的超时重传。",
+      "figures":[{"src":"/data/zhenti/assets/2019/q38-tcp-fast-retransmit.svg","alt":"2019年第38题TCP快速重传时序图","caption":"依据2019年原卷第5页逐报文与时刻重绘，保留seq=100/200/300/400、重复ACK和t0~t4。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["csgraduates","foreverlink","csyanku"]}
+    },
     "41":{
       "number":41,
       "subject":"ds",
@@ -62,6 +86,17 @@
       "answer":"两条指令在同一页：4KB页使页内偏移12位，两地址高20位均为00401H。Cache有64行且4路组相联，所以16组、组号4位；块大小64B，所以块内地址6位；其余22位为tag。call地址00401025H的页内低12位为025H，其中第6~9位组号为0000，因此只可能在第0组命中。",
       "analysis":"页内偏移在虚实地址转换前后保持不变，因此可直接利用call虚拟地址的低12位确定低10位中的块内偏移和组号。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "47":{
+      "number":47,
+      "subject":"cn",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"某网络拓扑如图，其中R为路由器，H1～H4的IP地址及默认网关、R各接口地址如图。现有以太网交换机（无VLAN功能）和路由器两类设备可选。（1）设备1、2、3分别选什么类型；（2）哪些设备接口需要配置IP，并配置正确地址；（3）为使H1～H4访问Internet，R需要提供什么服务；（4）H3向192.168.1.127发送IP数据报时，哪些主机会接收？",
+      "answer":"（1）设备1为路由器，设备2、设备3为以太网交换机。（2）只有设备1的接口需要配置IP：IF1=192.168.1.254/30，IF2=192.168.1.1/26，IF3=192.168.1.65/26。（3）R需提供NAT服务。（4）192.168.1.127是H3/H4所在192.168.1.64/26子网的定向广播地址，路由器隔离广播域，因此H4接收该数据报。",
+      "analysis":"H1/H2位于192.168.1.0/26，H3/H4位于192.168.1.64/26，R与设备1之间使用192.168.1.252/30。设备1必须在三个不同IP网络之间转发，所以是路由器；设备2、3只在各自局域网内二层转发。",
+      "figures":[{"src":"/data/zhenti/assets/2019/q47-network-topology.svg","alt":"2019年第47题网络拓扑","caption":"依据2019年原卷第7页逐接口、IP地址和默认网关重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["csgraduates","foreverlink","noobdream","csyanku"]}
     }
   }
 }
