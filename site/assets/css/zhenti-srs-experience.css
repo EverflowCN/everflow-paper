@@ -1,0 +1,106 @@
+/* Everflow 408 SRS experience v3: hierarchy, 3-device layout, immersive fullscreen */
+.srs-home{width:min(1520px,calc(100% - 40px));margin:22px auto 72px}
+
+/* Top navigation: separate modes from subjects instead of one undifferentiated row. */
+.wall-subject-bar.has-srs-groups{justify-content:center;gap:14px;padding:13px 18px;overflow-x:auto;scrollbar-width:none}
+.wall-subject-bar.has-srs-groups::-webkit-scrollbar{display:none}
+.srs-mode-group,.srs-subject-group{display:flex;align-items:center;gap:6px;flex:0 0 auto;padding:4px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--card) 92%,transparent)}
+.srs-mode-group .subject-tab,.srs-subject-group .subject-tab{min-height:38px;padding:0 16px;border-radius:12px;white-space:nowrap}
+.srs-mode-group .subject-tab{background:transparent}
+.srs-mode-group .subject-tab.active,.srs-subject-group .subject-tab.active{background:var(--red);color:#fff;box-shadow:0 8px 22px rgba(243,18,36,.16)}
+.wall-subject-bar.has-srs-groups>.subject-divider{display:none}
+
+/* Hero: compact left narrative + stable 2x2 metrics; error rate becomes a wide emphasis row. */
+.srs-hero{grid-template-columns:minmax(0,1fr) minmax(360px,430px);align-items:stretch;gap:26px;padding:26px 28px;border-radius:22px;background:linear-gradient(135deg,color-mix(in srgb,var(--red) 7%,var(--card)),var(--card) 52%)}
+.srs-hero>div:first-child{display:flex;flex-direction:column;justify-content:center;min-height:170px}
+.srs-hero h1{font-size:36px;letter-spacing:-.04em;margin:7px 0 8px}
+.srs-hero p{max-width:720px;font-size:13px;line-height:1.75}
+.srs-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-content:stretch}
+.srs-stat{min-width:0;min-height:76px;display:flex;flex-direction:column;justify-content:center;padding:11px 12px;border-radius:15px}
+.srs-stat strong{font-size:22px}
+.srs-stat.error{grid-column:1/-1;min-height:58px;display:grid;grid-template-columns:1fr auto;align-items:center;text-align:left;padding:10px 15px;border-color:color-mix(in srgb,var(--red) 24%,var(--line));background:color-mix(in srgb,var(--red) 5%,var(--card))}
+.srs-stat.error strong{grid-column:2;grid-row:1/3;font-size:23px;color:var(--red)}
+.srs-stat.error span{grid-column:1;grid-row:1/3;margin:0;font-size:11px;font-weight:850;color:var(--ink)}
+.srs-stat.error span:after{content:' · 按当前科目与题型范围统计';font-weight:500;color:var(--muted)}
+
+/* Filter/settings card: separate hierarchy, better select/dropdown treatment. */
+.srs-toolbar-v2{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;padding:15px 18px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.025)}
+.srs-filter-stack{display:grid;gap:9px;min-width:0}
+.srs-filters{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.srs-toolbar-label{min-width:34px;color:var(--muted);font-size:10px;letter-spacing:.05em}
+.srs-filter{min-height:32px;padding:0 13px;background:var(--card);transition:.15s ease}
+.srs-filter:hover{border-color:color-mix(in srgb,var(--red) 28%,var(--line));background:var(--soft)}
+.srs-filter.active{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 5px 16px rgba(243,18,36,.12)}
+.srs-settings{justify-content:flex-end;padding-left:18px;border-left:1px solid var(--line)}
+.srs-settings select{appearance:none;-webkit-appearance:none;min-width:68px;height:36px;padding:0 32px 0 12px;border-radius:11px;background-color:var(--card);background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 15px,calc(100% - 10px) 15px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;font-weight:800;outline:none;cursor:pointer;transition:.15s ease}
+.srs-settings select:hover{border-color:color-mix(in srgb,var(--red) 30%,var(--line))}
+.srs-settings select:focus{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 10%,transparent)}
+.srs-policy{max-width:240px;line-height:1.45}
+.srs-fullscreen-btn,.srs-side-toggle{height:36px;border:1px solid var(--line);border-radius:11px;background:var(--ink);color:var(--paper);padding:0 13px;font:850 11px/1 system-ui;cursor:pointer;white-space:nowrap}
+.srs-fullscreen-btn:hover{opacity:.88}
+.srs-side-toggle{background:var(--card);color:var(--ink)}
+
+/* Main workbench: card first, sidebar second. */
+.srs-stage{grid-template-columns:minmax(0,1fr) 310px;gap:16px}
+.srs-card-shell{min-height:540px;border-radius:22px;box-shadow:0 18px 55px rgba(0,0,0,.055)}
+.srs-card{padding:24px 30px 24px}
+.srs-card-meta{gap:7px;margin-bottom:16px}
+.srs-chip{min-height:26px;background:color-mix(in srgb,var(--soft) 78%,var(--card))}
+.srs-memory{padding-left:10px}
+.srs-question{max-width:1060px;font-size:21px;line-height:1.78}
+.srs-question strong{display:block;margin-bottom:9px;color:var(--muted);font-size:11px;letter-spacing:.04em}
+.srs-options{gap:9px;margin:19px 0}
+.srs-option{grid-template-columns:34px minmax(0,1fr) auto;align-items:center;min-height:58px;padding:10px 14px;border-radius:14px;background:color-mix(in srgb,var(--soft) 45%,var(--card));transition:transform .12s ease,border-color .12s ease,background .12s ease}
+.srs-option:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--soft) 72%,var(--card))}
+.srs-option b{font-size:15px}
+.srs-option span{font-size:17px;line-height:1.55}
+.srs-option kbd{opacity:.72}
+.srs-primary-row{margin-top:20px}
+.srs-primary{min-width:230px;min-height:48px;border-radius:14px}
+.srs-grades{gap:8px}
+.srs-grade{min-height:66px;border-radius:14px}
+.srs-side{gap:11px;position:sticky;top:142px}
+.srs-side-card{padding:15px 16px;border-radius:16px}
+.srs-side-card h3{font-size:12px;letter-spacing:.01em}
+.srs-side-row{font-size:11px;padding:2px 0}
+.srs-side-row b{font-variant-numeric:tabular-nums}
+
+/* Immersive bar only exists in fullscreen/fallback immersive mode. */
+.srs-immersive-bar{display:none;align-items:center;justify-content:space-between;gap:14px;min-height:58px;padding:10px 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 96%,transparent);backdrop-filter:blur(18px)}
+.srs-immersive-title{display:flex;align-items:center;gap:10px;min-width:0}.srs-immersive-mark{width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:var(--red);color:#fff;font-weight:950}.srs-immersive-title>div{display:grid;min-width:0}.srs-immersive-title strong{font-size:13px}.srs-immersive-title span{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srs-immersive-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:10px}.srs-immersive-meta b{color:var(--ink);font-size:11px}.srs-immersive-actions{display:flex;align-items:center;gap:7px}.srs-immersive-actions button{height:34px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 11px;font-weight:800;cursor:pointer}.srs-immersive-actions .srs-exit-full{background:var(--ink);color:var(--paper)}
+
+/* Native fullscreen and CSS fallback share the same immersive layout. */
+.srs-home:fullscreen,.srs-home:-webkit-full-screen,body.srs-immersive-fallback .srs-home{width:100vw;max-width:none;height:100dvh;margin:0;padding:0;background:color-mix(in srgb,var(--soft) 28%,var(--paper));overflow:hidden;display:flex;flex-direction:column}
+body.srs-immersive-fallback .srs-home{position:fixed;inset:0;z-index:12050}
+.srs-home:fullscreen .srs-immersive-bar,.srs-home:-webkit-full-screen .srs-immersive-bar,body.srs-immersive-fallback .srs-immersive-bar{display:flex;flex:0 0 auto}
+.srs-home:fullscreen .srs-hero,.srs-home:-webkit-full-screen .srs-hero,body.srs-immersive-fallback .srs-hero{display:none}
+.srs-home:fullscreen .srs-toolbar-v2,.srs-home:-webkit-full-screen .srs-toolbar-v2,body.srs-immersive-fallback .srs-toolbar-v2{flex:0 0 auto;margin:0;border-width:0 0 1px;border-radius:0;padding:10px 16px;background:var(--card);box-shadow:none}
+.srs-home:fullscreen .srs-policy,.srs-home:-webkit-full-screen .srs-policy,body.srs-immersive-fallback .srs-policy{display:none}
+.srs-home:fullscreen .srs-fullscreen-btn,.srs-home:-webkit-full-screen .srs-fullscreen-btn,body.srs-immersive-fallback .srs-fullscreen-btn{display:none}
+.srs-home:fullscreen .srs-stage,.srs-home:-webkit-full-screen .srs-stage,body.srs-immersive-fallback .srs-stage{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 300px;gap:0}
+.srs-home:fullscreen .srs-card-shell,.srs-home:-webkit-full-screen .srs-card-shell,body.srs-immersive-fallback .srs-card-shell{height:100%;min-height:0;border:0;border-radius:0;box-shadow:none;overflow:auto}
+.srs-home:fullscreen .srs-card,.srs-home:-webkit-full-screen .srs-card,body.srs-immersive-fallback .srs-card{max-width:1180px;margin:0 auto;padding:26px clamp(24px,4vw,58px) 30px}
+.srs-home:fullscreen .srs-side,.srs-home:-webkit-full-screen .srs-side,body.srs-immersive-fallback .srs-side{position:static;height:100%;overflow:auto;border-left:1px solid var(--line);padding:14px;background:color-mix(in srgb,var(--soft) 35%,var(--paper))}
+.srs-home.srs-side-collapsed:fullscreen .srs-stage,.srs-home.srs-side-collapsed:-webkit-full-screen .srs-stage,body.srs-immersive-fallback .srs-home.srs-side-collapsed .srs-stage{grid-template-columns:1fr}
+.srs-home.srs-side-collapsed:fullscreen .srs-side,.srs-home.srs-side-collapsed:-webkit-full-screen .srs-side,body.srs-immersive-fallback .srs-home.srs-side-collapsed .srs-side{display:none}
+body.srs-immersive-fallback{overflow:hidden}
+
+/* Tablet */
+@media(max-width:1100px){
+  .srs-home{width:min(100% - 28px,1520px)}
+  .srs-hero{grid-template-columns:1fr;gap:16px}.srs-hero>div:first-child{min-height:auto}.srs-stats{grid-template-columns:repeat(4,1fr)}.srs-stat.error{grid-column:auto;display:flex;text-align:center}.srs-stat.error strong{display:block;order:0}.srs-stat.error span{display:block;margin-top:5px}.srs-stat.error span:after{display:none}
+  .srs-toolbar-v2{grid-template-columns:1fr}.srs-settings{justify-content:flex-start;padding:10px 0 0;border-left:0;border-top:1px solid var(--line)}
+  .srs-stage{grid-template-columns:1fr}.srs-side{position:static;grid-template-columns:repeat(3,1fr)}
+  .srs-home:fullscreen .srs-stage,.srs-home:-webkit-full-screen .srs-stage,body.srs-immersive-fallback .srs-stage{grid-template-columns:1fr}.srs-home:fullscreen .srs-side,.srs-home:-webkit-full-screen .srs-side,body.srs-immersive-fallback .srs-side{display:none}
+}
+
+/* Phone */
+@media(max-width:720px){
+  .wall-subject-bar.has-srs-groups{justify-content:flex-start;gap:8px;padding:9px 10px}.srs-mode-group,.srs-subject-group{gap:4px;padding:3px;border-radius:13px}.srs-mode-group .subject-tab,.srs-subject-group .subject-tab{min-height:34px;padding:0 12px;font-size:11px}
+  .srs-home{width:calc(100% - 18px);margin:10px auto 48px}.srs-hero{padding:18px;border-radius:18px}.srs-hero h1{font-size:28px}.srs-hero p{font-size:12px}.srs-stats{grid-template-columns:repeat(2,1fr)}.srs-stat.error{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;text-align:left}.srs-stat.error strong{grid-column:2;grid-row:1/3}.srs-stat.error span{grid-column:1;grid-row:1/3;margin:0}.srs-stat.error span:after{display:none}
+  .srs-toolbar-v2{padding:12px;border-radius:15px}.srs-filters{gap:5px}.srs-toolbar-label{width:100%;min-width:0}.srs-filter{min-height:31px;padding:0 11px;font-size:10px}.srs-settings{width:100%;gap:7px}.srs-settings .srs-toolbar-label{width:auto}.srs-settings select{min-width:76px}.srs-policy{width:100%;max-width:none}.srs-fullscreen-btn{margin-left:auto}
+  .srs-card-shell{min-height:0;border-radius:17px}.srs-card{padding:18px 14px 20px}.srs-card-meta{margin-bottom:13px}.srs-memory{width:100%;margin-left:0;padding-left:0}.srs-question{font-size:18px;line-height:1.72}.srs-options{margin:15px 0}.srs-option{grid-template-columns:30px minmax(0,1fr) auto;min-height:54px;padding:9px 11px}.srs-option span{font-size:15.5px}.srs-primary{width:100%;min-width:0}.srs-grades{grid-template-columns:repeat(2,1fr)}.srs-card-foot{flex-direction:column;align-items:flex-start}
+  .srs-side{grid-template-columns:1fr}.srs-immersive-bar{padding:8px 10px}.srs-immersive-meta{display:none}.srs-immersive-actions button{padding:0 9px;font-size:10px}.srs-immersive-actions .srs-side-toggle{display:none}
+  .srs-home:fullscreen .srs-toolbar-v2,.srs-home:-webkit-full-screen .srs-toolbar-v2,body.srs-immersive-fallback .srs-toolbar-v2{padding:8px 10px;max-height:122px;overflow:auto}.srs-home:fullscreen .srs-settings,.srs-home:-webkit-full-screen .srs-settings,body.srs-immersive-fallback .srs-settings{display:none}.srs-home:fullscreen .srs-card,.srs-home:-webkit-full-screen .srs-card,body.srs-immersive-fallback .srs-card{padding:18px 13px 24px}
+}
