@@ -4,6 +4,7 @@
   const extraYears=new Set(['2010','2011','2012','2013','2014','2017','2018','2020','2021','2022','2025']);
   const cache=new Map();
   const extraCache=new Map();
+  const DATA_VERSION='20260824-2016-complete-a';
 
   function yearFrom(input){
     try{
@@ -17,7 +18,7 @@
 
   async function loadSupplement(year){
     if(cache.has(year))return cache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-2025-q44q47-b`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=${DATA_VERSION}`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     cache.set(year,promise);
@@ -27,7 +28,7 @@
   async function loadExtra(year){
     if(!extraYears.has(year))return null;
     if(extraCache.has(year))return extraCache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-2025-q44q47-b`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=${DATA_VERSION}`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     extraCache.set(year,promise);
@@ -36,7 +37,9 @@
 
   function mergeQuestionSets(base,supplement,extra){
     const merged={};
-    for(const source of [extra,supplement,base]){
+    // Canonical precedence: base < supplement < extra.
+    // Later verified patches must be able to replace stale/pending base entries.
+    for(const source of [base,supplement,extra]){
       if(!source)continue;
       for(const [number,patch] of Object.entries(source)){
         const previous=merged[number]||{};
@@ -82,7 +85,7 @@
   if(!document.querySelector('link[data-zhenti-media]')){
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href='/assets/css/zhenti-media.css?v=20260824-2025-q44q47-b';
+    link.href=`/assets/css/zhenti-media.css?v=${DATA_VERSION}`;
     link.dataset.zhentiMedia='1';
     document.head.appendChild(link);
   }
@@ -90,7 +93,7 @@
   const loadMedia=()=>{
     if(document.querySelector('script[data-zhenti-media]'))return;
     const script=document.createElement('script');
-    script.src='/assets/js/zhenti-media.js?v=20260824-2025-q44q47-b';
+    script.src=`/assets/js/zhenti-media.js?v=${DATA_VERSION}`;
     script.defer=true;
     script.dataset.zhentiMedia='1';
     document.body.appendChild(script);
