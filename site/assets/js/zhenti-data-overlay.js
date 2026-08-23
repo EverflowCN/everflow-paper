@@ -1,6 +1,6 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
-  const supplementYears=new Set(['2024','2025','2026']);
+  const supplementYears=new Set(['2023','2024','2025','2026']);
   const cache=new Map();
 
   function yearFrom(input){
@@ -15,7 +15,7 @@
 
   async function loadSupplement(year){
     if(cache.has(year))return cache.get(year);
-    const p=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260823b`,{cache:'no-store'})
+    const p=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260823c`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     cache.set(year,p);
