@@ -13,6 +13,17 @@
       "analysis": "暴力枚举每个 i 后面的 j 会达到 O(n²)。固定 A[i] 后，正数与后缀最大值相乘取得最大乘积，负数与后缀最小值相乘取得最大乘积，因此只需一次逆序扫描维护两个极值。参考实现：minValue=INT_MAX，maxValue=INT_MIN；for(i=n-1;i>=0;i--){minValue=min(minValue,A[i]); maxValue=max(maxValue,A[i]); res[i]=(A[i]>=0?A[i]*maxValue:A[i]*minValue);}。",
       "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
+    "42": {
+      "number": 42,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 10,
+      "stem": "某工程包含 12 个活动，用图示 AOE 网描述，各边标注活动及持续时间。回答：（1）完成该工程的最短时间以及所有关键活动；（2）若按最短时间完成工程，与活动 e 同时进行的活动可能有哪些；（3）时间余量最大的活动及其余量；（4）工程从时刻 0 开始，若活动 b 在时刻 6 开始，为保证工程不延期，b 的持续时间最多可为多少；若不改变 b 的持续时间，压缩哪个活动也可保证不延期。",
+      "answer": "（1）工程最短完成时间为 12，关键活动为 a、e、m、n。（2）可能与 e 同时进行的活动为 b、c、d。（3）活动 j 的时间余量最大，为 6。（4）b 的持续时间最多可为 4；若不改变 b 的持续时间，可压缩活动 k。",
+      "analysis": "按原卷 AOE 网从源点向汇点计算事件最早发生时间，再逆向计算最迟发生时间；活动的时间余量由其最迟开始时间减最早开始时间得到。零余量活动组成关键路径，因此得到 a、e、m、n，工程长度为 12。活动 j 的余量为 6。对延迟后的 b，保证其后续路径仍不超过关键路径长度可得允许持续时间上限为 4；若保持 b 原持续时间，则压缩其后续活动 k 可消除延期。",
+      "figures": [{"src":"/data/zhenti/assets/2025/q42-aoe-original.png","alt":"2025年第42题原卷AOE网络图","caption":"截取自厦门工学院公开的2025年408原卷扫描，仅保留第42题所需AOE网络图区域。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates","noobdream"]}
+    },
     "43": {
       "number": 43,
       "subject": "co",
