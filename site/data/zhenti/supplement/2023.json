@@ -3,6 +3,39 @@
   "year": 2023,
   "verifiedAt": "2026-08-24",
   "questions": {
+    "5": {
+      "number": 5,
+      "subject": "ds",
+      "type": "single",
+      "stem": "已知一棵二叉树的树形如下图所示，若其后序遍历序列为 f，d，b，e，c，a，则其先（前）序遍历序列是（ ）。",
+      "options": {"A": "a，e，d，f，b，c", "B": "a，c，e，b，d，f", "C": "c，a，b，e，f，d", "D": "d，f，e，b，a，c"},
+      "answer": "A",
+      "analysis": "原卷树形共有6个结点：根有左右孩子；左孩子也有左右孩子；其左孩子还有一个右孩子。结合后序序列 f,d,b,e,c,a 可定位各结点，先序遍历为 a,e,d,f,b,c。",
+      "figures": [{"src": "/data/zhenti/assets/2023/q05-tree.svg", "alt": "2023年第5题原卷二叉树树形", "caption": "依据厦门工学院公开2023年408原卷扫描逐结构核对后重绘。"}],
+      "verification": {"status": "verified", "mode": "original-scan-verified-reconstruction", "sources": ["xit", "csyanku"]}
+    },
+    "33": {
+      "number": 33,
+      "subject": "cn",
+      "type": "single",
+      "stem": "在图示分组交换网络中，主机 H1 和 H2 通过路由器互连，2 段链路带宽均为 100Mbps，时延带宽积（单向传播时延×带宽）均为 1000bit。若 H1 向 H2 发送 1 个大小为 1MB 的文件，分组长度为 1000B，则从 H1 开始发送到 H2 收到文件全部数据至少需要（注：M=10^6）（ ）。",
+      "options": {"A": "80.02ms", "B": "80.08ms", "C": "80.09ms", "D": "80.10ms"},
+      "answer": "D",
+      "analysis": "共有1000个分组。每个1000B分组在100Mbps链路上的发送时延为80μs；由时延带宽积1000bit可得每段链路传播时延10μs。首个分组经两段存储转发需2×(80+10)=180μs，之后999个分组按80μs流水到达，总时间180+999×80=80100μs=80.10ms。",
+      "figures": [{"src": "/data/zhenti/assets/2023/q33-network.svg", "alt": "2023年第33题H1经路由器R连接H2的两段链路", "caption": "依据厦门工学院公开2023年408原卷扫描核对后重绘。"}],
+      "verification": {"status": "verified", "mode": "original-scan-verified-reconstruction", "sources": ["xit", "csyanku"]}
+    },
+    "38": {
+      "number": 38,
+      "subject": "cn",
+      "type": "single",
+      "stem": "某网络拓扑如下图所示，其中路由器 R2 实现 NAT 功能。若主机 H 向 Internet 发送一个 IP 分组，则经过 R2 转发后，该 IP 分组的源 IP 地址是（ ）。",
+      "options": {"A": "195.123.0.33", "B": "195.123.0.35", "C": "192.168.0.1", "D": "192.168.0.3"},
+      "answer": "A",
+      "analysis": "原卷图中R1—R2链路标注195.123.0.34/30，R2内侧接口为192.168.0.1，H为192.168.0.3。195.123.0.32/30的可用主机地址只有.33和.34；图中.34已标在R1侧，因此R2外部接口为195.123.0.33。NAT转发后源地址改写为该外部接口地址，选A。注意部分二次转录把A/B误写成192.168开头，本条以原卷扫描为准。",
+      "figures": [{"src": "/data/zhenti/assets/2023/q38-nat.svg", "alt": "2023年第38题R2执行NAT的网络拓扑", "caption": "依据厦门工学院公开2023年408原卷扫描核对后重绘；地址值按原卷保留。"}],
+      "verification": {"status": "verified", "mode": "original-scan-corrected-transcription", "sources": ["xit", "csyanku"]}
+    },
     "41": {
       "number": 41,
       "subject": "ds",
@@ -43,6 +76,17 @@
       "analysis": "第19条机器指令从 004010AEH 开始，共 11B，故下一条从 004010B9H 开始。相对转移用取完当前指令后的 PC 加位移量。数组每行 64 个 int，每个 4B，因此行跨度为 256B，ecx 对应 i×256；立即数 0AH 的机器码低字节在低地址侧，体现小端存放。",
       "verification": {"status": "verified", "mode": "cross-checked-paraphrase", "sources": ["csgraduates", "csyanku"]}
     },
+    "45": {
+      "number": 45,
+      "subject": "os",
+      "type": "comprehensive",
+      "score": 7,
+      "stem": "使用 swap 指令和共享布尔变量 lock 实现临界区互斥。题图(a)给出：bool lock=FALSE；线程局部 bool key=TRUE；if(key==TRUE) swap key,lock；临界区；lock=TRUE。题图(b)给出普通函数 newSwap(bool *a,bool *b)，依次执行 temp=*a、*a=*b、*b=temp。（1）指出图(a)中错误语句并在不增加语句条数的条件下改正；（2）能否用 newSwap(&key,&lock) 代替原子 swap 指令实现互斥，说明原因。",
+      "answer": "（1）将 if(key==TRUE) 改为 while(key==TRUE)，将退出区 lock=TRUE 改为 lock=FALSE。（2）不能。newSwap() 内部由多条普通读写指令组成，不具备不可分割的原子性，并发执行时可能交叉，不能保证互斥。",
+      "analysis": "lock为TRUE时线程必须持续自旋，只有交换后key变为FALSE才可进入临界区；退出临界区必须把lock置FALSE释放锁。硬件swap的关键在于原子性，普通函数即使实现同样的顺序逻辑，也会在读写之间暴露竞态窗口。",
+      "figures": [{"src": "/data/zhenti/assets/2023/q45-swap-panels.svg", "alt": "2023年第45题swap互斥伪代码图(a)与newSwap伪代码图(b)", "caption": "依据厦门工学院公开2023年408原卷扫描逐语句核对后重绘。"}],
+      "verification": {"status": "verified", "mode": "original-scan-verified-reconstruction", "sources": ["xit", "csyanku"]}
+    },
     "46": {
       "number": 46,
       "subject": "os",
@@ -52,6 +96,17 @@
       "answer": "（1）①的前一个操作是③，后一个操作是⑤；⑥的后一个操作是④。（2）②之后 CPU 一定从 P 切换到其他进程；①之后调度程序才可能选择 P 执行。（3）③属于键盘驱动程序完成的操作。（4）键盘中断处理程序执行时，P 处于阻塞态，CPU 处于内核态。",
       "analysis": "P 发起阻塞式键盘输入后先进入阻塞队列；用户输入触发中断，中断入口启动处理程序，驱动读取控制器数据并将字符放入系统缓冲区，随后唤醒 P 使其进入就绪队列；P 之后被重新调度并从系统调用返回。因此关键顺序可概括为 ②→⑥→④→③→①→⑤。",
       "verification": {"status": "verified", "mode": "cross-checked-paraphrase", "sources": ["csgraduates", "noobdream"]}
+    },
+    "47": {
+      "number": 47,
+      "subject": "cn",
+      "type": "comprehensive",
+      "score": 9,
+      "stem": "某网络拓扑如图，主机 H 登录 FTP 服务器后上传大小为18000B的文件F。H为传输F建立数据连接时选择初始序号100，MSS=1000B，拥塞控制初始阈值4MSS，RTT=10ms，忽略TCP传输时延；传输过程中均以MSS段发送，且无差错、丢包和乱序。（1）FTP控制连接、数据连接分别是否持久，登录时建立哪种连接；（2）F第一个字节序号及断开数据连接时服务器第二次挥手ACK的确认序号；（3）收到确认号2101和7101时拥塞窗口分别是多少；（4）从请求建立数据连接到确认F全部被接收至少多久，期间应用层平均发送速率多少。",
+      "answer": "（1）FTP控制连接持久，数据连接非持久；登录时建立控制连接。（2）F第一个字节序号101；服务器第二次挥手ACK确认序号18102。（3）收到确认号2101时拥塞窗口为3MSS；收到7101时为5MSS。（4）至少6RTT=60ms；平均应用层数据速率=18000B/60ms=0.3MB/s=2.4Mb/s。",
+      "analysis": "SYN和FIN各占用一个序号，因此数据从101开始，18000B数据后FIN序号为18101，服务器ACK为18102。慢启动从1MSS起增长，到4MSS阈值后转拥塞避免；按每轮可发送1、2、4、5、6个MSS累计18MSS数据，数据阶段需5RTT，再加建连1RTT，共6RTT。",
+      "figures": [{"src": "/data/zhenti/assets/2023/q47-ftp-topology.svg", "alt": "2023年第47题主机H经交换机和路由器连接Internet FTP服务器", "caption": "依据厦门工学院公开2023年408原卷扫描核对后重绘。"}],
+      "verification": {"status": "verified", "mode": "original-scan-verified-reconstruction", "sources": ["xit", "csyanku"]}
     }
   }
 }
