@@ -3,6 +3,17 @@
   "year":2009,
   "verifiedAt":"2026-08-24",
   "questions":{
+    "3":{
+      "number":3,
+      "subject":"ds",
+      "type":"single",
+      "stem":"给定二叉树如图。设 N 表示根结点，L 表示根的左子树，R 表示根的右子树。若遍历后的结点序列为 3，1，7，5，6，2，4，则其遍历方式是（ ）。",
+      "options":{"A":"LRN","B":"NRL","C":"RLN","D":"RNL"},
+      "answer":"D",
+      "analysis":"按图执行 RNL：先遍历根1的右子树得到3，再访问根1；随后对左子树按RNL遍历，结点2的右子树5依次得到7、5、6，再访问2及其左子树4，完整序列正好为3、1、7、5、6、2、4。",
+      "figures":[{"src":"/data/zhenti/assets/2009/q03-tree.svg","alt":"2009年第3题二叉树","caption":"依据2009原卷扫描与两份独立题库核对后重绘；结点关系与原题一致。"}],
+      "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["csgraduates","foreverlink","noobdream"]}
+    },
     "43":{
       "number":43,
       "subject":"co",
