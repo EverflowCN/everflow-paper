@@ -1,6 +1,6 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260824-ui2';
+  const ASSET_VERSION='20260824-ui3';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={
     get:key=>{try{return localStorage.getItem(key)}catch{return null}},
@@ -45,6 +45,15 @@
     el.classList.add('ui-iconized');
     el.classList.remove('ui-icon-only');
   }
+  function preserveLiveLabelIcon(el,name,labelSelector){
+    if(!el)return;
+    const label=el.querySelector(labelSelector);
+    if(!label)return;
+    [...el.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>node.remove());
+    if(!el.querySelector(':scope > .ui-icon'))el.insertAdjacentHTML('afterbegin',iconMarkup(name));
+    el.classList.add('ui-iconized');
+    el.classList.remove('ui-icon-only');
+  }
   function syncThemeIcons(){
     document.querySelectorAll('[data-theme]').forEach(btn=>{
       iconOnly(btn,body.classList.contains('dark')?'sun':'moon');
@@ -60,7 +69,7 @@
     if(el.matches('.modal-close,.membership-close,.membership-nav-close,[data-drawer-close]')){iconOnly(el,'close');return}
     if(el.matches('[data-tool="analysis"]')){iconText(el,'book','看解析');return}
     if(el.matches('[data-tool="note"]')){iconText(el,'pencil','笔记');return}
-    if(el.matches('[data-tool="timer"]')){const label=el.querySelector('[data-timer-text]')?.textContent||'计时';iconText(el,'clock',label);return}
+    if(el.matches('[data-tool="timer"]')){preserveLiveLabelIcon(el,'clock','[data-timer-text]');return}
     if(el.matches('[data-prev-question],[data-paper-prev]')){iconText(el,'chevronLeft','上一题');return}
     if(el.matches('[data-next-question],[data-paper-next]')){iconText(el,'chevronRight','下一题','end');return}
     if(el.matches('[data-paper-exit]')){iconText(el,'arrowLeft','退出整套');return}
@@ -107,7 +116,7 @@
     for(const mutation of mutations){
       if(mutation.type==='characterData'){
         const parent=mutation.target.parentElement;
-        if(parent?.matches('button,a,.answer-result strong'))upgradeControl(parent),upgradeResult(parent);
+        if(parent?.matches('button,a,.answer-result strong')){upgradeControl(parent);upgradeResult(parent)}
         continue;
       }
       mutation.addedNodes.forEach(node=>{
