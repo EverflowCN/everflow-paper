@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow · 408 真题墙，按年份记录真题完成度、熟练度与错题状态">
+  <meta name="description" content="Everflow · 408 真题墙，按学科、年份与题号纵览历年真题掌握状态">
   <title>408 真题墙 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
   <link rel="stylesheet" href="../assets/css/site.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
-  <link rel="stylesheet" href="../assets/css/zhenti-wall.css">
+  <link rel="stylesheet" href="../assets/css/zhenti-wall.css?v=20260823b">
 </head>
 <body data-view="zhenti">
 <header class="topbar">
@@ -20,113 +20,135 @@
 </header>
 <div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
 
-<main class="wrap wall-shell" data-wall-root>
-  <header class="wall-head">
-    <div>
-      <div class="eyebrow">408 · QUESTION WALL</div>
-      <h1>408 真题墙</h1>
-      <p>按年份推进真题，把每一道题标记成“熟练 / 模糊 / 不会”。先把完成情况看清楚，再集中多刷薄弱题。</p>
-    </div>
-    <div class="wall-head-badge"><strong>2009—2026</strong><span>历年真题进度</span></div>
-  </header>
+<main class="wall-app" data-wall-root>
+  <section class="wall-subject-bar" aria-label="408 学科">
+    <button class="subject-tab active" type="button" data-main-subject="ds">数据结构</button>
+    <button class="subject-tab" type="button" data-main-subject="co">计算机组成原理</button>
+    <button class="subject-tab" type="button" data-main-subject="os">操作系统</button>
+    <button class="subject-tab" type="button" data-main-subject="cn">计算机网络</button>
+  </section>
 
-  <nav class="wall-tabs" aria-label="真题墙视图">
-    <button class="wall-tab active" type="button" data-wall-view="bank">题库</button>
-    <button class="wall-tab" type="button" data-wall-view="years">年份总览</button>
-    <button class="wall-tab" type="button" data-wall-view="review">错题多刷</button>
-  </nav>
+  <div class="wall-workspace">
+    <aside class="wall-sidebar">
+      <div class="side-switch" role="tablist" aria-label="刷题方式">
+        <button class="active" type="button" data-side-mode="point">考点刷题</button>
+        <button type="button" data-side-mode="year">按年刷题</button>
+      </div>
+      <div class="side-heading" data-side-title>考点目录</div>
+      <div class="side-list" data-side-list></div>
+    </aside>
 
-  <section class="wall-view active" data-view-panel="bank">
-    <div class="year-card">
-      <div class="year-card-top">
+    <section class="wall-main">
+      <section class="wall-summary">
         <div>
-          <div class="eyebrow">SELECT YEAR</div>
-          <h2>选择年份</h2>
+          <div class="eyebrow">408 PAST PAPERS</div>
+          <h1><span data-summary-subject>数据结构</span> · 真题墙</h1>
+          <p>2009—2026 · 按年份纵览题号，点击任意题目记录熟练度、笔记与复盘状态。</p>
         </div>
-        <span class="year-current">当前：<strong data-current-year>2026</strong></span>
-      </div>
-      <div class="year-strip" data-year-strip aria-label="年份"></div>
-    </div>
-
-    <section class="progress-card">
-      <div class="progress-card-head">
-        <div>
-          <div class="eyebrow">YEAR PROGRESS</div>
-          <h2><span data-progress-year>2026</span> 年 · 408</h2>
+        <div class="summary-numbers">
+          <div><strong data-summary-done>0</strong><span>已标记</span></div>
+          <div><strong data-summary-weak>0</strong><span>薄弱题</span></div>
+          <div><strong data-summary-rate>0%</strong><span>完成率</span></div>
         </div>
-        <div class="progress-percent" data-progress-percent>0%</div>
-      </div>
-      <div class="wall-progress"><span data-progress-bar></span></div>
-      <div class="status-grid">
-        <div class="status-stat"><span>已完成</span><strong data-stat-done>0/47</strong></div>
-        <div class="status-stat status-mastered"><span>熟练</span><strong data-stat-mastered>0</strong></div>
-        <div class="status-stat status-fuzzy"><span>模糊</span><strong data-stat-fuzzy>0</strong></div>
-        <div class="status-stat status-weak"><span>不会</span><strong data-stat-weak>0</strong></div>
-        <div class="status-stat"><span>未标记</span><strong data-stat-unmarked>47</strong></div>
-      </div>
-    </section>
-
-    <div class="wall-layout">
-      <section class="question-card">
-        <div class="question-card-head">
-          <div>
-            <div class="eyebrow">QUESTION BANK</div>
-            <h2>题号墙</h2>
-          </div>
-          <div class="legend" aria-label="状态图例"><span><i class="mastered"></i>熟练</span><span><i class="fuzzy"></i>模糊</span><span><i class="weak"></i>不会</span><span><i></i>未标记</span></div>
-        </div>
-        <div class="subject-filters" data-subject-filters>
-          <button class="subject-filter active" type="button" data-subject="all">全部</button>
-          <button class="subject-filter" type="button" data-subject="ds">DS 数据结构</button>
-          <button class="subject-filter" type="button" data-subject="co">CO 计组</button>
-          <button class="subject-filter" type="button" data-subject="os">OS 操作系统</button>
-          <button class="subject-filter" type="button" data-subject="cn">CN 计网</button>
-        </div>
-        <div class="question-grid" data-question-grid></div>
-        <p class="question-hint">1—40 为选择题，41—47 为综合应用题。点击题号即可标记掌握状态。</p>
       </section>
 
-      <aside class="question-inspector" data-question-inspector>
-        <div class="inspector-empty" data-inspector-empty>
-          <span class="inspector-mark">?</span>
-          <h3>选择一道真题</h3>
-          <p>点击左侧题号后，可记录熟练度和自己的复盘笔记。</p>
-        </div>
-        <div class="inspector-content" data-inspector-content hidden>
-          <div class="inspector-topline"><span class="subject-pill" data-selected-subject>DS</span><span class="muted" data-selected-type>选择题</span></div>
-          <h3><span data-selected-year>2026</span> 年 · 第 <span data-selected-question>1</span> 题</h3>
-          <div class="question-placeholder">
-            <strong>真题内容</strong>
-            <p>当前先用于真题进度与错题状态管理。题干、答案和解析后续可继续接入结构化真题题库。</p>
+      <section class="wall-toolbar">
+        <div class="toolbar-group">
+          <span class="toolbar-label">年份范围：</span>
+          <div class="segmented" data-year-range>
+            <button class="active" type="button" data-range="all">全部年份</button>
+            <button type="button" data-range="recent">近十年</button>
+            <button type="button" data-range="custom">自定义</button>
           </div>
-          <div class="status-actions" aria-label="熟练度">
-            <button type="button" data-set-status="mastered">熟练</button>
-            <button type="button" data-set-status="fuzzy">模糊</button>
-            <button type="button" data-set-status="weak">不会</button>
-            <button class="clear-status" type="button" data-set-status="">清除标记</button>
+          <div class="custom-range" data-custom-range hidden>
+            <select data-range-from aria-label="起始年份"></select><span>—</span><select data-range-to aria-label="结束年份"></select>
           </div>
-          <label class="note-label" for="question-note">复盘笔记</label>
-          <textarea id="question-note" data-question-note rows="5" placeholder="例如：BFS 与拓扑排序混淆；二刷时重新做……"></textarea>
-          <div class="note-state" data-note-state>本机自动保存</div>
-          <div class="question-nav"><button type="button" data-prev-question>← 上一题</button><button type="button" data-next-question>下一题 →</button></div>
         </div>
-      </aside>
-    </div>
-  </section>
+        <div class="toolbar-group toolbar-view">
+          <span class="toolbar-label">视图：</span>
+          <div class="segmented">
+            <button class="active" type="button" data-display="matrix">纵览</button>
+            <button type="button" data-display="list">列表</button>
+          </div>
+        </div>
+      </section>
 
-  <section class="wall-view" data-view-panel="years">
-    <div class="overview-head"><div><div class="eyebrow">YEAR OVERVIEW</div><h2>年份总览</h2><p>一眼查看 2009—2026 每一年的完成度与薄弱题数量。</p></div></div>
-    <div class="year-overview-grid" data-year-overview></div>
-  </section>
+      <section class="matrix-card" data-display-panel="matrix">
+        <div class="matrix-head">
+          <div>
+            <h2>真题纵览</h2>
+            <p data-current-scope>数据结构 · 全部考点</p>
+          </div>
+          <div class="matrix-legend" aria-label="状态图例">
+            <span><i class="mastered"></i>熟练</span><span><i class="fuzzy"></i>模糊</span><span><i class="weak"></i>不会</span><span><i class="unmarked"></i>未做</span>
+          </div>
+        </div>
+        <div class="matrix-scroll">
+          <table class="question-matrix">
+            <thead data-matrix-head></thead>
+            <tbody data-matrix-body></tbody>
+          </table>
+        </div>
+      </section>
 
-  <section class="wall-view" data-view-panel="review">
-    <div class="overview-head review-head"><div><div class="eyebrow">REVIEW AGAIN</div><h2>错题多刷</h2><p>自动汇总你标记为“模糊”或“不会”的题目。</p></div><button class="review-switch" type="button" data-review-weak-only>仅看不会</button></div>
-    <div class="review-list" data-review-list></div>
-  </section>
+      <section class="list-panel" data-display-panel="list" hidden>
+        <div class="list-grid" data-year-list></div>
+      </section>
+    </section>
+  </div>
 </main>
+
+<div class="question-modal" data-question-modal hidden>
+  <div class="modal-backdrop" data-modal-close></div>
+  <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <header class="modal-head">
+      <div class="modal-title-wrap">
+        <span class="modal-dot"></span>
+        <h2 id="modal-title"><span data-modal-year>2026</span>年 第<span data-modal-question>1</span>题</h2>
+        <span class="modal-tag" data-modal-point>数据结构</span>
+        <span class="modal-tag" data-modal-type>选择题</span>
+      </div>
+      <div class="modal-status-actions">
+        <button type="button" data-modal-status="mastered">熟练</button>
+        <button type="button" data-modal-status="fuzzy">模糊</button>
+        <button type="button" data-modal-status="weak">不会</button>
+        <button class="modal-clear" type="button" data-modal-status="" title="清除标记">×</button>
+        <button class="modal-close" type="button" data-modal-close aria-label="关闭">×</button>
+      </div>
+    </header>
+
+    <div class="question-paper">
+      <div class="question-paper-inner" data-question-content>
+        <span class="question-number">（<span data-paper-question>1</span>）</span>
+        <p>该题题干、选项与标准答案尚未接入结构化真题库。当前页面先用于真题墙进度、熟练度和复盘记录。</p>
+      </div>
+      <div class="analysis-box" data-analysis-box hidden>
+        <strong>解析</strong>
+        <p>解析数据待接入。后续接入真题题库后，这里将展示标准答案、考点与解析。</p>
+      </div>
+      <div class="note-box" data-note-box hidden>
+        <label for="wall-note">复盘笔记</label>
+        <textarea id="wall-note" data-question-note rows="4" placeholder="例如：把拓扑排序和 BFS 混淆了；二刷重点看入度变化……"></textarea>
+        <span data-note-state>本机自动保存</span>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <div class="modal-tools">
+        <button type="button" data-tool="analysis">▣ 看解析</button>
+        <button type="button" data-tool="note">✎ 笔记</button>
+        <button type="button" data-tool="timer">◷ <span data-timer-text>计时</span></button>
+      </div>
+      <div class="modal-nav">
+        <button type="button" data-prev-question>‹ 上一题</button>
+        <button type="button" data-next-question>下一题 ›</button>
+      </div>
+    </footer>
+  </section>
+</div>
 
 <footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>408 真题墙 · 本机自动保存</span></div></footer>
 <script src="../assets/js/site-runtime-v2.js"></script>
-<script src="../assets/js/zhenti-wall.js"></script>
+<script src="../assets/js/zhenti-wall.js?v=20260823b"></script>
 </body>
 </html>
