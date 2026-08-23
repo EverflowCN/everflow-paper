@@ -17,7 +17,7 @@
 
   async function loadSupplement(year){
     if(cache.has(year))return cache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-base-authoritative`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-2023-complete`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     cache.set(year,promise);
@@ -27,7 +27,7 @@
   async function loadExtra(year){
     if(!extraYears.has(year))return null;
     if(extraCache.has(year))return extraCache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-base-authoritative`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-2023-complete`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     extraCache.set(year,promise);
@@ -82,7 +82,7 @@
   if(!document.querySelector('link[data-zhenti-media]')){
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href='/assets/css/zhenti-media.css?v=20260824-base-authoritative';
+    link.href='/assets/css/zhenti-media.css?v=20260824-2023-complete';
     link.dataset.zhentiMedia='1';
     document.head.appendChild(link);
   }
@@ -90,7 +90,7 @@
   const loadMedia=()=>{
     if(document.querySelector('script[data-zhenti-media]'))return;
     const script=document.createElement('script');
-    script.src='/assets/js/zhenti-media.js?v=20260824-base-authoritative';
+    script.src='/assets/js/zhenti-media.js?v=20260824-2023-complete';
     script.defer=true;
     script.dataset.zhentiMedia='1';
     document.body.appendChild(script);
