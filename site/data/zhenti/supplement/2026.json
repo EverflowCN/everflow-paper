@@ -1,0 +1,35 @@
+{
+  "schema": "everflow-408-paper-supplement-v1",
+  "year": 2026,
+  "verifiedAt": "2026-08-23",
+  "questions": {
+    "41": {
+      "number": 41,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 13,
+      "stem": "二叉搜索树采用二叉链表存储，结点含 data、left、right。给定二叉搜索树 T 和整数 K，查找树中关键字与 K 之差的绝对值最小的所有结点，并输出该最小绝对值以及这些结点的关键字。要求给出基本思想，并用 C/C++ 描述算法。",
+      "answer": "利用 BST 中序遍历有序的性质。中序扫描时维护当前最小差值 minDiff 和至多两个候选关键字；访问结点 x 时计算 |x-K|：若更小则更新 minDiff 并清空候选，若相等则加入候选；当已经越过 K 且差值开始严格增大时可停止后续遍历。最后输出 minDiff 及所有候选关键字。",
+      "analysis": "关键是利用 BST 的有序性，而不是遍历后再排序。与 K 距离最小的关键字在有序序列中只可能位于 K 的前驱/后继附近，因此满足最小差值的结点最多两个。可以直接沿 BST 搜索路径维护前驱和后继，也可以按中序遍历扫描并在差值由减小转为增大后剪枝。两种写法都能正确处理两个关键字与 K 等距的情况。",
+      "verification": {
+        "status": "verified",
+        "mode": "cross-checked-paraphrase",
+        "sources": ["csgraduates", "noobdream"]
+      }
+    },
+    "45": {
+      "number": 45,
+      "subject": "os",
+      "type": "comprehensive",
+      "score": 7,
+      "stem": "系统采用优先级（数值越大优先级越高）与时间片轮转结合的调度算法，仅在时钟中断时检查并触发抢占；时钟中断间隔 10ms，新进入就绪队列的进程时间片为 50ms。时间片用完回队列时优先级减 1，被更高优先级进程抢占时优先级不变；同优先级按进入就绪队列先后调度。P1(10ms,3,95ms)、P2(10ms,4,20ms)、P3(12ms,2,40ms)、P4(14ms,5,60ms)。求全部完成前的时钟中断次数、CPU 调度次数、各进程首次调度时刻；并判断时间片改为 100ms 后调度次数变化、时钟中断间隔改为 1ms 后系统开销变化。",
+      "answer": "共发生 22 次时钟中断、7 次 CPU 调度。首次调度时刻：P2=10ms，P4=20ms，P1=90ms，P3=140ms。时间片从 50ms 增至 100ms 后，CPU 调度次数减少；时钟中断间隔从 10ms 缩短到 1ms 后，系统开销增大。",
+      "analysis": "10ms 调度 P2；20ms 时 P4 已到达且优先级最高，调度 P4；P4 完成后在 90ms 调度 P1；P1 到 140ms 用完时间片、优先级降为 2，与 P3 同优先级，但 P3 更早进入就绪队列，因此调度 P3；之后再回到 P1。调度检查只在时钟中断点发生，因此进程到达本身不会立刻抢占。",
+      "verification": {
+        "status": "verified",
+        "mode": "cross-checked-paraphrase",
+        "sources": ["csgraduates", "noobdream"]
+      }
+    }
+  }
+}
