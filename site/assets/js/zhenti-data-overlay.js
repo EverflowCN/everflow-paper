@@ -1,7 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const supplementYears=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const extraYears=new Set(['2010','2011','2012','2013','2014','2022']);
+  const extraYears=new Set(['2010','2011','2012','2013','2014','2017','2018','2020','2021','2022']);
   const cache=new Map();
   const extraCache=new Map();
 
@@ -27,7 +27,7 @@
   async function loadExtra(year){
     if(!extraYears.has(year))return null;
     if(extraCache.has(year))return extraCache.get(year);
-    const p=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824e`,{cache:'no-store'})
+    const p=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824f`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     extraCache.set(year,p);
