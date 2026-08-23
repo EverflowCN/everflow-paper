@@ -6,14 +6,14 @@
   <meta name="description" content="Everflow 学习中心：课程、刷题与学习数据统一入口">
   <title>学习中心 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
-  <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/site.css?v=20260824-ui4">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20260824-ui4">
   <link rel="stylesheet" href="../assets/css/study.css">
-  <link rel="stylesheet" href="../assets/css/learning-center.css">
+  <link rel="stylesheet" href="../assets/css/learning-center.css?v=20260824-ui4">
 </head>
 <body>
-<header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
-<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
+<div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
 <main class="wrap learning-shell">
   <section class="learning-hero">
     <div class="learning-hero-main">
@@ -23,7 +23,7 @@
       <div class="learning-hero-actions"><a class="learning-btn primary" href="courses/">进入课程</a><a class="learning-btn" href="practice/">进入刷题</a><a class="learning-btn" href="heatmap/">查看热力图</a></div>
     </div>
     <aside class="learning-summary">
-      <div><div class="eyebrow">EVERFLOW STUDY</div><h2>课程 × 刷题<br>分轨管理</h2><p>一个学习入口，两类进度，再用一张热力图汇总每天的学习密度。</p></div>
+      <div><div class="eyebrow">EVERFLOW STUDY</div><h2>课程与刷题<br>分轨管理</h2><p>一个学习入口，两类进度，再用一张热力图汇总每天的学习密度。</p></div>
       <div class="learning-summary-grid"><div class="learning-summary-chip"><strong>课程</strong><span>课时 · 视频 · 跟课进度</span></div><div class="learning-summary-chip"><strong>刷题</strong><span>题单 · 错题 · 二刷状态</span></div><div class="learning-summary-chip"><strong>热力图</strong><span>每日次数 · 连续天数</span></div><div class="learning-summary-chip"><strong>云端</strong><span>登录后跨设备汇总</span></div></div>
     </aside>
   </section>
@@ -32,7 +32,7 @@
     <div class="learning-section-head"><div><div class="eyebrow">LEARNING DATA</div><h2>学习数据</h2></div><p>只看节奏，不打乱课程和刷题原有结构。</p></div>
     <div class="learning-lanes" style="grid-template-columns:1fr">
       <article class="learning-lane">
-        <div class="learning-lane-head"><div><h3>学习热力图 <span class="learning-badge live">已接入</span></h3><p>课程、刷题和手动补录统一按天计数；支持月视图、年视图、连续打卡、来源拆分和当天详情。</p></div><div class="learning-lane-icon">▦</div></div>
+        <div class="learning-lane-head"><div><h3>学习热力图 <span class="learning-badge live">已接入</span></h3><p>课程、刷题和手动补录统一按天计数；支持月视图、年视图、连续打卡、来源拆分和当天详情。</p></div><div class="learning-lane-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h2M11 8h2M15 8h2M7 12h2M11 12h2M15 12h2M7 16h2M11 16h2M15 16h2"/></svg></div></div>
         <div class="learning-note"><strong>统计口径：</strong>完成 1 个课程课时 = 1 次；完成 1 个刷题条目 = 1 次；手动补录 = 1 次。登录后使用 Supabase 云端事件记录，未登录时读取本机可识别进度。</div>
         <div class="learning-hero-actions"><a class="learning-btn primary" href="heatmap/">查看学习热力图</a></div>
       </article>
@@ -43,22 +43,22 @@
     <div class="learning-section-head"><div><div class="eyebrow">TWO TRACKS</div><h2>选择学习方式</h2></div><p>后续新增内容只进入对应轨道。</p></div>
     <div class="learning-lanes">
       <article class="learning-lane">
-        <div class="learning-lane-head"><div><h3>课程</h3><p>用于网课、强化课、视频课的课时完成情况。</p></div><div class="learning-lane-icon">▶</div></div>
+        <div class="learning-lane-head"><div><h3>课程</h3><p>用于网课、强化课、视频课的课时完成情况。</p></div><div class="learning-lane-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4Z"/></svg></div></div>
         <div class="learning-list">
-          <a class="learning-item" href="../408/"><div><strong>氧气11 · 27考研408强化 <span class="learning-badge live">已接入</span></strong><small>DS / CO / OS / CN 四科课程自动更新与云同步。</small></div><span class="arrow">→</span></a>
+          <a class="learning-item" href="../408/"><div><strong>氧气11 · 27考研408强化 <span class="learning-badge live">已接入</span></strong><small>DS / CO / OS / CN 四科课程自动更新与云同步。</small></div><span class="arrow"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
         </div>
       </article>
       <article class="learning-lane">
-        <div class="learning-lane-head"><div><h3>刷题</h3><p>用于题单、专项训练、错题与后续二刷。</p></div><div class="learning-lane-icon">✓</div></div>
+        <div class="learning-lane-head"><div><h3>刷题</h3><p>用于题单、专项训练、错题与后续二刷。</p></div><div class="learning-lane-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/><path d="M4 4h16v16H4Z"/></svg></div></div>
         <div class="learning-list">
-          <a class="learning-item" href="practice/"><div><strong>408 · 强化题单 <span class="learning-badge live">2 个题单</span></strong><small>1800题强化必刷 + 数据结构强化专项，进度与课程完全分开。</small></div><span class="arrow">→</span></a>
-          <a class="learning-item" href="practice/math-880/"><div><strong>数学 · 李林880题（数学二） <span class="learning-badge live">已接入</span></strong><small>12 章、三层题单、533 个打卡条目，支持本地保存与登录后云同步。</small></div><span class="arrow">→</span></a>
+          <a class="learning-item" href="practice/"><div><strong>408 · 强化题单 <span class="learning-badge live">2 个题单</span></strong><small>1800题强化必刷 + 数据结构强化专项，进度与课程完全分开。</small></div><span class="arrow"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+          <a class="learning-item" href="practice/math-880/"><div><strong>数学 · 李林880题（数学二） <span class="learning-badge live">已接入</span></strong><small>12 章、三层题单、533 个打卡条目，支持本地保存与登录后云同步。</small></div><span class="arrow"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
         </div>
       </article>
     </div>
   </section>
 </main>
-<footer class="footer"><div class="wrap footer-inner"><span>Everflow Study · 课程与刷题分轨</span><span><a href="../account/">账户与云同步 →</a></span></div></footer>
-<script src="../assets/js/site-runtime-v2.js"></script>
+<footer class="footer"><div class="wrap footer-inner"><span>Everflow Study · 课程与刷题分轨</span><span><a class="ui-iconized" href="../account/"><span>账户与云同步</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></span></div></footer>
+<script src="../assets/js/site-runtime-v2.js?v=20260824-ui4"></script>
 </body>
 </html>
