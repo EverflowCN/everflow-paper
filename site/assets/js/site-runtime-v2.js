@@ -18,7 +18,10 @@
       .then(()=>import('/assets/js/zhenti-srs-error-v2.js?v=20260823b'))
       .then(()=>import('/assets/js/zhenti-srs-reset.js?v=20260823a'))
       .catch(err=>console.error('Everflow 408 SRS quick cards failed',err));
-    srsFlow.finally(()=>import('/assets/js/zhenti-favorites.js?v=20260823a').catch(err=>console.error('Everflow 408 favorites failed',err)));
+    srsFlow.finally(async()=>{
+      try{await import('/assets/js/zhenti-favorites.js?v=20260823a')}catch(err){console.error('Everflow 408 favorites failed',err)}
+      try{await import('/assets/js/zhenti-srs-experience.js?v=20260823a')}catch(err){console.error('Everflow 408 immersive SRS failed',err)}
+    });
     import('/assets/js/zhenti-ui-polish.js?v=20260823a').catch(err=>console.error('Everflow 408 UI polish failed',err));
   }
 })();
