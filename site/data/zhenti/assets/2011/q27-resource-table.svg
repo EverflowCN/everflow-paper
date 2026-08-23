@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="410" viewBox="0 0 980 410" role="img" aria-labelledby="title desc">
+<title id="title">2011 年 408 第 27 题资源使用表</title>
+<desc id="desc">按原题数据重建：P1-P4 的已分配资源、尚需资源以及当前可用资源 0,2,1。</desc>
+<style>
+  text{font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#111;font-size:22px}
+  .small{font-size:20px}.head{font-weight:700}.line{stroke:#111;stroke-width:2;fill:none}
+</style>
+<rect x="10" y="10" width="960" height="380" class="line"/>
+<!-- vertical grid -->
+<path class="line" d="M120 10V390 M240 10V390 M330 90V390 M420 90V390 M540 10V390 M630 90V390 M720 90V390 M810 10V390 M863 90V390 M916 90V390"/>
+<!-- horizontal grid -->
+<path class="line" d="M10 90H970 M10 150H970 M10 210H810 M10 270H810 M10 330H810"/>
+<!-- grouped headers -->
+<text x="65" y="58" text-anchor="middle" class="head">进程</text>
+<text x="330" y="58" text-anchor="middle" class="head">已分配资源</text>
+<text x="675" y="58" text-anchor="middle" class="head">尚需资源</text>
+<text x="890" y="58" text-anchor="middle" class="head">可用资源</text>
+<text x="180" y="130" text-anchor="middle" class="small">R1</text><text x="285" y="130" text-anchor="middle" class="small">R2</text><text x="375" y="130" text-anchor="middle" class="small">R3</text>
+<text x="585" y="130" text-anchor="middle" class="small">R1</text><text x="675" y="130" text-anchor="middle" class="small">R2</text><text x="765" y="130" text-anchor="middle" class="small">R3</text>
+<text x="837" y="130" text-anchor="middle" class="small">R1</text><text x="890" y="130" text-anchor="middle" class="small">R2</text><text x="943" y="130" text-anchor="middle" class="small">R3</text>
+<!-- rows -->
+<g text-anchor="middle">
+<text x="65" y="190">P1</text><text x="180" y="190">2</text><text x="285" y="190">0</text><text x="375" y="190">0</text><text x="585" y="190">0</text><text x="675" y="190">0</text><text x="765" y="190">1</text>
+<text x="65" y="250">P2</text><text x="180" y="250">1</text><text x="285" y="250">2</text><text x="375" y="250">0</text><text x="585" y="250">1</text><text x="675" y="250">3</text><text x="765" y="250">2</text>
+<text x="65" y="310">P3</text><text x="180" y="310">0</text><text x="285" y="310">1</text><text x="375" y="310">1</text><text x="585" y="310">1</text><text x="675" y="310">3</text><text x="765" y="310">1</text>
+<text x="65" y="370">P4</text><text x="180" y="370">0</text><text x="285" y="370">0</text><text x="375" y="370">1</text><text x="585" y="370">2</text><text x="675" y="370">0</text><text x="765" y="370">0</text>
+<text x="837" y="280">0</text><text x="890" y="280">2</text><text x="943" y="280">1</text>
+</g>
+</svg>
