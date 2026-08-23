@@ -108,7 +108,7 @@
 
   async function loadPaper(year){
     if(PAPER_CACHE.has(year))return PAPER_CACHE.get(year);
-    const promise=fetch(`/data/zhenti/${year}.json?v=20260824f`,{cache:'no-store'})
+    const promise=fetch(`/data/zhenti/${year}.json`,{cache:'no-store'})
       .then(response=>response.ok?response.json():null)
       .catch(()=>null);
     PAPER_CACHE.set(year,promise);
@@ -256,7 +256,7 @@
     syncDrawerControls();
   }
 
-  drawerClose?.addEventListener('click',hideDrawer);
+  drawerClose.addEventListener('click',hideDrawer);
   drawerReopen?.addEventListener('click',()=>{if(selected){showDrawer();refreshSelected()}});
   drawerAnswer?.addEventListener('click',()=>{
     if(!selected?.item||selected.item.verification?.status!=='verified')return;
@@ -290,5 +290,8 @@
 
   window.addEventListener('pageshow',event=>{if(event.persisted)refresh()});
   window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY||event.key===CURRENT_KEY)refresh()});
+
   render({focusCurrent:true});
+  const initial=parseKey(current)||{year:2026,q:1};
+  openQuestion(initial.year,initial.q);
 })();
