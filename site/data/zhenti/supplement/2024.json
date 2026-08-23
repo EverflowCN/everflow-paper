@@ -11,11 +11,7 @@
       "stem": "有向图 G 采用邻接矩阵 MGraph 存储。设计 int uniquely(MGraph G)，判断 G 是否存在唯一拓扑序列；若存在返回 1，否则返回 0。给出基本思想及 C/C++ 算法。",
       "answer": "先由邻接矩阵计算各顶点入度。重复 n 轮：统计尚未删除且入度为 0 的顶点；若本轮数量不等于 1（为 0 表示有环，为 2 个及以上表示拓扑序不唯一），立即返回 0；否则删除唯一顶点，并将其所有后继的入度减 1。n 轮均成功则返回 1。",
       "analysis": "Kahn 拓扑排序中，唯一拓扑序列等价于每一步可选的零入度顶点都恰好只有一个。可将已删除顶点的入度置为 -1 防止重复选择。采用邻接矩阵时，时间复杂度 O(V^2)，额外空间复杂度 O(V)。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
     "42": {
       "number": 42,
@@ -25,11 +21,7 @@
       "stem": "关键字 20、3、11、18、9、14、7 依次插入长度为 11 的散列表，H(key)=(key×3)%11；发生冲突时按 Hk=(H0+k^2)%11 进行二次探查。给出最终散列表及装填因子、查找 14 的关键字比较序列、查找 8 失败时确认失败的散列地址。",
       "answer": "最终 HT：0→11，1 空，2→14，3→7，4 空，5→20，6→9，7 空，8 空，9→3，10→18；装填因子为 7/11。查找 14 的比较序列为 3、18、14。查找 8 时探测地址依次为 2、3、6、0、7，地址 7 为空，因此确认失败的散列地址为 7。",
       "analysis": "逐个关键字先计算 H0；若冲突则令 k=1,2,… 按平方增量重新探测。14 的 H0=9，依次比较 3、18 后在地址 2 命中；8 的 H0=2，继续探测 3、6、0，最终到达空地址 7。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
     "45": {
       "number": 45,
@@ -39,11 +31,17 @@
       "stem": "32 位字节编址系统采用页式虚拟存储，虚拟地址和物理地址均为 32 位，页表项 4B，页大小 4MB。进程 P 的页表虚拟基址为 B8C00000H，页表装入从物理地址 65400000H 开始的连续主存。访问虚拟地址 12345678H 时缺页，处理后映射到物理地址 BAB45678H。求对应页表项的虚拟地址、物理地址和更新后的页框号；再求页表所在页的页号、该页对应页表项的虚拟地址与页框号。",
       "answer": "页大小 4MB=2^22B，因此虚拟页号为高 10 位。12345678H 的 VPN=048H，对应 PTE 虚拟地址=B8C00000H+048H×4=B8C00120H，PTE 物理地址=65400000H+048H×4=65400120H；由 BAB45678H 的高 10 位得到更新后的 PPN=2EAH。页表虚拟基址 B8C00000H 所在 VPN=2E3H，其 PTE 虚拟地址=B8C00000H+2E3H×4=B8C00B8CH；页表所在物理页框号为 195H。",
       "analysis": "4MB 页使页内偏移占 22 位、页号占 10 位；每个 PTE 为 4B，所以第 VPN 项相对页表基址的偏移为 VPN×4。物理页框号同样取物理地址的高 10 位。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "46": {
+      "number": 46,
+      "subject": "os",
+      "type": "comprehensive",
+      "score": 8,
+      "stem": "某网络系统的缓冲区 B 只能存放一个数据分组。操作 C1 向 B 写入一个分组，C2 从 B 读出一个分组，C3 修改 B 中的分组；B 为空时才能执行 C1，B 非空时才能执行 C2、C3。回答：两个进程均执行 C1 时其代码是否为临界区；B 初始为空、P1 执行 C1 一次且 P2 执行 C2 一次时如何用尽可能少的信号量同步；B 初始非空、P1 和 P2 各执行 C3 一次时如何用尽可能少的信号量实现互斥。",
+      "answer": "（1）C1 的实现代码是临界区，因为两个进程对共享缓冲区 B 的写入必须互斥。（2）可用 empty=1、full=0 两个同步信号量：P1：wait(empty); C1; signal(full)。P2：wait(full); C2; signal(empty)。在只有一次写和一次读的题设下，这两个量同时完成空/满同步。（3）只需一个互斥信号量 mutex=1：P1、P2 执行 C3 前 wait(mutex)，完成后 signal(mutex)。",
+      "analysis": "核心是区分条件同步与互斥。C1/C2 的执行条件分别是“空”和“非空”，因此用空/满状态信号量约束先后；两个 C3 都会修改同一非空缓冲区，只需一个二元互斥量保护临界区。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     }
   }
 }
