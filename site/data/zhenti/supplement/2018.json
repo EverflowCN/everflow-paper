@@ -1,0 +1,17 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2018,
+  "verifiedAt":"2026-08-23",
+  "questions":{
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"给定一个含 n（n≥1）个整数的数组，设计一个时间上尽可能高效的算法，找出数组中未出现的最小正整数。例如 {-5,3,2,3} 的答案为 1，{1,2,3} 的答案为 4。要求给出基本设计思想、C/C++ 算法，并说明时间复杂度和空间复杂度。",
+      "answer":"最小未出现正整数必在 1～n+1。分配长度为 n 的标记数组 B 并清零，扫描 A；若 0<A[i]≤n，则置 B[A[i]-1]=1。再从 B[0] 起寻找第一个 0，若下标为 i 则返回 i+1；若 B 全为 1，则返回 n+1。时间复杂度 O(n)，额外空间复杂度 O(n)。",
+      "analysis":"n 个输入若恰好包含 1～n，则答案是 n+1；否则答案一定是 1～n 中最先缺失的整数。用标记数组把成员检查降为常数时间，因此两次线性扫描即可。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","foreverlink","csyanku"]}
+    }
+  }
+}
