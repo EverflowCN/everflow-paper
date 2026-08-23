@@ -1,0 +1,64 @@
+/* Canonical 408 question-state palette shared by 真题墙 and 整体图谱. */
+:root{
+  --status-unmarked:#d9dde5;
+  --status-mastered:#a9d9f7;
+  --status-mastered-strong:#75bde8;
+  --status-mastered-ink:#174f70;
+  --status-fuzzy:#f2c45d;
+  --status-weak:#ec6b7e;
+  --status-mastered-border:#67add6;
+  --status-fuzzy-border:#c38d18;
+  --status-weak-border:#b9344b;
+  --mastered:var(--status-mastered);
+  --mastered-border:var(--status-mastered-border);
+  --fuzzy:var(--status-fuzzy);
+  --fuzzy-border:var(--status-fuzzy-border);
+  --weak:var(--status-weak);
+  --weak-border:var(--status-weak-border);
+  --cell:var(--status-unmarked);
+}
+body.dark{
+  --status-unmarked:#414650;
+  --status-mastered:#5fa7d3;
+  --status-mastered-strong:#79bce5;
+  --status-mastered-ink:#081f2d;
+  --status-fuzzy:#c99732;
+  --status-weak:#c95b6b;
+  --status-mastered-border:#7bc2e9;
+  --status-fuzzy-border:#d7ab53;
+  --status-weak-border:#df7b89;
+}
+
+/* Wall JS emits status-* classes; these selectors are the single semantic bridge. */
+.matrix-q.unmarked,.matrix-q:not(.status-mastered):not(.status-fuzzy):not(.status-weak),
+.whole-mini-grid i.unmarked,.whole-mini-grid i:not(.status-mastered):not(.status-fuzzy):not(.status-weak),
+.paper-answer.unmarked,.paper-answer:not(.status-mastered):not(.status-fuzzy):not(.status-weak){background:var(--status-unmarked)}
+.matrix-q.status-mastered,.whole-mini-grid i.status-mastered,.paper-answer.status-mastered{background:var(--status-mastered)}
+.matrix-q.status-fuzzy,.whole-mini-grid i.status-fuzzy,.paper-answer.status-fuzzy{background:var(--status-fuzzy)}
+.matrix-q.status-weak,.whole-mini-grid i.status-weak,.paper-answer.status-weak{background:var(--status-weak)}
+.matrix-q.status-mastered,.paper-answer.status-mastered{color:var(--status-mastered-ink)}
+.matrix-q.status-fuzzy,.paper-answer.status-fuzzy{color:#493400}
+.matrix-q.status-weak,.paper-answer.status-weak{color:#fff}
+
+.matrix-legend .mastered,.whole-legend .mastered,.overview-legend .mastered{background:var(--status-mastered)!important}
+.matrix-legend .fuzzy,.whole-legend .fuzzy,.overview-legend .fuzzy{background:var(--status-fuzzy)!important}
+.matrix-legend .weak,.whole-legend .weak,.overview-legend .weak{background:var(--status-weak)!important}
+.matrix-legend .unmarked,.whole-legend .unmarked,.overview-legend .unmarked{background:var(--status-unmarked)!important}
+.overview-legend .mastered{border-color:var(--status-mastered-border)!important}
+.overview-legend .fuzzy{border-color:var(--status-fuzzy-border)!important}
+.overview-legend .weak{border-color:var(--status-weak-border)!important}
+.overview-legend .unmarked{border-color:color-mix(in srgb,var(--status-unmarked) 62%,#6d7480)!important}
+
+.modal-status-actions button[data-modal-status="mastered"].active{border-color:var(--status-mastered-strong)!important;color:#3386b8!important;background:color-mix(in srgb,var(--status-mastered) 18%,var(--card))!important}
+.modal-status-actions button[data-modal-status="fuzzy"].active{border-color:var(--status-fuzzy)!important;color:#a66b00!important;background:color-mix(in srgb,var(--status-fuzzy) 14%,var(--card))!important}
+.modal-status-actions button[data-modal-status="weak"].active{border-color:var(--status-weak)!important;color:var(--status-weak)!important;background:color-mix(in srgb,var(--status-weak) 12%,var(--card))!important}
+.paper-status-actions button[data-paper-status="mastered"].active,
+.drawer-status button[data-drawer-status="mastered"].active{background:var(--status-mastered)!important;border-color:var(--status-mastered-border)!important;color:var(--status-mastered-ink)!important}
+.paper-status-actions button[data-paper-status="fuzzy"].active,
+.drawer-status button[data-drawer-status="fuzzy"].active{background:var(--status-fuzzy)!important;border-color:var(--status-fuzzy-border)!important;color:#493400!important}
+.paper-status-actions button[data-paper-status="weak"].active,
+.drawer-status button[data-drawer-status="weak"].active{background:var(--status-weak)!important;border-color:var(--status-weak-border)!important;color:#fff!important}
+
+.overview-cell.status-mastered{background:var(--status-mastered)!important}
+.overview-cell.status-fuzzy{background:var(--status-fuzzy)!important}
+.overview-cell.status-weak{background:var(--status-weak)!important}
