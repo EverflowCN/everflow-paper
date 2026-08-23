@@ -120,15 +120,16 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
       const {data:remoteRow,error:readError}=await client.from(TABLE).select('payload,updated_at,device_id').eq('user_id',user.id).eq('scope_key',SCOPE).maybeSingle();
       if(readError)throw readError;
       const merged=mergeSnapshot(local,remoteRow?.payload||null);
-      const localBefore=fingerprint(local),mergedPrint=fingerprint(merged);
-      if(mergedPrint!==localBefore){applySnapshot(merged);document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-merged',{detail:{userId:user.id}}))}
+      const localBefore=fingerprint(local),mergedPrint=fingerprint(merged),pulledRemote=mergedPrint!==localBefore;
+      if(pulledRemote)applySnapshot(merged);
       const now=new Date().toISOString();
       const {error:writeError}=await client.from(TABLE).upsert({user_id:user.id,scope_key:SCOPE,payload:merged,device_id:deviceId(),updated_at:now},{onConflict:'user_id,scope_key'});
       if(writeError)throw writeError;
       lastSeenFingerprint=mergedPrint;saveMeta({userId:user.id,lastSyncAt:now,lastFingerprint:mergedPrint});
       setStatus('synced','已同步',`真题墙已同步 · ${new Date(now).toLocaleString('zh-CN',{hour12:false})}`);
       localStorage.setItem('everflow-last-zhenti-cloud-sync',JSON.stringify({ok:true,at:now,userId:user.id}));
-      document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-sync',{detail:{ok:true,at:now,userId:user.id,manual}}));
+      document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-sync',{detail:{ok:true,at:now,userId:user.id,manual,pulledRemote}}));
+      if(pulledRemote){sessionStorage.setItem('everflow-408-cloud-reload-toast','已载入云端最新真题进度。');setTimeout(()=>location.reload(),120);return true}
       return true;
     }catch(err){console.error('Everflow zhenti cloud sync failed',err);setStatus('error','同步失败',`同步失败：${err?.message||err}`);document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-error',{detail:{message:err?.message||String(err)}}));return false}
     finally{syncing=false}
@@ -138,7 +139,7 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
   status.addEventListener('click',async()=>{
     const user=await currentUser();
     if(!user){window.EveraUI?.toast?.('登录账户后即可在电脑、平板和手机间同步真题墙数据。',{type:'info',title:'当前为本地模式',duration:4200});setTimeout(()=>{location.href='/account/'},650);return}
-    await sync({manual:true});window.EveraUI?.toast?.('真题墙数据已与云端合并。',{type:'success',title:'同步完成'});
+    const ok=await sync({manual:true});if(ok)window.EveraUI?.toast?.('真题墙数据已与云端合并。',{type:'success',title:'同步完成'});
   });
 
   client.auth.onAuthStateChange((event,session)=>{
@@ -155,6 +156,9 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
     if(nowPrint!==lastSeenFingerprint){lastSeenFingerprint=nowPrint;schedule(900)}
   },WATCH_INTERVAL);
   setInterval(()=>{if(document.visibilityState==='visible')sync().catch(()=>{})},SYNC_INTERVAL);
+
+  const reloadToast=sessionStorage.getItem('everflow-408-cloud-reload-toast');
+  if(reloadToast){sessionStorage.removeItem('everflow-408-cloud-reload-toast');setTimeout(()=>window.EveraUI?.toast?.(reloadToast,{type:'success',title:'云同步',duration:3200}),500)}
 
   (async()=>{
     const user=await currentUser();
