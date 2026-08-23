@@ -1,0 +1,124 @@
+{
+  "schema": "everflow-408-paper-v1",
+  "year": 2009,
+  "title": "2009 年全国硕士研究生入学统一考试 · 计算机学科专业基础综合",
+  "questionCount": 47,
+  "contentStatus": "partial-verified",
+  "verifiedAt": "2026-08-23",
+  "subjectRanges": {
+    "ds": "1-10,41-42",
+    "co": "11-22,43-44",
+    "os": "23-32,45-46",
+    "cn": "33-40,47"
+  },
+  "questions": {
+    "1": {
+      "number": 1,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "为保持打印数据原有顺序，同时缓解主机与打印机之间的速度差，主机先把待打印数据写入缓冲区，打印机再按写入次序取出。该缓冲区最合适的逻辑结构是（ ）。",
+      "options": {"A":"栈","B":"队列","C":"树","D":"图"},
+      "answer": "B",
+      "analysis": "缓冲数据必须保持先进先出的顺序，因此应使用队列。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","hermes408"]}
+    },
+    "2": {
+      "number": 2,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "栈 S 与队列 Q 初始为空，a、b、c、d、e、f、g 依次进入栈 S；元素每次出栈后立即进入队列 Q。若最终出队顺序为 b、d、c、f、e、a、g，则栈 S 至少需要多大容量？",
+      "options": {"A":"1","B":"2","C":"3","D":"4"},
+      "answer": "C",
+      "analysis": "队列保持出栈顺序。按目标序列模拟压栈/出栈，栈中元素数的最大值为 3，所以最小容量为 3。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","hermes408"]}
+    },
+    "5": {
+      "number": 5,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "一棵完全二叉树的第 6 层（根为第 1 层）有 8 个叶结点。该完全二叉树的结点总数最多是多少？",
+      "options": {"A":"39","B":"52","C":"111","D":"119"},
+      "answer": "C",
+      "analysis": "要使结点最多，树高取 7。满 7 层有 127 个结点；第 6 层的 8 个叶结点对应第 7 层缺少 16 个孩子，因此最多 127-16=111。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+    },
+    "6": {
+      "number": 6,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "把森林转换成对应二叉树后，若二叉树中结点 u 是结点 v 的祖父结点（u 是 v 的父结点的父结点），则在原森林中 u 与 v 可能满足：I. 父子关系；II. 兄弟关系；III. u 的父结点与 v 的父结点为兄弟关系。正确的是（ ）。",
+      "options": {"A":"只有 II","B":"I 和 II","C":"I 和 III","D":"I、II 和 III"},
+      "answer": "B",
+      "analysis": "森林转二叉树采用“左孩子、右兄弟”规则。该二叉关系可对应原森林中的父子或兄弟关系，III 不成立。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+    },
+    "7": {
+      "number": 7,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "关于无向连通图：I. 所有顶点度数之和为偶数；II. 边数一定大于顶点数减 1；III. 至少存在一个度为 1 的顶点。正确的是（ ）。",
+      "options": {"A":"只有 I","B":"只有 II","C":"I 和 II","D":"I 和 III"},
+      "answer": "A",
+      "analysis": "握手定理给出度数之和等于 2|E|，所以 I 正确；树恰有 n-1 条边，II 错；完全图等连通图可没有度为 1 的顶点，III 错。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+    },
+    "8": {
+      "number": 8,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "下列哪一项不属于 m 阶 B 树的定义要求？",
+      "options": {"A":"根结点最多有 m 棵子树","B":"所有叶结点处在同一层","C":"结点内关键字有序排列","D":"叶结点之间用指针相连"},
+      "answer": "D",
+      "analysis": "叶结点之间通过指针链接是 B+ 树的典型特征，不是 B 树的定义要求。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+    },
+    "9": {
+      "number": 9,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "关键字序列 5，8，12，19，28，20，15，22 已构成小根堆。插入关键字 3 并调整后，得到的小根堆序列是（ ）。",
+      "options": {"A":"3，5，12，8，28，20，15，22，19","B":"3，5，12，19，20，15，22，8，28","C":"3，8，12，5，20，15，22，28，19","D":"3，12，5，8，28，20，15，22，19"},
+      "answer": "A",
+      "analysis": "3 先插到堆尾，再沿父结点方向连续上滤，最终得到选项 A 的序列。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+    },
+    "10": {
+      "number": 10,
+      "subject": "ds",
+      "type": "single",
+      "score": 2,
+      "stem": "序列 11，12，13，7，8，9，23，4，5 是某排序算法完成第二趟后的结果。下列算法中，能够唯一符合该中间状态的是（ ）。",
+      "options": {"A":"冒泡排序","B":"直接插入排序","C":"简单选择排序","D":"二路归并排序"},
+      "answer": "B",
+      "analysis": "第二趟后前三个元素已形成有序前缀，而整体不具备冒泡、选择或二路归并第二趟应有的结构特征，因此是直接插入排序。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+    },
+    "41": {
+      "number": 41,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 10,
+      "stem": "对非负权带权图，有人提出一种求初始顶点到目标顶点最短路径的方法：从当前顶点出发，每次选择与当前顶点距离最近、且尚未加入路径的顶点，加入路径并把它作为新的当前顶点，直至到达目标。该方法能否保证得到最短路径？若不能，请说明原因或给出反例。",
+      "answer": "不能保证。",
+      "analysis": "该策略只做局部最优选择，没有比较“从起点到候选顶点的累计路径长度”，因此局部最近并不推出全局最短；构造一个先走近边却导致后续长边的图即可得到反例。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","foreverlink","noobdream"]}
+    },
+    "42": {
+      "number": 42,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 15,
+      "stem": "给定带头结点的单链表，仅给出头指针 list。要求在不修改链表的前提下，用尽可能高效的方法查找倒数第 k 个结点（k>0）；成功时输出该结点 data 并返回 1，否则返回 0。请给出设计思想、主要步骤和 C/C++/Java 算法。",
+      "answer": "采用前后双指针，一趟扫描完成。",
+      "analysis": "先让前指针领先后指针 k 个结点，再让两个指针同步后移；当前指针到达表尾时，后指针位于倒数第 k 个结点。时间复杂度 O(n)，额外空间 O(1)。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","foreverlink","noobdream"]}
+    }
+  }
+}
