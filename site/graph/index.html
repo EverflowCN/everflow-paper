@@ -4,18 +4,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes,viewport-fit=cover">
   <meta name="theme-color" content="#f7f7fa">
-  <title>整体图谱</title>
+  <title>整体图谱 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
-  <link rel="stylesheet" href="../assets/css/overall-graph.css?v=20260824c">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/overall-graph.css?v=20260824d">
 </head>
 <body>
-  <main class="overview-stage">
-    <section class="overview-frame">
-      <div class="overview-scroll">
-        <div class="overview-matrix" data-overview-matrix role="grid" aria-label="2009年至2026年408真题整体图谱"></div>
-      </div>
-    </section>
-  </main>
-  <script src="../assets/js/overall-graph.js?v=20260824c"></script>
+<header class="topbar">
+  <div class="wrap nav">
+    <a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a>
+    <nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav>
+    <button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button>
+  </div>
+</header>
+<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+
+<main class="overview-stage">
+  <section class="overview-frame">
+    <div class="overview-legend" aria-label="掌握状态">
+      <span><i class="mastered"></i>熟悉</span>
+      <span><i class="fuzzy"></i>模糊</span>
+      <span><i class="weak"></i>不会</span>
+      <span><i class="unmarked"></i>未做</span>
+    </div>
+    <div class="overview-scroll">
+      <div class="overview-matrix" data-overview-matrix role="grid" aria-label="2009年至2026年408真题整体图谱"></div>
+    </div>
+  </section>
+</main>
+
+<script src="../assets/js/site-runtime-v2.js?v=20260824d"></script>
+<script src="../assets/js/overall-graph.js?v=20260824d"></script>
 </body>
 </html>
