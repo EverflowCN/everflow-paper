@@ -1,0 +1,37 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2016,
+  "verifiedAt":"2026-08-23",
+  "questions":{
+    "42":{
+      "number":42,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"若一棵非空 k(k≥2) 叉树 T 中每个非叶结点都有 k 个孩子，则称 T 为正则 k 叉树。若 T 有 m 个非叶结点，求叶结点数并给出推导；若 T 的高度为 h（单结点树 h=1），求结点数的最大值和最小值并给出推导。",
+      "answer":"设叶结点数为 n0。树的边数一方面为 mk，另一方面为总结点数减1，即 mk=m+n0-1，所以 n0=(k-1)m+1。高度为 h 时，最大情形每层都满，结点数为 1+k+…+k^(h-1)=(k^h-1)/(k-1)。最小情形每一层只让一个分支结点继续向下，其余 k-1 个孩子均为叶结点，因此除根外每层恰有 k 个结点，总数为 1+(h-1)k。",
+      "analysis":"正则 k 叉树所有分支结点度均为 k，先用树的边数关系得到叶结点公式；高度固定时，分别构造每层满分支和每层仅一条分支持续的极端形态即可得到上下界。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "43":{
+      "number":43,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"由 n(n≥2) 个正整数构成集合 A，将其划分为两个不相交子集 A1、A2，元素个数分别为 n1、n2，元素和分别为 S1、S2。设计尽可能高效的算法，使 |n1-n2| 最小且 |S1-S2| 最大，并说明基本思想、C/C++实现思路以及平均时间和空间复杂度。",
+      "answer":"要使元素个数差最小，应把 A 划成大小分别为 floor(n/2) 和 ceil(n/2) 的两部分；要让和的差尽可能大，应让较小的一半元素全部进入一组、较大的一半进入另一组。无需完全排序，可用类似快速选择的原地 partition 反复划分，直到枢轴落到中间分界位置。之后分别求两部分元素和。平均时间复杂度 O(n)，额外空间复杂度 O(1)。",
+      "analysis":"目标只要求确定中位分界，不要求两部分内部有序，因此完整 O(n log n) 排序是多余的。快速选择平均线性时间即可把较小元素和较大元素分置两侧。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":6,
+      "stem":"某进程调度程序按优先数 priority 选择数值最小的进程运行，进程创建时由用户给出 nice 作为静态优先数。系统另维护运行时间 cpuTime 和等待时间 waitTime：运行时 cpuTime 定时增加且 waitTime 清0；就绪等待时 cpuTime 清0且 waitTime 定时增加。说明仅用 priority=nice 为什么可能产生饥饿，并利用 nice、cpuTime、waitTime 设计动态优先数以避免饥饿，说明 waitTime 的作用。",
+      "answer":"若只用静态 nice，当就绪队列持续存在优先数更小的进程时，优先数较大的进程可能永远得不到 CPU，发生饥饿。可设计 priority = nice + k1·cpuTime - k2·waitTime，其中 k1、k2>0；运行时间越长，priority 增大、优先级降低；等待越久，priority 减小、优先级提高。waitTime 实现老化，使长期等待进程最终获得足够高的调度优先级。",
+      "analysis":"因为题目规定优先数越小优先级越高，所以 cpuTime 应作为惩罚项加到优先数，而 waitTime 应作为等待补偿从优先数中减去。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    }
+  }
+}
