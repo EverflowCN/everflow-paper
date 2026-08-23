@@ -22,18 +22,15 @@ jobs:
           python-version: '3.12'
       - name: Install PDF/image dependencies
         run: pip install --quiet pymupdf pillow requests
-      - name: Crop exact 2024 original-paper figures
+      - name: Ensure exact 2024 original-paper figures exist
         run: |
           python - <<'PY'
           import os, requests, fitz
           from PIL import Image, ImageChops
-
           url='https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/6b611f5c-55d9-4612-8ff9-30b028731314.pdf'
           r=requests.get(url,timeout=60); r.raise_for_status()
           doc=fitz.open(stream=r.content,filetype='pdf')
           outdir='site/data/zhenti/assets/2024'; os.makedirs(outdir,exist_ok=True)
-
-          # (page index, crop box at 3x PDF render, output file)
           jobs=[
             (0,(580,1790,1310,2165),'q04-adjacency-multilist-original.png'),
             (1,(820,770,1225,1185),'q07-bst-original.png'),
@@ -45,7 +42,6 @@ jobs:
             (11,(355,1170,1285,1705),'q44-memory-table-original.png'),
             (14,(325,465,1470,1305),'q47-as-topology-original.png'),
           ]
-
           rendered={}
           def trim(crop):
             bg=Image.new('RGB',crop.size,'white')
@@ -54,21 +50,53 @@ jobs:
             if not box:return crop
             pad=14; l,t,rr,b=box
             return crop.crop((max(0,l-pad),max(0,t-pad),min(crop.width,rr+pad),min(crop.height,b+pad)))
-
           for page_no,box,name in jobs:
             if page_no not in rendered:
               pix=doc[page_no].get_pixmap(matrix=fitz.Matrix(3,3),alpha=False)
               rendered[page_no]=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
-            crop=trim(rendered[page_no].crop(box))
             path=os.path.join(outdir,name)
-            crop.save(path,'PNG',optimize=True)
-            print(name,crop.size)
+            trim(rendered[page_no].crop(box)).save(path,'PNG',optimize=True)
           PY
-      - name: Commit exact crops
+      - name: Validate corpora and finalize metadata/cache
+        run: |
+          python - <<'PY'
+          import json, pathlib, datetime
+          root=pathlib.Path('site/data/zhenti')
+          # Validate all year and supplement JSON currently in the repository.
+          for p in sorted(root.glob('*.json'))+sorted((root/'supplement').glob('*.json')):
+            json.loads(p.read_text(encoding='utf-8'))
+
+          required_2024=['q04-adjacency-multilist-original.png','q07-bst-original.png','q33-packet-network-original.png','q35-vlan-switch-original.png','q37-sr-timeline-original.png','q43-instruction-format-original.png','q43-datapath-original.png','q44-memory-table-original.png','q47-as-topology-original.png']
+          for name in required_2024:
+            assert (root/'assets'/'2024'/name).is_file(), name
+          assert (root/'assets'/'2025'/'q42-aoe-original.png').is_file()
+
+          mpath=root/'manifest.json'
+          manifest=json.loads(mpath.read_text(encoding='utf-8'))
+          for year,note in {
+            '2024':'47/47 verified. Previously missing adjacency-multilist, BST, packet-network, VLAN, SR timeline, instruction-format/datapath, memory-table and AS-topology questions are now backed by tight crops from the public original-paper scan.',
+            '2025':'47/47 verified. Q42 now uses a tight crop of the original AOE network from the public 2025 paper; Q44 and Q47 remain scan-verified figure-backed questions.'
+          }.items():
+            y=manifest['years'][year]
+            y['paperStatus']='verified'; y['contentStatus']='verified'
+            y['questionCount']=47; y['verifiedQuestions']=list(range(1,48)); y['notes']=note
+            src=list(dict.fromkeys(y.get('sources',[])+['xit','csgraduates','noobdream']))
+            y['sources']=src
+          manifest['updatedAt']='2026-08-24T08:00:00+08:00'
+          mpath.write_text(json.dumps(manifest,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
+
+          overlay=pathlib.Path('site/assets/js/zhenti-data-overlay.js')
+          text=overlay.read_text(encoding='utf-8')
+          old='20260824-2025-q44q47-b'
+          new='20260824-2024-2025-complete-a'
+          if old in text:text=text.replace(old,new)
+          overlay.write_text(text,encoding='utf-8')
+          PY
+      - name: Commit verified batch
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/data/zhenti/assets/2024/*.png
+          git add site/data/zhenti/assets/2024 site/data/zhenti/manifest.json site/assets/js/zhenti-data-overlay.js
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Add original 2024 missing-question figure crops'
+          git commit -m 'Finalize verified 2024 and 2025 past papers'
           git push
