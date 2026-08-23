@@ -4,7 +4,7 @@
   const extraYears=new Set(['2010','2011','2012','2013','2014','2017','2018','2020','2021','2022','2025']);
   const cache=new Map();
   const extraCache=new Map();
-  const DATA_VERSION='20260824-2016-complete-a';
+  const DATA_VERSION='20260824-base-authoritative-c';
 
   function yearFrom(input){
     try{
@@ -37,9 +37,10 @@
 
   function mergeQuestionSets(base,supplement,extra){
     const merged={};
-    // Canonical precedence: base < supplement < extra.
-    // Later verified patches must be able to replace stale/pending base entries.
-    for(const source of [base,supplement,extra]){
+    // Canonical precedence: extra < supplement < base.
+    // Supplements may fill missing verified questions, but must never replace
+    // a question already present in the authoritative base-year JSON.
+    for(const source of [extra,supplement,base]){
       if(!source)continue;
       for(const [number,patch] of Object.entries(source)){
         const previous=merged[number]||{};
