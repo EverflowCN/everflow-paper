@@ -3,6 +3,28 @@
   "year":2010,
   "verifiedAt":"2026-08-24",
   "questions":{
+    "4":{
+      "number":4,
+      "subject":"ds",
+      "type":"single",
+      "stem":"在图示平衡二叉树中插入关键字48后得到一棵新平衡二叉树。在新树中，关键字37所在结点的左、右子结点中保存的关键字分别是（ ）。",
+      "options":{"A":"13，48","B":"24，48","C":"24，53","D":"24，90"},
+      "answer":"C",
+      "analysis":"原树根为24，左孩子13，右孩子53；53的左孩子37、右孩子90。插入48后，48成为37的右孩子，根24出现RL型失衡。对右子树先右旋、再对24左旋，调整后37成为该子树根，其左孩子为24、右孩子为53，因此选C。",
+      "figures":[{"src":"/data/zhenti/assets/2010/q04-avl.svg","alt":"2010年第4题原始AVL树","caption":"依据2010原卷公开转录与两份独立题库核对后重绘。"}],
+      "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["csgraduates","foreverlink","noobdream"]}
+    },
+    "8":{
+      "number":8,
+      "subject":"ds",
+      "type":"single",
+      "stem":"对图示有向无环图进行拓扑排序，可以得到不同拓扑序列的个数是（ ）。",
+      "options":{"A":"4","B":"3","C":"2","D":"1"},
+      "answer":"B",
+      "analysis":"该图的拓扑序列共有3个：abced、abecd、aebcd。a必须最先；随后b与e的相对次序可变化，c必须在b之后，d必须同时在c、e之后，因此恰有3种。",
+      "figures":[{"src":"/data/zhenti/assets/2010/q08-dag.svg","alt":"2010年第8题拓扑图等价重绘","caption":"依据两份独立来源给出的完整拓扑序列反推并重绘的等价DAG；拓扑约束与原题一致。"}],
+      "verification":{"status":"verified","mode":"cross-checked-equivalent-redraw","sources":["csgraduates","foreverlink"]}
+    },
     "41":{
       "number":41,
       "subject":"ds",
