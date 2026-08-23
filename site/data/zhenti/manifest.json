@@ -1,6 +1,6 @@
 {
   "schema": "everflow-408-zhenti-v1",
-  "updatedAt": "2026-08-23T03:00:00Z",
+  "updatedAt": "2026-08-23T03:20:00Z",
   "policy": {
     "displayRule": "Only questions with verification.status=verified are rendered as confirmed past-paper content.",
     "copyrightNote": "Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This pilot stores concise verified transcriptions/paraphrases and provenance metadata."
@@ -33,6 +33,11 @@
       "type": "public-structured-question-bank-cross-check",
       "url": "https://github.com/lij768423-svg/408-",
       "license": "ISC-for-software"
+    },
+    "noobdream": {
+      "name": "N诺考研",
+      "type": "independent-cross-check",
+      "url": "https://noobdream.com/Practice/exam_solution/40206/"
     }
   },
   "years": {
@@ -40,9 +45,9 @@
       "paperStatus": "verified",
       "contentStatus": "partial-verified",
       "questionCount": 47,
-      "verifiedQuestions": [1, 2, 5, 6, 7, 8, 9, 10, 41, 42],
-      "sources": ["tommy408", "neville408", "csgraduates", "foreverlink", "hermes408"],
-      "notes": "2009 paper identity, section boundaries and the listed pilot questions were cross-checked. Figure-dependent questions are not imported until their figures are verified."
+      "verifiedQuestions": [1, 2, 5, 6, 7, 8, 9, 10, 11, 22, 23, 32, 33, 40, 41, 42],
+      "sources": ["tommy408", "neville408", "csgraduates", "foreverlink", "hermes408", "noobdream"],
+      "notes": "2009 paper identity, subject boundaries and the listed pilot questions were cross-checked against multiple independent sources. Figure-dependent questions are not imported until their figures are verified."
     }
   }
 }
