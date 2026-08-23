@@ -12,6 +12,56 @@
       "answer":"先用快慢指针定位链表中点，把后半段原地逆置，再将前半段与逆置后的后半段交替合并。整个过程中只修改 next 指针，不申请与 n 相关的辅助空间。时间复杂度 O(n)，额外空间复杂度 O(1)。",
       "analysis":"目标序列等价于从原链表前半段顺序取结点、从后半段逆序取结点并交替连接。找中点、逆置后半段和交替合并均为线性扫描，因此总体 O(n)。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "42":{
+      "number":42,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":10,
+      "stem":"设计一种队列：初始为空；入队时允许增加占用空间；元素出队后，其结点空间可重复使用，使队列占用空间只增不减；并要求入队、出队时间复杂度始终为 O(1)。说明应采用何种存储结构，给出初始状态、队空/队满条件以及入队、出队的基本过程。",
+      "answer":"采用循环单链表并维护 front、rear。初始时 front=rear，二者指向同一个空闲结点；队空条件 front==rear，队满条件 front==rear->next。入队时在 rear 位置写入新元素，若队满则在 rear 后新建一个空闲结点并接回 front，然后 rear=rear->next；出队时若非空，取 front 所指元素并令 front=front->next。整个链表的结点不因出队释放，只在容量不足时扩充。",
+      "analysis":"循环链表可复用已经出队的结点，并可在历史峰值继续增大时 O(1) 扩链。front/rear 只做常数次指针修改，因此入队、出队均保持 O(1)。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "43":{
+      "number":43,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"有 n(n≥3) 位哲学家围坐圆桌，每两人之间一根筷子，桌中央有 m(m≥1) 个碗。每位哲学家必须同时取得一个碗和左右两根筷子才能就餐。要求用信号量 P/V 描述互斥与同步，使尽可能多的哲学家可同时就餐且避免死锁，并说明信号量含义和初值。",
+      "answer":"可设 bowls=min(m,n-1)，表示允许进入取筷阶段的最大人数；另设 chopstick[0..n-1]，每个初值均为1。哲学家 i 依次 P(bowls)、P(chopstick[i])、P(chopstick[(i+1)%n]) 后进餐，结束后按相反资源释放顺序 V 两根筷子并 V(bowls)。",
+      "analysis":"将可同时竞争筷子的哲学家数限制为 min(m,n-1)，既不超过实际碗数，也保证不会出现 n 个人各持一根筷子的环路等待；因此至少有一位哲学家能够取得两根筷子并继续执行。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "44":{
+      "number":44,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"某磁盘有300个柱面，每柱面10个磁道，每磁道200个扇区，每扇区512B；文件系统每簇含2个扇区。求磁盘容量；磁头当前在85号柱面，访问簇号100260、60005、101660、110560时按SSTF给出访问顺序；并求第100530簇的物理地址以及簇号到物理地址由I/O系统中的什么程序完成。",
+      "answer":"容量为300×10×200×512B=3×10^5KB。每柱面含1000个簇，因此4个请求分别位于100、60、101、110号柱面，SSTF访问顺序为100260→101660→110560→60005。第100530簇对应柱面100、磁头/磁道5、扇区60；簇号到物理地址的转换由磁盘驱动程序完成。",
+      "analysis":"每磁道100个簇、每柱面1000个簇。用簇号除以1000得到柱面号，再由柱面内余数求磁道与扇区；SSTF每次选择离当前磁头柱面最近的请求。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":16,
+      "stem":"32位计算机M按字节编址，int为32位。给出递归函数 f1(n)=n! 的部分机器级代码：00401018处 cmp [ebp+8],1；0040101C处 jle 00401035；00401025处机器码 E8 D6 FF FF FF 的 call f1(00401000)；00401030处 imul eax,ecx；00401033处 jmp 0040103A；0040104A处 ret。要求分析 f(10) 的递归调用次数、控制转移指令、call相对位移与端序、f(13)整数溢出以及imul溢出检测与异常处理。",
+      "answer":"f(10)共调用f1 10次，递归由00401025处call完成。jle是条件转移；call、jmp、ret执行时一定改变控制流。call为5字节，下一条指令地址0040102A，目标00401000，因此相对位移=00401000-0040102A=FFFFFFD6H；机器码中的D6 FF FF FF表明小端。f(13)=6227020800超出32位有符号int范围，应把返回值及相关运算改为long long等足够宽类型。若64位乘积的高33位不是全0或全1，则截成32位会溢出、OF=1；编译器可在imul后加入溢出自陷/条件陷阱指令，使OF=1时转异常处理。",
+      "analysis":"递归参数从10逐次减到1。相对寻址以call后一条指令为基准；小端从最低有效字节先存储可直接由位移机器码判断。补码乘法无溢出时，高位必须是低32位符号位的正确符号扩展。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"承接第45题。计算机M主存地址32位，采用分页管理，页大小4KB；指令Cache有64行、4路组相联，主存块64B。判断00401000处push与0040104A处ret是否在同一页，并确定32位主存地址的块内地址、Cache组号、tag位数，以及读取00401025处call时可能命中的Cache组。",
+      "answer":"两条指令在同一页：4KB页使页内偏移12位，两地址高20位均为00401H。Cache有64行且4路组相联，所以16组、组号4位；块大小64B，所以块内地址6位；其余22位为tag。call地址00401025H的页内低12位为025H，其中第6~9位组号为0000，因此只可能在第0组命中。",
+      "analysis":"页内偏移在虚实地址转换前后保持不变，因此可直接利用call虚拟地址的低12位确定低10位中的块内偏移和组号。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
     }
   }
 }
