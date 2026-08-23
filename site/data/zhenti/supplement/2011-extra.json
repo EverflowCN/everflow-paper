@@ -1,0 +1,50 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2011,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "27":{
+      "number":27,
+      "subject":"os",
+      "type":"single",
+      "stem":"某时刻进程的资源使用情况如下：P1 已分配(2,0,0)、尚需(0,0,1)；P2 已分配(1,2,0)、尚需(1,3,2)；P3 已分配(0,1,1)、尚需(1,3,1)；P4 已分配(0,0,1)、尚需(2,0,0)。当前可用资源(R1,R2,R3)=(0,2,1)。此时的安全序列是（ ）。",
+      "options":{"A":"P1，P2，P3，P4","B":"P1，P3，P2，P4","C":"P1，P4，P3，P2","D":"不存在"},
+      "answer":"D",
+      "analysis":"初始(0,2,1)只能满足P1。P1完成后释放资源，Available=(2,2,1)，此时只能满足P4；P4完成后Available=(2,2,2)。剩余P2、P3都还需要3个R2，均无法继续，因此系统不存在安全序列，选D。",
+      "verification":{"status":"verified","mode":"cross-checked-table-transcription","sources":["csgraduates","foreverlink","noobdream","csyanku"]}
+    },
+    "37":{
+      "number":37,
+      "subject":"cn",
+      "type":"single",
+      "stem":"某网络拓扑如图，R1只有到达子网192.168.1.0/24的路由。为使R1可以将IP分组正确路由到图中所有子网，需要在R1中增加的一条路由（目的网络，子网掩码，下一跳）是（ ）。",
+      "options":{"A":"192.168.2.0，255.255.255.128，192.168.1.1","B":"192.168.2.0，255.255.255.0，192.168.1.1","C":"192.168.2.0，255.255.255.128，192.168.1.2","D":"192.168.2.0，255.255.255.0，192.168.1.2"},
+      "answer":"D",
+      "analysis":"R2后方的192.168.2.0/25与192.168.2.128/25可聚合成192.168.2.0/24；R1到R2的直连下一跳是192.168.1.2，因此应增加192.168.2.0/24经192.168.1.2的路由，选D。",
+      "figures":[{"src":"/data/zhenti/assets/2011/q37-route-topology.svg","alt":"2011年第37题网络拓扑","caption":"依据2011年原卷拓扑与独立题库逐地址重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["noobdream","csgraduates","foreverlink","csyanku"]}
+    },
+    "44":{
+      "number":44,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":12,
+      "stem":"某计算机按字节编址，虚拟地址空间16MB，主存地址空间1MB，页大小4KB；Cache直接映射，共8行，主存块/Cache块32B。系统当前页表、Cache和四路组相联TLB的部分内容如图。回答：（1）虚拟/物理地址位数及虚页号/页框号字段；（2）物理地址访问Cache时的字段划分；（3）虚拟地址001C60H是否在主存、对应物理地址及Cache是否命中；（4）TLB共8项、4路组相联时，虚拟地址024BACH所在页面是否在主存。",
+      "answer":"（1）虚拟地址24位，高12位为虚页号；物理地址20位，高8位为页框号。（2）物理地址=12位主存块标记+3位Cache行号+5位块内地址。（3）001C60H的虚页号001H，页表项有效、页框04H，所以物理地址04C60H；其Cache行号为3，而当前第3行有效标记105H与该地址标记04H不同，故Cache不命中。（4）024BACH的虚页号中，低1位选择TLB组0，高11位标记为012H；组0存在有效标记012H、页框1FH，故TLB命中，页面在主存。",
+      "analysis":"页大小4KB给出12位页内偏移；1MB物理空间为20位地址。32B块给5位块内偏移，8行直接映射给3位行号，余下12位为Cache标记。TLB为4路、共8项，即2组，组索引只需1位。",
+      "figures":[{"src":"/data/zhenti/assets/2011/q44-page-cache-tlb.svg","alt":"2011年第44题页表、Cache和TLB表格","caption":"依据2011年原卷第44题表格逐项重绘，十六进制字段保持原值。"}],
+      "verification":{"status":"verified","mode":"original-paper-table-cross-check","sources":["noobdream","csgraduates","foreverlink","csyanku"]}
+    },
+    "47":{
+      "number":47,
+      "subject":"cn",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"某主机MAC为00-15-C5-C1-5E-28，IP为10.2.128.100。图中给出其经NAT路由器R访问Web服务器的拓扑、一个Web请求以太网帧前80B十六进制内容、以太网帧结构和IPv4首部结构。回答：（1）Web服务器IP和主机默认网关MAC；（2）主机用何协议确定目的MAC，协议请求帧目的MAC是什么；（3）HTTP/1.1持续非流水线，一次请求-响应为1 RTT，HTML引用5个JPEG，从该Web请求开始到全部内容收到需多少RTT；（4）IP分组经R转发时需修改哪些IP首部字段。",
+      "answer":"（1）Web服务器IP=64.170.98.32；默认网关MAC=00-21-27-21-51-ee。（2）使用ARP；ARP请求帧目的MAC为ff-ff-ff-ff-ff-ff。（3）持续非流水线方式下，HTML响应1 RTT，随后5个JPEG各1 RTT，共6 RTT。（4）R进行NAT和路由转发时至少修改源IP地址、TTL及IP首部校验和；若因MTU发生分片，还会修改总长度、标志、片偏移等分片相关字段。",
+      "analysis":"以太网头前6B即目的MAC；IP首部从以太网头后14B开始，目的IP字段在IP首部第16～19B，对应40 aa 62 20=64.170.98.32。跨网段发送先ARP解析默认网关。路由器每跳递减TTL并重算首部校验和，NAT还改源IP。",
+      "figures":[{"src":"/data/zhenti/assets/2011/q47-web-frame.svg","alt":"2011年第47题网络拓扑、帧字节与首部结构","caption":"依据2011年原卷第47题公开扫描逐字段重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-data-cross-check","sources":["noobdream","csgraduates","foreverlink","csyanku"]}
+    }
+  }
+}
