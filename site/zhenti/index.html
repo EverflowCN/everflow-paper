@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow · 408 真题墙，支持分科刷题与整套真题模式">
+  <meta name="description" content="Everflow · 408 真题墙，支持分科刷题、整套真题、答题判分与电脑快捷键">
   <title>408 真题墙 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
   <link rel="stylesheet" href="../assets/css/site.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
-  <link rel="stylesheet" href="../assets/css/zhenti-wall.css?v=20260823c">
-  <link rel="stylesheet" href="../assets/css/zhenti-whole.css?v=20260823c">
-  <link rel="stylesheet" href="../assets/css/zhenti-data.css?v=20260823d">
+  <link rel="stylesheet" href="../assets/css/zhenti-wall.css?v=20260823e">
+  <link rel="stylesheet" href="../assets/css/zhenti-whole.css?v=20260823e">
+  <link rel="stylesheet" href="../assets/css/zhenti-data.css?v=20260823e">
+  <link rel="stylesheet" href="../assets/css/zhenti-answer.css?v=20260823e">
 </head>
 <body data-view="zhenti">
 <header class="topbar">
@@ -37,16 +38,16 @@
       <div>
         <div class="eyebrow">FULL PAPER MODE</div>
         <h1>408 整套真题</h1>
-        <p>按真实年份整套推进，一次连续完成 1—47 题。整套模式与分科模式共用同一份熟练度、笔记和错题记录；只有通过来源核验的题目才展示正式题干。</p>
+        <p>按真实年份整套推进，一次连续完成 1—47 题。整套模式与分科模式共用答题记录、熟练度、笔记和错题状态；只有通过来源核验的题目才展示正式题干。</p>
       </div>
       <div class="whole-summary">
         <div><strong data-whole-finished>0</strong><span>已完成整套</span></div>
-        <div><strong data-whole-done>0</strong><span>已标记题目</span></div>
+        <div><strong data-whole-done>0</strong><span>已完成题目</span></div>
         <div><strong data-whole-rate>0%</strong><span>总完成率</span></div>
       </div>
     </div>
     <div class="whole-toolbar">
-      <div><strong>2009—2026</strong><span>选择年份开始或继续整套真题</span></div>
+      <div><strong>2009—2026</strong><span>选择年份开始或继续整套真题；电脑端支持 A–D / Enter / ← → 等快捷键</span></div>
       <div class="whole-legend"><span><i class="mastered"></i>熟练</span><span><i class="fuzzy"></i>模糊</span><span><i class="weak"></i>不会</span><span><i class="unmarked"></i>未做</span></div>
     </div>
     <div class="whole-year-grid" data-whole-year-grid></div>
@@ -67,10 +68,10 @@
         <div>
           <div class="eyebrow">408 PAST PAPERS</div>
           <h1><span data-summary-subject>数据结构</span> · 真题墙</h1>
-          <p>2009—2026 · 按年份纵览题号。题干按“先核验、后展示”的规则逐年接入，避免年份或题号错配。</p>
+          <p>2009—2026 · 按年份纵览题号。题干按“先核验、后展示”的规则逐年接入；选择题可直接作答、提交并即时判分。</p>
         </div>
         <div class="summary-numbers">
-          <div><strong data-summary-done>0</strong><span>已标记</span></div>
+          <div><strong data-summary-done>0</strong><span>已完成</span></div>
           <div><strong data-summary-weak>0</strong><span>薄弱题</span></div>
           <div><strong data-summary-rate>0%</strong><span>完成率</span></div>
         </div>
@@ -115,13 +116,13 @@
 <div class="paper-session" data-paper-session hidden>
   <header class="paper-session-head"><div class="paper-session-title"><button type="button" data-paper-exit>← 退出整套</button><div><span>408 整套真题</span><strong><span data-paper-year>2026</span> 年全国硕士研究生招生考试</strong></div></div><div class="paper-session-meta"><span>进度 <b data-paper-progress>0/47</b></span><span>用时 <b data-paper-timer>00:00:00</b></span></div></header>
   <div class="paper-session-body">
-    <aside class="paper-answer-sheet"><div class="answer-sheet-head"><div><strong>答题卡</strong><span>点击题号快速跳转</span></div><span data-paper-percent>0%</span></div><div class="paper-progress-bar"><i data-paper-progress-bar></i></div><div class="answer-sheet-grid" data-paper-answer-grid></div><div class="paper-subject-legend"><span>1—10 / 41—42 数据结构</span><span>11—22 / 43—44 计组</span><span>23—32 / 45—46 操作系统</span><span>33—40 / 47 计网</span></div></aside>
+    <aside class="paper-answer-sheet"><div class="answer-sheet-head"><div><strong>答题卡</strong><span>点击题号快速跳转；绿色=答对，红色=答错</span></div><span data-paper-percent>0%</span></div><div class="paper-progress-bar"><i data-paper-progress-bar></i></div><div class="answer-sheet-grid" data-paper-answer-grid></div><div class="paper-subject-legend"><span>1—10 / 41—42 数据结构</span><span>11—22 / 43—44 计组</span><span>23—32 / 45—46 操作系统</span><span>33—40 / 47 计网</span></div></aside>
     <main class="paper-question-stage"><div class="paper-question-head"><div><span class="paper-subject-pill" data-paper-subject>DS 数据结构</span><span class="paper-type-pill" data-paper-type>选择题</span></div><strong>第 <span data-paper-current>1</span> 题 / 47</strong></div><section class="paper-question-content"><div class="question-loading">正在读取并核验题库…</div></section><section class="paper-session-note"><label for="paper-note">本题复盘笔记</label><textarea id="paper-note" data-paper-note rows="4" placeholder="记录本题易错点、知识点或二刷提醒……"></textarea><span data-paper-note-state>本机自动保存</span></section><footer class="paper-question-footer"><div class="paper-status-actions"><span>掌握状态：</span><button type="button" data-paper-status="mastered">熟练</button><button type="button" data-paper-status="fuzzy">模糊</button><button type="button" data-paper-status="weak">不会</button><button type="button" data-paper-status="">清除</button></div><div class="paper-nav"><button type="button" data-paper-prev>‹ 上一题</button><button type="button" data-paper-next>下一题 ›</button></div></footer></main>
   </div>
 </div>
 
-<footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>408 真题墙 · 已核验题目优先展示</span></div></footer>
+<footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>408 真题墙 · 核验题库 / 答题模式 / 桌面快捷键</span></div></footer>
 <script src="../assets/js/site-runtime-v2.js"></script>
-<script src="../assets/js/zhenti-wall.js?v=20260823d"></script>
+<script src="../assets/js/zhenti-wall.js?v=20260823e"></script>
 </body>
 </html>
