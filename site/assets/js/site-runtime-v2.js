@@ -20,7 +20,7 @@
       .catch(err=>console.error('Everflow 408 SRS quick cards failed',err));
     srsFlow.finally(async()=>{
       try{await import('/assets/js/zhenti-favorites.js?v=20260823a')}catch(err){console.error('Everflow 408 favorites failed',err)}
-      try{await import('/assets/js/zhenti-srs-experience.js?v=20260823a')}catch(err){console.error('Everflow 408 immersive SRS failed',err)}
+      try{await import('/assets/js/zhenti-srs-experience.js?v=20260823b')}catch(err){console.error('Everflow 408 immersive SRS failed',err)}
       try{await import('/assets/js/zhenti-srs-mobile-immersive.js?v=20260823a')}catch(err){console.error('Everflow 408 mobile immersive fix failed',err)}
     });
     import('/assets/js/zhenti-ui-polish.js?v=20260823a').catch(err=>console.error('Everflow 408 UI polish failed',err));
