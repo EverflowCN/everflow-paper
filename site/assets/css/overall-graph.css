@@ -1,0 +1,25 @@
+:root{--bg:#f7f8fa;--ink:#15171c;--line:#d8dce3;--panel:rgba(255,255,255,.82)}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+body.dark{--bg:#0f1115;--ink:#f4f6f8;--line:#31353d;--panel:rgba(20,22,27,.86)}
+.graph-viewport{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:
+radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--ink) 7%,transparent) 1px,transparent 1.2px);background-size:24px 24px}
+.graph-viewport.dragging{cursor:grabbing}
+.graph-svg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none;touch-action:none}
+.graph-edge{fill:none;stroke:color-mix(in srgb,var(--ink) 18%,transparent);stroke-width:3;stroke-linecap:round}
+.graph-edge.cross{stroke-dasharray:10 12;stroke-width:2;opacity:.55}
+.graph-node rect,.graph-node circle{filter:url(#node-shadow)}
+.graph-node text{pointer-events:none;text-anchor:middle;dominant-baseline:middle;fill:var(--ink);font-weight:750;letter-spacing:-.01em}
+.graph-node.leaf rect{fill:color-mix(in srgb,var(--bg) 92%,white);stroke:color-mix(in srgb,var(--ink) 13%,transparent);stroke-width:2}
+body.dark .graph-node.leaf rect{fill:#171a20}
+.graph-node.leaf text{font-size:24px;font-weight:650}
+.graph-node.subject text{fill:white;font-size:30px;font-weight:850}
+.graph-node.subject .short{font-size:16px;font-weight:800;opacity:.78;letter-spacing:.1em}
+.graph-node.root circle{fill:#111217;stroke:#fff;stroke-width:7}
+body.dark .graph-node.root circle{fill:#f5f6f8;stroke:#1d2026}
+.graph-node.root text{fill:white;font-size:38px;font-weight:900;letter-spacing:.04em}
+body.dark .graph-node.root text{fill:#111217}
+.graph-controls{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:10;display:flex;gap:8px;padding:7px;border:1px solid var(--line);border-radius:18px;background:var(--panel);backdrop-filter:blur(18px);box-shadow:0 14px 42px rgba(0,0,0,.12)}
+.graph-controls button{width:42px;height:42px;border:0;border-radius:12px;background:transparent;color:var(--ink);display:grid;place-items:center;font-size:22px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.graph-controls button:hover{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+@media(max-width:760px){.graph-controls{right:calc(10px + env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));gap:4px;padding:5px;border-radius:16px}.graph-controls button{width:40px;height:40px}.graph-node.leaf text{font-size:23px}}
