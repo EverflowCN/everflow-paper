@@ -1,7 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const supplementYears=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const extraYears=new Set(['2010','2011','2012','2013','2014','2017','2018','2020','2021','2022']);
+  const extraYears=new Set(['2010','2011','2012','2013','2014','2017','2018','2020','2021','2022','2025']);
   const cache=new Map();
   const extraCache=new Map();
 
@@ -17,7 +17,7 @@
 
   async function loadSupplement(year){
     if(cache.has(year))return cache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-2023-complete`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-2025-figures-a`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     cache.set(year,promise);
@@ -27,7 +27,7 @@
   async function loadExtra(year){
     if(!extraYears.has(year))return null;
     if(extraCache.has(year))return extraCache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-2023-complete`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-2025-figures-a`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     extraCache.set(year,promise);
@@ -82,7 +82,7 @@
   if(!document.querySelector('link[data-zhenti-media]')){
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href='/assets/css/zhenti-media.css?v=20260824-2023-complete';
+    link.href='/assets/css/zhenti-media.css?v=20260824-2025-figures-a';
     link.dataset.zhentiMedia='1';
     document.head.appendChild(link);
   }
@@ -90,7 +90,7 @@
   const loadMedia=()=>{
     if(document.querySelector('script[data-zhenti-media]'))return;
     const script=document.createElement('script');
-    script.src='/assets/js/zhenti-media.js?v=20260824-2023-complete';
+    script.src='/assets/js/zhenti-media.js?v=20260824-2025-figures-a';
     script.defer=true;
     script.dataset.zhentiMedia='1';
     document.body.appendChild(script);
