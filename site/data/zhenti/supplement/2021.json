@@ -23,6 +23,16 @@
       "analysis":"count 最终决定每个元素在 b 中的位置。原条件遇到相等关键字时让前一个元素的 count 增加，会颠倒相等元素次序；加入等号后由后出现元素的 count 增加，恢复稳定性。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
     },
+    "44":{
+      "number":44,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"计算机 M 的主存地址为 24 位、按字节编址；采用分页存储管理，虚拟地址 30 位、页大小 4KB；TLB 为 2 路组相联、LRU 替换、共 8 组。回答：虚拟地址中虚页号和页内地址各占哪些位；TLB 标记和组号各占哪些位；TLB 初始为空且依次访问虚页号 10、12、16、7、26、4、12、20 时哪个表项被替换并说明原因；若虚拟地址增加到 32 位，每个 TLB 表项增加几位。",
+      "answer":"页大小 4KB=2^12B，因此虚拟地址低 12 位为页内地址，高 18 位为虚页号。8 组需要 3 位组号，所以虚页号低 3 位为 TLB 组号，高 15 位为 TLB 标记。访问序列映射的组号为 2、4、0、7、2、4、4、4；第 4 组先装入 12、4，再访问 12 后其成为最近使用，访问 20 时按 LRU 淘汰虚页号 4。虚拟地址增加 2 位且页大小、组数不变，新增位进入 TLB 标记，因此每个 TLB 表项增加 2 位。",
+      "analysis":"TLB 的地址划分可按组相联 Cache 理解：VPN=Tag+Set Index，页内偏移不参与 TLB 查找。页大小固定时，扩大虚拟地址只增加 VPN 高位，也就是 TLB Tag 位数。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
     "45":{
       "number":45,
       "subject":"os",
