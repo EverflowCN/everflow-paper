@@ -1,6 +1,6 @@
 {
   "schema": "everflow-408-zhenti-v1",
-  "updatedAt": "2026-08-23T03:20:00Z",
+  "updatedAt": "2026-08-23T04:10:00Z",
   "policy": {
     "displayRule": "Only questions with verification.status=verified are rendered as confirmed past-paper content.",
     "copyrightNote": "Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This pilot stores concise verified transcriptions/paraphrases and provenance metadata."
@@ -45,9 +45,9 @@
       "paperStatus": "verified",
       "contentStatus": "partial-verified",
       "questionCount": 47,
-      "verifiedQuestions": [1, 2, 5, 6, 7, 8, 9, 10, 11, 22, 23, 32, 33, 40, 41, 42],
-      "sources": ["tommy408", "neville408", "csgraduates", "foreverlink", "hermes408", "noobdream"],
-      "notes": "2009 paper identity, subject boundaries and the listed pilot questions were cross-checked against multiple independent sources. Figure-dependent questions are not imported until their figures are verified."
+      "verifiedQuestions": [1,2,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,32,33,40,41,42],
+      "sources": ["tommy408","neville408","csgraduates","foreverlink","hermes408","noobdream"],
+      "notes": "2009 paper identity and subject boundaries are cross-checked. Questions 12-21 were added after independent year/question/answer checks against TommyTay0712/408, N诺, 计算机考研杂货铺 and 408 ForeverLink. Figure-dependent questions remain withheld until figures are verified."
     }
   }
 }
