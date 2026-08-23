@@ -7,14 +7,14 @@
   <link rel="manifest" href="../manifest.webmanifest">
   <title>账户 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
-  <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/site.css?v=20260824-ui4">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20260824-ui4">
   <link rel="stylesheet" href="../assets/css/study.css">
   <link rel="stylesheet" href="../assets/css/account-membership.css">
 </head>
 <body>
-<header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
-<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
+<div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
 
 <main class="wrap study-dashboard">
   <div class="auth-shell account-shell">
@@ -72,13 +72,13 @@
       <div class="auth-feedback" data-auth-feedback-signed role="status" aria-live="polite"></div>
     </section>
 
-    <section class="study-card" style="margin-top:14px" data-owner-workspace hidden><div class="membership-summary-row"><div><div class="eyebrow">OWNER</div><h2>管理工作台</h2><p>用户、会员、兑换码、通知、资源与 408 更新。</p></div><a class="membership-manage-btn" href="../workspace/">进入工作台 →</a></div></section>
-    <section class="study-card" style="margin-top:14px"><div class="membership-summary-row"><div><div class="eyebrow">MEMBERSHIP</div><h2>会员</h2><p>查看 Member / Pro 状态与兑换码。</p></div><a class="membership-manage-btn" href="../membership/">会员中心 →</a></div></section>
+    <section class="study-card" style="margin-top:14px" data-owner-workspace hidden><div class="membership-summary-row"><div><div class="eyebrow">OWNER</div><h2>管理工作台</h2><p>用户、会员、兑换码、通知、资源与 408 更新。</p></div><a class="membership-manage-btn ui-iconized" href="../workspace/"><span>进入工作台</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></section>
+    <section class="study-card" style="margin-top:14px"><div class="membership-summary-row"><div><div class="eyebrow">MEMBERSHIP</div><h2>会员</h2><p>查看 Member / Pro 状态与兑换码。</p></div><a class="membership-manage-btn ui-iconized" href="../membership/"><span>会员中心</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></section>
     <section class="study-card" style="margin-top:14px"><div class="eyebrow">BACKUP</div><h2>本地备份</h2><p>导出或恢复 408 打卡 JSON；恢复时按更新时间合并。</p><div class="data-actions centered"><button class="timer-btn" type="button" data-export>导出 JSON</button><label class="timer-btn" style="cursor:pointer;text-align:center">导入 JSON<input type="file" accept="application/json,.json" data-import-file hidden></label></div><p class="muted" data-account-message role="status" aria-live="polite"></p></section>
   </div>
 </main>
-<footer class="footer"><div class="wrap footer-inner"><span>Everflow Account</span><span><a href="../study/">学习中心 →</a></span></div></footer>
-<script src="../assets/js/site-runtime-v2.js"></script>
+<footer class="footer"><div class="wrap footer-inner"><span>Everflow Account</span><span><a class="ui-iconized" href="../study/"><span>学习中心</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></span></div></footer>
+<script src="../assets/js/site-runtime-v2.js?v=20260824-ui4"></script>
 <script src="../assets/js/study-store.js"></script>
 <script src="../assets/js/cloud-config.js"></script>
 <script type="module" src="../assets/js/account.js"></script>
