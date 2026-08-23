@@ -36,8 +36,6 @@
 
   function mergeQuestionSets(base,supplement,extra){
     const merged={};
-    // Legacy extras are lowest priority, then supplement fills gaps/older fields,
-    // and the base year JSON is always authoritative when the same question exists.
     for(const source of [extra,supplement,base]){
       if(!source)continue;
       for(const [number,patch] of Object.entries(source)){
@@ -78,6 +76,8 @@
       return response;
     }
   };
+
+  if(document.body?.dataset.view!=='zhenti')return;
 
   if(!document.querySelector('link[data-zhenti-media]')){
     const link=document.createElement('link');
