@@ -1,0 +1,17 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2019,
+  "verifiedAt":"2026-08-23",
+  "questions":{
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"线性表 L=(a1,a2,…,an) 采用带头结点的单链表保存。设计一个空间复杂度 O(1) 且时间上尽可能高效的算法，原地重新排列各结点，得到 L'=(a1,an,a2,a(n-1),a3,a(n-2),…)。要求给出基本设计思想、C/C++ 算法并说明时间复杂度。",
+      "answer":"先用快慢指针定位链表中点，把后半段原地逆置，再将前半段与逆置后的后半段交替合并。整个过程中只修改 next 指针，不申请与 n 相关的辅助空间。时间复杂度 O(n)，额外空间复杂度 O(1)。",
+      "analysis":"目标序列等价于从原链表前半段顺序取结点、从后半段逆序取结点并交替连接。找中点、逆置后半段和交替合并均为线性扫描，因此总体 O(n)。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    }
+  }
+}
