@@ -13,6 +13,26 @@
       "analysis":"本题同时考察无符号下溢、32位补码范围和 IEEE754 单精度的24位有效精度。2^(n+1)-1 的位模式使边界值可直接由机器数和阶码/尾数容量判断。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
     },
+    "44":{
+      "number":44,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":10,
+      "stem":"在按字节编址的计算机 M 上，题43中 f1 的部分机器级代码包括：00401020H 处 `55 push ebp`，0040105EH 处 `39 4D F4 cmp dword ptr [ebp-0Ch],ecx`，00401066H 处 `D1 E2 shl edx,1`，0040107FH 处 `C3 ret`。回答：M 属于 RISC 还是 CISC；f1 机器代码共占多少字节；执行 f1(0) 且 i=0 时 cmp 后 CF 的值；f2 中能否仍用 shl 实现 float 类型 power×2。",
+      "answer":"M 为 CISC，因为机器指令长度不固定。f1 代码长度=0040107FH+1-00401020H=60H=96B。f1(0) 时 n-1 的32位无符号值为 FFFFFFFFH，cmp 实质计算 0-FFFFFFFFH，发生借位，CF=1。f2 中不能用整数 shl 实现 power×2，因为 float 的机器数包含符号位、阶码和尾数，整体左移会破坏浮点编码而不是简单把真值乘2。",
+      "analysis":"变长机器码是 CISC 的典型特征之一。代码长度按首尾地址和最后一条指令长度计算。x86 cmp 设置减法标志；对无符号全1作减法产生借位。浮点数乘2应按浮点规则调整指数，不能把位串作为整数整体左移。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"计算机 M 采用二级分页虚拟存储，32位虚拟地址由10位页目录号、10位页表索引和12位页内偏移组成。结合 f1 代码地址（首条 push ebp 为00401020H，末条 ret 为0040107FH），回答：f1 机器代码占多少页；取 push ebp 时分别访问页目录和页表的第几个表项（编号从0开始）；若进程 P 在调用 f1 前通过 scanf() 获取 n 且 I/O 采用中断方式，P 的状态如何变化，CPU 是否进入内核态。",
+      "answer":"f1 的机器指令地址高20位相同，因此只占1个4KB页。00401020H 的高10位页目录号为1，中间10位页表索引也为1，所以分别访问页目录第1项和对应页表第1项（编号从0开始）。执行 scanf() 等待输入时，P 从运行态进入阻塞态；输入完成后由中断处理唤醒为就绪态，之后经调度重新进入运行态。I/O 系统调用和中断处理都会使 CPU 进入内核态。",
+      "analysis":"页大小4KB意味着低12位为页内偏移；两级页表直接从地址高20位分解出页目录号和页表索引。阻塞式输入需要等待设备，完成时通过中断唤醒进程。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
     "46":{
       "number":46,
       "subject":"os",
