@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v32';
+const CACHE='everflow-site-v33';
 const SHELL=[
   '/',
   '/assets/css/site.css',
@@ -62,8 +62,8 @@ self.addEventListener('fetch',event=>{
   if(url.origin!==self.location.origin)return;
 
   const path=url.pathname;
-  const fresh= request.mode==='navigate' ||
-    path.startsWith('/data/') ||
+  const fresh=request.mode==='navigate'||
+    path.startsWith('/data/')||
     /\.(?:js|css|json|webmanifest)$/i.test(path);
 
   event.respondWith(fresh?networkFirst(request):staleWhileRevalidate(request));
