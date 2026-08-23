@@ -13,3 +13,40 @@
 @media(max-width:960px){.heatmap-layout{grid-template-columns:1fr}.heatmap-side{grid-template-columns:1fr 1fr}.heatmap-tip{grid-column:1/-1}.heatmap-year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.heatmap-shell{padding:28px 0 62px}.heatmap-hero{padding:23px;border-radius:22px;align-items:flex-start;flex-direction:column}.heatmap-hero-actions{width:100%;justify-content:flex-start}.heatmap-metrics{grid-template-columns:1fr 1fr}.heatmap-panel{padding:17px;border-radius:22px}.heatmap-panel-head{align-items:flex-start;flex-direction:column}.heatmap-segment{width:100%}.heatmap-segment button{flex:1}.heatmap-weekdays,.heatmap-month-grid{gap:5px}.heatmap-day{border-radius:11px;font-size:13px}.heatmap-day small{display:none}.heatmap-summary{grid-template-columns:1fr;gap:9px}.heatmap-year-grid{grid-template-columns:1fr 1fr}.heatmap-side{grid-template-columns:1fr}.heatmap-tip{grid-column:auto}}
 @media(max-width:380px){.heatmap-year-grid{grid-template-columns:1fr}.heatmap-metrics{grid-template-columns:1fr 1fr}.heatmap-metrics strong{font-size:28px}}
+
+/* Tablet density and landscape behavior are kept here so the page has one heatmap stylesheet. */
+@media (min-width:721px) and (max-width:1180px),(min-width:721px) and (max-width:1366px) and (any-pointer:coarse){
+  .heatmap-shell{padding:34px 0 72px}
+  .heatmap-hero{padding:25px 27px}
+  .heatmap-hero h1{font-size:clamp(40px,5vw,52px)}
+  .heatmap-metrics article{padding:17px 18px}
+  .heatmap-metrics strong{font-size:29px}
+  .heatmap-layout{grid-template-columns:1fr}
+  .heatmap-panel{padding:20px 22px}
+  .heatmap-panel-head{max-width:760px;margin-inline:auto}
+  .heatmap-calendar-head,.heatmap-weekdays,.heatmap-month-grid,.heatmap-legend,.heatmap-summary{width:min(100%,560px);margin-left:auto;margin-right:auto}
+  .heatmap-calendar-head{grid-template-columns:40px 1fr 40px;gap:10px;margin-top:16px;margin-bottom:11px}
+  .heatmap-nav-btn{width:40px;height:40px;border-radius:13px;font-size:25px}
+  .heatmap-month-label{font-size:20px}
+  .heatmap-weekdays,.heatmap-month-grid{gap:6px}
+  .heatmap-weekdays span{font-size:9px}
+  .heatmap-day{border-radius:13px;font-size:14px}
+  .heatmap-day small{right:5px;bottom:4px;font-size:7px}
+  .heatmap-legend{margin-top:9px}
+  .heatmap-summary{margin-top:14px;padding:15px 17px}
+  .heatmap-summary>div:first-child strong{font-size:30px}
+  .heatmap-summary b{font-size:18px}
+  .heatmap-side{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .heatmap-side-card{padding:17px 18px}
+  .heatmap-side-card h3{font-size:19px}
+  .heatmap-today-number{font-size:40px}
+  .heatmap-tip{grid-column:auto}
+  .heatmap-year-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .heatmap-mini-month{padding:10px;border-radius:16px}
+}
+@media (min-width:960px) and (max-width:1366px) and (any-pointer:coarse) and (orientation:landscape){
+  .heatmap-layout{grid-template-columns:minmax(0,1fr) 250px;gap:12px}
+  .heatmap-side{grid-template-columns:1fr}
+  .heatmap-tip{grid-column:auto}
+  .heatmap-calendar-head,.heatmap-weekdays,.heatmap-month-grid,.heatmap-legend,.heatmap-summary{width:min(100%,570px)}
+}
