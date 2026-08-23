@@ -24,6 +24,9 @@
   fullscreenBtn.type='button';fullscreenBtn.className='srs-fullscreen-btn';fullscreenBtn.dataset.srsFullscreen='';fullscreenBtn.innerHTML='⛶ 畅享全屏';
   const resetBtn=settings.querySelector('.srs-reset-btn');if(resetBtn)settings.insertBefore(fullscreenBtn,resetBtn);else settings.appendChild(fullscreenBtn);
 
+  const shortcuts=home.querySelector('.srs-shortcuts');
+  if(shortcuts){shortcuts.insertAdjacentHTML('beforeend','<span>畅享全屏</span><kbd>Shift + F</kbd>')}
+
   const immersiveBar=document.createElement('div');immersiveBar.className='srs-immersive-bar';immersiveBar.innerHTML=`
     <div class="srs-immersive-title"><span class="srs-immersive-mark">408</span><div><strong>速刷卡片 · 畅享全屏</strong><span data-srs-immersive-scope>全部科目 · 全部题型</span></div></div>
     <div class="srs-immersive-meta"><span>待复习 <b data-srs-immersive-due>0</b></span><span>今日已刷 <b data-srs-immersive-reviewed>0</b></span></div>
@@ -86,8 +89,10 @@
       e.preventDefault();e.stopImmediatePropagation();isImmersive()?exitImmersive():enterImmersive();return;
     }
     if(isImmersive()&&e.key==='Escape'){
-      // Browser native fullscreen consumes Escape itself; fallback needs explicit handling.
-      if(document.body.classList.contains('srs-immersive-fallback')){e.preventDefault();e.stopImmediatePropagation();exitImmersive()}
+      // Prevent SRS's normal Esc handler from leaving card mode while fullscreen is active.
+      e.stopImmediatePropagation();
+      if(document.body.classList.contains('srs-immersive-fallback')){e.preventDefault();exitImmersive()}
+      return;
     }
   },true);
 
