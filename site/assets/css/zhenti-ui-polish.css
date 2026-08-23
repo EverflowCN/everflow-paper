@@ -1,0 +1,50 @@
+/* Everflow 408 真题墙 · 三端 UI polish */
+:root{--zt-radius-xl:24px;--zt-radius-lg:18px;--zt-shadow:0 16px 46px rgba(17,18,23,.07);--zt-shadow-hover:0 22px 56px rgba(17,18,23,.11)}
+.wall-app{background:linear-gradient(180deg,color-mix(in srgb,var(--soft) 32%,var(--paper)),var(--paper) 34%)}
+.wall-subject-bar{gap:7px;padding:13px clamp(12px,2vw,24px);box-shadow:0 8px 24px rgba(17,18,23,.035)}
+.subject-tab{min-height:40px;padding:0 17px;border:1px solid transparent;border-radius:999px;white-space:nowrap}.subject-tab:not(.active):hover{border-color:var(--line);background:var(--card)}
+.wall-summary,.wall-toolbar,.matrix-card,.list-panel,.whole-hero,.whole-toolbar,.whole-year-card{box-shadow:var(--zt-shadow)}
+
+/* 统一美化所有下拉选择器 */
+.custom-range select,.srs-settings select,.favorites-sort select{
+  appearance:none;-webkit-appearance:none;min-height:36px;padding:0 36px 0 12px;border:1px solid var(--line)!important;border-radius:11px!important;background-color:var(--card)!important;color:var(--ink)!important;font:750 12px/1 system-ui;cursor:pointer;outline:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%)!important;
+  background-position:calc(100% - 16px) 15px,calc(100% - 11px) 15px!important;background-size:5px 5px,5px 5px!important;background-repeat:no-repeat!important;transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease
+}
+.custom-range select:hover,.srs-settings select:hover,.favorites-sort select:hover{border-color:color-mix(in srgb,var(--red) 36%,var(--line))!important}.custom-range select:focus,.srs-settings select:focus,.favorites-sort select:focus{border-color:var(--red)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 11%,transparent)}
+
+/* 真题大观 */
+.zhenti-overview{max-width:1480px;margin:0 auto 18px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.75fr);gap:14px}
+.zt-overview-main,.zt-overview-side{border:1px solid var(--line);border-radius:var(--zt-radius-lg);background:var(--card);box-shadow:var(--zt-shadow)}
+.zt-overview-main{padding:20px 22px}.zt-overview-title{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:16px}.zt-overview-title h2{margin:0;font-size:18px}.zt-overview-title span{color:var(--muted);font-size:11px}.zt-overview-subjects{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.zt-subject-card{padding:13px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--soft) 55%,var(--card))}.zt-subject-card header{display:flex;align-items:center;justify-content:space-between;gap:8px}.zt-subject-card strong{font-size:12px}.zt-subject-card b{font-size:17px}.zt-subject-card small{display:block;margin-top:4px;color:var(--muted);font-size:9px}.zt-subject-progress{height:6px;margin-top:10px;border-radius:999px;background:var(--soft);overflow:hidden}.zt-subject-progress i{display:block;height:100%;border-radius:inherit;background:var(--red)}
+.zt-overview-side{padding:18px 20px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.zt-metric{padding:12px;border-radius:13px;background:var(--soft)}.zt-metric strong{display:block;font-size:21px}.zt-metric span{display:block;margin-top:4px;color:var(--muted);font-size:10px}.zt-metric.danger strong{color:#d83d55}.zt-metric.good strong{color:#15966e}
+
+/* 年份卡片：从“纯方块”升级成总览卡 */
+.whole-year-grid{gap:18px}.whole-year-card{position:relative;padding:19px;border-radius:22px;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.whole-year-card:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--red),color-mix(in srgb,var(--red) 20%,transparent));opacity:.8}.whole-year-card:hover{transform:translateY(-3px);box-shadow:var(--zt-shadow-hover);border-color:color-mix(in srgb,var(--red) 18%,var(--line))}.whole-year-head strong{font-size:32px}.whole-year-head>b{font-size:13px;padding:6px 9px;border-radius:999px;background:var(--soft)}
+.whole-year-insight{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;align-items:center;margin:14px 0 12px;padding:13px;border:1px solid var(--line);border-radius:15px;background:color-mix(in srgb,var(--soft) 55%,var(--card))}.whole-year-ring{--p:0;position:relative;width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--red) calc(var(--p)*1%),var(--soft) 0)}.whole-year-ring:after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--card)}.whole-year-ring b{position:relative;z-index:1;font-size:15px}.whole-subject-mini{display:grid;gap:7px}.whole-subject-row{display:grid;grid-template-columns:36px 1fr 44px;align-items:center;gap:7px;font-size:9px}.whole-subject-row strong{font-size:9px}.whole-subject-row span{height:5px;border-radius:999px;background:var(--soft);overflow:hidden}.whole-subject-row span i{display:block;height:100%;background:var(--red);border-radius:inherit}.whole-subject-row em{font-style:normal;text-align:right;color:var(--muted)}
+.whole-grid-label{display:flex;align-items:center;justify-content:space-between;margin:13px 0 7px;color:var(--muted);font-size:9px}.whole-grid-label strong{color:var(--ink);font-size:10px}.whole-mini-grid.is-enhanced{grid-template-columns:repeat(12,1fr);gap:4px;margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--soft) 35%,var(--card))}.whole-mini-grid.is-enhanced i{min-width:0;border-radius:4px;outline:1px solid color-mix(in srgb,var(--line) 70%,transparent)}.whole-mini-grid.is-enhanced i[data-subject="ds"]{box-shadow:inset 0 0 0 1px rgba(32,185,137,.12)}.whole-mini-grid.is-enhanced i[data-subject="co"]{box-shadow:inset 0 0 0 1px rgba(139,92,246,.12)}.whole-mini-grid.is-enhanced i[data-subject="os"]{box-shadow:inset 0 0 0 1px rgba(240,183,45,.14)}.whole-mini-grid.is-enhanced i[data-subject="cn"]{box-shadow:inset 0 0 0 1px rgba(235,82,105,.12)}
+.whole-start{min-height:43px;border-radius:13px;background:linear-gradient(135deg,#111318,#242730);box-shadow:0 8px 20px rgba(17,18,23,.12)}
+
+/* 纵览矩阵与工具栏 */
+.wall-toolbar{border-radius:16px}.segmented{border:1px solid var(--line);background:color-mix(in srgb,var(--soft) 72%,var(--card))}.segmented button{min-height:34px}.matrix-card{border-radius:20px}.matrix-scroll{background:var(--card)}.question-matrix th,.question-matrix td{height:46px}.matrix-q{width:35px;height:35px;border-radius:9px;box-shadow:0 2px 7px rgba(17,18,23,.08),inset 0 -1px rgba(0,0,0,.08)}
+
+/* 平板 */
+@media (min-width:768px) and (max-width:1199px){
+  .wall-workspace{grid-template-columns:230px minmax(0,1fr)}.wall-sidebar{padding:15px 12px 32px}.wall-main{padding:20px 18px 56px}.wall-summary{align-items:flex-start;flex-direction:column}.summary-numbers{width:100%;max-width:none;grid-template-columns:repeat(3,1fr)}
+  .whole-year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.zhenti-overview{grid-template-columns:1fr}.zt-overview-subjects{grid-template-columns:repeat(4,1fr)}.zt-overview-side{grid-template-columns:repeat(4,1fr)}
+  .whole-mini-grid.is-enhanced{grid-template-columns:repeat(10,1fr)}
+  .favorites-home,.srs-home{width:min(100% - 28px,1440px)}
+}
+
+/* 手机 */
+@media (max-width:767px){
+  .wall-subject-bar{padding:10px 11px;gap:6px;scroll-snap-type:x proximity}.subject-tab{min-height:38px;padding:0 13px;font-size:11px;scroll-snap-align:start}.wall-main{padding:12px 10px 42px}.wall-summary{padding:16px;border-radius:17px}.wall-summary h1{font-size:25px}.wall-summary p{font-size:12px;line-height:1.7}.summary-numbers div{padding:10px 6px}.summary-numbers strong{font-size:18px}
+  .wall-toolbar{padding:12px;border-radius:15px}.toolbar-group{width:100%}.toolbar-label{font-size:12px}.segmented{width:100%;overflow:auto;scrollbar-width:none}.segmented button{flex:1;min-width:max-content;padding:7px 9px;font-size:11px}.custom-range{width:100%}.custom-range select{flex:1;min-width:0}
+  .matrix-head{padding:0 14px 12px}.matrix-legend{gap:8px}.question-matrix .freq-head,.question-matrix .freq-cell{width:40px;min-width:40px}.question-matrix .year-head,.question-matrix .year-cell{left:40px;width:66px;min-width:66px}.q-head{width:45px;min-width:45px}.matrix-q{width:34px;height:34px}
+  .full-paper-home{padding:12px 10px 46px}.whole-hero,.whole-toolbar{border-radius:17px}.whole-hero{padding:17px}.whole-hero h1{font-size:28px}.whole-summary{gap:7px}.whole-summary div{padding:10px 6px}.whole-summary strong{font-size:18px}.whole-toolbar{padding:13px}.whole-year-grid{grid-template-columns:1fr;gap:12px}.whole-year-card{padding:16px;border-radius:18px}.whole-year-head strong{font-size:29px}.whole-year-insight{grid-template-columns:62px minmax(0,1fr);padding:11px;gap:11px}.whole-year-ring{width:58px;height:58px}.whole-mini-grid.is-enhanced{grid-template-columns:repeat(10,1fr);gap:3px;padding:8px}.whole-grid-label{margin-top:10px}
+  .zhenti-overview{grid-template-columns:1fr;gap:10px}.zt-overview-main,.zt-overview-side{border-radius:16px}.zt-overview-main{padding:15px}.zt-overview-title{align-items:flex-start;flex-direction:column;gap:4px}.zt-overview-subjects{grid-template-columns:repeat(2,1fr)}.zt-overview-side{padding:12px;grid-template-columns:repeat(2,1fr)}
+  .srs-stage{grid-template-columns:1fr}.srs-card-shell{min-height:auto}.srs-card{padding:18px 14px}.favorites-list{grid-template-columns:1fr!important}
+}
+
+@media (max-width:420px){.zt-overview-subjects{grid-template-columns:1fr 1fr}.whole-subject-row{grid-template-columns:32px 1fr 40px}.whole-mini-grid.is-enhanced{grid-template-columns:repeat(8,1fr)}.whole-year-meta{gap:7px}.whole-year-meta span{font-size:9px}}
+@media (pointer:coarse){.subject-tab,.segmented button,.matrix-q,.whole-start,.side-item,.side-group-title{touch-action:manipulation}.matrix-q{min-width:36px;min-height:36px}}
