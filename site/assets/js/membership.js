@@ -14,8 +14,8 @@ import './cloud.js';
     return ({invalid_code:'兑换码无效，请检查后重试。',code_expired:'兑换码已经过期。',code_exhausted:'兑换码使用次数已用完。',promo_closed:'Pro 限免活动当前不可领取。',login_required:'请先登录账户。'})[key]||key||'操作没有完成。';
   };
   const cacheStatus=status=>{
-    try{localStorage.setItem('everflow-membership-cache-v1',JSON.stringify({plan:status.plan,active:status.active,at:new Date().toISOString()}))}catch{}
-    if(status.active){localStorage.setItem('everflow-membership-nav-hidden-v1','1');document.dispatchEvent(new CustomEvent('everflow:membership-change',{detail:{active:true,plan:status.plan}}))}
+    try{localStorage.setItem('everflow-membership-cache-v1',JSON.stringify({plan:status.plan,active:status.active,at:new Date().toISOString()}));if(status.active)localStorage.setItem('everflow-membership-nav-hidden-v1','1')}catch{}
+    if(status.active)document.dispatchEvent(new CustomEvent('everflow:membership-change',{detail:{active:true,plan:status.plan}}));
   };
 
   async function load(){
@@ -34,7 +34,7 @@ import './cloud.js';
       const expiry=status.membership?.effective_expires_at;
       if(detail){detail.classList.toggle('active',Boolean(status.active));detail.textContent=status.active?(expiry?`有效至 ${new Date(expiry).toLocaleDateString('zh-CN')}`:'会员当前有效'):'当前为普通用户'}
       if(claim){
-        if(status.plan==='pro'&&status.active){claim.disabled=true;claim.textContent='Pro 已开通 ✓'}
+        if(status.plan==='pro'&&status.active){claim.disabled=true;claim.textContent='Pro 已开通'}
         else if(status.promo?.enabled){claim.disabled=false;claim.textContent='¥0 免费开通 Pro'}
         else{claim.disabled=true;claim.textContent='限免活动已结束'}
       }
@@ -49,7 +49,7 @@ import './cloud.js';
       await EveraCloud.membership('claim-pro');
       const status=await EveraCloud.membership('status');cacheStatus(status);
       setMsg('Pro 开通成功','当前账号已经获得 Pro 权益；顶部购买会员入口会自动隐藏。');
-      ui().complete?.(btn,'Pro 已开通 ✓',0);ui().toast?.('当前账号已经获得 Pro 权益。',{type:'success',title:'开通成功',duration:4500});await load();
+      ui().complete?.(btn,'Pro 已开通',0);ui().toast?.('当前账号已经获得 Pro 权益。',{type:'success',title:'开通成功',duration:4500});await load();
     }catch(e){const text=friendlyError(e);setMsg('开通失败',text,true);ui().toast?.(text,{type:'error',title:'开通失败'});ui().setBusy?.(btn,false)}
   }
 
@@ -61,12 +61,12 @@ import './cloud.js';
     try{
       await EveraCloud.membership('redeem',{code});
       const status=await EveraCloud.membership('status');cacheStatus(status);
-      setMsg('兑换成功',`${planLabel(status.plan)} 已经开通，权益已绑定到当前账号。`);if(input)input.value='';ui().complete?.(btn,'兑换成功 ✓');ui().toast?.(`${planLabel(status.plan)} 已经开通。`,{type:'success',title:'兑换成功',duration:4500});await load();
+      setMsg('兑换成功',`${planLabel(status.plan)} 已经开通，权益已绑定到当前账号。`);if(input)input.value='';ui().complete?.(btn,'兑换成功');ui().toast?.(`${planLabel(status.plan)} 已经开通。`,{type:'success',title:'兑换成功',duration:4500});await load();
     }catch(e){const text=friendlyError(e);setMsg('兑换失败',text,true);ui().toast?.(text,{type:'error',title:'兑换失败'});ui().setBusy?.(btn,false)}
   }
 
   $('[data-claim-pro]')?.addEventListener('click',claimPro);$('[data-redeem]')?.addEventListener('click',redeem);$('[data-redeem-code]')?.addEventListener('keydown',e=>{if(e.key==='Enter')redeem()});
   $('[data-focus-redeem]')?.addEventListener('click',()=>{document.querySelector('#redeem')?.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$('[data-redeem-code]')?.focus(),350)});
-  $('[data-membership-close]')?.addEventListener('click',e=>{const btn=e.currentTarget;btn.disabled=true;localStorage.setItem('everflow-membership-nav-hidden-v1','1');ui().toast?.('购买会员入口已隐藏；以后仍可从账户页进入。',{type:'info',title:'已隐藏'});setTimeout(()=>{if(history.length>1)history.back();else location.href='../account/'},350)});
+  $('[data-membership-close]')?.addEventListener('click',e=>{const btn=e.currentTarget;btn.disabled=true;try{localStorage.setItem('everflow-membership-nav-hidden-v1','1')}catch{}ui().toast?.('购买会员入口已隐藏；以后仍可从账户页进入。',{type:'info',title:'已隐藏'});setTimeout(()=>{if(history.length>1)history.back();else location.href='../account/'},350)});
   document.addEventListener('everflow:auth-change',()=>load().catch(console.error));load().catch(console.error);
 })();
