@@ -21,8 +21,8 @@
   function yearsPresent(records){const years=new Set();Object.keys(records).forEach(id=>{const m=id.match(/^(\d{4})-/);if(m)years.add(Number(m[1]))});return years}
   function renderOverview(){
     const records=read(),years=Array.from({length:18},(_,i)=>2009+i),yearSet=yearsPresent(records);
-    let totalDone=0,totalCorrect=0,totalWrong=0,totalFav=0,totalWeak=0;
-    years.forEach(y=>{const s=statFor(records,y,allQs);totalDone+=s.done;totalCorrect+=s.correct;totalWrong+=s.wrong;totalFav+=s.fav;totalWeak+=s.weak});
+    let totalDone=0,totalCorrect=0,totalWrong=0,totalFav=0;
+    years.forEach(y=>{const s=statFor(records,y,allQs);totalDone+=s.done;totalCorrect+=s.correct;totalWrong+=s.wrong;totalFav+=s.fav});
     const answered=totalCorrect+totalWrong,errorRate=answered?Math.round(totalWrong/answered*100):0;
     const subjectHtml=Object.values(GROUPS).map(g=>{let d=0,t=years.length*g.qs.length;years.forEach(y=>d+=statFor(records,y,g.qs).done);const rate=Math.round(d/t*100);return `<article class="zt-subject-card"><header><strong>${g.short} ${g.label}</strong><b>${rate}%</b></header><small>${d}/${t} 题已完成</small><div class="zt-subject-progress"><i style="width:${rate}%"></i></div></article>`}).join('');
     overview.innerHTML=`<section class="zt-overview-main"><div class="zt-overview-title"><div><h2>408 真题大观</h2><span>2009—2026 · 四科进度一眼看清</span></div><span>${yearSet.size} 个年份已有学习记录</span></div><div class="zt-overview-subjects">${subjectHtml}</div></section><aside class="zt-overview-side"><div class="zt-metric"><strong>${totalDone}</strong><span>累计完成题</span></div><div class="zt-metric good"><strong>${totalCorrect}</strong><span>累计答对</span></div><div class="zt-metric danger"><strong>${errorRate}%</strong><span>累计错误率</span></div><div class="zt-metric"><strong>${totalFav}</strong><span>收藏题目</span></div></aside>`;
@@ -31,6 +31,7 @@
   function decorateCard(card){
     if(card.dataset.uiPolished==='1')return;
     const year=Number(card.querySelector('.whole-year-head strong')?.textContent||0);if(!year)return;
+    card.querySelectorAll('.whole-year-insight,.whole-grid-label').forEach(el=>el.remove());
     card.dataset.uiPolished='1';
     const records=read(),all=statFor(records,year,allQs),rows=Object.values(GROUPS).map(g=>{const s=statFor(records,year,g.qs);return `<div class="whole-subject-row"><strong>${g.short}</strong><span><i style="width:${s.rate}%"></i></span><em>${s.done}/${s.total}</em></div>`}).join('');
     const insight=document.createElement('div');insight.className='whole-year-insight';insight.innerHTML=`<div class="whole-year-ring" style="--p:${all.rate}"><b>${all.rate}%</b></div><div class="whole-subject-mini">${rows}</div>`;
@@ -41,10 +42,11 @@
     }else card.appendChild(insight);
   }
   function decorateAll(){[...wholeGrid.querySelectorAll('.whole-year-card')].forEach(decorateCard);renderOverview()}
+  function refreshCards(){[...wholeGrid.querySelectorAll('.whole-year-card')].forEach(c=>delete c.dataset.uiPolished);decorateAll()}
 
   const observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.addedNodes.length))requestAnimationFrame(decorateAll)});
   observer.observe(wholeGrid,{childList:true});
-  window.addEventListener('storage',e=>{if(e.key===WALL_KEY){[...wholeGrid.querySelectorAll('.whole-year-card')].forEach(c=>delete c.dataset.uiPolished);decorateAll()}});
-  document.addEventListener('click',e=>{if(e.target.closest('[data-answer-submit],[data-modal-status],[data-paper-status],[data-answer-favorite],.favorite-remove'))setTimeout(()=>{[...wholeGrid.querySelectorAll('.whole-year-card')].forEach(c=>delete c.dataset.uiPolished);decorateAll()},60)});
+  window.addEventListener('storage',e=>{if(e.key===WALL_KEY)refreshCards()});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-answer-submit],[data-modal-status],[data-paper-status],[data-answer-favorite],.favorite-remove'))setTimeout(refreshCards,60)});
   decorateAll();
 })();
