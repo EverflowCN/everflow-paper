@@ -111,6 +111,116 @@
       "analysis": "取指阶段访问存储器取得的是指令，执行阶段因取操作数而访存取得的是数据，因此依据的是指令周期的不同阶段。",
       "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
     },
+    "12": {
+      "number": 12,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "32 位机器上，x、z 为 int，y 为 short。若 x=127、y=-9，执行 z=x+y 后，三者的十六进制补码表示应是哪一组？",
+      "options": {"A":"x=0000007FH，y=FFF9H，z=00000076H","B":"x=0000007FH，y=FFF9H，z=FFFF0076H","C":"x=0000007FH，y=FFF7H，z=FFFF0076H","D":"x=0000007FH，y=FFF7H，z=00000076H"},
+      "answer": "D",
+      "analysis": "-9 的 16 位补码为 FFF7H。参与 int 加法时先符号扩展为 FFFFFFF7H，再与 0000007FH 相加得到 00000076H。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "13": {
+      "number": 13,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "某浮点格式的阶码和尾数都用补码表示，位数分别为 5 位和 7 位，且都含 2 位符号位。计算 X=2^7×29/32 与 Y=2^5×5/8 的浮点加法 X+Y，最终结果属于哪种情况？",
+      "options": {"A":"00111 1100010","B":"00111 0100010","C":"01000 0010001","D":"发生溢出"},
+      "answer": "D",
+      "analysis": "对阶后做尾数加法需要右规，阶码再加 1 后阶码双符号位呈 01，说明正溢出。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "14": {
+      "number": 14,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "Cache 共 16 块，采用 2 路组相联；主存块大小 32B，按字节编址。主存地址 129 所在的主存块应映射到哪个 Cache 组？",
+      "options": {"A":"0","B":"1","C":"4","D":"6"},
+      "answer": "C",
+      "analysis": "16 块、2 路得到 8 组。地址 129 位于主存第 4 块，因此组号为 4 mod 8=4。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "15": {
+      "number": 15,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "64KB 主存中 ROM 占 4KB，其余为 RAM，均按字节编址。用 2K×8 位 ROM 芯片和 4K×4 位 RAM 芯片实现，需要的 ROM 与 RAM 芯片数量分别是多少？",
+      "options": {"A":"1、15","B":"2、15","C":"1、30","D":"2、30"},
+      "answer": "D",
+      "analysis": "ROM 需要 4K×8 / (2K×8)=2 片；RAM 为 60K×8，需要 60K×8 / (4K×4)=30 片。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "16": {
+      "number": 16,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "一条 2 字节相对转移指令位于地址 2000H，第二字节位移量为 06H；每取 1 字节 PC 自动加 1。若转移成功，目标地址是多少？",
+      "options": {"A":"2006H","B":"2007H","C":"2008H","D":"2009H"},
+      "answer": "C",
+      "analysis": "取完 2 字节指令后 PC=2002H，相对寻址目标 EA=PC+06H=2008H。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "17": {
+      "number": 17,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "关于 RISC 的下列说法中，错误的是哪一项？",
+      "options": {"A":"普遍采用微程序控制器","B":"大多数指令可在一个时钟周期内完成","C":"通用寄存器数量通常比 CISC 多","D":"指令数、寻址方式和指令格式种类通常比 CISC 少"},
+      "answer": "A",
+      "analysis": "RISC 通常强调硬布线控制、简单固定格式和较多通用寄存器，不以普遍采用微程序控制为特征。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "18": {
+      "number": 18,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "四段指令流水线各段耗时分别为 90ns、80ns、70ns、60ns，忽略段间寄存器开销时，CPU 时钟周期至少应取多少？",
+      "options": {"A":"90ns","B":"80ns","C":"70ns","D":"60ns"},
+      "answer": "A",
+      "analysis": "流水线时钟周期不能小于最慢功能段的执行时间，因此至少为 90ns。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "19": {
+      "number": 19,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "与微程序控制器相比，硬布线控制器通常具有怎样的特点？",
+      "options": {"A":"执行慢，修改扩展容易","B":"执行慢，修改扩展困难","C":"执行快，修改扩展容易","D":"执行快，修改扩展困难"},
+      "answer": "D",
+      "analysis": "硬布线直接由逻辑电路产生控制信号，速度快，但控制逻辑固化，修改和扩展较困难。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "20": {
+      "number": 20,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "系统总线每个总线周期并行传输 4B，一个总线周期占 2 个时钟周期，总线时钟为 10MHz。总线带宽是多少？",
+      "options": {"A":"10MB/s","B":"20MB/s","C":"40MB/s","D":"80MB/s"},
+      "answer": "B",
+      "analysis": "一个时钟周期为 0.1μs，总线周期为 0.2μs；每 0.2μs 传 4B，因此带宽为 20MB/s。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "21": {
+      "number": 21,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "某程序共访存 1000 次，其中 Cache 未命中 50 次。Cache 命中率是多少？",
+      "options": {"A":"5%","B":"9.5%","C":"50%","D":"95%"},
+      "answer": "D",
+      "analysis": "命中次数为 1000-50=950，所以命中率为 950/1000=95%。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
     "22": {
       "number": 22,
       "subject": "co",
