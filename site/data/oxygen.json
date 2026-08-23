@@ -1,18 +1,18 @@
 {
   "schema": 2,
-  "updatedAt": "2026-08-23T12:06:00+08:00",
+  "updatedAt": "2026-08-23T15:06:45+08:00",
   "source": {
     "up": "就是氧气11",
     "mid": 378777885,
     "collection": "27考研408计算机基础综合合集",
     "auto": true,
-    "syncStatus": "ok",
-    "message": "27强化合集四科同步成功；新增 2 条，补全 0 条课程元数据。",
+    "syncStatus": "partial",
+    "message": "本次 2/4 科同步成功；优先读取27强化合集；已有数据均保留。失败：ds: HTTPError: HTTP Error 412: Precondition Failed | os: HTTPError: HTTP Error 412: Precondition Failed",
     "subjectStatus": {
       "ds": {
-        "ok": true,
-        "error": "",
-        "method": "search"
+        "ok": false,
+        "error": "HTTPError: HTTP Error 412: Precondition Failed",
+        "method": ""
       },
       "co": {
         "ok": true,
@@ -20,9 +20,9 @@
         "method": "search"
       },
       "os": {
-        "ok": true,
-        "error": "",
-        "method": "search"
+        "ok": false,
+        "error": "HTTPError: HTTP Error 412: Precondition Failed",
+        "method": ""
       },
       "cn": {
         "ok": true,
