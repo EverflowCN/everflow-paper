@@ -6,9 +6,10 @@
     const link=document.createElement('a');
     link.href='./limits.html';
     link.dataset.wsQuotaEntry='1';
-    link.innerHTML='▤ <span>额度中心</span>';
+    link.innerHTML='<span>额度中心</span>';
     const system=nav.querySelector('[data-ws-nav="system"]');
     if(system)system.insertAdjacentElement('beforebegin',link);else nav.appendChild(link);
+    window.dispatchEvent(new CustomEvent('everflow:workspace-nav-change'));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});else inject();
   setTimeout(inject,220);
