@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="330" viewBox="0 0 900 330" role="img" aria-labelledby="title desc">
+<title id="title">2009 年 408 第 4 题四个二叉排序树选项</title><desc id="desc">按2009原卷第1页重绘A、B、C、D四个无关键字结点的树形选项。</desc>
+<style>text{font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#111;font-size:24px;font-weight:700}.edge{stroke:#111;stroke-width:3}.node{fill:#fff;stroke:#111;stroke-width:3}</style>
+<!-- A -->
+<text x="110" y="305">A.</text><line class="edge" x1="150" y1="65" x2="115" y2="130"/><line class="edge" x1="115" y1="130" x2="150" y2="205"/><circle class="node" cx="150" cy="55" r="16"/><circle class="node" cx="105" cy="140" r="16"/><circle class="node" cx="160" cy="215" r="16"/>
+<!-- B -->
+<text x="310" y="305">B.</text><line class="edge" x1="365" y1="65" x2="320" y2="130"/><line class="edge" x1="365" y1="65" x2="420" y2="130"/><line class="edge" x1="320" y1="130" x2="275" y2="205"/><line class="edge" x1="420" y1="130" x2="390" y2="205"/><circle class="node" cx="365" cy="55" r="16"/><circle class="node" cx="310" cy="140" r="16"/><circle class="node" cx="430" cy="140" r="16"/><circle class="node" cx="265" cy="215" r="16"/><circle class="node" cx="380" cy="215" r="16"/>
+<!-- C -->
+<text x="530" y="305">C.</text><line class="edge" x1="580" y1="65" x2="535" y2="130"/><line class="edge" x1="580" y1="65" x2="625" y2="130"/><line class="edge" x1="625" y1="130" x2="675" y2="195"/><line class="edge" x1="675" y1="195" x2="640" y2="255"/><circle class="node" cx="580" cy="55" r="16"/><circle class="node" cx="525" cy="140" r="16"/><circle class="node" cx="635" cy="140" r="16"/><circle class="node" cx="685" cy="205" r="16"/><circle class="node" cx="630" cy="265" r="16"/>
+<!-- D -->
+<text x="735" y="305">D.</text><line class="edge" x1="785" y1="55" x2="750" y2="110"/><line class="edge" x1="750" y1="110" x2="800" y2="155"/><line class="edge" x1="750" y1="110" x2="710" y2="165"/><line class="edge" x1="710" y1="165" x2="750" y2="215"/><line class="edge" x1="750" y1="215" x2="790" y2="265"/><circle class="node" cx="785" cy="45" r="16"/><circle class="node" cx="740" cy="120" r="16"/><circle class="node" cx="810" cy="165" r="16"/><circle class="node" cx="700" cy="175" r="16"/><circle class="node" cx="760" cy="225" r="16"/><circle class="node" cx="800" cy="275" r="16"/>
+</svg>
