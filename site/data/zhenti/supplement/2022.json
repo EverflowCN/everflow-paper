@@ -1,0 +1,37 @@
+{
+  "schema": "everflow-408-paper-supplement-v1",
+  "year": 2022,
+  "verifiedAt": "2026-08-23",
+  "questions": {
+    "41": {
+      "number": 41,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 13,
+      "stem": "非空二叉树 T 的结点值均为正整数，采用顺序存储；数组中不存在的结点用 -1 表示。请设计尽可能高效的算法判断这种顺序存储的二叉树是否为二叉搜索树，给出基本思想和 C/C++ 算法。",
+      "answer": "可按中序次序检查有效结点是否严格递增。递归访问下标 i：先递归 2i+1，再检查当前有效结点值是否严格大于上一个访问到的有效值，最后递归 2i+2；遇到越界或值为 -1 直接返回。若整个中序序列严格递增则为 BST，否则不是。",
+      "analysis": "BST 的中序遍历结果严格递增。顺序存储中下标 i 的左右孩子分别为 2i+1、2i+2，因此无需重建链式二叉树。一次遍历即可完成判断，时间复杂度 O(n)，递归栈空间 O(h)。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "42": {
+      "number": 42,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 10,
+      "stem": "一维数组 M 中保存 n 个数，n>100000，需要找出其中最小的 10 个数。请设计平均情况下比较次数尽可能少的算法，并说明平均时间复杂度和空间复杂度。",
+      "answer": "维护一个固定大小为 10 的大根堆。先用前 10 个数建堆，之后扫描 M 的其余元素；若当前元素小于堆顶，则用它替换堆顶并向下调整。扫描结束后，堆中即为最小的 10 个数。平均时间复杂度 O(n log 10)=O(n)，额外空间 O(10)=O(1)。",
+      "analysis": "固定大小大根堆使每次更新只需 O(log 10) 比较。因为 10 是常数，总体仍为线性时间，且不需要对整个数组排序。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "46": {
+      "number": 46,
+      "subject": "os",
+      "type": "comprehensive",
+      "score": 8,
+      "stem": "同一进程的线程 T1、T2 并发执行 A、B、C、D、E、F，其中 T1 执行 A、E、F，T2 执行 B、C、D；约束为 C 必须在 A 和 B 完成后执行，D、E 必须在 C 完成后执行，F 必须在 E 完成后执行。请用 wait()/signal() 描述同步关系，并说明信号量作用和初值。",
+      "answer": "只需两个初值为 0 的同步信号量 AC、CE。T1：A; signal(AC); wait(CE); E; F。T2：B; wait(AC); C; signal(CE); D。AC 保证 C 在 A 完成后执行；CE 保证 E 在 C 后执行；其余约束由线程内部程序顺序自然保证。",
+      "analysis": "只为跨线程的先后约束设信号量。A→C 和 C→E 是两条跨线程依赖，需要两个同步量；B→C、C→D、E→F 都由线程内部顺序自动满足。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    }
+  }
+}
