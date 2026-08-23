@@ -1,6 +1,6 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260824-ui3';
+  const ASSET_VERSION='20260824-ui4';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={
     get:key=>{try{return localStorage.getItem(key)}catch{return null}},
@@ -26,7 +26,8 @@
     book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5Z"/>',
     star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/>',
     eraser:'<path d="m7 20-4-4L14.5 4.5a2.1 2.1 0 0 1 3 0l2 2a2.1 2.1 0 0 1 0 3L9 20Z"/><path d="m11 8 5 5M7 20h13"/>',
-    panel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>'
+    panel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>',
+    keyboard:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M17 14h.01M7 14h6"/>'
   };
   const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const iconMarkup=name=>`<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name]||ICONS.info}</svg>`;
@@ -66,7 +67,7 @@
     if(el.matches('[data-theme]'))return syncThemeIcons();
     if(el.matches('[data-menu]')){iconOnly(el,'menu');return}
     if(el.matches('.modal-clear')){iconOnly(el,'eraser');return}
-    if(el.matches('.modal-close,.membership-close,.membership-nav-close,[data-drawer-close]')){iconOnly(el,'close');return}
+    if(el.matches('.modal-close,.membership-close,.membership-nav-close,[data-drawer-close],[data-shortcut-close]')){iconOnly(el,'close');return}
     if(el.matches('[data-tool="analysis"]')){iconText(el,'book','看解析');return}
     if(el.matches('[data-tool="note"]')){iconText(el,'pencil','笔记');return}
     if(el.matches('[data-tool="timer"]')){preserveLiveLabelIcon(el,'clock','[data-timer-text]');return}
@@ -75,14 +76,15 @@
     if(el.matches('[data-paper-exit]')){iconText(el,'arrowLeft','退出整套');return}
     if(el.matches('[data-manual-open]')){iconText(el,'plus','手动补录');return}
     if(el.matches('.question-favorite')){iconText(el,'star',el.classList.contains('active')?'已收藏':'收藏');return}
+    if(el.matches('.shortcut-fab')){iconText(el,'keyboard','快捷键');const kbd=document.createElement('kbd');kbd.textContent='?';el.appendChild(kbd);return}
 
     const raw=(el.textContent||'').trim();
     if(!raw)return;
     const exact={
-      '☰':'menu','◐':body.classList.contains('dark')?'sun':'moon','×':'close','✕':'close','＋':'plus','+':'plus','−':'minus','-':'minus','‹':'chevronLeft','›':'chevronRight'
+      '☰':'menu','◐':body.classList.contains('dark')?'sun':'moon','×':'close','✕':'close','＋':'plus','+':'plus','−':'minus','-':'minus','‹':'chevronLeft','›':'chevronRight','⌨':'keyboard'
     };
     if(exact[raw]){iconOnly(el,exact[raw]);return}
-    const prefix=[['＋ ','plus'],['+ ','plus'],['← ','arrowLeft'],['‹ ','chevronLeft'],['✓ ','check'],['✕ ','close'],['✎ ','pencil'],['◷ ','clock'],['▣ ','book'],['★ ','star'],['☆ ','star']];
+    const prefix=[['＋ ','plus'],['+ ','plus'],['← ','arrowLeft'],['‹ ','chevronLeft'],['✓ ','check'],['✕ ','close'],['✎ ','pencil'],['◷ ','clock'],['▣ ','book'],['★ ','star'],['☆ ','star'],['⌨ ','keyboard']];
     for(const [token,name] of prefix){if(raw.startsWith(token)){iconText(el,name,raw.slice(token.length));return}}
     const suffix=[[' →','arrowRight'],[' ›','chevronRight']];
     for(const [token,name] of suffix){if(raw.endsWith(token)){iconText(el,name,raw.slice(0,-token.length),'end');return}}
@@ -161,7 +163,8 @@
   const complete=(btn,label='完成',restoreMs=1400)=>{
     if(!btn)return;
     const original=btn.dataset.everaHtml||btn.innerHTML;
-    btn.classList.remove('is-busy');btn.disabled=true;iconText(btn,'check',label);
+    const cleanLabel=String(label||'完成').replace(/[✓✔]\s*$/,'').trim()||'完成';
+    btn.classList.remove('is-busy');btn.disabled=true;iconText(btn,'check',cleanLabel);
     if(restoreMs>0)setTimeout(()=>{btn.disabled=false;btn.innerHTML=original;delete btn.dataset.everaHtml;upgradeControl(btn)},restoreMs);
   };
   window.EveraUI={toast,setBusy,complete,icon:iconMarkup,upgradeIcons:upgradeScope};
