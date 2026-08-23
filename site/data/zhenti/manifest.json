@@ -1,0 +1,48 @@
+{
+  "schema": "everflow-408-zhenti-v1",
+  "updatedAt": "2026-08-23T03:00:00Z",
+  "policy": {
+    "displayRule": "Only questions with verification.status=verified are rendered as confirmed past-paper content.",
+    "copyrightNote": "Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This pilot stores concise verified transcriptions/paraphrases and provenance metadata."
+  },
+  "sources": {
+    "tommy408": {
+      "name": "TommyTay0712/408",
+      "type": "public-github-transcription",
+      "url": "https://github.com/TommyTay0712/408/blob/main/%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98/2009.md",
+      "license": "not-declared"
+    },
+    "neville408": {
+      "name": "neville-studio/408-exam-paper",
+      "type": "public-github-rebuilt-paper",
+      "url": "https://github.com/neville-studio/408-exam-paper/blob/main/papers-rebuild/2009.pdf",
+      "license": "MIT-for-repository"
+    },
+    "csgraduates": {
+      "name": "计算机考研杂货铺",
+      "type": "independent-cross-check",
+      "url": "https://csgraduates.com/study_methods/408quiz/2009/"
+    },
+    "foreverlink": {
+      "name": "408 ForeverLink",
+      "type": "independent-cross-check",
+      "url": "https://408.foreverlink.love/2009"
+    },
+    "hermes408": {
+      "name": "lij768423-svg/408-",
+      "type": "public-structured-question-bank-cross-check",
+      "url": "https://github.com/lij768423-svg/408-",
+      "license": "ISC-for-software"
+    }
+  },
+  "years": {
+    "2009": {
+      "paperStatus": "verified",
+      "contentStatus": "partial-verified",
+      "questionCount": 47,
+      "verifiedQuestions": [1, 2, 5, 6, 7, 8, 9, 10, 41, 42],
+      "sources": ["tommy408", "neville408", "csgraduates", "foreverlink", "hermes408"],
+      "notes": "2009 paper identity, section boundaries and the listed pilot questions were cross-checked. Figure-dependent questions are not imported until their figures are verified."
+    }
+  }
+}
