@@ -1,9 +1,11 @@
 (()=>{
-  const grid=document.querySelector('[data-overview-grid]');
-  if(!grid)return;
+  const matrix=document.querySelector('[data-overview-matrix]');
+  if(!matrix)return;
 
+  const YEARS=Array.from({length:18},(_,i)=>2026-i);
+  const QUESTIONS=Array.from({length:47},(_,i)=>i+1);
   const STORAGE_KEY='everflow-408-zhenti-wall-v1';
-  const CURRENT_KEY='everflow-408-graph-current-v1';
+  const CURRENT_KEY='everflow-408-graph-current-v2';
 
   function subjectFor(q){
     if((q>=1&&q<=10)||q===41||q===42)return'ds';
@@ -19,56 +21,94 @@
     }catch{return{}}
   }
 
-  const records=loadRecords();
-  let latest=null;
-  for(const [key,record] of Object.entries(records)){
-    const match=key.match(/^(\d{4})-(\d{1,2})$/);
-    if(!match)continue;
-    const q=Number(match[2]);
-    if(q<1||q>47)continue;
-    const time=Date.parse(record?.updatedAt||'')||0;
-    if(!latest||time>latest.time)latest={q,time};
+  function latestKey(records){
+    let found='',time=-1;
+    for(const [key,record] of Object.entries(records)){
+      if(!/^20(?:0\d|1\d|2[0-6])-(?:[1-9]|[1-3]\d|4[0-7])$/.test(key))continue;
+      const next=Date.parse(record?.updatedAt||'')||0;
+      if(next>time){time=next;found=key}
+    }
+    return found;
   }
 
-  let current=Number(localStorage.getItem(CURRENT_KEY)||0);
-  if(!(current>=1&&current<=47))current=latest?.q||0;
+  function stateFor(record){
+    if(record?.correct===true)return'correct';
+    if(record?.correct===false)return'wrong';
+    if(record?.reviewed)return'reviewed';
+    if(record?.draftAnswer)return'draft';
+    return'unmarked';
+  }
 
-  function newestRecordForQuestion(q){
-    let found=null;
-    for(const [key,record] of Object.entries(records)){
-      if(!key.endsWith(`-${q}`))continue;
-      const match=key.match(/^(\d{4})-(\d{1,2})$/);
-      if(!match||Number(match[2])!==q)continue;
-      const time=Date.parse(record?.updatedAt||'')||0;
-      if(!found||time>found.time)found={record,time};
+  function stateText(record){
+    if(record?.correct===true)return'答对';
+    if(record?.correct===false)return'答错';
+    if(record?.reviewed)return'已查看';
+    if(record?.draftAnswer)return'作答中';
+    if(record?.status==='mastered')return'熟练';
+    if(record?.status==='fuzzy')return'模糊';
+    if(record?.status==='weak')return'不会';
+    return'未做';
+  }
+
+  let records=loadRecords();
+  let current='';
+  try{current=localStorage.getItem(CURRENT_KEY)||''}catch{}
+  if(!/^20(?:0\d|1\d|2[0-6])-(?:[1-9]|[1-3]\d|4[0-7])$/.test(current))current=latestKey(records);
+
+  function indexCell(text,className){
+    const cell=document.createElement('div');
+    cell.className=`overview-index ${className}`;
+    cell.textContent=text;
+    cell.setAttribute('aria-hidden','true');
+    return cell;
+  }
+
+  function questionCell(year,q){
+    const key=`${year}-${q}`;
+    const record=records[key]||{};
+    const link=document.createElement('a');
+    link.className=`overview-cell ${subjectFor(q)} ${stateFor(record)}${key===current?' current':''}`;
+    link.href=`/zhenti/?year=${year}&q=${q}`;
+    link.dataset.key=key;
+    link.setAttribute('role','gridcell');
+    link.setAttribute('aria-label',`${year}年第${q}题，${stateText(record)}`);
+    link.title=`${year} · ${q} · ${stateText(record)}`;
+    link.addEventListener('click',()=>{
+      current=key;
+      try{localStorage.setItem(CURRENT_KEY,key)}catch{}
+    });
+
+    if(['mastered','fuzzy','weak'].includes(record.status)){
+      const dot=document.createElement('span');
+      dot.className=`overview-dot ${record.status}`;
+      dot.setAttribute('aria-hidden','true');
+      link.appendChild(dot);
     }
-    return found?.record||null;
+    return link;
   }
 
   function render(){
-    grid.replaceChildren();
-    for(let q=1;q<=47;q++){
-      const cell=document.createElement('button');
-      cell.type='button';
-      cell.className=`overview-cell ${subjectFor(q)}${q===current?' current':''}`;
-      cell.setAttribute('aria-label',`第${q}题`);
-
-      const record=newestRecordForQuestion(q);
-      if(record?.status&&['mastered','fuzzy','weak'].includes(record.status)){
-        const dot=document.createElement('span');
-        dot.className=`overview-dot ${record.status}`;
-        dot.setAttribute('aria-hidden','true');
-        cell.appendChild(dot);
-      }
-
-      cell.addEventListener('click',()=>{
-        current=q;
-        try{localStorage.setItem(CURRENT_KEY,String(q))}catch{}
-        render();
-      });
-      grid.appendChild(cell);
-    }
+    const fragment=document.createDocumentFragment();
+    fragment.appendChild(indexCell('','overview-corner'));
+    QUESTIONS.forEach(q=>fragment.appendChild(indexCell(String(q),'overview-q')));
+    YEARS.forEach(year=>{
+      fragment.appendChild(indexCell(String(year),'overview-year'));
+      QUESTIONS.forEach(q=>fragment.appendChild(questionCell(year,q)));
+    });
+    matrix.replaceChildren(fragment);
   }
+
+  window.addEventListener('pageshow',()=>{
+    records=loadRecords();
+    try{current=localStorage.getItem(CURRENT_KEY)||current}catch{}
+    render();
+  });
+  window.addEventListener('storage',event=>{
+    if(event.key!==STORAGE_KEY&&event.key!==CURRENT_KEY)return;
+    records=loadRecords();
+    try{current=localStorage.getItem(CURRENT_KEY)||current}catch{}
+    render();
+  });
 
   render();
 })();
