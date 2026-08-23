@@ -17,7 +17,7 @@
 
   async function loadSupplement(year){
     if(cache.has(year))return cache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-stable`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824-base-authoritative`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     cache.set(year,promise);
@@ -27,7 +27,7 @@
   async function loadExtra(year){
     if(!extraYears.has(year))return null;
     if(extraCache.has(year))return extraCache.get(year);
-    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-stable`,{cache:'no-store'})
+    const promise=nativeFetch(`/data/zhenti/supplement/${year}-extra.json?v=20260824-base-authoritative`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     extraCache.set(year,promise);
@@ -35,8 +35,10 @@
   }
 
   function mergeQuestionSets(base,supplement,extra){
-    const merged={...(base||{})};
-    for(const source of [supplement,extra]){
+    const merged={};
+    // Legacy extras are lowest priority, then supplement fills gaps/older fields,
+    // and the base year JSON is always authoritative when the same question exists.
+    for(const source of [extra,supplement,base]){
       if(!source)continue;
       for(const [number,patch] of Object.entries(source)){
         const previous=merged[number]||{};
@@ -80,7 +82,7 @@
   if(!document.querySelector('link[data-zhenti-media]')){
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href='/assets/css/zhenti-media.css?v=20260824-stable';
+    link.href='/assets/css/zhenti-media.css?v=20260824-base-authoritative';
     link.dataset.zhentiMedia='1';
     document.head.appendChild(link);
   }
@@ -88,7 +90,7 @@
   const loadMedia=()=>{
     if(document.querySelector('script[data-zhenti-media]'))return;
     const script=document.createElement('script');
-    script.src='/assets/js/zhenti-media.js?v=20260824-stable';
+    script.src='/assets/js/zhenti-media.js?v=20260824-base-authoritative';
     script.defer=true;
     script.dataset.zhentiMedia='1';
     document.body.appendChild(script);
