@@ -9,6 +9,10 @@
   --status-mastered-border:#67add6;
   --status-fuzzy-border:#c38d18;
   --status-weak-border:#b9344b;
+  --result-correct:#24a77a;
+  --result-wrong:#d94159;
+  --result-reviewed:#7655d9;
+  --result-draft:#3f78db;
   --mastered:var(--status-mastered);
   --mastered-border:var(--status-mastered-border);
   --fuzzy:var(--status-fuzzy);
@@ -29,16 +33,29 @@ body.dark{
   --status-weak-border:#df7b89;
 }
 
-/* Wall JS emits status-* classes; these selectors are the single semantic bridge. */
-.matrix-q.unmarked,.matrix-q:not(.status-mastered):not(.status-fuzzy):not(.status-weak),
-.whole-mini-grid i.unmarked,.whole-mini-grid i:not(.status-mastered):not(.status-fuzzy):not(.status-weak),
-.paper-answer.unmarked,.paper-answer:not(.status-mastered):not(.status-fuzzy):not(.status-weak){background:var(--status-unmarked)}
-.matrix-q.status-mastered,.whole-mini-grid i.status-mastered,.paper-answer.status-mastered{background:var(--status-mastered)}
-.matrix-q.status-fuzzy,.whole-mini-grid i.status-fuzzy,.paper-answer.status-fuzzy{background:var(--status-fuzzy)}
-.matrix-q.status-weak,.whole-mini-grid i.status-weak,.paper-answer.status-weak{background:var(--status-weak)}
+/* Fill always represents mastery. No mastery = gray, regardless of answer result. */
+.matrix-q,.whole-mini-grid i,.paper-answer,.overview-cell{background:var(--status-unmarked)}
+.matrix-q.status-mastered,.whole-mini-grid i.status-mastered,.paper-answer.status-mastered,.overview-cell.status-mastered{background:var(--status-mastered)!important}
+.matrix-q.status-fuzzy,.whole-mini-grid i.status-fuzzy,.paper-answer.status-fuzzy,.overview-cell.status-fuzzy{background:var(--status-fuzzy)!important}
+.matrix-q.status-weak,.whole-mini-grid i.status-weak,.paper-answer.status-weak,.overview-cell.status-weak{background:var(--status-weak)!important}
 .matrix-q.status-mastered,.paper-answer.status-mastered{color:var(--status-mastered-ink)}
 .matrix-q.status-fuzzy,.paper-answer.status-fuzzy{color:#493400}
 .matrix-q.status-weak,.paper-answer.status-weak{color:#fff}
+.matrix-q:not(.status-mastered):not(.status-fuzzy):not(.status-weak),.paper-answer:not(.status-mastered):not(.status-fuzzy):not(.status-weak){color:#555c67}
+body.dark .matrix-q:not(.status-mastered):not(.status-fuzzy):not(.status-weak),body.dark .paper-answer:not(.status-mastered):not(.status-fuzzy):not(.status-weak){color:#eef1f5}
+
+/* Answer result is secondary information: a small dot, never another full-cell fill. */
+.matrix-q,.paper-answer,.whole-mini-grid i{position:relative}
+.matrix-q.correct::after,.matrix-q.wrong::after,.matrix-q.reviewed::after,.matrix-q.draft::after,
+.paper-answer.correct::after,.paper-answer.wrong::after,.paper-answer.reviewed::after,.paper-answer.draft::after,
+.whole-mini-grid i.correct::after,.whole-mini-grid i.wrong::after,.whole-mini-grid i.reviewed::after,.whole-mini-grid i.draft::after{
+  content:"";position:absolute;right:3px;bottom:3px;width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,255,255,.92);box-shadow:0 1px 2px rgba(0,0,0,.18);pointer-events:none
+}
+.matrix-q.correct::after,.paper-answer.correct::after,.whole-mini-grid i.correct::after{background:var(--result-correct)}
+.matrix-q.wrong::after,.paper-answer.wrong::after,.whole-mini-grid i.wrong::after{background:var(--result-wrong)}
+.matrix-q.reviewed::after,.paper-answer.reviewed::after,.whole-mini-grid i.reviewed::after{background:var(--result-reviewed)}
+.matrix-q.draft::after,.paper-answer.draft::after,.whole-mini-grid i.draft::after{background:var(--result-draft)}
+.whole-mini-grid i.correct::after,.whole-mini-grid i.wrong::after,.whole-mini-grid i.reviewed::after,.whole-mini-grid i.draft::after{right:1px;bottom:1px;width:4px;height:4px;border-width:0}
 
 .matrix-legend .mastered,.whole-legend .mastered,.overview-legend .mastered{background:var(--status-mastered)!important}
 .matrix-legend .fuzzy,.whole-legend .fuzzy,.overview-legend .fuzzy{background:var(--status-fuzzy)!important}
@@ -52,13 +69,6 @@ body.dark{
 .modal-status-actions button[data-modal-status="mastered"].active{border-color:var(--status-mastered-strong)!important;color:#3386b8!important;background:color-mix(in srgb,var(--status-mastered) 18%,var(--card))!important}
 .modal-status-actions button[data-modal-status="fuzzy"].active{border-color:var(--status-fuzzy)!important;color:#a66b00!important;background:color-mix(in srgb,var(--status-fuzzy) 14%,var(--card))!important}
 .modal-status-actions button[data-modal-status="weak"].active{border-color:var(--status-weak)!important;color:var(--status-weak)!important;background:color-mix(in srgb,var(--status-weak) 12%,var(--card))!important}
-.paper-status-actions button[data-paper-status="mastered"].active,
-.drawer-status button[data-drawer-status="mastered"].active{background:var(--status-mastered)!important;border-color:var(--status-mastered-border)!important;color:var(--status-mastered-ink)!important}
-.paper-status-actions button[data-paper-status="fuzzy"].active,
-.drawer-status button[data-drawer-status="fuzzy"].active{background:var(--status-fuzzy)!important;border-color:var(--status-fuzzy-border)!important;color:#493400!important}
-.paper-status-actions button[data-paper-status="weak"].active,
-.drawer-status button[data-drawer-status="weak"].active{background:var(--status-weak)!important;border-color:var(--status-weak-border)!important;color:#fff!important}
-
-.overview-cell.status-mastered{background:var(--status-mastered)!important}
-.overview-cell.status-fuzzy{background:var(--status-fuzzy)!important}
-.overview-cell.status-weak{background:var(--status-weak)!important}
+.paper-status-actions button[data-paper-status="mastered"].active,.drawer-status button[data-drawer-status="mastered"].active{background:var(--status-mastered)!important;border-color:var(--status-mastered-border)!important;color:var(--status-mastered-ink)!important}
+.paper-status-actions button[data-paper-status="fuzzy"].active,.drawer-status button[data-drawer-status="fuzzy"].active{background:var(--status-fuzzy)!important;border-color:var(--status-fuzzy-border)!important;color:#493400!important}
+.paper-status-actions button[data-paper-status="weak"].active,.drawer-status button[data-drawer-status="weak"].active{background:var(--status-weak)!important;border-color:var(--status-weak-border)!important;color:#fff!important}
