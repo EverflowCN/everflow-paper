@@ -1,0 +1,148 @@
+/* 408 真题墙顶部导航 v5：模式 / 科目 / 云同步明确分区 */
+.wall-subject-bar.has-srs-groups{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  grid-template-areas:'modes subjects sync'!important;
+  align-items:center!important;
+  gap:18px!important;
+  min-height:58px;
+  padding:8px max(28px,calc((100vw - 1500px)/2))!important;
+  overflow:visible!important;
+  background:color-mix(in srgb,var(--paper) 97%,transparent)!important;
+}
+.wall-subject-bar.has-srs-groups .srs-mode-group{grid-area:modes!important;justify-self:start!important}
+.wall-subject-bar.has-srs-groups .srs-subject-group{grid-area:subjects!important;justify-self:center!important}
+.wall-subject-bar.has-srs-groups>.zhenti-cloud-status{grid-area:sync!important;justify-self:end!important}
+
+.wall-subject-bar.has-srs-groups .srs-mode-group,
+.wall-subject-bar.has-srs-groups .srs-subject-group{
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  min-width:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+.wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab{
+  min-height:40px!important;
+  padding:0 15px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:var(--muted)!important;
+  box-shadow:none!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab:hover{
+  background:var(--soft)!important;
+  color:var(--ink)!important;
+}
+.wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab.active{
+  background:var(--red)!important;
+  color:#fff!important;
+  box-shadow:0 6px 16px rgba(243,18,36,.14)!important;
+}
+
+.wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab{
+  min-height:36px!important;
+  padding:0 14px!important;
+  border:0!important;
+  border-radius:11px!important;
+  background:var(--soft)!important;
+  color:var(--muted)!important;
+  box-shadow:none!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab:hover{
+  background:color-mix(in srgb,var(--red) 6%,var(--soft))!important;
+  color:var(--ink)!important;
+}
+.wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab.active{
+  background:var(--ink)!important;
+  color:var(--paper)!important;
+}
+
+.wall-subject-bar.has-srs-groups>.zhenti-cloud-status{
+  margin:0!important;
+  min-height:30px!important;
+  padding:0 4px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:var(--muted)!important;
+  font-size:10px!important;
+}
+.wall-subject-bar.has-srs-groups>.zhenti-cloud-status.synced{color:#15966e!important}
+.wall-subject-bar.has-srs-groups>.zhenti-cloud-status i{width:7px!important;height:7px!important}
+
+@media(max-width:1180px) and (min-width:721px){
+  .wall-subject-bar.has-srs-groups{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:'modes sync' 'subjects subjects'!important;
+    gap:7px 12px!important;
+    padding:8px 16px 9px!important;
+  }
+  .wall-subject-bar.has-srs-groups .srs-subject-group{
+    justify-self:stretch!important;
+    width:100%!important;
+    overflow-x:auto!important;
+    scrollbar-width:none;
+  }
+  .wall-subject-bar.has-srs-groups .srs-subject-group::-webkit-scrollbar{display:none}
+}
+
+@media(max-width:720px){
+  .wall-subject-bar.has-srs-groups{
+    grid-template-columns:1fr!important;
+    grid-template-areas:'modes' 'subjects'!important;
+    gap:6px!important;
+    min-height:0!important;
+    padding:7px 9px!important;
+    overflow:hidden!important;
+  }
+  .wall-subject-bar.has-srs-groups .srs-mode-group,
+  .wall-subject-bar.has-srs-groups .srs-subject-group{
+    justify-self:stretch!important;
+    width:100%!important;
+    overflow-x:auto!important;
+    gap:5px!important;
+    scrollbar-width:none;
+  }
+  .wall-subject-bar.has-srs-groups .srs-mode-group::-webkit-scrollbar,
+  .wall-subject-bar.has-srs-groups .srs-subject-group::-webkit-scrollbar{display:none}
+  .wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab{
+    flex:0 0 auto!important;
+    min-height:34px!important;
+    padding:0 11px!important;
+    font-size:11px!important;
+  }
+  .wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab{
+    flex:0 0 auto!important;
+    min-height:32px!important;
+    padding:0 11px!important;
+    font-size:10.5px!important;
+  }
+  .wall-subject-bar.has-srs-groups>.zhenti-cloud-status{
+    position:fixed!important;
+    right:10px!important;
+    bottom:calc(12px + env(safe-area-inset-bottom))!important;
+    z-index:90!important;
+    width:34px!important;
+    min-width:34px!important;
+    height:34px!important;
+    padding:0!important;
+    border:1px solid var(--line)!important;
+    border-radius:999px!important;
+    background:color-mix(in srgb,var(--card) 94%,transparent)!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.12)!important;
+    backdrop-filter:blur(16px)!important;
+  }
+  .wall-subject-bar.has-srs-groups>.zhenti-cloud-status span{display:none!important}
+}
