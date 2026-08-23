@@ -1,18 +1,18 @@
 {
   "schema": 2,
-  "updatedAt": "2026-08-23T05:41:30+08:00",
+  "updatedAt": "2026-08-23T10:03:26+08:00",
   "source": {
     "up": "就是氧气11",
     "mid": 378777885,
     "collection": "27考研408计算机基础综合合集",
     "auto": true,
-    "syncStatus": "ok",
-    "message": "27强化合集四科同步成功；新增 2 条，补全 0 条课程元数据。",
+    "syncStatus": "partial",
+    "message": "本次 3/4 科同步成功；优先读取27强化合集；已有数据均保留。失败：ds: HTTPError: HTTP Error 412: Precondition Failed",
     "subjectStatus": {
       "ds": {
-        "ok": true,
-        "error": "",
-        "method": "search"
+        "ok": false,
+        "error": "HTTPError: HTTP Error 412: Precondition Failed",
+        "method": ""
       },
       "co": {
         "ok": true,
@@ -1038,6 +1038,14 @@
           "url": "https://www.bilibili.com/video/BV1ff8y6vEzg/",
           "bvid": "BV1ff8y6vEzg",
           "publishedAt": 1787394916
+        },
+        {
+          "id": "cn|应用层选择题专题",
+          "title": "应用层选择题专题",
+          "duration": "33:11",
+          "url": "https://www.bilibili.com/video/BV13Z8s6vEYn/",
+          "bvid": "BV13Z8s6vEYn",
+          "publishedAt": 1787450056
         }
       ]
     }
