@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="620" viewBox="0 0 860 620" role="img" aria-labelledby="title desc">
+<title id="title">2019 年 408 第 38 题 TCP 快速重传时序图</title><desc id="desc">客户端与服务器之间，t0首次收到ack_seq=100；seq=100丢失；随后发送seq=200、300、400并收到三个重复ack_seq=100，分别在t1、t2、t3到达；t4为seq=100超时。</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#111"/></marker></defs>
+<style>text{font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#111;font-size:19px}.lane{stroke:#111;stroke-width:2}.msg{stroke:#111;stroke-width:2;fill:none;marker-end:url(#arrow)}.lost{stroke:#111;stroke-width:2;fill:none}.dash{stroke:#111;stroke-width:2;stroke-dasharray:8 7}.small{font-size:17px}</style>
+<text x="210" y="42" text-anchor="middle" font-weight="700">客户端</text><text x="650" y="42" text-anchor="middle" font-weight="700">服务器</text>
+<line class="lane" x1="210" y1="60" x2="210" y2="570"/><line class="lane" x1="650" y1="60" x2="650" y2="570"/>
+<path class="msg" d="M650 95 L210 155"/><text x="390" y="108" transform="rotate(-8 390 108)">ack_seq=100</text>
+<text x="178" y="164" text-anchor="end">t0</text>
+<path class="lost" d="M210 170 L430 218"/><line class="dash" x1="430" y1="218" x2="490" y2="232"/><text x="332" y="183" transform="rotate(12 332 183)">seq=100</text><text x="500" y="238">丢失</text>
+<path class="msg" d="M210 205 L650 285"/><text x="360" y="216" transform="rotate(10 360 216)">seq=200</text>
+<path class="msg" d="M210 240 L650 320"/><text x="360" y="251" transform="rotate(10 360 251)">seq=300</text>
+<path class="msg" d="M210 275 L650 355"/><text x="360" y="286" transform="rotate(10 360 286)">seq=400</text>
+<path class="msg" d="M650 300 L210 390"/><text x="390" y="327" transform="rotate(-12 390 327)">ack_seq=100</text>
+<text x="178" y="397" text-anchor="end">t1</text>
+<path class="msg" d="M650 337 L210 430"/><text x="390" y="364" transform="rotate(-12 390 364)">ack_seq=100</text>
+<text x="178" y="437" text-anchor="end">t2</text>
+<path class="msg" d="M650 375 L210 470"/><text x="390" y="402" transform="rotate(-12 390 402)">ack_seq=100</text>
+<text x="178" y="477" text-anchor="end">t3</text>
+<text x="178" y="520" text-anchor="end">t4</text><path d="M210 510 h45 v18" stroke="#111" stroke-width="2" fill="none"/><text x="270" y="528" class="small">t4 时刻 seq=100 段超时</text>
+<text x="110" y="586" text-anchor="middle">时间 ↓</text>
+</svg>
