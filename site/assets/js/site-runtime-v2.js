@@ -1,6 +1,6 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260824-ui4';
+  const ASSET_VERSION='20260824-score1';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={
     get:key=>{try{return localStorage.getItem(key)}catch{return null}},
@@ -33,35 +33,10 @@
   const iconMarkup=name=>`<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name]||ICONS.info}</svg>`;
   window.EveraIcons={markup:iconMarkup,names:Object.keys(ICONS)};
 
-  function iconOnly(el,name){
-    if(!el)return;
-    el.innerHTML=iconMarkup(name);
-    el.classList.add('ui-icon-only');
-    el.classList.remove('ui-iconized');
-  }
-  function iconText(el,name,label,position='start'){
-    if(!el)return;
-    const text=`<span>${escapeHtml(label)}</span>`;
-    el.innerHTML=position==='end'?`${text}${iconMarkup(name)}`:`${iconMarkup(name)}${text}`;
-    el.classList.add('ui-iconized');
-    el.classList.remove('ui-icon-only');
-  }
-  function preserveLiveLabelIcon(el,name,labelSelector){
-    if(!el)return;
-    const label=el.querySelector(labelSelector);
-    if(!label)return;
-    [...el.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>node.remove());
-    if(!el.querySelector(':scope > .ui-icon'))el.insertAdjacentHTML('afterbegin',iconMarkup(name));
-    el.classList.add('ui-iconized');
-    el.classList.remove('ui-icon-only');
-  }
-  function syncThemeIcons(){
-    document.querySelectorAll('[data-theme]').forEach(btn=>{
-      iconOnly(btn,body.classList.contains('dark')?'sun':'moon');
-      btn.setAttribute('aria-label',body.classList.contains('dark')?'切换浅色主题':'切换深色主题');
-      btn.title=btn.getAttribute('aria-label');
-    });
-  }
+  function iconOnly(el,name){if(!el)return;el.innerHTML=iconMarkup(name);el.classList.add('ui-icon-only');el.classList.remove('ui-iconized')}
+  function iconText(el,name,label,position='start'){if(!el)return;const text=`<span>${escapeHtml(label)}</span>`;el.innerHTML=position==='end'?`${text}${iconMarkup(name)}`:`${iconMarkup(name)}${text}`;el.classList.add('ui-iconized');el.classList.remove('ui-icon-only')}
+  function preserveLiveLabelIcon(el,name,labelSelector){if(!el)return;const label=el.querySelector(labelSelector);if(!label)return;[...el.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>node.remove());if(!el.querySelector(':scope > .ui-icon'))el.insertAdjacentHTML('afterbegin',iconMarkup(name));el.classList.add('ui-iconized');el.classList.remove('ui-icon-only')}
+  function syncThemeIcons(){document.querySelectorAll('[data-theme]').forEach(btn=>{iconOnly(btn,body.classList.contains('dark')?'sun':'moon');btn.setAttribute('aria-label',body.classList.contains('dark')?'切换浅色主题':'切换深色主题');btn.title=btn.getAttribute('aria-label')})}
   function upgradeControl(el){
     if(!(el instanceof Element))return;
     if(el.matches('[data-theme]'))return syncThemeIcons();
@@ -77,133 +52,39 @@
     if(el.matches('[data-manual-open]')){iconText(el,'plus','手动补录');return}
     if(el.matches('.question-favorite')){iconText(el,'star',el.classList.contains('active')?'已收藏':'收藏');return}
     if(el.matches('.shortcut-fab')){iconText(el,'keyboard','快捷键');const kbd=document.createElement('kbd');kbd.textContent='?';el.appendChild(kbd);return}
-
-    const raw=(el.textContent||'').trim();
-    if(!raw)return;
-    const exact={
-      '☰':'menu','◐':body.classList.contains('dark')?'sun':'moon','×':'close','✕':'close','＋':'plus','+':'plus','−':'minus','-':'minus','‹':'chevronLeft','›':'chevronRight','⌨':'keyboard'
-    };
+    const raw=(el.textContent||'').trim();if(!raw)return;
+    const exact={'☰':'menu','◐':body.classList.contains('dark')?'sun':'moon','×':'close','✕':'close','＋':'plus','+':'plus','−':'minus','-':'minus','‹':'chevronLeft','›':'chevronRight','⌨':'keyboard'};
     if(exact[raw]){iconOnly(el,exact[raw]);return}
     const prefix=[['＋ ','plus'],['+ ','plus'],['← ','arrowLeft'],['‹ ','chevronLeft'],['✓ ','check'],['✕ ','close'],['✎ ','pencil'],['◷ ','clock'],['▣ ','book'],['★ ','star'],['☆ ','star'],['⌨ ','keyboard']];
     for(const [token,name] of prefix){if(raw.startsWith(token)){iconText(el,name,raw.slice(token.length));return}}
-    const suffix=[[' →','arrowRight'],[' ›','chevronRight']];
-    for(const [token,name] of suffix){if(raw.endsWith(token)){iconText(el,name,raw.slice(0,-token.length),'end');return}}
+    const suffix=[[' →','arrowRight'],[' ›','chevronRight']];for(const [token,name] of suffix){if(raw.endsWith(token)){iconText(el,name,raw.slice(0,-token.length),'end');return}}
   }
-  function upgradeResult(el){
-    if(!(el instanceof Element))return;
-    const raw=(el.textContent||'').trim();
-    if(raw.startsWith('✓ '))iconText(el,'check',raw.slice(2));
-    else if(raw.startsWith('✕ '))iconText(el,'close',raw.slice(2));
-  }
-  function upgradeScope(scope=document){
-    const controls=[];
-    if(scope instanceof Element&&scope.matches('button,a'))controls.push(scope);
-    if(scope.querySelectorAll)controls.push(...scope.querySelectorAll('button,a'));
-    controls.forEach(upgradeControl);
-    const results=[];
-    if(scope instanceof Element&&scope.matches('.answer-result strong'))results.push(scope);
-    if(scope.querySelectorAll)results.push(...scope.querySelectorAll('.answer-result strong'));
-    results.forEach(upgradeResult);
-  }
+  function upgradeResult(el){if(!(el instanceof Element))return;const raw=(el.textContent||'').trim();if(raw.startsWith('✓ '))iconText(el,'check',raw.slice(2));else if(raw.startsWith('✕ '))iconText(el,'close',raw.slice(2))}
+  function upgradeScope(scope=document){const controls=[];if(scope instanceof Element&&scope.matches('button,a'))controls.push(scope);if(scope.querySelectorAll)controls.push(...scope.querySelectorAll('button,a'));controls.forEach(upgradeControl);const results=[];if(scope instanceof Element&&scope.matches('.answer-result strong'))results.push(scope);if(scope.querySelectorAll)results.push(...scope.querySelectorAll('.answer-result strong'));results.forEach(upgradeResult)}
 
   if(storage.get('everflow-theme')==='dark')body.classList.add('dark');
   upgradeScope(document);
-  document.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>{
-    body.classList.toggle('dark');
-    storage.set('everflow-theme',body.classList.contains('dark')?'dark':'light');
-    syncThemeIcons();
-  }));
+  document.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>{body.classList.toggle('dark');storage.set('everflow-theme',body.classList.contains('dark')?'dark':'light');syncThemeIcons()}));
 
-  const observer=new MutationObserver(mutations=>{
-    for(const mutation of mutations){
-      if(mutation.type==='characterData'){
-        const parent=mutation.target.parentElement;
-        if(parent?.matches('button,a,.answer-result strong')){upgradeControl(parent);upgradeResult(parent)}
-        continue;
-      }
-      mutation.addedNodes.forEach(node=>{
-        if(node.nodeType===Node.ELEMENT_NODE)upgradeScope(node);
-        else if(node.nodeType===Node.TEXT_NODE&&node.parentElement?.matches('button,a,.answer-result strong')){upgradeControl(node.parentElement);upgradeResult(node.parentElement)}
-      });
-    }
-  });
+  const observer=new MutationObserver(mutations=>{for(const mutation of mutations){if(mutation.type==='characterData'){const parent=mutation.target.parentElement;if(parent?.matches('button,a,.answer-result strong')){upgradeControl(parent);upgradeResult(parent)}continue}mutation.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)upgradeScope(node);else if(node.nodeType===Node.TEXT_NODE&&node.parentElement?.matches('button,a,.answer-result strong')){upgradeControl(node.parentElement);upgradeResult(node.parentElement)}})}});
   observer.observe(body,{childList:true,subtree:true,characterData:true});
 
-  const toast=(message,options={})=>{
-    const type=options.type||'info';
-    const title=options.title||({success:'操作成功',error:'操作失败',info:'提示'}[type]||'提示');
-    let stack=document.querySelector('.evera-toast-stack');
-    if(!stack){
-      stack=document.createElement('div');
-      stack.className='evera-toast-stack';stack.setAttribute('aria-live','polite');
-      document.body.appendChild(stack);
-    }
-    const el=document.createElement('div');
-    el.className=`evera-toast ${type}`;
-    const statusIcon=type==='success'?'check':type==='error'?'alert':'info';
-    el.innerHTML=`<span class="evera-toast-icon">${iconMarkup(statusIcon)}</span><div><strong></strong><p></p></div><button class="evera-toast-x" type="button" aria-label="关闭提示">${iconMarkup('close')}</button>`;
-    el.querySelector('strong').textContent=title;
-    el.querySelector('p').textContent=String(message||'');
-    const remove=()=>el.remove();
-    el.querySelector('button').addEventListener('click',remove);
-    stack.appendChild(el);
-    setTimeout(remove,Number(options.duration)||3600);
-    return el;
-  };
-  const setBusy=(btn,busy,label)=>{
-    if(!btn)return;
-    if(busy){
-      if(!btn.dataset.everaHtml)btn.dataset.everaHtml=btn.innerHTML;
-      btn.disabled=true;btn.classList.add('is-busy');if(label)btn.textContent=label;
-      return;
-    }
-    btn.disabled=false;btn.classList.remove('is-busy');
-    if(btn.dataset.everaHtml){btn.innerHTML=btn.dataset.everaHtml;delete btn.dataset.everaHtml}else if(label)btn.textContent=label;
-  };
-  const complete=(btn,label='完成',restoreMs=1400)=>{
-    if(!btn)return;
-    const original=btn.dataset.everaHtml||btn.innerHTML;
-    const cleanLabel=String(label||'完成').replace(/[✓✔]\s*$/,'').trim()||'完成';
-    btn.classList.remove('is-busy');btn.disabled=true;iconText(btn,'check',cleanLabel);
-    if(restoreMs>0)setTimeout(()=>{btn.disabled=false;btn.innerHTML=original;delete btn.dataset.everaHtml;upgradeControl(btn)},restoreMs);
-  };
+  const toast=(message,options={})=>{const type=options.type||'info',title=options.title||({success:'操作成功',error:'操作失败',info:'提示'}[type]||'提示');let stack=document.querySelector('.evera-toast-stack');if(!stack){stack=document.createElement('div');stack.className='evera-toast-stack';stack.setAttribute('aria-live','polite');document.body.appendChild(stack)}const el=document.createElement('div');el.className=`evera-toast ${type}`;const statusIcon=type==='success'?'check':type==='error'?'alert':'info';el.innerHTML=`<span class="evera-toast-icon">${iconMarkup(statusIcon)}</span><div><strong></strong><p></p></div><button class="evera-toast-x" type="button" aria-label="关闭提示">${iconMarkup('close')}</button>`;el.querySelector('strong').textContent=title;el.querySelector('p').textContent=String(message||'');const remove=()=>el.remove();el.querySelector('button').addEventListener('click',remove);stack.appendChild(el);setTimeout(remove,Number(options.duration)||3600);return el};
+  const setBusy=(btn,busy,label)=>{if(!btn)return;if(busy){if(!btn.dataset.everaHtml)btn.dataset.everaHtml=btn.innerHTML;btn.disabled=true;btn.classList.add('is-busy');if(label)btn.textContent=label;return}btn.disabled=false;btn.classList.remove('is-busy');if(btn.dataset.everaHtml){btn.innerHTML=btn.dataset.everaHtml;delete btn.dataset.everaHtml}else if(label)btn.textContent=label};
+  const complete=(btn,label='完成',restoreMs=1400)=>{if(!btn)return;const original=btn.dataset.everaHtml||btn.innerHTML,cleanLabel=String(label||'完成').replace(/[✓✔]\s*$/,'').trim()||'完成';btn.classList.remove('is-busy');btn.disabled=true;iconText(btn,'check',cleanLabel);if(restoreMs>0)setTimeout(()=>{btn.disabled=false;btn.innerHTML=original;delete btn.dataset.everaHtml;upgradeControl(btn)},restoreMs)};
   window.EveraUI={toast,setBusy,complete,icon:iconMarkup,upgradeIcons:upgradeScope};
 
-  const menu=document.querySelector('.mobile-panel');
-  const menuButtons=[...document.querySelectorAll('[data-menu]')];
-  const setMenu=open=>{
-    if(!menu)return;
-    menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);
-    menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'));
-  };
-  menuButtons.forEach(btn=>{
-    btn.setAttribute('aria-expanded','false');
-    btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))});
-  });
-  menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});
-  document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});
-  window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
+  const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];
+  const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};
+  menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))})});
+  menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
 
   import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));
   if(body.dataset.view!=='zhenti')return;
-
-  const navCss=document.createElement('link');
-  navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss);
+  const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss);
   import(asset('/assets/js/zhenti-qwer.js')).catch(err=>console.error('Everflow 408 shortcuts failed',err));
-
-  const srsFlow=import(asset('/assets/js/zhenti-srs-v2.js'))
-    .then(()=>import(asset('/assets/js/zhenti-srs-error-v2.js')))
-    .then(()=>import(asset('/assets/js/zhenti-srs-reset.js')))
-    .catch(err=>console.error('Everflow 408 SRS failed',err));
-
-  srsFlow.finally(async()=>{
-    try{await import(asset('/assets/js/zhenti-favorites.js'))}catch(err){console.error('Everflow 408 favorites failed',err)}
-    try{await import(asset('/assets/js/zhenti-srs-experience.js'))}catch(err){console.error('Everflow 408 immersive SRS failed',err)}
-    try{await import(asset('/assets/js/zhenti-srs-mobile-immersive.js'))}catch(err){console.error('Everflow 408 mobile SRS failed',err)}
-  });
+  const srsFlow=import(asset('/assets/js/zhenti-srs-v2.js')).then(()=>import(asset('/assets/js/zhenti-srs-error-v2.js'))).then(()=>import(asset('/assets/js/zhenti-srs-reset.js'))).catch(err=>console.error('Everflow 408 SRS failed',err));
+  srsFlow.finally(async()=>{try{await import(asset('/assets/js/zhenti-favorites.js'))}catch(err){console.error('Everflow 408 favorites failed',err)}try{await import(asset('/assets/js/zhenti-srs-experience.js'))}catch(err){console.error('Everflow 408 immersive SRS failed',err)}try{await import(asset('/assets/js/zhenti-srs-mobile-immersive.js'))}catch(err){console.error('Everflow 408 mobile SRS failed',err)}});
   import(asset('/assets/js/zhenti-ui-polish.js')).catch(err=>console.error('Everflow 408 UI polish failed',err));
-  import(asset('/assets/js/cloud-config.js'))
-    .then(()=>import(asset('/assets/js/zhenti-cloud-sync.js')))
-    .catch(err=>console.error('Everflow 408 cloud sync failed',err));
+  import(asset('/assets/js/cloud-config.js')).then(()=>import(asset('/assets/js/zhenti-cloud-sync.js'))).catch(err=>console.error('Everflow 408 cloud sync failed',err));
 })();
