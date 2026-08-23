@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="300" viewBox="0 0 980 300" role="img" aria-labelledby="title desc">
+<title id="title">2012年第40题电子邮件发送接收流程</title>
+<desc id="desc">用户1经邮件服务器1发送到邮件服务器2，再由用户2接收，三段依次标为①②③。</desc>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#222"/></marker></defs>
+<style>text{font-family:Arial,"Noto Sans SC",sans-serif;fill:#111}.box{fill:#fff;stroke:#222;stroke-width:2}.t{font-size:24px}.n{font-size:28px;font-weight:700}.arr{stroke:#222;stroke-width:2.4;marker-end:url(#a)}</style>
+<rect class="box" x="35" y="105" width="150" height="72" rx="8"/><text class="t" x="80" y="149">用户1</text>
+<rect class="box" x="270" y="85" width="175" height="112" rx="8"/><text class="t" x="292" y="133">邮件服务器1</text><text class="t" x="324" y="165">（发送方）</text>
+<rect class="box" x="535" y="85" width="175" height="112" rx="8"/><text class="t" x="557" y="133">邮件服务器2</text><text class="t" x="589" y="165">（接收方）</text>
+<rect class="box" x="795" y="105" width="150" height="72" rx="8"/><text class="t" x="840" y="149">用户2</text>
+<line class="arr" x1="185" y1="141" x2="270" y2="141"/><line class="arr" x1="445" y1="141" x2="535" y2="141"/><line class="arr" x1="710" y1="141" x2="795" y2="141"/>
+<text class="n" x="215" y="112">①</text><text class="n" x="480" y="112">②</text><text class="n" x="745" y="112">③</text>
+<text class="t" x="270" y="250">发送邮件 → 服务器转发 → 用户取信</text>
+</svg>
