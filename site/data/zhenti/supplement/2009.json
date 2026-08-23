@@ -1,0 +1,47 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2009,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "43":{
+      "number":43,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"某计算机 CPU 主频500MHz，CPI=5。某外设数据率0.5MB/s，以32位为单位采用中断方式传输；中断服务程序18条指令，其他中断开销相当于2条指令。（1）求CPU用于该外设I/O的时间占比；（2）当外设数据率升至5MB/s，改用DMA，每次DMA块5000B，预处理和后处理总开销500个时钟周期，且DMA与CPU无访存冲突，求CPU用于该外设I/O的时间占比。",
+      "answer":"中断方式：32位=4B，每秒中断0.5×10^6/4=125000次；每次CPU开销(18+2)×5=100周期，因此每秒12.5M周期，占500M周期/s的2.5%。DMA方式：每秒DMA次数5×10^6/5000=1000；每次CPU开销500周期，每秒0.5M周期，占500M周期/s的0.1%。",
+      "analysis":"把数据传输率换算成每秒中断次数或DMA块次数，再乘每次CPU处理开销即可。题设明确DMA传输本身与CPU并行且无访存冲突，所以不计DMA搬运时间。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"三个进程 P1、P2、P3 互斥使用一个含 N（N>0）个单元的缓冲区。P1不断 produce() 一个正整数并 put() 到空单元；P2用 getodd() 取奇数并 countodd()；P3用 geteven() 取偶数并 counteven()。请用信号量实现三个进程的同步与互斥，并说明各信号量含义。",
+      "answer":"设 empty=N 表示空单元数，odd=0、even=0分别表示可取奇数和偶数的数量，mutex=1保护缓冲区。P1：x=produce(); P(empty);P(mutex);put(x);V(mutex); 若x为奇数V(odd)，否则V(even)。P2：P(odd);P(mutex);x=getodd();V(mutex);V(empty);countodd(x)。P3：P(even);P(mutex);x=geteven();V(mutex);V(empty);counteven(x)。",
+      "analysis":"empty限制总容量，odd/even分别把生产结果与对应消费者同步，mutex保证共享缓冲区put/get互斥。消费者先等待类别信号量再申请mutex，避免持锁等待尚不存在的数据。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"请求分页系统中某进程页表：页0→页框101H、有效位1；页1无页框、有效位0；页2→页框254H、有效位1。页大小4KB，内存访问100ns，TLB访问10ns，平均缺页处理10^8ns（含更新TLB和页表），驻留集固定为2，采用LRU局部置换。TLB初始为空；地址转换先查TLB，未命中再查页表；缺页处理后从原指令重新执行。依次访问虚地址2362H、1565H、25A5H。（1）各次访问耗时；（2）1565H最终物理地址。",
+      "answer":"低12位为页内偏移。2362H访问页2：TLB miss 10ns+页表100ns+数据100ns=210ns。1565H访问页1：10+100ns后缺页，处理10^8ns；重启后TLB hit 10ns+数据100ns，总100000220ns。25A5H再次访问页2：TLB hit10ns+数据100ns=110ns。访问页1前最近访问的是页2，因此LRU淘汰页0，页1复用页框101H；1565H页内偏移565H，物理地址101565H。",
+      "analysis":"缺页后原指令重启，所以要重新计算一次TLB查询和最终数据访问。LRU只在当前驻留的页0、页2之间选择，页2刚被访问，因此淘汰页0。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "47":{
+      "number":47,
+      "subject":"cn",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"网络中，R1的E1、E2分别连接局域网1、2，R1通过L0连接R2。R1-L0=202.118.2.1；R2-L0=202.118.2.2，R2-L1=130.11.120.1，R2-E0=202.118.3.1；域名服务器=202.118.3.2，R2再连接Internet。（1）把202.118.1.0/24划成两个子网给局域网1、2，每个至少分配120个IP地址；（2）给出R1路由表，明确到两个局域网、域名服务器主机路由和Internet默认路由；（3）用路由聚合给出R2到两个局域网的路由。",
+      "answer":"每个局域网采用/25，单个/25有128个地址、126个可用主机地址。可分为局域网1=202.118.1.0/25，局域网2=202.118.1.128/25（可互换）。R1：202.118.1.0/25直连E1；202.118.1.128/25直连E2；202.118.3.2/32下一跳202.118.2.2、接口L0；默认0.0.0.0/0下一跳202.118.2.2、接口L0。R2把两个/25聚合为202.118.1.0/24，下一跳202.118.2.1，接口L0。",
+      "analysis":"120台主机要求至少7个主机位，/25提供126个可用地址。R1同时保留直连路由、DNS主机路由和默认路由；两个连续/25正好共享202.118.1.0/24前缀，可在R2聚合。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    }
+  }
+}
