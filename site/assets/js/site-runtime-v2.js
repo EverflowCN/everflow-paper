@@ -19,5 +19,6 @@
       .then(()=>import('/assets/js/zhenti-srs-reset.js?v=20260823a'))
       .catch(err=>console.error('Everflow 408 SRS quick cards failed',err));
     srsFlow.finally(()=>import('/assets/js/zhenti-favorites.js?v=20260823a').catch(err=>console.error('Everflow 408 favorites failed',err)));
+    import('/assets/js/zhenti-ui-polish.js?v=20260823a').catch(err=>console.error('Everflow 408 UI polish failed',err));
   }
 })();
