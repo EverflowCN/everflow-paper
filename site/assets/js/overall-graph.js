@@ -38,7 +38,7 @@
     return found;
   }
 
-  function stateFor(record){
+  function answerClass(record){
     if(record?.correct===true)return'correct';
     if(record?.correct===false)return'wrong';
     if(record?.reviewed)return'reviewed';
@@ -46,15 +46,23 @@
     return'unmarked';
   }
 
-  function stateText(record){
+  function statusClass(record){
+    return ['mastered','fuzzy','weak'].includes(record?.status)?`status-${record.status}`:'';
+  }
+
+  function answerText(record){
     if(record?.correct===true)return'答对';
     if(record?.correct===false)return'答错';
     if(record?.reviewed)return'已查看';
     if(record?.draftAnswer)return'作答中';
-    if(record?.status==='mastered')return'熟练';
+    return'未作答';
+  }
+
+  function statusText(record){
+    if(record?.status==='mastered')return'熟悉';
     if(record?.status==='fuzzy')return'模糊';
     if(record?.status==='weak')return'不会';
-    return'未做';
+    return'未标记';
   }
 
   let records=loadRecords();
@@ -74,23 +82,18 @@
     const key=`${year}-${q}`;
     const record=records[key]||{};
     const link=document.createElement('a');
-    link.className=`overview-cell ${subjectFor(q)} ${stateFor(record)}${key===current?' current':''}`;
+    const classes=['overview-cell',subjectFor(q),answerClass(record),statusClass(record)];
+    if(key===current)classes.push('current');
+    link.className=classes.filter(Boolean).join(' ');
     link.href=`/zhenti/?year=${year}&q=${q}`;
     link.dataset.key=key;
     link.setAttribute('role','gridcell');
-    link.setAttribute('aria-label',`${year}年第${q}题，${stateText(record)}`);
-    link.title=`${year} · ${q} · ${stateText(record)}`;
+    link.setAttribute('aria-label',`${year}年第${q}题，${statusText(record)}，${answerText(record)}`);
+    link.title=`${year} · 第${q}题 · ${statusText(record)} · ${answerText(record)}`;
     link.addEventListener('click',()=>{
       current=key;
       try{localStorage.setItem(CURRENT_KEY,key)}catch{}
     });
-
-    if(['mastered','fuzzy','weak'].includes(record.status)){
-      const dot=document.createElement('span');
-      dot.className=`overview-dot ${record.status}`;
-      dot.setAttribute('aria-hidden','true');
-      link.appendChild(dot);
-    }
     return link;
   }
 
