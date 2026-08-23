@@ -7,6 +7,13 @@
   const STORAGE_KEY='everflow-408-zhenti-wall-v1';
   const CURRENT_KEY='everflow-408-graph-current-v2';
 
+  function parseKey(key){
+    const match=String(key||'').match(/^(\d{4})-(\d{1,2})$/);
+    if(!match)return null;
+    const year=Number(match[1]),q=Number(match[2]);
+    return year>=2009&&year<=2026&&q>=1&&q<=47?{year,q}:null;
+  }
+
   function subjectFor(q){
     if((q>=1&&q<=10)||q===41||q===42)return'ds';
     if((q>=11&&q<=22)||q===43||q===44)return'co';
@@ -24,7 +31,7 @@
   function latestKey(records){
     let found='',time=-1;
     for(const [key,record] of Object.entries(records)){
-      if(!/^20(?:0\d|1\d|2[0-6])-(?:[1-9]|[1-3]\d|4[0-7])$/.test(key))continue;
+      if(!parseKey(key))continue;
       const next=Date.parse(record?.updatedAt||'')||0;
       if(next>time){time=next;found=key}
     }
@@ -53,7 +60,7 @@
   let records=loadRecords();
   let current='';
   try{current=localStorage.getItem(CURRENT_KEY)||''}catch{}
-  if(!/^20(?:0\d|1\d|2[0-6])-(?:[1-9]|[1-3]\d|4[0-7])$/.test(current))current=latestKey(records);
+  if(!parseKey(current))current=latestKey(records);
 
   function indexCell(text,className){
     const cell=document.createElement('div');
@@ -98,17 +105,14 @@
     matrix.replaceChildren(fragment);
   }
 
-  window.addEventListener('pageshow',()=>{
+  function refresh(){
     records=loadRecords();
     try{current=localStorage.getItem(CURRENT_KEY)||current}catch{}
+    if(!parseKey(current))current=latestKey(records);
     render();
-  });
-  window.addEventListener('storage',event=>{
-    if(event.key!==STORAGE_KEY&&event.key!==CURRENT_KEY)return;
-    records=loadRecords();
-    try{current=localStorage.getItem(CURRENT_KEY)||current}catch{}
-    render();
-  });
+  }
 
+  window.addEventListener('pageshow',event=>{if(event.persisted)refresh()});
+  window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY||event.key===CURRENT_KEY)refresh()});
   render();
 })();
