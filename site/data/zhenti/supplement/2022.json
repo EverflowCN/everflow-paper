@@ -23,6 +23,26 @@
       "analysis": "固定大小大根堆使每次更新只需 O(log 10) 比较。因为 10 是常数，总体仍为线性时间，且不需要对整个数组排序。",
       "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
+    "44": {
+      "number": 44,
+      "subject": "co",
+      "type": "comprehensive",
+      "score": 8,
+      "stem": "某磁盘驱动器有 4 个双面盘片，每盘面 20000 个磁道，每磁道 500 个扇区，每扇区 512B，转速 7200 rpm，平均寻道时间 5ms。求：扇区地址三个字段名称及最少位数；一个扇区的平均访问时间；若采用周期挪用 DMA、控制器缓冲区为 64bit，则读写一个扇区需多少次总线请求，以及 CPU 与 DMA 同时访存时谁获得总线并说明原因。",
+      "answer": "地址字段为柱面号（磁道号）、盘面号（磁头号）、扇区号，至少分别为 15、3、9 位。转一圈约 8.33ms，平均访问时间约 5+8.33/2+8.33/500=9.18ms。一个扇区需 512B/8B=64 次总线请求；周期挪用方式下 DMA 请求优先级更高，可优先获得总线，以防磁盘缓冲区数据因不能及时传走而被覆盖。",
+      "analysis": "4 个双面盘片共有 8 个盘面；20000 个柱面需 ceil(log2 20000)=15 位，8 个盘面需 3 位，500 个扇区需 9 位。平均访问时间由寻道、平均旋转延迟和扇区传输时间组成。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "45": {
+      "number": 45,
+      "subject": "os",
+      "type": "comprehensive",
+      "score": 7,
+      "stem": "某文件系统磁盘块为 4KB，目录项由文件名和索引结点号构成；每个索引结点 256B，含 10 个直接地址项及一级、二级、三级间接地址项各 1 个，每个地址项 4B。目录 stu 含 course 和 doc，course 含 course1、course2。已核验的图表数据为：stu→(inode1,块10)，course→(inode2,块20)，course1→(inode10,块30)，course2→(inode100,块40)，doc→(inode10,块x)。求 stu 的目录项内容、x、course 内容已在内存时读取 course1 需读几个磁盘块，以及 course2 增长到 6MB 时需使用哪些级别的间接地址项。",
+      "answer": "stu 的目录项为 course→2、doc→10；x=30。读取 course1 需读 2 个磁盘块：先读 inode10 所在块，再读数据块30。6MB/4KB=1536 个数据块；10 个直接地址加 1024 个一级间接地址共只能覆盖 1034 块，因此还需二级间接，故需要使用一级和二级间接地址项。",
+      "analysis": "doc 与 course1 的 inode 都为 10，说明二者指向同一文件，因此数据块号相同。一级间接块可存 4KB/4B=1024 个地址，直接+一级仍不足 1536 块，加入二级后足够。",
+      "verification": {"status":"verified","mode":"cross-checked-structured-data","sources":["noobdream","csyanku"]}
+    },
     "46": {
       "number": 46,
       "subject": "os",
@@ -32,6 +52,16 @@
       "answer": "只需两个初值为 0 的同步信号量 AC、CE。T1：A; signal(AC); wait(CE); E; F。T2：B; wait(AC); C; signal(CE); D。AC 保证 C 在 A 完成后执行；CE 保证 E 在 C 后执行；其余约束由线程内部程序顺序自然保证。",
       "analysis": "只为跨线程的先后约束设信号量。A→C 和 C→E 是两条跨线程依赖，需要两个同步量；B→C、C→D、E→F 都由线程内部顺序自动满足。",
       "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "47": {
+      "number": 47,
+      "subject": "cn",
+      "type": "comprehensive",
+      "score": 9,
+      "stem": "某网络中 R 为路由器、S 为交换机、AP 为 802.11 接入点。H1 与 H2 同广播域但不同冲突域，H2 与 H3 同冲突域；H4、H5 通过 DHCP 获取地址。设备候选为路由器、100BaseT 交换机、100BaseT Hub。信号速率 2×10^8m/s，最小帧 64B，信号通过设备2额外延迟1.51μs。已核验图中与第(4)问相关的 MAC 为 H5=00-11-11-11-11-E1、AP=00-11-11-11-11-C1、H4=00-11-11-11-11-D1。求设备1/2类型、H2-H3最大距离、DHCP 首报文及其广播帧信息，以及 H4→H5 时 H5 收到的 802.11 帧地址1/2/3。",
+      "answer": "设备1为100BaseT交换机，设备2为100BaseT集线器；H2 与 H3 最远 210m。H4 首先发送 DHCP DISCOVER；路由器 E0 能收到该广播帧，目的 MAC 为 FF-FF-FF-FF-FF-FF。H5 收到的 802.11 帧地址1、2、3分别为 00-11-11-11-11-E1、00-11-11-11-11-C1、00-11-11-11-11-D1。",
+      "analysis": "交换机隔离冲突域但不隔离广播域，Hub 不隔离冲突域。64B 在 100Mbps 下发送时间为 5.12μs；扣除 Hub 往返额外延迟 3.02μs，剩余 2.10μs 为线路往返传播时间，对应单程 1.05μs，距离为 210m。DHCP DISCOVER 使用二层广播；AP 发往无线站点时，地址1为接收站 H5，地址2为 AP，地址3为源主机 H4。",
+      "verification": {"status":"verified","mode":"cross-checked-structured-data","sources":["csgraduates","noobdream"]}
     }
   }
 }
