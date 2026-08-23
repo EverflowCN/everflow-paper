@@ -1,0 +1,47 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2014,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"二叉树的带权路径长度 WPL 是所有叶结点的带权路径长度之和。给定二叉树 T，采用二叉链表存储，叶结点的 weight 域保存非负权值，root 指向根结点。请设计求 T 的 WPL 的算法：给出基本设计思想、C/C++ 结点类型定义和算法。",
+      "answer":"递归遍历并携带当前深度 d。空指针返回 0；若当前结点是叶结点，则返回 weight*d；否则返回左右子树结果之和。可定义 typedef struct node{int weight; struct node *left,*right;} BTree；WPL(root)=WPL1(root,0)。",
+      "analysis":"WPL 本质是所有叶结点 weight×depth 的累加。递归向下一层时深度加 1，在叶结点处贡献权值与深度的乘积即可。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "44":{
+      "number":44,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":12,
+      "stem":"程序段 P 为 for(int i=0;i<N;i++) sum+=A[i]。sum、i、N、A 首地址分别放在 R1、R2、R6、R3。P 从 08048100H 开始，6 条 32 位定长机器指令依次为：1) 08048100H 00022080H sll R4,R2,2；2) 08048104H 00083020H add R4,R4,R3；3) 08048108H 8C850000H load R5,0(R4)；4) 0804810CH 00250820H add R1,R1,R5；5) 08048110H 20420001H add R2,R2,1；6) 08048114H 1446FFFAH bne R2,R6,loop。bne 格式为 OP(31~26)、Rs(25~21)、Rd(20~16)、OFFSET(15~0，补码)。回答：M 的编址单位；A 每元素位数；bne 的 OFFSET 及转移目标公式；若采用无转发的按序 5 级流水线且分支引起 3 周期阻塞，哪些指令因数据相关阻塞、哪条有控制冒险，以及为何下一轮指令1不会再因指令5的数据相关额外阻塞。",
+      "answer":"M 按字节编址。sll 将下标左移 2 位，相当于乘 4，所以 A 每个元素占 4B=32bit。OFFSET=FFFAH，即 -6；目标地址=(PC)+4+OFFSET×4=08048100H。无转发时指令2、3、4、6会因 RAW 数据相关阻塞；指令6是条件分支，产生控制冒险。指令6自身引入的3周期控制阻塞已覆盖指令5到下一轮指令1之间的数据相关等待。",
+      "analysis":"相邻指令地址差 4 且指令长 32 位，说明地址按字节递增。分支位移以指令字为单位，并以顺序下一条地址 PC+4 为基准。无旁路五级流水线必须等待生产者写回后消费者才能读寄存器。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":11,
+      "stem":"沿用第44题的程序 P 与6条机器指令。计算机 M 采用页式虚拟存储；P 开始时 R1=R2=0、R6=1000，机器代码已在主存但不在 Cache；数组 A 尚未调入主存，所有数组元素位于同一页且存储在磁盘同一扇区。回答：P 结束时 R2 的值；若指令 Cache 有16行、块大小32B，其数据区容量及仅执行 P 时的命中率；P 中哪条指令可能溢出、哪条可能缺页，以及访问 A 至少读磁盘和查询 TLB 各多少次。",
+      "answer":"P 结束时 R2=1000。指令 Cache 数据区容量 16×32=512B；P 的6条指令共24B，落在同一个32B块中，执行1000轮共取指6000次，仅第一次缺失，命中率=(6000-1)/6000≈99.98%。指令4 add R1,R1,R5 可能溢出；指令3 load R5,0(R4) 可能缺页。A 在同一页且同一扇区，不置换时至少读磁盘1次；首次 load 查 TLB 后缺页，处理完成重执行时再查一次，此后继续查询，合计至少1001次 TLB 查询。",
+      "analysis":"循环次数由 R2 从0递增到1000决定。代码块一旦装入 Cache 后后续取指均命中；数据页首次访问引发缺页，缺页处理后原指令需要重新执行，因此会多一次地址转换/TLB 查询。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":6,
+      "stem":"文件 F 有 200 条记录，编号从1开始。用户打开文件后，要把内存中的一条记录插入为 F 的第30条。回答并说明理由：（1）若采用连续分配，每块一条记录，F 前后都有足够空闲空间，完成插入最少访问多少次磁盘块，FCB 哪些内容改变；（2）若采用链接分配，每块一条记录和一个链接指针，需要访问多少次磁盘块；若块大小1KB、其中4B存指针，该文件系统支持的最大文件长度是多少。",
+      "answer":"连续分配可把前29条记录整体向前移动，每条读写各一次，再写入新记录，共29×2+1=59次；FCB 的文件起始地址和文件长度改变。链接分配需沿链读取前29块，再写新块并改写第29块，共29+2=31次。1KB块扣除4B指针后每块可存1020B数据，4B指针可表示2^32个块，最大文件长度=(1024-4)×2^32B=4080GB。",
+      "analysis":"连续分配插入必须搬移一侧连续记录，选择移动前29条最少；链接分配不搬数据，只需找到插入点并修改链接。最大长度由可寻址块数乘每块实际数据容量决定。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    }
+  }
+}
