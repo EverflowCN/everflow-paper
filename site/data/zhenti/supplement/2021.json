@@ -1,0 +1,47 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2021,
+  "verifiedAt":"2026-08-23",
+  "questions":{
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":15,
+      "stem":"已知无向连通图 G=(V,E)，|E|>0。当 G 中奇度顶点个数为不大于 2 的偶数时，存在包含所有边且长度为 |E| 的 EL 路径。图采用邻接矩阵存储，含 numVertices、numEdges、VerticesList 和 Edge。设计 int IsExistEL(MGraph G) 判断是否存在 EL 路径，并给出设计思想、C/C++ 算法及复杂度。",
+      "answer":"逐个顶点扫描邻接矩阵对应行，统计非零元素个数作为该顶点的度，并累计奇度顶点数 odd。若 odd 为 0 或 2 则返回 1，否则返回 0。时间复杂度 O(n²)，额外空间 O(1)。",
+      "analysis":"题设已经保证图连通且有边，所以无需再执行 DFS/BFS；欧拉迹存在条件只剩奇度顶点数为 0 或 2。邻接矩阵每一行必须扫描 n 个位置，共 n 行。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "42":{
+      "number":42,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"给定比较计数排序 cmpCountSort：先将 count[0..n-1] 清零；对每一对 i<j，若 a[i]<a[j] 则 count[j]++，否则 count[i]++；最后执行 b[count[i]]=a[i]。若 a={25,-10,25,10,11,19}，回答排序后 b 的内容、n 个元素间的比较次数，并判断算法是否稳定；若不稳定，给出修改方法。",
+      "answer":"b={-10,10,11,19,25,25}。每一对元素恰比较一次，因此比较次数为 n(n-1)/2。原算法不稳定；把比较条件改为 if(a[i] <= a[j]) count[j]++; else count[i]++;，使相等元素中后出现者获得更大的目标下标，从而保持原相对次序。",
+      "analysis":"count 最终决定每个元素在 b 中的位置。原条件遇到相等关键字时让前一个元素的 count 增加，会颠倒相等元素次序；加入等号后由后出现元素的 count 增加，恢复稳定性。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"整型信号量 S 的 wait 为 while(S<=0); S=S-1，signal 为 S=S+1。方法1在 wait 前关中断、整个 while 结束后再开中断；signal 也在修改 S 前后关/开中断。方法2则在 wait 的 while(S<=0) 循环体内反复开中断、关中断，离开循环后执行 S=S-1 再开中断。回答：为何访问 S 必须互斥；方法1、方法2是否正确并说明理由；用户程序能否用开/关中断实现临界区互斥。",
+      "answer":"S 是共享变量，wait/signal 对其检查和修改必须原子互斥，否则并发交叉执行会产生竞态。方法1错误：S<=0 时处理器一直在关中断状态忙等，其他执行流无法获得运行机会去 signal(S)，可能永久等待；方法2正确，等待循环中短暂开中断允许其他执行流推进。用户程序不能直接用开/关中断实现互斥，因为开中断和关中断是特权指令，只能在内核态执行。",
+      "analysis":"互斥应保护对信号量的检查与更新，但不能在等待资源期间永久禁止中断，否则系统无法调度能够释放资源的执行流。",
+      "verification":{"status":"verified","mode":"cross-checked-structured-data","sources":["csgraduates","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"某计算机用硬盘作为启动盘。硬盘第一个扇区的主引导记录包含磁盘引导程序和分区表；每个分区首扇区含分区引导程序；系统还需执行 ROM 中的引导程序。回答：ROM 引导、磁盘引导、分区引导、操作系统初始化程序的执行顺序；制作启动盘时物理格式化、分区、逻辑格式化、安装操作系统的顺序；磁盘扇区划分和文件系统根目录建立分别发生在哪一步。",
+      "answer":"启动顺序：ROM 引导程序 → 磁盘引导程序 → 分区引导程序 → 操作系统初始化程序。制作启动盘顺序：物理格式化 → 磁盘分区 → 逻辑格式化 → 安装操作系统。磁盘扇区在物理格式化时划分；文件系统根目录在逻辑格式化时建立。",
+      "analysis":"ROM bootstrap 最先执行并装入主引导记录；主引导代码选择活动/目标分区，再由分区引导程序装入操作系统。低级格式化组织物理扇区，高级/逻辑格式化建立文件系统元数据和根目录。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    }
+  }
+}
