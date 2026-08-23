@@ -1,4 +1,4 @@
-name: Crop 2025 Q42 original figure
+name: Crop remaining original 408 figures
 
 on:
   push:
@@ -22,46 +22,53 @@ jobs:
           python-version: '3.12'
       - name: Install PDF/image dependencies
         run: pip install --quiet pymupdf pillow requests
-      - name: Download authoritative public original and crop Q42 figure
+      - name: Crop exact 2024 original-paper figures
         run: |
           python - <<'PY'
-          import io, os, requests, fitz
+          import os, requests, fitz
           from PIL import Image, ImageChops
 
-          url = 'https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/d9fce855-72bd-4e00-9a48-5d4ec5ef6f72.pdf'
-          r = requests.get(url, timeout=60)
-          r.raise_for_status()
-          doc = fitz.open(stream=r.content, filetype='pdf')
-          page = doc[7]  # printed page 7, PDF index 7
-          pix = page.get_pixmap(matrix=fitz.Matrix(3, 3), alpha=False)
-          img = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
+          url='https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/6b611f5c-55d9-4612-8ff9-30b028731314.pdf'
+          r=requests.get(url,timeout=60); r.raise_for_status()
+          doc=fitz.open(stream=r.content,filetype='pdf')
+          outdir='site/data/zhenti/assets/2024'; os.makedirs(outdir,exist_ok=True)
 
-          # Tight region containing only the AOE network figure; coordinates were
-          # verified against the public original scan at 3x PDF scale.
-          crop = img.crop((640, 1725, 1215, 2015))
+          # (page index, crop box at 3x PDF render, output file)
+          jobs=[
+            (0,(580,1790,1310,2165),'q04-adjacency-multilist-original.png'),
+            (1,(820,770,1225,1185),'q07-bst-original.png'),
+            (5,(830,1040,1515,1595),'q33-packet-network-original.png'),
+            (6,(245,115,1545,800),'q35-vlan-switch-original.png'),
+            (6,(675,1140,1245,1925),'q37-sr-timeline-original.png'),
+            (9,(190,135,1590,935),'q43-instruction-format-original.png'),
+            (9,(260,1000,1575,1870),'q43-datapath-original.png'),
+            (11,(355,1170,1285,1705),'q44-memory-table-original.png'),
+            (14,(325,465,1470,1305),'q47-as-topology-original.png'),
+          ]
 
-          # Trim only outer near-white margins; preserve all original labels,
-          # values, line directions and anti-aliasing inside the source crop.
-          bg = Image.new('RGB', crop.size, 'white')
-          diff = ImageChops.difference(crop, bg).convert('L')
-          diff = diff.point(lambda p: 255 if p > 18 else 0)
-          box = diff.getbbox()
-          if box:
-              pad = 12
-              l,t,r,b = box
-              box = (max(0,l-pad), max(0,t-pad), min(crop.width,r+pad), min(crop.height,b+pad))
-              crop = crop.crop(box)
+          rendered={}
+          def trim(crop):
+            bg=Image.new('RGB',crop.size,'white')
+            diff=ImageChops.difference(crop,bg).convert('L').point(lambda p:255 if p>18 else 0)
+            box=diff.getbbox()
+            if not box:return crop
+            pad=14; l,t,rr,b=box
+            return crop.crop((max(0,l-pad),max(0,t-pad),min(crop.width,rr+pad),min(crop.height,b+pad)))
 
-          out = 'site/data/zhenti/assets/2025/q42-aoe-original.png'
-          os.makedirs(os.path.dirname(out), exist_ok=True)
-          crop.save(out, 'PNG', optimize=True)
-          print('saved', out, crop.size)
+          for page_no,box,name in jobs:
+            if page_no not in rendered:
+              pix=doc[page_no].get_pixmap(matrix=fitz.Matrix(3,3),alpha=False)
+              rendered[page_no]=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
+            crop=trim(rendered[page_no].crop(box))
+            path=os.path.join(outdir,name)
+            crop.save(path,'PNG',optimize=True)
+            print(name,crop.size)
           PY
-      - name: Commit cropped original figure
+      - name: Commit exact crops
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/data/zhenti/assets/2025/q42-aoe-original.png
+          git add site/data/zhenti/assets/2024/*.png
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Add original 2025 Q42 AOE figure crop'
+          git commit -m 'Add original 2024 missing-question figure crops'
           git push
