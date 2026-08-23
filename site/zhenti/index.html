@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../assets/css/site.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/zhenti-wall.css?v=20260823c">
+  <link rel="stylesheet" href="../assets/css/zhenti-whole.css?v=20260823c">
 </head>
 <body data-view="zhenti">
 <header class="topbar">
@@ -88,21 +89,14 @@
         </div>
         <div class="toolbar-group toolbar-view">
           <span class="toolbar-label">视图：</span>
-          <div class="segmented">
-            <button class="active" type="button" data-display="matrix">纵览</button>
-            <button type="button" data-display="list">列表</button>
-          </div>
+          <div class="segmented"><button class="active" type="button" data-display="matrix">纵览</button><button type="button" data-display="list">列表</button></div>
         </div>
       </section>
 
       <section class="matrix-card" data-display-panel="matrix">
-        <div class="matrix-head">
-          <div><h2>真题纵览</h2><p data-current-scope>数据结构 · 全部考点</p></div>
-          <div class="matrix-legend" aria-label="状态图例"><span><i class="mastered"></i>熟练</span><span><i class="fuzzy"></i>模糊</span><span><i class="weak"></i>不会</span><span><i class="unmarked"></i>未做</span></div>
-        </div>
+        <div class="matrix-head"><div><h2>真题纵览</h2><p data-current-scope>数据结构 · 全部考点</p></div><div class="matrix-legend" aria-label="状态图例"><span><i class="mastered"></i>熟练</span><span><i class="fuzzy"></i>模糊</span><span><i class="weak"></i>不会</span><span><i class="unmarked"></i>未做</span></div></div>
         <div class="matrix-scroll"><table class="question-matrix"><thead data-matrix-head></thead><tbody data-matrix-body></tbody></table></div>
       </section>
-
       <section class="list-panel" data-display-panel="list" hidden><div class="list-grid" data-year-list></div></section>
     </section>
   </div>
@@ -111,40 +105,17 @@
 <div class="question-modal" data-question-modal hidden>
   <div class="modal-backdrop" data-modal-close></div>
   <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <header class="modal-head">
-      <div class="modal-title-wrap"><span class="modal-dot"></span><h2 id="modal-title"><span data-modal-year>2026</span>年 第<span data-modal-question>1</span>题</h2><span class="modal-tag" data-modal-point>数据结构</span><span class="modal-tag" data-modal-type>选择题</span></div>
-      <div class="modal-status-actions"><button type="button" data-modal-status="mastered">熟练</button><button type="button" data-modal-status="fuzzy">模糊</button><button type="button" data-modal-status="weak">不会</button><button class="modal-clear" type="button" data-modal-status="" title="清除标记">×</button><button class="modal-close" type="button" data-modal-close aria-label="关闭">×</button></div>
-    </header>
-    <div class="question-paper">
-      <div class="question-paper-inner" data-question-content><span class="question-number">（<span data-paper-question>1</span>）</span><p>该题题干、选项与标准答案尚未接入结构化真题库。当前页面先用于真题墙进度、熟练度和复盘记录。</p></div>
-      <div class="analysis-box" data-analysis-box hidden><strong>解析</strong><p>解析数据待接入。后续接入真题题库后，这里将展示标准答案、考点与解析。</p></div>
-      <div class="note-box" data-note-box hidden><label for="wall-note">复盘笔记</label><textarea id="wall-note" data-question-note rows="4" placeholder="例如：把拓扑排序和 BFS 混淆了；二刷重点看入度变化……"></textarea><span data-note-state>本机自动保存</span></div>
-    </div>
+    <header class="modal-head"><div class="modal-title-wrap"><span class="modal-dot"></span><h2 id="modal-title"><span data-modal-year>2026</span>年 第<span data-modal-question>1</span>题</h2><span class="modal-tag" data-modal-point>数据结构</span><span class="modal-tag" data-modal-type>选择题</span></div><div class="modal-status-actions"><button type="button" data-modal-status="mastered">熟练</button><button type="button" data-modal-status="fuzzy">模糊</button><button type="button" data-modal-status="weak">不会</button><button class="modal-clear" type="button" data-modal-status="" title="清除标记">×</button><button class="modal-close" type="button" data-modal-close aria-label="关闭">×</button></div></header>
+    <div class="question-paper"><div class="question-paper-inner" data-question-content><span class="question-number">（<span data-paper-question>1</span>）</span><p>该题题干、选项与标准答案尚未接入结构化真题库。当前页面先用于真题墙进度、熟练度和复盘记录。</p></div><div class="analysis-box" data-analysis-box hidden><strong>解析</strong><p>解析数据待接入。后续接入真题题库后，这里将展示标准答案、考点与解析。</p></div><div class="note-box" data-note-box hidden><label for="wall-note">复盘笔记</label><textarea id="wall-note" data-question-note rows="4" placeholder="例如：把拓扑排序和 BFS 混淆了；二刷重点看入度变化……"></textarea><span data-note-state>本机自动保存</span></div></div>
     <footer class="modal-footer"><div class="modal-tools"><button type="button" data-tool="analysis">▣ 看解析</button><button type="button" data-tool="note">✎ 笔记</button><button type="button" data-tool="timer">◷ <span data-timer-text>计时</span></button></div><div class="modal-nav"><button type="button" data-prev-question>‹ 上一题</button><button type="button" data-next-question>下一题 ›</button></div></footer>
   </section>
 </div>
 
 <div class="paper-session" data-paper-session hidden>
-  <header class="paper-session-head">
-    <div class="paper-session-title"><button type="button" data-paper-exit>← 退出整套</button><div><span>408 整套真题</span><strong><span data-paper-year>2026</span> 年全国硕士研究生招生考试</strong></div></div>
-    <div class="paper-session-meta"><span>进度 <b data-paper-progress>0/47</b></span><span>用时 <b data-paper-timer>00:00:00</b></span></div>
-  </header>
+  <header class="paper-session-head"><div class="paper-session-title"><button type="button" data-paper-exit>← 退出整套</button><div><span>408 整套真题</span><strong><span data-paper-year>2026</span> 年全国硕士研究生招生考试</strong></div></div><div class="paper-session-meta"><span>进度 <b data-paper-progress>0/47</b></span><span>用时 <b data-paper-timer>00:00:00</b></span></div></header>
   <div class="paper-session-body">
-    <aside class="paper-answer-sheet">
-      <div class="answer-sheet-head"><div><strong>答题卡</strong><span>点击题号快速跳转</span></div><span data-paper-percent>0%</span></div>
-      <div class="paper-progress-bar"><i data-paper-progress-bar></i></div>
-      <div class="answer-sheet-grid" data-paper-answer-grid></div>
-      <div class="paper-subject-legend"><span>1—11 / 41—42 数据结构</span><span>12—23 / 43—44 计组</span><span>24—33 / 45—46 操作系统</span><span>34—40 / 47 计网</span></div>
-    </aside>
-    <main class="paper-question-stage">
-      <div class="paper-question-head"><div><span class="paper-subject-pill" data-paper-subject>DS 数据结构</span><span class="paper-type-pill" data-paper-type>选择题</span></div><strong>第 <span data-paper-current>1</span> 题 / 47</strong></div>
-      <section class="paper-question-content"><span class="question-number">（<span data-paper-content-number>1</span>）</span><p>该题题干、选项与标准答案尚未接入结构化真题库。接入后这里会按整套试卷顺序连续展示题目。</p></section>
-      <section class="paper-session-note"><label for="paper-note">本题复盘笔记</label><textarea id="paper-note" data-paper-note rows="4" placeholder="记录本题易错点、知识点或二刷提醒……"></textarea><span data-paper-note-state>本机自动保存</span></section>
-      <footer class="paper-question-footer">
-        <div class="paper-status-actions"><span>掌握状态：</span><button type="button" data-paper-status="mastered">熟练</button><button type="button" data-paper-status="fuzzy">模糊</button><button type="button" data-paper-status="weak">不会</button><button type="button" data-paper-status="">清除</button></div>
-        <div class="paper-nav"><button type="button" data-paper-prev>‹ 上一题</button><button type="button" data-paper-next>下一题 ›</button></div>
-      </footer>
-    </main>
+    <aside class="paper-answer-sheet"><div class="answer-sheet-head"><div><strong>答题卡</strong><span>点击题号快速跳转</span></div><span data-paper-percent>0%</span></div><div class="paper-progress-bar"><i data-paper-progress-bar></i></div><div class="answer-sheet-grid" data-paper-answer-grid></div><div class="paper-subject-legend"><span>1—11 / 41—42 数据结构</span><span>12—23 / 43—44 计组</span><span>24—33 / 45—46 操作系统</span><span>34—40 / 47 计网</span></div></aside>
+    <main class="paper-question-stage"><div class="paper-question-head"><div><span class="paper-subject-pill" data-paper-subject>DS 数据结构</span><span class="paper-type-pill" data-paper-type>选择题</span></div><strong>第 <span data-paper-current>1</span> 题 / 47</strong></div><section class="paper-question-content"><span class="question-number">（<span data-paper-content-number>1</span>）</span><p>该题题干、选项与标准答案尚未接入结构化真题库。接入后这里会按整套试卷顺序连续展示题目。</p></section><section class="paper-session-note"><label for="paper-note">本题复盘笔记</label><textarea id="paper-note" data-paper-note rows="4" placeholder="记录本题易错点、知识点或二刷提醒……"></textarea><span data-paper-note-state>本机自动保存</span></section><footer class="paper-question-footer"><div class="paper-status-actions"><span>掌握状态：</span><button type="button" data-paper-status="mastered">熟练</button><button type="button" data-paper-status="fuzzy">模糊</button><button type="button" data-paper-status="weak">不会</button><button type="button" data-paper-status="">清除</button></div><div class="paper-nav"><button type="button" data-paper-prev>‹ 上一题</button><button type="button" data-paper-next>下一题 ›</button></div></footer></main>
   </div>
 </div>
 
