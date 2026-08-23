@@ -1,0 +1,54 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2025,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "33":{
+      "number":33,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"如图，主机 H1 向 H2 发送一个 2MB（1M=10^6B）文件有三种方式：①电路交换，建立时间为32μs、速率为10Mbps；②分组交换，分组长度为400B，忽略首部；③报文交换。若电路交换、报文交换、分组交换所需时间分别为 Tcs、Tms、Tps，则三者大小关系是（ ）。",
+      "options":{"A":"Tcs>Tms>Tps","B":"Tms>Tps>Tcs","C":"Tms>Tcs>Tps","D":"Tps>Tms>Tcs"},
+      "answer":"B",
+      "analysis":"电路交换只需一次建立连接后按瓶颈链路10Mbps连续发送；报文交换要求整份2MB报文在各链路逐跳完整存储转发；分组交换可形成流水。由此 Tms>Tps>Tcs。",
+      "figures":[{"src":"/data/zhenti/assets/2025/q33-switching-topology.svg","alt":"2025年第33题交换网络拓扑","caption":"依据厦门工学院公开的2025年原卷扫描逐项核对后重绘；链路速率和节点顺序保持一致。"}],
+      "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["xit","csgraduates"]}
+    },
+    "36":{
+      "number":36,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"一台新接入网络的主机 H 通过 DHCP 服务器动态请求 IP 地址，交互过程如图。封装 DHCP REQUEST 报文的 IP 数据报，其目的 IP 地址和源 IP 地址分别是（ ）。",
+      "options":{"A":"192.168.5.1，0.0.0.0","B":"192.168.5.1，192.168.5.9","C":"255.255.255.255，0.0.0.0","D":"255.255.255.255，192.168.5.9"},
+      "answer":"C",
+      "analysis":"初始地址获取阶段，主机尚未正式配置IP，因此源地址为0.0.0.0；DHCP REQUEST 采用广播，使所有可能提供地址的DHCP服务器都能获知选择结果，因此目的地址为255.255.255.255。",
+      "figures":[{"src":"/data/zhenti/assets/2025/q36-dhcp-timeline.svg","alt":"2025年第36题DHCP交互时序","caption":"依据厦门工学院公开的2025年原卷扫描逐项核对后重绘。"}],
+      "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["xit","csgraduates"]}
+    },
+    "38":{
+      "number":38,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"主机甲通过 TCP 向主机乙发送数据的部分过程如图，seq 为序号，ack_seq 为确认序号，rcwnd 为接收窗口。甲在 t0 时刻的拥塞窗口和发送窗口均为2000B，拥塞控制阈值为8000B，MSS=1000B，甲始终以MSS发送TCP段。若甲在t1时刻收到图示确认段，则甲在未收到新的确认段之前，还可以继续向乙发送的TCP段数是（ ）。",
+      "options":{"A":"2","B":"3","C":"4","D":"5"},
+      "answer":"A",
+      "analysis":"ack_seq=3001 表明前一个1000B段已确认而 seq=3001 的1000B段仍在途。慢开始下收到新ACK后 cwnd 从2MSS增至3MSS，接收窗口为4MSS，所以发送窗口=min(3,4)=3MSS；扣除1MSS在途数据，还可继续发送2个MSS段，选A。",
+      "figures":[{"src":"/data/zhenti/assets/2025/q38-tcp-window.svg","alt":"2025年第38题TCP窗口与确认时序","caption":"依据厦门工学院公开的2025年原卷扫描逐项核对后重绘。"}],
+      "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["xit","csgraduates"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"某进程的虚拟地址空间如图所示，阴影部分为未占用区域。程序定义全局指针 char *ptr；main 中定义局部变量 length，依次执行 ptr=(char*)malloc(100)、scanf(\"%s\",ptr)、length=strlen(ptr)、printf、free(ptr)。回答：（1）PCB位于哪个区域，scanf等待键盘输入时进程处于什么状态；（2）main代码位于哪个区域，直接调用的哪些函数需要通过执行驱动程序实现其功能；（3）ptr、未分配到寄存器的length、ptr所指字符串分别位于哪个区域。",
+      "answer":"（1）PCB位于内核区；等待键盘输入时进程处于阻塞态。（2）main函数代码位于只读代码区；scanf和printf涉及终端I/O，需要通过相应设备驱动程序完成。（3）全局变量ptr位于可读写数据区；局部变量length若不分配到寄存器则位于用户栈；malloc动态申请的字符串空间位于运行时堆。",
+      "analysis":"PCB属于操作系统内核数据结构；同步键盘输入会使进程等待I/O。程序代码放在只读代码区，全局可写变量进入数据区，自动局部变量通常在栈上，动态分配对象位于堆。",
+      "figures":[{"src":"/data/zhenti/assets/2025/q46-virtual-address-space.svg","alt":"2025年第46题进程虚拟地址空间布局","caption":"依据厦门工学院公开的2025年原卷扫描逐项核对后重绘；区域顺序及阴影未占用区保持一致。"}],
+      "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["xit","csgraduates"]}
+    }
+  }
+}
