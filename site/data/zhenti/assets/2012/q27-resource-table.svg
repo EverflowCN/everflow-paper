@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420" role="img" aria-labelledby="title desc">
+<title id="title">2012年第27题资源分配表</title>
+<desc id="desc">5个进程P0到P4的已分配资源与最大需求，资源总数R1=18、R2=6、R3=22。</desc>
+<style>text{font-family:Arial,"Noto Sans SC",sans-serif;fill:#111}.h{font-size:22px;font-weight:700}.c{font-size:20px}.s{stroke:#333;stroke-width:1.5;fill:none}</style>
+<text class="h" x="28" y="34">资源总数：R1=18，R2=6，R3=22</text>
+<rect class="s" x="25" y="60" width="930" height="330"/>
+<line class="s" x1="25" y1="115" x2="955" y2="115"/><line class="s" x1="25" y1="170" x2="955" y2="170"/><line class="s" x1="25" y1="225" x2="955" y2="225"/><line class="s" x1="25" y1="280" x2="955" y2="280"/><line class="s" x1="25" y1="335" x2="955" y2="335"/>
+<line class="s" x1="145" y1="60" x2="145" y2="390"/><line class="s" x1="280" y1="60" x2="280" y2="390"/><line class="s" x1="415" y1="60" x2="415" y2="390"/><line class="s" x1="550" y1="60" x2="550" y2="390"/><line class="s" x1="685" y1="60" x2="685" y2="390"/><line class="s" x1="820" y1="60" x2="820" y2="390"/>
+<text class="c" x="68" y="94">进程</text><text class="c" x="173" y="84">已分配</text><text class="c" x="183" y="106">R1</text><text class="c" x="318" y="84">已分配</text><text class="c" x="328" y="106">R2</text><text class="c" x="453" y="84">已分配</text><text class="c" x="463" y="106">R3</text><text class="c" x="578" y="84">最大需求</text><text class="c" x="600" y="106">R1</text><text class="c" x="713" y="84">最大需求</text><text class="c" x="735" y="106">R2</text><text class="c" x="848" y="84">最大需求</text><text class="c" x="870" y="106">R3</text>
+<g class="c"><text x="74" y="151">P0</text><text x="210" y="151">3</text><text x="345" y="151">2</text><text x="480" y="151">3</text><text x="615" y="151">5</text><text x="750" y="151">5</text><text x="878" y="151">10</text>
+<text x="74" y="206">P1</text><text x="210" y="206">4</text><text x="345" y="206">0</text><text x="480" y="206">3</text><text x="615" y="206">5</text><text x="750" y="206">3</text><text x="885" y="206">6</text>
+<text x="74" y="261">P2</text><text x="210" y="261">4</text><text x="345" y="261">0</text><text x="480" y="261">5</text><text x="615" y="261">4</text><text x="750" y="261">0</text><text x="878" y="261">11</text>
+<text x="74" y="316">P3</text><text x="210" y="316">2</text><text x="345" y="316">0</text><text x="480" y="316">4</text><text x="615" y="316">4</text><text x="750" y="316">2</text><text x="885" y="316">5</text>
+<text x="74" y="371">P4</text><text x="210" y="371">3</text><text x="345" y="371">1</text><text x="480" y="371">4</text><text x="615" y="371">4</text><text x="750" y="371">2</text><text x="885" y="371">4</text></g></svg>
