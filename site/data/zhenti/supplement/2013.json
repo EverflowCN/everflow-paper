@@ -1,0 +1,57 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2013,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"给定长度为 n 的整数序列 A=(a0,…,a(n-1))，0≤ai<n。若某个值 x 出现次数 m>n/2，则称 x 为 A 的主元素。设计尽可能高效的算法：若存在主元素则输出该值，否则输出 -1；要求给出基本思想、C/C++/Java 算法以及时间、空间复杂度。",
+      "answer":"可用 Boyer-Moore 投票法。第一次扫描维护候选 c 和计数 count：遇到与 c 相同的元素计数加1，不同则抵消减1，count 归零后更换候选。第二次扫描统计候选出现次数，若超过 n/2 则返回 c，否则返回 -1。时间复杂度 O(n)，额外空间 O(1)。",
+      "analysis":"若主元素存在，与其他元素两两抵消后它仍会留下，因此一次线性扫描能得到唯一可能候选；但候选不保证真的过半，所以必须再统计一次。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "42":{
+      "number":42,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":10,
+      "stem":"集合 S={do, for, repeat, while}，对应成功查找概率依次为 0.35、0.15、0.15、0.35。S 存在长度4的顺序表中，折半查找成功 ASL 为2.2。回答：（1）若仍采用顺序存储并要求更短 ASL，元素如何排列、采用什么查找方法、ASL 为多少；（2）若采用链式存储并要求更短 ASL，元素如何组织、采用什么查找方法、ASL 为多少。",
+      "answer":"顺序存储可按概率从高到低排列，如 do,while,for,repeat，并用顺序查找，ASL=0.35×1+0.35×2+0.15×3+0.15×4=2.1。链式存储若仅用单链表同样可按概率降序顺序查找，ASL=2.1；更优可构造二叉排序树，例如 for 为根、do 为左孩子、while 为右孩子、repeat 为 while 的左孩子，ASL=0.15×1+0.35×2+0.35×2+0.15×3=2.0。",
+      "analysis":"顺序查找时高概率元素应放在前面；链式结构不受随机访问限制，还可组织成二叉排序树，让高概率元素处于较浅层以进一步降低期望比较次数。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "43":{
+      "number":43,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"某32位计算机 CPU 主频800MHz，Cache 命中时 CPI=4，Cache 块32B。主存为8体交叉存储，每体字长32位、存储周期40ns；存储器总线宽32位、时钟200MHz，支持突发传送。一次读突发事务包含送首地址/命令、主存准备、传送数据；每次突发32B，传一个地址或32位数据均需1个总线周期。回答 CPU/总线周期和总线带宽；一次 Cache 缺失需几个突发事务；一次读突发事务时间；若程序执行100条指令、平均每条1.2次访存、Cache 缺失率5%，不计替换开销，CPU 执行时间。",
+      "answer":"CPU 周期1.25ns，总线周期5ns，总线最大带宽4B×200MHz=800MB/s。Cache 块与一次突发传送都是32B，因此一次缺失只需1个读突发事务。一次事务：地址5ns+首字准备40ns+8个32位字传送40ns=85ns。命中基准时间100×4×1.25=500ns；缺失次数100×1.2×5%=6次，附加6×85=510ns，总执行时间1010ns。",
+      "analysis":"八体交叉可使后续体的准备与前一数据传输重叠；总执行时间由命中时的基准 CPU 时间加上所有 Cache miss penalty 构成。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"某博物馆最多容纳500人同时参观，只有一个出入口，并且该出入口一次只允许一人通过。每个参观者进程依次执行进门、参观、出门。请添加必要的信号量和 P/V（wait/signal）操作实现互斥与同步，并说明信号量含义和初值。",
+      "answer":"设 empty=500 表示馆内剩余容量，mutex=1 表示唯一出入口互斥。参观者：P(empty)；P(mutex)，进门，V(mutex)；参观；P(mutex)，出门，V(mutex)；V(empty)。",
+      "analysis":"empty 控制馆内人数不超过500；进门和出门都经过同一个物理出入口，所以二者都必须受同一互斥信号量保护。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"某计算机主存按字节编址，逻辑地址和物理地址均为32位，页表项4B。（1）一级页表地址格式为页号20位+页内偏移12位，求页大小和页表最大字节数；（2）二级页表格式为页目录号10位+页表索引10位+页内偏移12位，给出逻辑地址 LA 的页目录号和页表索引表达式；（3）采用一级页表时，代码段从逻辑地址00008000H开始、长度8KB，连续装入从物理地址00900000H开始的主存，页表基址为00200000H。求代码段对应两个页表项的物理地址、页框号，以及代码页面2的起始物理地址。",
+      "answer":"页大小4KB；一级页表最多2^20项×4B=4MB。二级页表中，页目录号=(LA>>22)&0x3FF，页表索引=(LA>>12)&0x3FF。代码段从逻辑页号8开始：第一页表项地址00200020H，页框号00900H；第二页表项地址00200024H，页框号00901H；代码页面2起始物理地址00901000H。",
+      "analysis":"12位页内偏移给出4KB页。页表项地址=页表基址+逻辑页号×4；8KB代码段正好占连续两页，并被映射到从00900000H开始的两个连续物理页框。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    }
+  }
+}
