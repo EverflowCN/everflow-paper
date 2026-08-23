@@ -1,10 +1,4 @@
-/*
- * Everflow cloud public configuration.
- *
- * Production values below are intentionally public browser credentials.
- * IMPORTANT: only a Supabase Publishable/anon key may appear here.
- * NEVER put a Secret/service-role key in site/, localStorage, HTML or browser JS.
- */
+/* Everflow public browser configuration. Only publishable/anon credentials belong here. */
 (()=>{
   const BAKED={
     url:'https://xzodetdohinktagxuwhs.supabase.co',
@@ -16,37 +10,21 @@
     const parsed=JSON.parse(localStorage.getItem('everflow-cloud-public-config')||'null');
     if(parsed&&typeof parsed.url==='string'&&typeof parsed.publishableKey==='string')local=parsed;
   }catch{}
-
-  // Production values always win so a stale device-level test config cannot
-  // silently send study data to another Supabase project.
   window.EVERFLOW_CLOUD=(BAKED.url&&BAKED.publishableKey)?BAKED:(local||BAKED);
 
-  // Workspace-only visual/runtime enhancement. Kept separate from workspace-v3
-  // business logic so UI polish cannot break Owner APIs or cloud operations.
-  if(location.pathname.startsWith('/workspace/')){
-    const style=document.createElement('link');
-    style.rel='stylesheet';
-    style.href='../assets/css/workspace-hotfix-v5.css?v=5';
-    document.head.appendChild(style);
+  const path=location.pathname.replace(/\/index\.html$/,'/');
+  if(path!=='/workspace/')return;
 
-    const script=document.createElement('script');
-    script.src='../assets/js/workspace-controls-v4.js?v=4';
-    script.async=true;
-    document.head.appendChild(script);
-
-    const oxygenGuard=document.createElement('script');
-    oxygenGuard.src='../assets/js/workspace-oxygen-guard-v1.js?v=2';
-    oxygenGuard.async=true;
-    document.head.appendChild(oxygenGuard);
-
-    const userAdmin=document.createElement('script');
-    userAdmin.src='../assets/js/workspace-user-admin-v1.js?v=1';
-    userAdmin.async=true;
-    document.head.appendChild(userAdmin);
-
-    const quotaEntry=document.createElement('script');
-    quotaEntry.src='../assets/js/workspace-quota-entry-v1.js?v=1';
-    quotaEntry.async=true;
-    document.head.appendChild(quotaEntry);
+  const assets=[
+    ['link','../assets/css/workspace-hotfix-v5.css?v=5'],
+    ['script','../assets/js/workspace-controls-v4.js?v=4'],
+    ['script','../assets/js/workspace-oxygen-guard-v1.js?v=2'],
+    ['script','../assets/js/workspace-user-admin-v1.js?v=1'],
+    ['script','../assets/js/workspace-quota-entry-v1.js?v=1']
+  ];
+  for(const [kind,src] of assets){
+    const node=document.createElement(kind);
+    if(kind==='link'){node.rel='stylesheet';node.href=src}else{node.src=src;node.async=true}
+    document.head.appendChild(node);
   }
 })();
