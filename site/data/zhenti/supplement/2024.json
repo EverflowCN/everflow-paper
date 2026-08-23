@@ -1,8 +1,63 @@
 {
   "schema": "everflow-408-paper-supplement-v1",
   "year": 2024,
-  "verifiedAt": "2026-08-23",
+  "verifiedAt": "2026-08-24",
   "questions": {
+    "4": {
+      "number": 4,
+      "subject": "ds",
+      "type": "single",
+      "stem": "若无向图 G=(V,E) 的邻接多重表如图所示，则 G 中顶点 b 与 d 的度分别是（ ）。",
+      "options": {"A":"0，2","B":"2，4","C":"2，5","D":"3，4"},
+      "answer": "B",
+      "analysis": "邻接多重表的每个边结点同时链接到该边的两个端点。沿原图分别统计与 b、d 关联的边，可得二者的度分别为 2、4。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q04-adjacency-multilist-original.png","alt":"2024年第4题原卷邻接多重表","caption":"截取自厦门工学院公开的2024年408原卷，仅保留本题邻接多重表。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csyanku","csgraduates"]}
+    },
+    "7": {
+      "number": 7,
+      "subject": "ds",
+      "type": "single",
+      "stem": "一棵二叉搜索树如图所示，k1、k2、k3 分别是对应结点中保存的关键字，子树 T 的任一结点中保存的关键字 x 满足的是（ ）。",
+      "options": {"A":"x<k1","B":"x>k2","C":"k1<x<k3","D":"k3<x<k2"},
+      "answer": "D",
+      "analysis": "T 位于 k3 的右子树中，因此 x>k3；同时 T 仍处于 k2 的左子树范围内，因此 x<k2，故 k3<x<k2。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q07-bst-original.png","alt":"2024年第7题原卷二叉搜索树","caption":"截取自厦门工学院公开的2024年408原卷，仅保留本题二叉搜索树。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csyanku","csgraduates"]}
+    },
+    "33": {
+      "number": 33,
+      "subject": "cn",
+      "type": "single",
+      "stem": "若分组交换网络及每段链路的带宽如图所示，则 H1 到 H2 的最大吞吐量约为（ ）。",
+      "options": {"A":"1 Mb/s","B":"10 Mb/s","C":"100 Mb/s","D":"1000 Mb/s"},
+      "answer": "B",
+      "analysis": "H1 与 H2 两端接入链路均为 10 Mb/s。虽然中间存在并行的高带宽路径，但端系统接入链路构成总吞吐量瓶颈，因此最大吞吐量约为 10 Mb/s。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q33-packet-network-original.png","alt":"2024年第33题原卷分组交换网络及链路带宽","caption":"截取自厦门工学院公开的2024年408原卷，仅保留网络与链路带宽图。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates","csyanku"]}
+    },
+    "35": {
+      "number": 35,
+      "subject": "cn",
+      "type": "single",
+      "stem": "如图所示的支持 VLAN 划分的交换机已按端口划分 3 个 VLAN，部分端口连接主机的 IP 地址和 MAC 地址如图。ARP 表结构为〈IP 地址，MAC 地址，TTL〉。下列选项中，不会出现在 H4 的 ARP 表中的是（ ）。",
+      "options": {"A":"192.168.3.81，00-18-A2-3B-36-21，14:32:00","B":"192.168.3.91，00-3E-C2-39-12-B5，14:37:00","C":"192.168.3.125，00-E5-78-4A-09-B2，14:45:00","D":"192.168.3.129，00-08-6E-05-A7-82，14:52:00"},
+      "answer": "D",
+      "analysis": "H4 属于 VLAN1，只能直接通过 ARP 学习同一 VLAN 中主机的 IP-MAC 映射。图中 192.168.3.129 对应的 H6 位于 VLAN3，因此该项不会出现在 H4 的 ARP 表中。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q35-vlan-switch-original.png","alt":"2024年第35题原卷VLAN交换机与主机地址图","caption":"截取自厦门工学院公开的2024年408原卷，仅保留 VLAN、端口及主机地址图。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates","csyanku"]}
+    },
+    "37": {
+      "number": 37,
+      "subject": "cn",
+      "type": "single",
+      "stem": "主机甲通过选择重传（SR）滑动窗口协议向主机乙发送帧，部分过程如图所示。Fx 为数据帧，ACKx 为确认帧，x 是位数为 3 比特的序号。乙只对正确接收的数据帧进行独立确认，发送窗口与接收窗口大小相同且均为最大值。甲在 t1 和 t2 时刻发送的数据帧分别是（ ）。",
+      "options": {"A":"F1，F3","B":"F1，F4","C":"F3，F1","D":"F4，F1"},
+      "answer": "D",
+      "analysis": "3 比特序号且 SR 收发窗口取最大时窗口为 4。t1 时 ACK0 使窗口前移，甲可继续发送 F4；随后 F1 超时，SR 只重传超时帧，因此 t2 重传 F1。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q37-sr-timeline-original.png","alt":"2024年第37题原卷SR滑动窗口时序图","caption":"截取自厦门工学院公开的2024年408原卷，仅保留 SR 帧发送与确认时序图。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates","csyanku"]}
+    },
     "41": {
       "number": 41,
       "subject": "ds",
@@ -23,6 +78,28 @@
       "analysis": "逐个关键字先计算 H0；若冲突则令 k=1,2,… 按平方增量重新探测。14 的 H0=9，依次比较 3、18 后在地址 2 命中；8 的 H0=2，继续探测 3、6、0，最终到达空地址 7。",
       "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
+    "43": {
+      "number": 43,
+      "subject": "co",
+      "type": "comprehensive",
+      "score": 13,
+      "stem": "计算机 M 字长 32 位、按字节编址，采用 32 位定长指令字。add、slli、lw 的格式/编码/功能及部分数据通路如图。回答：通用寄存器数量与 shamt 位数原因；add 时 ALUBsrc 及给定操作数下 F、OF、CF 和无符号溢出判据；slli 时 Ext 为何可取 0 或 1；lw 的 Ext、ALUctr；机器码 A040A103H 为何必为 lw，以及 R[01H]=FFFFA2D0H 时读取地址。",
+      "answer": "（1）最多 32 个通用寄存器；32 位字长的移位量用 5 位即可编码 0～31。（2）add 时 ALUBsrc=0；87654321H+98765432H 得 F=1FDB9753H，OF=1，CF=1；无符号溢出看 CF。（3）slli 的 IR[31:20] 最高位固定为0，因此零扩展和符号扩展结果相同。（4）lw：Ext=1，ALUctr=000（加）。（5）A040A103H 的 opcode=0000011 且 funct3=010，符合 lw；其 imm=A04H 符号扩展为 FFFFFA04H，和 R[01H]=FFFFA2D0H 相加，读取地址为 FFFF9CD4H。",
+      "analysis": "寄存器字段 rs1、rs2、rd 均为5位，所以可编码32个寄存器。add 两个负补码操作数得到正结果产生有符号溢出，同时最高位有进位。lw 的立即数是补码位移，必须符号扩展，并由 ALU 加基址形成有效地址。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q43-instruction-format-original.png","alt":"2024年第43题原卷指令格式与功能表","caption":"截取自厦门工学院公开的2024年408原卷，仅保留题43(a)指令格式/编码/功能表。"},{"src":"/data/zhenti/assets/2024/q43-datapath-original.png","alt":"2024年第43题原卷部分数据通路","caption":"截取自厦门工学院公开的2024年408原卷，仅保留题43(b)数据通路与控制信号。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates"]}
+    },
+    "44": {
+      "number": 44,
+      "subject": "co",
+      "type": "comprehensive",
+      "score": 10,
+      "stem": "承接第43题。C 程序语句 sum+=a[i] 对应指令序列 slli r4,r2,2；add r4,r3,r4；lw r5,0(r4)；add r1,r1,r5。变量 i、sum 和数组 a 均为 int，r1～r5 编号为 01H～05H。回答寄存器分配；在小端、4KB 页、i=5、r1=00001332H、r3=0013DFF0H 且存储内容如图时，求 a[i] 地址/机器数、sum 结果、页号和数组至少跨页数；再求 slli 的机器码及 a 改为 short 后的 slli 形式。",
+      "answer": "（1）a 首地址在 r3，i 在 r2，sum 在 r1。（2）a[i] 地址=0013E004H，a[i] 机器数=FFFFECDCH，sum=0000000EH；a[i] 所在页号=0013EH，数组 a 至少跨 2 页。（3）slli r4,r2,2 的机器码=00212213H；若 a 为 short，则为 slli r4,r2,1。",
+      "analysis": "int 元素 4B，所以 i 左移2位形成字节偏移；首地址在 r3，累加结果在 r1。i=5 时有效地址为 0013DFF0H+20=0013E004H；按小端从图中读取 4 字节得到 FFFFECDCH，与 00001332H 相加得 0000000EH。4KB 页的页内偏移12位，因此页号取高20位。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q44-memory-table-original.png","alt":"2024年第44题原卷存储单元内容表","caption":"截取自厦门工学院公开的2024年408原卷，仅保留题44所需地址与存储字节表。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates"]}
+    },
     "45": {
       "number": 45,
       "subject": "os",
@@ -42,6 +119,17 @@
       "answer": "（1）C1 的实现代码是临界区，因为两个进程对共享缓冲区 B 的写入必须互斥。（2）可用 empty=1、full=0 两个同步信号量：P1：wait(empty); C1; signal(full)。P2：wait(full); C2; signal(empty)。在只有一次写和一次读的题设下，这两个量同时完成空/满同步。（3）只需一个互斥信号量 mutex=1：P1、P2 执行 C3 前 wait(mutex)，完成后 signal(mutex)。",
       "analysis": "核心是区分条件同步与互斥。C1/C2 的执行条件分别是“空”和“非空”，因此用空/满状态信号量约束先后；两个 C3 都会修改同一非空缓冲区，只需一个二元互斥量保护临界区。",
       "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "47": {
+      "number": 47,
+      "subject": "cn",
+      "type": "comprehensive",
+      "score": 9,
+      "stem": "互联网中 4 个自治系统的互连拓扑如图。AS1 运行 RIP；AS3 内任意两主机通信经过路由器数不超过15；AS4 规模较大，可能超过20个路由器。回答：AS4 在 RIP/OSPF 中应选哪个；AS3 内通信的初始 TTL 至少多少；AS1 路由器同时启动且每30s交换距离向量时，R11～R16 获得 210.2.4.0/24 正确路由至少多久；R44→R13 与 R13→R14/R15 分别使用哪类 BGP 会话及何种报文；给定三条 AS 路径时 R14、R15 最终下一跳。",
+      "answer": "（1）AS4 选 OSPF。（2）初始 TTL 至少 16。（3）至少 60s。（4）R44→R13 使用 eBGP，会用 UPDATE 报文通告；R13→R14、R15 使用 iBGP。（5）R14 的下一跳为 R11，R15 的下一跳为 R13。",
+      "analysis": "RIP 最大有效跳数为15，AS4 可能超过20跳，因此应使用 OSPF。经过最多15个路由器时 TTL 初值至少16。RIP 距离向量按每30s一跳传播，拓扑中使所有 R11～R16 学到右侧网络需要两轮。BGP 跨 AS 为 eBGP、AS 内传播外部可达性为 iBGP，路由更新使用 UPDATE；无策略约束时先比较 AS_PATH 长度，再结合 AS 内到下一跳的代价选择。",
+      "figures": [{"src":"/data/zhenti/assets/2024/q47-as-topology-original.png","alt":"2024年第47题原卷自治系统与路由器拓扑","caption":"截取自厦门工学院公开的2024年408原卷，仅保留 AS、路由器及网络前缀拓扑图。"}],
+      "verification": {"status":"verified","mode":"authoritative-original-scan-crop","sources":["xit","csgraduates"]}
     }
   }
 }
