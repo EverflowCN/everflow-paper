@@ -13,6 +13,7 @@
   const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',e=>{e.stopPropagation();setMenu(!menu?.classList.contains('open'))})});menu?.addEventListener('click',e=>{if(e.target.closest('a'))setMenu(false)});document.addEventListener('click',e=>{if(menu?.classList.contains('open')&&!menu.contains(e.target)&&!e.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
   import('/assets/js/site-nav-v2.js').catch(err=>console.error('Everflow navigation v2 failed',err));
   if(body.dataset.view==='zhenti'){
+    const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href='/assets/css/zhenti-nav-layout-v5.css?v=20260823a';document.head.appendChild(navCss);
     import('/assets/js/zhenti-qwer.js?v=20260823g').catch(err=>console.error('Everflow 408 QWER shortcuts failed',err));
     const srsFlow=import('/assets/js/zhenti-srs-v2.js?v=20260823b')
       .then(()=>import('/assets/js/zhenti-srs-error-v2.js?v=20260823b'))
@@ -20,7 +21,7 @@
       .catch(err=>console.error('Everflow 408 SRS quick cards failed',err));
     srsFlow.finally(async()=>{
       try{await import('/assets/js/zhenti-favorites.js?v=20260823a')}catch(err){console.error('Everflow 408 favorites failed',err)}
-      try{await import('/assets/js/zhenti-srs-experience.js?v=20260823b')}catch(err){console.error('Everflow 408 immersive SRS failed',err)}
+      try{await import('/assets/js/zhenti-srs-experience.js?v=20260823c')}catch(err){console.error('Everflow 408 immersive SRS failed',err)}
       try{await import('/assets/js/zhenti-srs-mobile-immersive.js?v=20260823a')}catch(err){console.error('Everflow 408 mobile immersive fix failed',err)}
     });
     import('/assets/js/zhenti-ui-polish.js?v=20260823a').catch(err=>console.error('Everflow 408 UI polish failed',err));
