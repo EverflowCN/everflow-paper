@@ -1,6 +1,6 @@
 {
   "schema": "everflow-408-zhenti-v1",
-  "updatedAt": "2026-08-23T07:43:00Z",
+  "updatedAt": "2026-08-23T08:59:00Z",
   "policy": {
     "displayRule": "Only questions with verification.status=verified are rendered as confirmed past-paper content.",
     "copyrightNote": "Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This pilot stores concise verified transcriptions/paraphrases and provenance metadata."
@@ -37,6 +37,14 @@
       "verifiedQuestions": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,28,29,30,31,32,33,34,35,36,38,39,40],
       "sources": ["tommy408","csgraduates","foreverlink"],
       "notes": "Accelerated 2011 text-only selection batch covers 38 questions. Table-dependent question 27 and topology-dependent question 37 are intentionally withheld until their original table/figure assets are verified. Comprehensive questions 41-47 remain for later verification."
+    },
+    "2012": {
+      "paperStatus": "verified",
+      "contentStatus": "partial-verified",
+      "questionCount": 47,
+      "verifiedQuestions": [1,2,3,4,5,6,8,10,11],
+      "sources": ["tommy408","csgraduates","foreverlink"],
+      "notes": "Accelerated 2012 intake started with nine independently cross-checked data-structure selections. Figure-dependent Dijkstra question 7 and B-tree question 9 are intentionally withheld until the original figures are verified. Remaining text-only selections 12-40 are next priority."
     }
   }
 }
