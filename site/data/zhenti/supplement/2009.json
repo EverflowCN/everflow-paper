@@ -14,6 +14,18 @@
       "figures":[{"src":"/data/zhenti/assets/2009/q03-tree.svg","alt":"2009年第3题二叉树","caption":"依据2009原卷扫描与两份独立题库核对后重绘；结点关系与原题一致。"}],
       "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["csgraduates","foreverlink","noobdream"]}
     },
+    "4":{
+      "number":4,
+      "subject":"ds",
+      "type":"single",
+      "score":2,
+      "stem":"下列二叉排序树中，满足平衡二叉树定义的是（ ）。",
+      "options":{"A":"见图 A","B":"见图 B","C":"见图 C","D":"见图 D"},
+      "answer":"B",
+      "analysis":"平衡二叉树要求任一结点左右子树高度差绝对值不超过1。逐项检查原图树形，只有B中所有结点均满足该条件；A、C、D都存在平衡因子绝对值大于1的结点，因此选B。",
+      "figures":[{"src":"/data/zhenti/assets/2009/q04-avl-options.svg","alt":"2009年第4题四个平衡二叉树选项","caption":"依据2009年原卷第1页四个选项逐树形重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["csgraduates","foreverlink","noobdream","csyanku"]}
+    },
     "43":{
       "number":43,
       "subject":"co",
@@ -23,6 +35,17 @@
       "answer":"中断方式：32位=4B，每秒中断0.5×10^6/4=125000次；每次CPU开销(18+2)×5=100周期，因此每秒12.5M周期，占500M周期/s的2.5%。DMA方式：每秒DMA次数5×10^6/5000=1000；每次CPU开销500周期，每秒0.5M周期，占500M周期/s的0.1%。",
       "analysis":"把数据传输率换算成每秒中断次数或DMA块次数，再乘每次CPU处理开销即可。题设明确DMA传输本身与CPU并行且无访存冲突，所以不计DMA搬运时间。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "44":{
+      "number":44,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"某计算机字长16位、采用16位定长指令字，部分数据通路如图。所有控制信号为1时有效；MDRinE表示允许DB数据打入MDR，MDRin表示允许内总线数据打入MDR，且MAR输出一直使能。加法指令 ADD (R1), R0 的功能为把R0与R1所指主存单元的数据相加，并把结果写回R1所指主存单元。已知取指/译码阶段：C1 MAR←PC；C2 MDR←M(MAR)、PC←PC+1；C3 IR←MDR；C4译码。要求按相同表格形式列出执行阶段各节拍的功能与有效控制信号。",
+      "answer":"一种最少节拍方案为：C5：MAR←(R1)，R1out、MARin；C6：MDR←M(MAR)且A←(R0)，MemR、MDRinE、R0out、Ain；C7：AC←(MDR)+(A)，MDRout、Add、ACin；C8：MDR←(AC)，ACout、MDRin；C9：M(MAR)←(MDR)，MDRoutE、MemW。也可把A←R0或A←MDR单独占一拍形成等价6拍方案。",
+      "analysis":"先用R1给出主存地址，再读操作数。存储器经DB把数据送MDR时不占用内总线，因此C6可以同时由R0经内总线送A。随后MDR与A经ALU相加写AC，再把AC送MDR并经DB写回MAR所指单元。",
+      "figures":[{"src":"/data/zhenti/assets/2009/q44-datapath.svg","alt":"2009年第44题部分数据通路","caption":"依据2009年原卷第5页数据通路逐部件与控制信号重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-datapath-cross-check","sources":["csgraduates","foreverlink","noobdream","csyanku"]}
     },
     "45":{
       "number":45,
