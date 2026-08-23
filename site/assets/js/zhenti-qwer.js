@@ -55,38 +55,61 @@
     }
   },true);
 
-  function refreshLabels(root=document){
+  function rewriteQuestionUi(root){
+    if(!(root instanceof Element)&&root!==document)return;
     root.querySelectorAll?.('[data-answer-option]').forEach(btn=>{
       const answer=btn.dataset.answerOption;
+      const wanted=DISPLAY_KEYS[answer];
       const kbd=btn.querySelector('kbd');
-      if(kbd&&DISPLAY_KEYS[answer])kbd.textContent=DISPLAY_KEYS[answer];
+      if(kbd&&wanted&&kbd.textContent!==wanted)kbd.textContent=wanted;
     });
 
     root.querySelectorAll?.('.shortcut-inline').forEach(el=>{
-      el.textContent=el.textContent
+      const next=el.textContent
         .replace('A/B/C/D 选项','Q/W/E/R 对应 A/B/C/D')
         .replace('R 解析','X 解析');
+      if(next!==el.textContent)el.textContent=next;
     });
+  }
+
+  function rewriteStaticUi(){
+    const toolbarHint=document.querySelector('.whole-toolbar>div:first-child span');
+    if(toolbarHint){
+      const next=toolbarHint.textContent.replace('A–D / Enter / ← →','Q/W/E/R→A/B/C/D / Enter / ← →');
+      if(next!==toolbarHint.textContent)toolbarHint.textContent=next;
+    }
 
     const help=document.querySelector('.shortcut-help-card');
     if(help){
       help.querySelectorAll('.shortcut-grid>div').forEach(row=>{
         const kbd=row.querySelector('kbd');
-        const text=row.querySelector('span')?.textContent||'';
-        if(text.includes('选择答案')&&kbd){kbd.textContent='Q W E R';row.querySelector('span').textContent='对应 A B C D'}
-        if(text.includes('查看解析')&&kbd)kbd.textContent='X';
+        const label=row.querySelector('span');
+        const text=label?.textContent||'';
+        if(text.includes('选择答案')&&kbd){
+          if(kbd.textContent!=='Q W E R')kbd.textContent='Q W E R';
+          if(label&&label.textContent!=='对应 A B C D')label.textContent='对应 A B C D';
+        }
+        if(text.includes('查看解析')&&kbd&&kbd.textContent!=='X')kbd.textContent='X';
       });
     }
 
     document.querySelectorAll('.shortcut-tip').forEach(tip=>{
-      tip.innerHTML='电脑刷题：<b>Q/W/E/R</b> 对应 A/B/C/D，<b>Enter</b> 提交，<b>← →</b> 切题，按 <b>?</b> 查看全部快捷键。';
+      const html='电脑刷题：<b>Q/W/E/R</b> 对应 A/B/C/D，<b>Enter</b> 提交，<b>← →</b> 切题，按 <b>?</b> 查看全部快捷键。';
+      if(tip.innerHTML!==html)tip.innerHTML=html;
     });
   }
 
-  refreshLabels();
+  rewriteQuestionUi(document);
+  rewriteStaticUi();
+  setTimeout(rewriteStaticUi,120);
+
+  // 只处理“新加入的元素节点”，且所有写入都做幂等检查。
+  // 避免旧版全局 refreshLabels() 自己触发 MutationObserver，造成无限循环和页面卡死。
   const observer=new MutationObserver(mutations=>{
-    for(const m of mutations){
-      if(m.addedNodes.length){refreshLabels();break}
+    for(const mutation of mutations){
+      mutation.addedNodes.forEach(node=>{
+        if(node.nodeType===Node.ELEMENT_NODE)rewriteQuestionUi(node);
+      });
     }
   });
   observer.observe(document.body,{childList:true,subtree:true});
