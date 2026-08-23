@@ -3,6 +3,7 @@
   const items=[
     {href:'/',label:'首页',match:p=>p==='/'},
     {href:'/study/',label:'学习',match:p=>p.startsWith('/study/')||p.startsWith('/408/')},
+    {href:'/zhenti/',label:'真题墙',match:p=>p.startsWith('/zhenti/')},
     {href:'/links/',label:'资源',match:p=>p.startsWith('/links/')},
     {href:'/archive/',label:'通知通告',match:p=>p.startsWith('/archive/')||p.startsWith('/notice/')||p.startsWith('/post/')},
     {href:'/account/',label:'账户',match:p=>p.startsWith('/account/')}
