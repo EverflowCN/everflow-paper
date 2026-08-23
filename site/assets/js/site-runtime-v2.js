@@ -14,9 +14,10 @@
   import('/assets/js/site-nav-v2.js').catch(err=>console.error('Everflow navigation v2 failed',err));
   if(body.dataset.view==='zhenti'){
     import('/assets/js/zhenti-qwer.js?v=20260823g').catch(err=>console.error('Everflow 408 QWER shortcuts failed',err));
-    import('/assets/js/zhenti-srs.js?v=20260823a')
+    const srsFlow=import('/assets/js/zhenti-srs.js?v=20260823a')
       .then(()=>import('/assets/js/zhenti-srs-error.js?v=20260823a'))
       .then(()=>import('/assets/js/zhenti-srs-reset.js?v=20260823a'))
       .catch(err=>console.error('Everflow 408 SRS quick cards failed',err));
+    srsFlow.finally(()=>import('/assets/js/zhenti-favorites.js?v=20260823a').catch(err=>console.error('Everflow 408 favorites failed',err)));
   }
 })();
