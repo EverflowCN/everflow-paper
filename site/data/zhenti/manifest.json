@@ -1,17 +1,47 @@
 {
   "schema": "everflow-408-zhenti-v1",
-  "updatedAt": "2026-08-23T08:59:00Z",
+  "updatedAt": "2026-08-23T10:04:00Z",
   "policy": {
     "displayRule": "Only questions with verification.status=verified are rendered as confirmed past-paper content.",
     "copyrightNote": "Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This pilot stores concise verified transcriptions/paraphrases and provenance metadata."
   },
   "sources": {
-    "tommy408": {"name":"TommyTay0712/408","type":"public-github-transcription","url":"https://github.com/TommyTay0712/408/tree/main/%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98","license":"not-declared"},
-    "neville408": {"name":"neville-studio/408-exam-paper","type":"public-github-rebuilt-paper","url":"https://github.com/neville-studio/408-exam-paper","license":"MIT-for-repository"},
-    "csgraduates": {"name":"计算机考研杂货铺","type":"independent-cross-check","url":"https://csgraduates.com/study_methods/408quiz/","license":"not-declared"},
-    "foreverlink": {"name":"408 ForeverLink","type":"independent-cross-check","url":"https://408.foreverlink.love/","license":"not-declared"},
-    "hermes408": {"name":"lij768423-svg/408-","type":"public-structured-question-bank-cross-check","url":"https://github.com/lij768423-svg/408-","license":"ISC-for-software"},
-    "noobdream": {"name":"N诺考研","type":"independent-cross-check","url":"https://noobdream.com/Practice/","license":"not-declared"}
+    "tommy408": {
+      "name": "TommyTay0712/408",
+      "type": "public-github-transcription",
+      "url": "https://github.com/TommyTay0712/408/tree/main/%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98",
+      "license": "not-declared"
+    },
+    "neville408": {
+      "name": "neville-studio/408-exam-paper",
+      "type": "public-github-rebuilt-paper",
+      "url": "https://github.com/neville-studio/408-exam-paper",
+      "license": "MIT-for-repository"
+    },
+    "csgraduates": {
+      "name": "计算机考研杂货铺",
+      "type": "independent-cross-check",
+      "url": "https://csgraduates.com/study_methods/408quiz/",
+      "license": "not-declared"
+    },
+    "foreverlink": {
+      "name": "408 ForeverLink",
+      "type": "independent-cross-check",
+      "url": "https://408.foreverlink.love/",
+      "license": "not-declared"
+    },
+    "hermes408": {
+      "name": "lij768423-svg/408-",
+      "type": "public-structured-question-bank-cross-check",
+      "url": "https://github.com/lij768423-svg/408-",
+      "license": "ISC-for-software"
+    },
+    "noobdream": {
+      "name": "N诺考研",
+      "type": "independent-cross-check",
+      "url": "https://noobdream.com/Practice/",
+      "license": "not-declared"
+    }
   },
   "years": {
     "2009": {
@@ -42,9 +72,9 @@
       "paperStatus": "verified",
       "contentStatus": "partial-verified",
       "questionCount": 47,
-      "verifiedQuestions": [1,2,3,4,5,6,8,10,11],
-      "sources": ["tommy408","csgraduates","foreverlink"],
-      "notes": "Accelerated 2012 intake started with nine independently cross-checked data-structure selections. Figure-dependent Dijkstra question 7 and B-tree question 9 are intentionally withheld until the original figures are verified. Remaining text-only selections 12-40 are next priority."
+      "verifiedQuestions": [1,2,3,4,5,6,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,28,29,30,31,32,33,34,35,36,37,38,39],
+      "sources": ["tommy408","csgraduates","foreverlink","noobdream"],
+      "notes": "Accelerated 2012 text-only selection intake now covers 36 verified questions. Questions 7 and 9 require original figures; question 27 requires the original resource-allocation table; question 40 depends on the original email-flow figure. Those four remain withheld until verified assets are included. Comprehensive questions 41-47 remain for subsequent batches."
     }
   }
 }
