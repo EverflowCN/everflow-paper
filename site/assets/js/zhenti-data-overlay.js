@@ -17,7 +17,7 @@
 
   async function loadSupplement(year){
     if(cache.has(year))return cache.get(year);
-    const p=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824h`,{cache:'no-store'})
+    const p=nativeFetch(`/data/zhenti/supplement/${year}.json?v=20260824i`,{cache:'no-store'})
       .then(r=>r.ok?r.json():null)
       .catch(()=>null);
     cache.set(year,p);
@@ -38,38 +38,17 @@
     const year=yearFrom(input);
     const response=await nativeFetch(input,init);
     if(!year||!response.ok)return response;
-
     try{
       const [base,supplement,extra]=await Promise.all([response.clone().json(),loadSupplement(year),loadExtra(year)]);
       if(!supplement?.questions&&!extra?.questions)return response;
-      const merged={
-        ...base,
-        questions:{
-          ...(extra?.questions||{}),
-          ...(supplement?.questions||{}),
-          ...(base.questions||{})
-        }
-      };
-      return new Response(JSON.stringify(merged),{
-        status:response.status,
-        statusText:response.statusText,
-        headers:{'Content-Type':'application/json; charset=utf-8'}
-      });
-    }catch{
-      return response;
-    }
+      const merged={...base,questions:{...(extra?.questions||{}),...(supplement?.questions||{}),...(base.questions||{})}};
+      return new Response(JSON.stringify(merged),{status:response.status,statusText:response.statusText,headers:{'Content-Type':'application/json; charset=utf-8'}});
+    }catch{return response;}
   };
 
   if(!document.querySelector('link[data-zhenti-media]')){
-    const link=document.createElement('link');
-    link.rel='stylesheet';link.href='/assets/css/zhenti-media.css?v=20260824a';link.dataset.zhentiMedia='1';
-    document.head.appendChild(link);
+    const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/css/zhenti-media.css?v=20260824a';link.dataset.zhentiMedia='1';document.head.appendChild(link);
   }
-  const loadMedia=()=>{
-    if(document.querySelector('script[data-zhenti-media]'))return;
-    const script=document.createElement('script');
-    script.src='/assets/js/zhenti-media.js?v=20260824a';script.defer=true;script.dataset.zhentiMedia='1';
-    document.body.appendChild(script);
-  };
+  const loadMedia=()=>{if(document.querySelector('script[data-zhenti-media]'))return;const script=document.createElement('script');script.src='/assets/js/zhenti-media.js?v=20260824a';script.defer=true;script.dataset.zhentiMedia='1';document.body.appendChild(script);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadMedia,{once:true});else loadMedia();
 })();
