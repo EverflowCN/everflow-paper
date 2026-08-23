@@ -1,0 +1,49 @@
+{
+  "schema": "everflow-408-paper-supplement-v1",
+  "year": 2025,
+  "verifiedAt": "2026-08-23",
+  "questions": {
+    "41": {
+      "number": 41,
+      "subject": "ds",
+      "type": "comprehensive",
+      "score": 13,
+      "stem": "设有长度均为 n 的整型数组 A 和 res。对每个 A[i]，要求在 i≤j≤n-1 的范围内，使 A[i]×A[j] 取得最大值，并把结果存入 res[i]。例如 A={1,4,-9,6} 时 res={6,24,81,36}。设计时间和空间上尽可能高效的 calMulMax(A,res,n)，给出设计思想、C/C++ 算法及复杂度。",
+      "answer": "从右向左扫描 A，同时维护后缀最大值 maxValue 和后缀最小值 minValue。若 A[i]≥0，则 res[i]=A[i]×maxValue；若 A[i]<0，则 res[i]=A[i]×minValue。每轮先用 A[i] 更新 maxValue、minValue。时间复杂度 O(n)，额外空间复杂度 O(1)。",
+      "analysis": "暴力枚举每个 i 后面的 j 会达到 O(n²)。固定 A[i] 后，正数与后缀最大值相乘取得最大乘积，负数与后缀最小值相乘取得最大乘积，因此只需一次逆序扫描维护两个极值。参考实现：minValue=INT_MAX，maxValue=INT_MIN；for(i=n-1;i>=0;i--){minValue=min(minValue,A[i]); maxValue=max(maxValue,A[i]); res[i]=(A[i]>=0?A[i]*maxValue:A[i]*minValue);}。",
+      "verification": {
+        "status": "verified",
+        "mode": "cross-checked-paraphrase",
+        "sources": ["csgraduates", "noobdream"]
+      }
+    },
+    "43": {
+      "number": 43,
+      "subject": "co",
+      "type": "comprehensive",
+      "score": 12,
+      "stem": "程序含 int x,d[2048],i，并执行 for(i=0;i<2048;i++) d[i]=d[i]/x。计算机字长 32 位、按字节编址；数据 Cache 数据区 32KB、8 路组相联、块 64B、命中时间 2 个时钟周期、缺失损失 200 个时钟周期；页式虚拟存储页大小 4KB，数组 d 起始虚拟地址为 01800020H。求 Cache 组号/块内地址位数与可作索引的 VA 位、d[100] 地址和组号、d[0] 块内偏移及访问 d 的 Cache 缺失率和平均访问时间、数组跨页数与缺页次数。",
+      "answer": "（1）Cache 组号 6 位、块内地址 6 位，VA11～VA6 可直接作为 Cache 索引。（2）d[100] 的 VA=018001B0H，组号=6（06H）。（3）d[0] 块内偏移=020H；共涉及 129 个 Cache 块，循环对 d 发生 4096 次数据访问，缺失率约 3.15%；按“命中时间+缺失率×缺失损失”口径平均访问时间约 8.3 个时钟周期。（4）d 分布在 3 个页中，访问 d 引起 3 次缺页。",
+      "analysis": "64B 块给出 6 位块内偏移；32KB/64B=512 行，8 路后 64 组，因此组号也是 6 位。页大小 4KB 使 VA 低 12 位与物理页内偏移一致，所以 VA11～VA6 可用于索引。d[100]=01800020H+400=018001B0H。数组 8192B 且首地址偏移 32B，因此跨 129 个 Cache 块、3 个页。循环每个元素读后写，共 4096 次访问，首次触及每个块时缺失。",
+      "verification": {
+        "status": "verified",
+        "mode": "cross-checked-paraphrase",
+        "sources": ["csgraduates", "noobdream"]
+      }
+    },
+    "45": {
+      "number": 45,
+      "subject": "os",
+      "type": "comprehensive",
+      "score": 7,
+      "stem": "甲、乙、丙协作植树：甲挖坑，乙放树苗并填土，丙浇水；顺序必须为挖坑→放苗填土→浇水。铁锹仅一把，供甲挖坑和乙填土；水桶一只供丙浇水。未被乙处理的树坑数量必须小于等于 3。初始坑数为 0。要求用尽可能少的信号量及 wait/signal 描述三人的同步互斥，并说明各信号量作用和初值。",
+      "answer": "可用 4 个信号量：shovel=1（铁锹互斥）、slots=3（还允许甲新挖的坑数）、readyPit=0（已挖好等待乙处理的坑数）、needWater=0（已填土等待丙浇水的树数）。甲：wait(slots); wait(shovel); 挖坑; signal(shovel); signal(readyPit)。乙：wait(readyPit); wait(shovel); 放苗并填土; signal(shovel); signal(slots); signal(needWater)。丙：wait(needWater); 浇水。",
+      "analysis": "slots/readyPit 构成容量为 3 的生产者-消费者同步，限制最多存在 3 个待处理树坑；甲和乙都使用同一把铁锹，因此需要一个二元互斥信号量；乙完成填土后才能允许丙浇水，因此再用 needWater 同步。水桶只由丙使用，不需要额外互斥信号量。",
+      "verification": {
+        "status": "verified",
+        "mode": "cross-checked-paraphrase",
+        "sources": ["csgraduates", "noobdream"]
+      }
+    }
+  }
+}
