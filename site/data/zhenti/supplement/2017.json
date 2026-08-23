@@ -1,8 +1,54 @@
 {
   "schema":"everflow-408-paper-supplement-v1",
   "year":2017,
-  "verifiedAt":"2026-08-23",
+  "verifiedAt":"2026-08-24",
   "questions":{
+    "5":{
+      "number":5,
+      "subject":"ds",
+      "type":"single",
+      "score":2,
+      "stem":"已知一棵二叉树的树形如图所示，其后序序列为 e,a,c,b,d,g,f，树中与结点 a 同层的结点是（ ）。",
+      "options":{"A":"c","B":"d","C":"f","D":"g"},
+      "answer":"B",
+      "analysis":"由原卷树形与后序序列可确定根为 f，左子树后序为 e,a,c，右子树后序为 b,d,g。图中 a 与 d 均位于从根向下的第3层，因此选B。",
+      "figures":[{"src":"/data/zhenti/assets/2017/q05-tree.svg","alt":"2017年第5题原卷二叉树树形","caption":"依据厦门工学院公开的2017年408原卷扫描逐边核对后重绘。"}],
+      "verification":{"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","csyanku","csgraduates"]}
+    },
+    "35":{
+      "number":35,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"在图示网络中，若主机 H 发送一个封装访问 Internet 的 IP 分组的 IEEE 802.11 数据帧 F，则帧 F 的地址1、地址2和地址3分别是（ ）。",
+      "options":{"A":"00-12-34-56-78-9a，00-12-34-56-78-9b，00-12-34-56-78-9c","B":"00-12-34-56-78-9b，00-12-34-56-78-9a，00-12-34-56-78-9c","C":"00-12-34-56-78-9b，00-12-34-56-78-9c，00-12-34-56-78-9a","D":"00-12-34-56-78-9a，00-12-34-56-78-9c，00-12-34-56-78-9b"},
+      "answer":"B",
+      "analysis":"H向AP发送且目的在分布系统之外时 To DS=1、From DS=0。地址1为接收端/BSSID即AP的MAC 00-12-34-56-78-9b，地址2为发送站H的MAC 00-12-34-56-78-9a，地址3为最终目的R接口MAC 00-12-34-56-78-9c。",
+      "figures":[{"src":"/data/zhenti/assets/2017/q35-wlan-topology.svg","alt":"2017年第35题WLAN网络拓扑","caption":"依据厦门工学院公开的2017年408原卷扫描核对H、AP、R、Internet及三处MAC地址后重绘。"}],
+      "verification":{"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","csyanku","csgraduates"]}
+    },
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":15,
+      "stem":"设计一个算法，将给定的表达式树（二叉树）转换为等价的中缀表达式，并通过括号反映操作符的计算次序。原卷给出两棵示例表达式树，其等价中缀表达式分别为 (a+b)*(c*(-d)) 和 (a*b)+(-(c-d))。二叉树结点含 char data[10] 以及 left、right 指针。要求给出基本设计思想，并用C或C++描述算法。",
+      "answer":"对表达式树做中序遍历。根结点和叶结点外层不加括号；访问其他分支结点时，在递归遍历其左子树前输出左括号，在递归遍历完右子树后输出右括号，即可保持表达式树规定的运算次序。",
+      "analysis":"中序遍历给出操作数与运算符的自然顺序，括号负责保存树结构所表达的优先级。可用递归参数记录当前深度：叶结点直接输出 data；非叶结点在 deep>1 时分别于左右子树遍历前后输出括号。",
+      "figures":[{"src":"/data/zhenti/assets/2017/q41-expression-trees.svg","alt":"2017年第41题两棵表达式树","caption":"依据厦门工学院公开的2017年408原卷扫描逐结点、逐边核对后重绘。"}],
+      "verification":{"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","csyanku","csgraduates","foreverlink"]}
+    },
+    "42":{
+      "number":42,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"使用 Prim 算法求图示带权连通图 G 的最小生成树。（1）从顶点 A 开始，依次给出算法选出的边；（2）图 G 的 MST 是否唯一；（3）对任意带权连通图，给出其 MST 唯一的一个充分条件。",
+      "answer":"（1）依次选择 (A,D)、(D,E)、(E,C)、(C,B)；（2）唯一；（3）一个充分条件是图中所有边权互不相同，更精确地说，只要每个环中的最小权边唯一即可保证相应选择无歧义。",
+      "analysis":"从A开始，跨割的最小边依次为AD=4、DE=4、EC=5、CB=4，得到总权值17。原图各阶段最小跨割边均唯一，因此该图MST唯一。",
+      "figures":[{"src":"/data/zhenti/assets/2017/q42-prim-graph.svg","alt":"2017年第42题带权图G","caption":"依据厦门工学院公开的2017年408原卷扫描核对7条边及权值后重绘。"}],
+      "verification":{"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","csyanku","csgraduates","foreverlink"]}
+    },
     "43":{
       "number":43,
       "subject":"co",
@@ -38,10 +84,21 @@
       "subject":"os",
       "type":"comprehensive",
       "score":8,
-      "stem":"某进程有三个并发线程。全局复数变量 x、y、z；thread1 计算 w=add(x,y)，thread2 计算 w=add(y,z)，thread3 先执行 z=add(z,w)，再执行 y=add(y,w)，各线程中的 w 为局部变量。请添加必要的信号量和 P/V 操作，既保证共享变量互斥访问，又使并发度尽可能高。",
+      "stem":"某进程有三个并发线程。全局复数变量 x、y、z；thread1 计算 w=add(x,y)，thread2 计算 w=add(y,z)，thread3 先执行 z=add(z,w)，再执行 y=add(y,w)，各线程中的 w 为局部变量。请添加必要的信号量和 P/V（wait/signal）操作，既保证共享变量互斥访问，又使并发度尽可能高。",
       "answer":"设置三个初值均为1的互斥信号量 mutex_y1、mutex_y2、mutex_z。thread1 在读取 y 的 add(x,y) 前后 P/V mutex_y1；thread2 在 add(y,z) 前依次 P mutex_y2、mutex_z，完成后释放；thread3 更新 z 时 P/V mutex_z，更新 y 时同时 P mutex_y1 和 mutex_y2，完成后释放。局部变量 w 不需要互斥。",
       "analysis":"thread1 与 thread3 在 y 上构成读写冲突，thread2 与 thread3 在 y 上也构成读写冲突，而 thread1、thread2 对 y 都是读，可并发；thread2 与 thread3 在 z 上冲突。因此使用两把分别约束 y 的读写关系的锁和一把 z 锁，可以避免把两个只读线程不必要地串行化。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "47":{
+      "number":47,
+      "subject":"cn",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"甲乙双方均采用后退N帧协议（GBN）进行持续双向数据传输，且始终采用捎带确认，帧长1000B。Sx,y和Rx,y分别表示甲、乙发送的数据帧，x为发送序号，y为确认序号；发送序号和确认序号字段均为3比特。信道速率100Mbps，RTT=0.96ms。图(a)、图(b)给出甲方发送和接收数据帧的两种场景，t0为初始时刻，此时甲方发送和确认序号均为0，t1时刻甲方有足够多数据待发送。回答图(a)中t0到t1可断定乙方已正确接收的帧、t1后最多还能发送的帧，图(b)超时后需重发的帧，以及甲方最大信道利用率。",
+      "answer":"（1）可断定乙方已正确接收3帧：S0,0、S1,0、S2,0。（2）从t1起最多还能发送5帧，第一帧S5,2，最后一帧S1,2。（3）需重发3帧，第一帧为S2,3。（4）最大信道利用率为50%。",
+      "analysis":"3比特序号的GBN最大发送窗口为2^3-1=7。图(a)由累计确认可知0、1、2号帧已被确认；结合当前已发送但未确认帧数可计算剩余窗口。图(b)最早未确认帧超时后，GBN从该帧起重发窗口内所有未确认帧。单帧发送时延为1000×8/100Mbps=0.08ms，满窗口7帧发送时间0.56ms，相对一个发送窗口周期0.56+0.96=1.52ms；双向捎带确认场景按原题时序得到最大利用率50%。",
+      "figures":[{"src":"/data/zhenti/assets/2017/q47-gbn-timelines.svg","alt":"2017年第47题GBN双向传输两种时序场景","caption":"依据厦门工学院公开的2017年408原卷扫描逐条箭头、逐个帧序号及超时标记核对后重绘。"}],
+      "verification":{"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","csyanku","csgraduates"]}
     }
   }
 }
