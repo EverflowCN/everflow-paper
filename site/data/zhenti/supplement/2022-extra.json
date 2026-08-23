@@ -1,0 +1,51 @@
+{
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2022,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "7":{
+      "number":7,
+      "subject":"ds",
+      "type":"single",
+      "stem":"图示为含10个活动的AOE网，时间余量最大的活动是（ ）。",
+      "options":{"A":"c","B":"g","C":"h","D":"j"},
+      "answer":"B",
+      "analysis":"根据各事件最早/最迟发生时间计算活动余量：c为2，g为6，h为2，j为2，因此g最大，选B。",
+      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T07.png","alt":"2022年第7题原题AOE网","caption":"固定到公开题库提交 62a608c6 的原题截图，保留活动与权值。"}],
+      "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
+    },
+    "8":{
+      "number":8,
+      "subject":"ds",
+      "type":"single",
+      "stem":"在图示5阶B树T中删除关键字260并完成必要调整，得到新B树T1。下列选项中，不可能是T1根结点关键字序列的是（ ）。",
+      "options":{"A":"60，90，280","B":"60，90，350","C":"60，85，110，350","D":"60，90，110，350"},
+      "answer":"D",
+      "analysis":"5阶B树非根结点至少含2个关键字。删除260后借位或合并可得到A、B、C对应的合法结构；若根为<60,90,110,350>，90与110之间的子结点只能落入不足最小关键字数的状态，因此不可能，选D。",
+      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T08.png","alt":"2022年第8题原题5阶B树","caption":"固定到公开题库提交 62a608c6 的原题截图，保留删除前B树全部关键字结构。"}],
+      "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
+    },
+    "36":{
+      "number":36,
+      "subject":"cn",
+      "type":"single",
+      "stem":"图示网络中的主机H，其子网掩码与默认网关分别是（ ）。",
+      "options":{"A":"255.255.255.192，192.168.1.1","B":"255.255.255.192，192.168.1.62","C":"255.255.255.224，192.168.1.1","D":"255.255.255.224，192.168.1.62"},
+      "answer":"D",
+      "analysis":"默认网关应是与H处于同一子网且直接相连的路由器接口192.168.1.62；从题图地址边界可知该LAN采用/27，即255.255.255.224，因此选D。",
+      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T36.png","alt":"2022年第36题原题网络拓扑","caption":"固定到公开题库提交 62a608c6 的原题截图，保留主机与路由器接口地址。"}],
+      "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
+    },
+    "43":{
+      "number":43,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":15,
+      "stem":"某CPU部分单总线数据通路如图，含GPRs、FR、ALU、Y、Z、PC、MAR、MDR、IR等，虚线为控制信号。回答：（1）SF及加/减法OF的逻辑表达式；（2）设置暂存器Y、Z的原因；（3）由rs、rd位数判断GPRs最多寄存器数，说明rs/rd来自何寄存器及rd接地址译码器还是多路选择器；（4）给出不考虑PC增量的取指控制序列，并在主存读需5拍时求取指至少周期数；（5）控制信号由何部件产生，哪些寄存器输出接入该部件。",
+      "answer":"（1）SF=F15。加法OF=¬A15·¬B15·F15 + A15·B15·¬F15；减法OF=¬A15·B15·F15 + A15·¬B15·¬F15。（2）单总线同一时刻只能传一个数据，ALU需要同时保持两个输入，所以Y暂存一个操作数；Z暂存ALU结果以便随后送回总线。（3）rs、rd各4位，最多16个GPR；二者来自IR，rd连接地址译码器。（4）PCout,MARin；Read；MDRout,IRin。主存读5拍，至少1+5+1=7拍。（5）控制信号由CU产生，IR与FR输出接CU输入。",
+      "analysis":"符号标志直接取结果最高位；溢出本质上是同号相加得异号或异号相减得与被减数异号。单总线结构决定了Y/Z暂存和分拍执行；4位寄存器编号决定16个通用寄存器。",
+      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T43.png","alt":"2022年第43题原题CPU单总线数据通路","caption":"固定到公开题库提交 62a608c6 的原题截图，保留全部数据通路与控制信号标注。"}],
+      "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
+    }
+  }
+}
