@@ -7,16 +7,16 @@
   <meta name="robots" content="noindex,nofollow">
   <title>学习热力图 · Everflow</title>
   <link rel="icon" href="../../assets/everflow-icon.svg">
-  <link rel="stylesheet" href="../../assets/css/site.css">
-  <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260824-ui4">
+  <link rel="stylesheet" href="../../assets/css/responsive.css?v=20260824-ui4">
   <link rel="stylesheet" href="../../assets/css/study.css">
-  <link rel="stylesheet" href="../../assets/css/learning-center.css">
+  <link rel="stylesheet" href="../../assets/css/learning-center.css?v=20260824-ui4">
   <link rel="stylesheet" href="../../assets/css/app-ui.css">
-  <link rel="stylesheet" href="../../assets/css/study-heatmap.css?v=20260824-clean1">
+  <link rel="stylesheet" href="../../assets/css/study-heatmap.css?v=20260824-ui4">
 </head>
 <body>
-<header class="topbar"><div class="wrap nav"><a class="brand" href="../../"><img src="../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
-<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="../../"><img src="../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
+<div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
 
 <main class="wrap heatmap-shell" data-heatmap-root>
   <header class="heatmap-hero">
@@ -26,7 +26,7 @@
       <p>按天汇总课程、刷题与手动补录的打卡次数。颜色越深，表示当天完成的学习动作越多。</p>
     </div>
     <div class="heatmap-hero-actions">
-      <button type="button" class="learning-btn" data-manual-open>＋ 手动补录</button>
+      <button type="button" class="learning-btn ui-iconized" data-manual-open><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>手动补录</span></button>
       <a class="learning-btn" href="../">返回学习中心</a>
     </div>
   </header>
@@ -54,9 +54,9 @@
 
       <section data-month-view>
         <div class="heatmap-calendar-head">
-          <button type="button" class="heatmap-nav-btn" data-prev-month aria-label="上个月">‹</button>
+          <button type="button" class="heatmap-nav-btn ui-icon-only" data-prev-month aria-label="上个月"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
           <button type="button" class="heatmap-month-label" data-jump-current title="返回本月">2026年8月</button>
-          <button type="button" class="heatmap-nav-btn" data-next-month aria-label="下个月">›</button>
+          <button type="button" class="heatmap-nav-btn ui-icon-only" data-next-month aria-label="下个月"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
         </div>
         <div class="heatmap-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
         <div class="heatmap-month-grid" data-month-grid></div>
@@ -69,9 +69,9 @@
 
       <section data-year-view hidden>
         <div class="heatmap-calendar-head heatmap-year-head">
-          <button type="button" class="heatmap-nav-btn" data-prev-year aria-label="上一年">‹</button>
+          <button type="button" class="heatmap-nav-btn ui-icon-only" data-prev-year aria-label="上一年"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
           <button type="button" class="heatmap-month-label" data-jump-year title="返回今年">2026 年</button>
-          <button type="button" class="heatmap-nav-btn" data-next-year aria-label="下一年">›</button>
+          <button type="button" class="heatmap-nav-btn ui-icon-only" data-next-year aria-label="下一年"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
         </div>
         <div class="heatmap-year-grid" data-year-grid></div>
       </section>
@@ -102,14 +102,14 @@
 
 <dialog class="heatmap-dialog" data-day-dialog>
   <form method="dialog" class="heatmap-dialog-card">
-    <header><div><span data-day-label>当天详情</span><h3 data-day-count>0 次打卡</h3></div><button value="cancel" aria-label="关闭">×</button></header>
+    <header><div><span data-day-label>当天详情</span><h3 data-day-count>0 次打卡</h3></div><button class="ui-icon-only" value="cancel" aria-label="关闭"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></header>
     <div class="heatmap-day-events" data-day-events></div>
   </form>
 </dialog>
 
 <dialog class="heatmap-dialog" data-manual-dialog>
   <form class="heatmap-dialog-card" data-manual-form>
-    <header><div><span>MANUAL CHECK-IN</span><h3>手动补录</h3></div><button type="button" data-manual-close aria-label="关闭">×</button></header>
+    <header><div><span>MANUAL CHECK-IN</span><h3>手动补录</h3></div><button class="ui-icon-only" type="button" data-manual-close aria-label="关闭"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></header>
     <label class="heatmap-field"><span>日期与时间</span><input type="datetime-local" data-manual-time required></label>
     <label class="heatmap-field"><span>科目</span><select data-manual-subject data-pretty-select><option value="study">学习</option><option value="ds">数据结构</option><option value="co">组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option><option value="math2">数学二</option><option value="english">英语</option><option value="politics">政治</option></select></label>
     <label class="heatmap-field"><span>备注</span><textarea data-manual-note maxlength="200" placeholder="例如：补录晚间复盘 / 纸质题本打卡"></textarea></label>
@@ -118,8 +118,8 @@
   </form>
 </dialog>
 
-<footer class="footer"><div class="wrap footer-inner"><span>Everflow Study · 学习热力图</span><span><a href="../practice/">去刷题 →</a></span></div></footer>
-<script src="../../assets/js/site-runtime-v2.js"></script>
+<footer class="footer"><div class="wrap footer-inner"><span>Everflow Study · 学习热力图</span><span><a class="ui-iconized" href="../practice/"><span>去刷题</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></span></div></footer>
+<script src="../../assets/js/site-runtime-v2.js?v=20260824-ui4"></script>
 <script src="../../assets/js/cloud-config.js"></script>
 <script src="../../assets/js/study-store.js"></script>
 <script src="../../assets/js/pretty-select.js"></script>
