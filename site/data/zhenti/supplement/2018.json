@@ -12,6 +12,26 @@
       "answer":"最小未出现正整数必在 1～n+1。分配长度为 n 的标记数组 B 并清零，扫描 A；若 0<A[i]≤n，则置 B[A[i]-1]=1。再从 B[0] 起寻找第一个 0，若下标为 i 则返回 i+1；若 B 全为 1，则返回 n+1。时间复杂度 O(n)，额外空间复杂度 O(n)。",
       "analysis":"n 个输入若恰好包含 1～n，则答案是 n+1；否则答案一定是 1～n 中最先缺失的整数。用标记数组把成员检查降为常数时间，因此两次线性扫描即可。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","foreverlink","csyanku"]}
+    },
+    "43":{
+      "number":43,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"计算机主频500MHz、CPI=4。设备A、B的数据传输率分别为2MB/s和40MB/s，对应I/O接口各有32位数据缓冲寄存器。分析：A采用定时查询I/O时，为不丢数据最多多久查询一次、CPU至少有多少时间用于A；B采用中断I/O且一次中断响应与处理至少400个时钟周期时是否可行；B采用DMA、每次1000B且CPU预处理与后处理共500个时钟周期时，CPU用于B输入/输出的时间占比最大是多少。",
+      "answer":"A接口每得到4B需要4B/(2MB/s)=2μs，因此最多每2μs查询一次。每次I/O至少10条指令，每条平均4周期，500MHz时每次约80ns，CPU占比至少80ns/2μs=4%。B接口每得到4B只需0.1μs，而400周期在500MHz下需0.8μs，因此若每缓冲字触发一次中断会来不及处理，不宜采用该中断I/O方式。DMA每1000B传输需25μs，CPU预/后处理500周期=1μs，所以CPU占比最大约4%。",
+      "analysis":"查询间隔受32位缓冲寄存器装满时间约束；中断方式必须在下一个缓冲字到来前完成必要处理；DMA把大块传输交给控制器，CPU只承担每块开始/结束处理。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"某文件系统用索引结点保存文件属性和地址信息，簇大小4KB。每个索引结点64B，含11个地址项：8个直接地址项以及一级、二级、三级间接地址项各1个，每个地址项4B。求最大文件长度；若1M个簇用于存索引结点、512M个簇用于文件数据，一个5600B图像文件最多可存多少个；并比较6KB文件F1与40KB文件F2获取最后一个簇号所需时间是否相同。",
+      "answer":"每个间接索引块可存4KB/4B=1024个地址。最大文件长度=(8+1024+1024^2+1024^3)×4KB。索引结点容量为1M×4KB/64B=64M个；5600B文件占2簇，数据区可容纳256M个，因此最终受索引结点限制，最多64M个。F1为6KB，只用直接地址项；F2为40KB，超过8个直接簇的32KB，需要一级间接索引，因此获取F2最后簇号比F1多一次间接索引访问，时间不同。",
+      "analysis":"索引层级决定可寻址的数据簇数量，也决定访问最后数据簇前需要读取的间接索引块数量。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream","csyanku"]}
     }
   }
 }
