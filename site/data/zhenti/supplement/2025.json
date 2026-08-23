@@ -1,7 +1,7 @@
 {
   "schema": "everflow-408-paper-supplement-v1",
   "year": 2025,
-  "verifiedAt": "2026-08-23",
+  "verifiedAt": "2026-08-24",
   "questions": {
     "41": {
       "number": 41,
@@ -11,11 +11,7 @@
       "stem": "设有长度均为 n 的整型数组 A 和 res。对每个 A[i]，要求在 i≤j≤n-1 的范围内，使 A[i]×A[j] 取得最大值，并把结果存入 res[i]。例如 A={1,4,-9,6} 时 res={6,24,81,36}。设计时间和空间上尽可能高效的 calMulMax(A,res,n)，给出设计思想、C/C++ 算法及复杂度。",
       "answer": "从右向左扫描 A，同时维护后缀最大值 maxValue 和后缀最小值 minValue。若 A[i]≥0，则 res[i]=A[i]×maxValue；若 A[i]<0，则 res[i]=A[i]×minValue。每轮先用 A[i] 更新 maxValue、minValue。时间复杂度 O(n)，额外空间复杂度 O(1)。",
       "analysis": "暴力枚举每个 i 后面的 j 会达到 O(n²)。固定 A[i] 后，正数与后缀最大值相乘取得最大乘积，负数与后缀最小值相乘取得最大乘积，因此只需一次逆序扫描维护两个极值。参考实现：minValue=INT_MAX，maxValue=INT_MIN；for(i=n-1;i>=0;i--){minValue=min(minValue,A[i]); maxValue=max(maxValue,A[i]); res[i]=(A[i]>=0?A[i]*maxValue:A[i]*minValue);}。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
     "43": {
       "number": 43,
@@ -25,25 +21,39 @@
       "stem": "程序含 int x,d[2048],i，并执行 for(i=0;i<2048;i++) d[i]=d[i]/x。计算机字长 32 位、按字节编址；数据 Cache 数据区 32KB、8 路组相联、块 64B、命中时间 2 个时钟周期、缺失损失 200 个时钟周期；页式虚拟存储页大小 4KB，数组 d 起始虚拟地址为 01800020H。求 Cache 组号/块内地址位数与可作索引的 VA 位、d[100] 地址和组号、d[0] 块内偏移及访问 d 的 Cache 缺失率和平均访问时间、数组跨页数与缺页次数。",
       "answer": "（1）Cache 组号 6 位、块内地址 6 位，VA11～VA6 可直接作为 Cache 索引。（2）d[100] 的 VA=018001B0H，组号=6（06H）。（3）d[0] 块内偏移=020H；共涉及 129 个 Cache 块，循环对 d 发生 4096 次数据访问，缺失率约 3.15%；按“命中时间+缺失率×缺失损失”口径平均访问时间约 8.3 个时钟周期。（4）d 分布在 3 个页中，访问 d 引起 3 次缺页。",
       "analysis": "64B 块给出 6 位块内偏移；32KB/64B=512 行，8 路后 64 组，因此组号也是 6 位。页大小 4KB 使 VA 低 12 位与物理页内偏移一致，所以 VA11～VA6 可用于索引。d[100]=01800020H+400=018001B0H。数组 8192B 且首地址偏移 32B，因此跨 129 个 Cache 块、3 个页。循环每个元素读后写，共 4096 次访问，首次触及每个块时缺失。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "44": {
+      "number": 44,
+      "subject": "co",
+      "type": "comprehensive",
+      "score": 9,
+      "stem": "承接第43题。程序 P 的机器级代码中，x 在 R2、i 在 R4、数组 d 首地址在 R3；依次执行 mov R1,(R3+R4*4)、scov R1（将 R1 符号扩展到 {R0,R1}）、idiv R1,R2。补码除法器由除数寄存器 Y、32 位 ALU、余数寄存器 R/余数商寄存器 Q 和控制逻辑组成。回答：（1）当 d[i]=87654321H、x=000000FFH 时，R、Q、Y 初值；控制逻辑中哪个部分包含计数器，以及 ALUop 控制的运算种类；（2）idiv 的哪些输入会触发除法异常，并说明异常响应时 CPU 的基本操作。",
+      "answer": "（1）R=FFFFFFFFH，Q=87654321H，Y=000000FFH；计数器位于控制逻辑中；ALUop 控制加法和减法两类运算。（2）除数为0时发生除零异常，即 x=00000000H、d[i] 任意；32位补码最小负数除以-1时发生商溢出，即 d[i]=80000000H、x=FFFFFFFFH。异常响应时 CPU 转入内核态并屏蔽/关闭可屏蔽中断，保存断点/程序状态，并转到相应异常处理程序入口。",
+      "analysis": "scov 先把 d[i] 的32位补码符号扩展为64位被除数，因此高32位 R 全为1、低32位 Q 保持87654321H；Y装入32位除数000000FFH。补码除法迭代需要加/减除数和移位，次数由控制逻辑计数。除法异常的两种典型硬件条件是除数为0和有符号商溢出；对32位补码，唯一的最小负数除以-1组合会超出正数上界。",
+      "figures": [{"src":"/data/zhenti/assets/2025/q44-divider.svg","alt":"2025年第44题补码除法器逻辑结构","caption":"依据厦门工学院公开2025年408原卷扫描逐结构核对后重绘；寄存器、位宽、控制信号和连线方向按原卷保留。"}],
+      "verification": {"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","noobdream","csgraduates"]}
     },
     "45": {
       "number": 45,
       "subject": "os",
       "type": "comprehensive",
-      "score": 7,
+      "score": 8,
       "stem": "甲、乙、丙协作植树：甲挖坑，乙放树苗并填土，丙浇水；顺序必须为挖坑→放苗填土→浇水。铁锹仅一把，供甲挖坑和乙填土；水桶一只供丙浇水。未被乙处理的树坑数量必须小于等于 3。初始坑数为 0。要求用尽可能少的信号量及 wait/signal 描述三人的同步互斥，并说明各信号量作用和初值。",
       "answer": "可用 4 个信号量：shovel=1（铁锹互斥）、slots=3（还允许甲新挖的坑数）、readyPit=0（已挖好等待乙处理的坑数）、needWater=0（已填土等待丙浇水的树数）。甲：wait(slots); wait(shovel); 挖坑; signal(shovel); signal(readyPit)。乙：wait(readyPit); wait(shovel); 放苗并填土; signal(shovel); signal(slots); signal(needWater)。丙：wait(needWater); 浇水。",
       "analysis": "slots/readyPit 构成容量为 3 的生产者-消费者同步，限制最多存在 3 个待处理树坑；甲和乙都使用同一把铁锹，因此需要一个二元互斥信号量；乙完成填土后才能允许丙浇水，因此再用 needWater 同步。水桶只由丙使用，不需要额外互斥信号量。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "47": {
+      "number": 47,
+      "subject": "cn",
+      "type": "comprehensive",
+      "score": 9,
+      "stem": "工程部网络通过天通一号卫星链路连接公司总部。R1、R2 分别经 TR1、TR2 收发卫星信号，链路为对称全双工，每方向 200kb/s；卫星轨道高度 36000km，电磁波传播速度 300000km/s。工程部主机 H 地址为 10.10.10.33/26。回答：（1）R1→R2 单向传播时延、H→总部服务器最大吞吐量，以及忽略协议首部和以太网传播时延时上传 4000B 文件的最短时间；（2）基于 GBN 的单向可靠 SLP 中，1500B 数据帧、忽略 ACK 帧长度、信道利用率不低于80%时的最小发送窗口和最少序号位数；（3）将 10.10.10.0/24 划分给生活区、作业区、管理区，生活区至少120个可分配地址，另两区各至少60个，求三个子网地址。",
+      "answer": "（1）单向传播路径为地面→卫星→地面，时延=2×36000/300000=0.24s=240ms；瓶颈速率200kb/s，因此最大吞吐量200kb/s；4000B发送时延=4000×8/200000=0.16s，最少总时间=0.24+0.16=0.40s。（2）单帧发送时延 Td=1500×8/200000=0.06s，RTT=0.48s。要求 Ws×0.06/(0.48+0.06)≥0.8，得 Ws≥7.2，故最小发送窗口为8；GBN需2^k≥Ws+1=9，故 k=4位。（3）管理区为10.10.10.0/26，作业区为10.10.10.64/26，生活区为10.10.10.128/25。",
+      "analysis": "卫星链路的单向路程包含上行和下行两段轨道高度。GBN连续发送时，一个窗口周期按首帧发送时间加往返传播时间计算；题目明确忽略ACK帧长度，因此不另加ACK发送时延。VLSM应先给需求最大的生活区分配/25，再用两个/26覆盖其余地址；H=10.10.10.33/26落在10.10.10.0/26，可确定该段为管理区。",
+      "figures": [{"src":"/data/zhenti/assets/2025/q47-satellite-topology.svg","alt":"2025年第47题卫星通信网络拓扑","caption":"依据厦门工学院公开2025年408原卷扫描逐结构核对后重绘；卫星高度、链路速率、节点连接关系和主机地址按原卷保留。"}],
+      "verification": {"status":"verified","mode":"original-scan-verified-reconstruction","sources":["xit","noobdream","csgraduates"]}
     }
   }
 }
