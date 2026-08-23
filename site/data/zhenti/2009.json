@@ -98,7 +98,73 @@
       "options": {"A":"冒泡排序","B":"直接插入排序","C":"简单选择排序","D":"二路归并排序"},
       "answer": "B",
       "analysis": "第二趟后前三个元素已形成有序前缀，而整体不具备冒泡、选择或二路归并第二趟应有的结构特征，因此是直接插入排序。",
-      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink"]}
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "11": {
+      "number": 11,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "在冯·诺依曼计算机中，指令和数据都以二进制形式存放。CPU 判断从存储器取出的内容属于指令还是数据，主要依据什么？",
+      "options": {"A":"操作码译码结果","B":"寻址方式","C":"指令周期所处阶段","D":"所在存储单元"},
+      "answer": "C",
+      "analysis": "取指阶段访问存储器取得的是指令，执行阶段因取操作数而访存取得的是数据，因此依据的是指令周期的不同阶段。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","csgraduates","foreverlink","noobdream"]}
+    },
+    "22": {
+      "number": 22,
+      "subject": "co",
+      "type": "single",
+      "score": 2,
+      "stem": "下列事件中，哪一个会引起外部中断？",
+      "options": {"A":"键盘输入","B":"除数为 0","C":"浮点运算下溢","D":"访存缺页"},
+      "answer": "A",
+      "analysis": "键盘输入来自 CPU 执行过程之外的外部设备，属于外部中断；除零和缺页属于执行指令过程中产生的异常/内中断。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","noobdream","foreverlink"]}
+    },
+    "23": {
+      "number": 23,
+      "subject": "os",
+      "type": "single",
+      "score": 2,
+      "stem": "在单处理机系统中，下列哪些活动可以真正并行？I. 进程与进程；II. 处理机与设备；III. 处理机与通道；IV. 设备与设备。",
+      "options": {"A":"I、II、III","B":"I、II、IV","C":"I、III、IV","D":"II、III、IV"},
+      "answer": "D",
+      "analysis": "单处理机同一时刻只能执行一个进程，因此进程与进程不能真正并行；CPU 与设备、CPU 与通道以及不同设备之间可以并行工作。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","noobdream","foreverlink"]}
+    },
+    "32": {
+      "number": 32,
+      "subject": "os",
+      "type": "single",
+      "score": 2,
+      "stem": "程序通过系统调用请求打开 I/O 设备时，通常向操作系统提供哪一种设备标识？",
+      "options": {"A":"逻辑设备名","B":"物理设备名","C":"主设备号","D":"从设备号"},
+      "answer": "A",
+      "analysis": "设备独立性要求用户程序使用逻辑设备名，由操作系统在执行阶段映射到具体物理设备。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","noobdream","csgraduates","foreverlink"]}
+    },
+    "33": {
+      "number": 33,
+      "subject": "cn",
+      "type": "single",
+      "score": 2,
+      "stem": "在 OSI 参考模型中，从低层向高层看，第一个提供端到端服务的是哪一层？",
+      "options": {"A":"数据链路层","B":"传输层","C":"会话层","D":"应用层"},
+      "answer": "B",
+      "analysis": "传输层负责端系统中应用进程之间的端到端逻辑通信，是自下而上第一个提供端到端服务的层次。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","noobdream","csgraduates","foreverlink"]}
+    },
+    "40": {
+      "number": 40,
+      "subject": "cn",
+      "type": "single",
+      "score": 2,
+      "stem": "FTP 客户端与服务器之间传递 FTP 命令时，使用的是哪一种连接？",
+      "options": {"A":"基于 TCP 的控制连接","B":"基于 TCP 的数据连接","C":"基于 UDP 的控制连接","D":"基于 UDP 的数据连接"},
+      "answer": "A",
+      "analysis": "FTP 的命令通过 TCP 控制连接传递；数据传输使用另一条数据连接。",
+      "verification": {"status":"verified","mode":"cross-checked-paraphrase","sources":["tommy408","noobdream","csgraduates","foreverlink"]}
     },
     "41": {
       "number": 41,
