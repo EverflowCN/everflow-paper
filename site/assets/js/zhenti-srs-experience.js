@@ -7,6 +7,139 @@
   const css=document.createElement('link');
   css.rel='stylesheet';css.href='/assets/css/zhenti-srs-experience.css?v=20260823a';document.head.appendChild(css);
 
+  // Final top-navigation layout: modes / subjects / cloud status are different levels.
+  // Desktop keeps a single balanced row; tablet becomes two rows; phone keeps two compact scrollable rows.
+  const navStyle=document.createElement('style');
+  navStyle.id='everflow-zhenti-nav-layout-v4';
+  navStyle.textContent=`
+    .wall-subject-bar.has-srs-groups{
+      display:grid!important;
+      grid-template-columns:auto minmax(0,1fr) auto!important;
+      align-items:center!important;
+      justify-content:stretch!important;
+      gap:18px!important;
+      padding:10px clamp(16px,2.4vw,44px)!important;
+      overflow:visible!important;
+    }
+    .wall-subject-bar.has-srs-groups .srs-mode-group,
+    .wall-subject-bar.has-srs-groups .srs-subject-group{
+      display:flex!important;
+      align-items:center!important;
+      gap:8px!important;
+      min-width:0;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+    .wall-subject-bar.has-srs-groups .srs-mode-group{justify-self:start!important}
+    .wall-subject-bar.has-srs-groups .srs-subject-group{justify-self:center!important}
+    .wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab,
+    .wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab{
+      min-height:40px!important;
+      padding:0 17px!important;
+      border:1px solid var(--line)!important;
+      border-radius:13px!important;
+      background:color-mix(in srgb,var(--soft) 78%,var(--card))!important;
+      color:var(--muted)!important;
+      box-shadow:none!important;
+      white-space:nowrap!important;
+    }
+    .wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab{font-weight:900!important}
+    .wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab{font-weight:800!important}
+    .wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab:hover,
+    .wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab:hover{
+      border-color:color-mix(in srgb,var(--red) 24%,var(--line))!important;
+      color:var(--ink)!important;
+      background:var(--card)!important;
+    }
+    .wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab.active,
+    .wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab.active{
+      border-color:var(--red)!important;
+      background:var(--red)!important;
+      color:#fff!important;
+      box-shadow:0 7px 18px rgba(243,18,36,.14)!important;
+    }
+    .wall-subject-bar.has-srs-groups>.zhenti-cloud-status{
+      justify-self:end!important;
+      align-self:center!important;
+      margin-left:0!important;
+      min-height:30px!important;
+      padding:0 8px!important;
+      border-color:transparent!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      font-size:10px!important;
+    }
+    .wall-subject-bar.has-srs-groups>.zhenti-cloud-status i{width:7px;height:7px}
+
+    @media(max-width:1180px) and (min-width:721px){
+      .wall-subject-bar.has-srs-groups{
+        grid-template-columns:minmax(0,1fr) auto!important;
+        grid-template-areas:'modes sync' 'subjects subjects';
+        gap:8px 12px!important;
+        padding:9px 16px 10px!important;
+      }
+      .wall-subject-bar.has-srs-groups .srs-mode-group{grid-area:modes;justify-self:start!important}
+      .wall-subject-bar.has-srs-groups .srs-subject-group{
+        grid-area:subjects;
+        justify-self:stretch!important;
+        width:100%;
+        overflow-x:auto;
+        padding-bottom:1px!important;
+        scrollbar-width:none;
+      }
+      .wall-subject-bar.has-srs-groups .srs-subject-group::-webkit-scrollbar{display:none}
+      .wall-subject-bar.has-srs-groups>.zhenti-cloud-status{grid-area:sync}
+    }
+
+    @media(max-width:720px){
+      .wall-subject-bar.has-srs-groups{
+        display:grid!important;
+        grid-template-columns:1fr!important;
+        gap:7px!important;
+        padding:8px 10px!important;
+        overflow:hidden!important;
+      }
+      .wall-subject-bar.has-srs-groups .srs-mode-group,
+      .wall-subject-bar.has-srs-groups .srs-subject-group{
+        justify-self:stretch!important;
+        width:100%;
+        overflow-x:auto;
+        gap:6px!important;
+        scrollbar-width:none;
+      }
+      .wall-subject-bar.has-srs-groups .srs-mode-group::-webkit-scrollbar,
+      .wall-subject-bar.has-srs-groups .srs-subject-group::-webkit-scrollbar{display:none}
+      .wall-subject-bar.has-srs-groups .srs-mode-group .subject-tab,
+      .wall-subject-bar.has-srs-groups .srs-subject-group .subject-tab{
+        flex:0 0 auto;
+        min-height:34px!important;
+        padding:0 12px!important;
+        border-radius:11px!important;
+        font-size:11px!important;
+      }
+      .wall-subject-bar.has-srs-groups>.zhenti-cloud-status{
+        position:fixed!important;
+        right:10px!important;
+        bottom:calc(12px + env(safe-area-inset-bottom))!important;
+        z-index:90!important;
+        width:34px!important;
+        min-width:34px!important;
+        height:34px!important;
+        padding:0!important;
+        border:1px solid var(--line)!important;
+        border-radius:999px!important;
+        background:color-mix(in srgb,var(--card) 94%,transparent)!important;
+        box-shadow:0 8px 24px rgba(0,0,0,.12)!important;
+        backdrop-filter:blur(16px)!important;
+      }
+      .wall-subject-bar.has-srs-groups>.zhenti-cloud-status span{display:none!important}
+    }
+  `;
+  document.head.appendChild(navStyle);
+
   // Separate page modes from subject filters for clearer hierarchy.
   if(!bar.classList.contains('has-srs-groups')){
     const modeButtons=[bar.querySelector('[data-main-subject="all"]'),bar.querySelector('[data-srs-tab]'),bar.querySelector('[data-favorites-tab]')].filter(Boolean);
