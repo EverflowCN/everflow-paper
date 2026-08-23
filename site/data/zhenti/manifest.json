@@ -1,6 +1,6 @@
 {
   "schema": "everflow-408-zhenti-v1",
-  "updatedAt": "2026-08-23T10:49:00Z",
+  "updatedAt": "2026-08-23T11:58:00Z",
   "policy": {
     "displayRule": "Only questions with verification.status=verified are rendered as confirmed past-paper content.",
     "copyrightNote": "Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This pilot stores concise verified transcriptions/paraphrases and provenance metadata."
@@ -49,6 +49,12 @@
       "verifiedQuestions":[1,2,3,5,6,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,35],
       "sources":["tommy408","csgraduates","noobdream","foreverlink"],
       "notes":"Accelerated 2014 intake added 32 cross-checked text-only selection questions. Questions 4 and 7 require original tree/graph figures, and question 34 requires the original Ethernet topology/forwarding-table figure. Network questions 36-40 and comprehensive questions 41-47 remain for the next batch; source answer keys for 36-40 have already been cross-checked but they were not marked verified until their stems/options are fully captured into the repository."
+    },
+    "2015": {
+      "paperStatus":"verified","contentStatus":"partial-verified","questionCount":47,
+      "verifiedQuestions":[1,2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,35,36,37,38,39,40],
+      "sources":["csgraduates","foreverlink"],
+      "notes":"Accelerated 2015 intake added 38 text-only/structured-table selection questions cross-checked independently against 计算机考研杂货铺 and 408 ForeverLink. Question 6 depends on the original weighted-graph figure and question 34 depends on the original line-code waveform, so both remain withheld until the correct figures are verified and included. Comprehensive questions 41-47 remain for later batches."
     }
   }
 }
