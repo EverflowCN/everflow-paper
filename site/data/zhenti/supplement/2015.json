@@ -3,46 +3,74 @@
   "year":2015,
   "verifiedAt":"2026-08-24",
   "questions":{
+    "6":{
+      "number":6,"subject":"ds","type":"single","score":2,
+      "stem":"求图示带权图的最小（代价）生成树时，可能是 Kruskal 算法第2次选中但不是 Prim 算法（从 V4 开始）第2次选中的边是（ ）。",
+      "options":{"A":"(V1,V3)","B":"(V1,V4)","C":"(V2,V3)","D":"(V3,V4)"},"answer":"C",
+      "analysis":"Kruskal 首先选唯一最小边(V1,V4)，随后权为8的边都可能作为第2条候选，只要不成环；其中(V2,V3)可能被选。Prim 从V4开始，第一条也只能选(V4,V1)，第二步只能从当前顶点集{V4,V1}向外选择最小边，候选为(V1,V3)或(V4,V3)，不可能直接选两端都在树外的(V2,V3)，故选C。",
+      "figures":[{"src":"/data/zhenti/assets/2015/q06-mst.svg","alt":"2015年第6题带权图","caption":"依据2015年原卷第1页逐边和权值重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-visual-cross-check","sources":["csgraduates","noobdream","foreverlink"]}
+    },
+    "34":{
+      "number":34,"subject":"cn","type":"single","score":2,
+      "stem":"使用两种编码方案对比特流 01100111 进行编码，结果如图所示。编码1和编码2分别是（ ）。",
+      "options":{"A":"NRZ 和曼彻斯特编码","B":"NRZ 和差分曼彻斯特编码","C":"NRZI 和曼彻斯特编码","D":"NRZI 和差分曼彻斯特编码"},"answer":"A",
+      "analysis":"编码1在一个码元期间电平保持不变，且比特0、1直接对应低、高电平，因此是NRZ；编码2每个码元中间必有一次跳变，跳变方向与数据位一一对应，因此是曼彻斯特编码。选A。",
+      "figures":[{"src":"/data/zhenti/assets/2015/q34-line-coding.svg","alt":"2015年第34题两种线路编码波形","caption":"依据2015年原卷第4页比特边界及波形逐段重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-waveform-cross-check","sources":["noobdream","csgraduates","foreverlink"]}
+    },
     "41":{
-      "number":41,
-      "subject":"ds",
-      "type":"comprehensive",
-      "score":15,
+      "number":41,"subject":"ds","type":"comprehensive","score":15,
       "stem":"用单链表保存 m 个整数，结点含 data 和 link，且 |data|≤n（n 为正整数）。设计时间复杂度尽可能高效的算法：对 data 绝对值相等的结点，仅保留第一次出现者，删除其余结点。要求给出基本设计思想、C/C++ 结点类型定义与算法，并说明时间、空间复杂度。",
       "answer":"设置长度 n+1 的标记数组 q，q[k] 记录绝对值 k 是否出现。扫描链表时，第一次出现就置 q[k]=1 并保留；之后再遇到相同绝对值的结点，用前驱指针摘链并释放。结点可定义为 typedef struct node{int data; struct node *link;} NODE。设链表长度为 m，时间复杂度 O(m)，辅助空间 O(n)。",
       "analysis":"题目给出 |data|≤n，使得绝对值可以直接作为数组下标。用标记数组把“此前是否出现”降为 O(1) 判断，从而只需一次链表扫描。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
     },
     "42":{
-      "number":42,
-      "subject":"ds",
-      "type":"comprehensive",
-      "score":8,
+      "number":42,"subject":"ds","type":"comprehensive","score":8,
       "stem":"已知含有5个顶点的图G如图所示。（1）写出图G的邻接矩阵A（行、列下标从0开始）；（2）求A²，并说明A²中0行3列元素值的含义；（3）若n个顶点图的邻接矩阵为B，说明B^m（2≤m≤n）中非零元素的含义。",
       "answer":"A=[[0,1,1,0,1],[1,0,0,1,1],[1,0,0,1,0],[0,1,1,0,1],[1,1,0,1,0]]。A²=[[3,1,0,3,1],[1,3,2,1,2],[0,2,2,0,2],[3,1,0,3,1],[1,2,2,1,3]]。A²[0][3]=3，表示从顶点0到顶点3长度为2的游走共有3条。一般地，B^m[i][j]给出从i到j长度为m的游走条数，非零表示至少存在一条。",
       "analysis":"邻接矩阵相乘时，中间下标对应一次中间顶点选择，因此矩阵幂自然计数固定长度的游走。公开答案常写“路径”，严格图论表述应为允许重复顶点/边的游走。",
       "figures":[{"src":"/data/zhenti/assets/2015/q42-graph.svg","alt":"2015年第42题5顶点无向图","caption":"依据两份独立题库给出的原题邻接矩阵交叉核对后重绘；边集与原题一致。"}],
       "verification":{"status":"verified","mode":"cross-checked-authoritative-redraw","sources":["csgraduates","noobdream","csyanku"]}
     },
+    "43":{
+      "number":43,"subject":"co","type":"comprehensive","score":13,
+      "stem":"某16位计算机主存按字节编址、存取单位16位，采用16位定长指令字和CPU单总线结构，数据通路如图。R0～R3为通用寄存器，T为暂存器；SR可执行mov/left/right，ALU可执行mova/add/sub/and/or/not/inc。回答：（1）哪些寄存器程序员可见及设置T的原因；（2）ALUop和SRop至少各需几位；（3）SRout控制什么部件/作用；（4）端点①～⑨中哪些须接控制部件输出；（5）补全必要连线；（6）MUX一个输入端为何为常数2。",
+      "answer":"（1）程序员可见R0～R3和PC；T暂存一个ALU操作数，解决单总线上两个操作数不能同时送ALU的问题。（2）ALU有7种操作，ALUop至少3位；SR有3种操作，SRop至少2位。（3）SRout控制SR输出端的三态门，使SR与CPU内总线接通/断开。（4）①、②、③、⑤、⑧必须接控制部件输出。（5）补线⑥→⑨、⑦→④。（6）16位指令按字节编址占2个字节，顺序取指需PC←PC+2，故MUX提供常数2。",
+      "analysis":"单总线在同一时刻只能承载一个源数据，因此需要T保存第一个ALU输入；操作控制位数由可选功能数向上取log2；①②③⑤⑧都是需要控制器发出的控制量，其余端点是数据通路连接点。",
+      "figures":[{"src":"/data/zhenti/assets/2015/q43-datapath.svg","alt":"2015年第43题CPU单总线数据通路","caption":"依据2015年原卷第6页逐部件、端点和控制信号重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-datapath-cross-check","sources":["csgraduates","foreverlink","noobdream"]}
+    },
+    "44":{
+      "number":44,"subject":"co","type":"comprehensive","score":10,
+      "stem":"承接第43题，部分指令执行过程控制信号和16位指令格式如图。支持寄存器直接/间接寻址，R0～R3编号为0～3。（1）最多可定义多少条指令；（2）inc=01H、shl=02H、sub=03H时，求 inc R1、shl R2,R1、sub R3,(R1),R2 的机器码；（3）填图中①～⑧；（4）sub R1,R3,(R2)和inc R1执行阶段至少各需多少时钟周期。",
+      "answer":"（1）OP为7位，最多128条。（2）inc R1=0240H；shl R2,R1=0488H；sub R3,(R1),R2=06EAH。（3）①0；②mov；③mova；④left；⑤read；⑥sub；⑦mov；⑧SRout。（4）sub R1,R3,(R2)至少4个时钟周期，inc R1至少2个时钟周期。",
+      "analysis":"机器码按OP、目的寻址位/寄存器号、源1寻址位/寄存器号、源2寻址位/寄存器号依次编码。控制信号由图中每拍的数据流反推；间接源操作数需要先读主存，因此sub执行阶段比inc多两个节拍。",
+      "figures":[{"src":"/data/zhenti/assets/2015/q44-control-format.svg","alt":"2015年第44题部分控制信号与指令格式","caption":"依据2015年原卷第7页图44-a、44-b逐字段和控制框重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-control-format-cross-check","sources":["noobdream","csgraduates","foreverlink"]}
+    },
     "45":{
-      "number":45,
-      "subject":"os",
-      "type":"comprehensive",
-      "score":9,
+      "number":45,"subject":"os","type":"comprehensive","score":9,
       "stem":"A、B 两人通过各自信箱辩论：每人从自己的信箱取出对方的问题，生成答案和一个新问题后，把新邮件放入对方信箱。A 信箱容量 M、初始有 x 封（0<x<M）；B 信箱容量 N、初始有 y 封（0<y<N）。信箱非空才能取信，未满才能投信。请添加必要的信号量 P/V（wait/signal）操作实现同步，并说明各信号量含义和初值。",
       "answer":"设 Full_A=x、Empty_A=M-x、Full_B=y、Empty_B=N-y，mutex_A=mutex_B=1。A：P(Full_A),P(mutex_A),取A箱邮件,V(mutex_A),V(Empty_A)；生成回复后 P(Empty_B),P(mutex_B),向B箱投信,V(mutex_B),V(Full_B)。B 对称执行：先从B箱取信，再向A箱投信。",
       "analysis":"Full/Empty 分别表示已有邮件数和空槽数，mutex 保证同一信箱的互斥访问。先取出并释放本箱空槽，再等待对方信箱空槽，可以避免持有信箱互斥锁时长期等待。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
     },
     "46":{
-      "number":46,
-      "subject":"os",
-      "type":"comprehensive",
-      "score":6,
+      "number":46,"subject":"os","type":"comprehensive","score":6,
       "stem":"某计算机按字节编址，采用二级页表分页管理。虚拟地址为 32 位，格式为：页目录索引 10 位、页表索引 10 位、页内偏移 12 位。页目录项和页表项均占 4B。回答：（1）页/页框大小与虚拟地址空间页数；（2）若完整建立页目录和全部二级页表，共占多少页；（3）某指令周期访问虚拟地址 01000000H 和 01112048H，地址转换共涉及多少个二级页表，并说明理由。",
       "answer":"页和页框大小均为 4KB；32 位虚拟地址含 2^20 个虚页。一级页目录 1024 项×4B=4KB，占 1 页；每个二级页表也占 1 页，共最多 1024 个二级页表，因此完整页目录+页表最多占 1025 页。01000000H 与 01112048H 的最高 10 位相同，属于同一页目录项覆盖范围，因此只涉及 1 个二级页表。",
       "analysis":"12 位页内偏移决定页大小 2^12B；两个 10 位索引分别给出 1024 个一级项和每张二级页表 1024 个页表项。判断是否访问同一二级页表只需比较两地址的页目录索引。",
       "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","csyanku"]}
+    },
+    "47":{
+      "number":47,"subject":"cn","type":"comprehensive","score":9,
+      "stem":"局域网拓扑如图，路由器LAN接口为111.123.15.1/24（MAC 00-a1-a1-a1-a1-a1），DHCP服务器为111.123.15.2/24，WWW服务器为111.123.15.3/24，主机1为111.123.15.4/24，主机2～N由DHCP配置。（1）DHCP最大动态地址范围及Discover的源/目的IP；（2）主机2 ARP表为空时访问Internet，首帧目的MAC及实际IP分组帧目的MAC；（3）主机1默认网关误配为111.123.15.2时能否访问WWW和Internet。",
+      "answer":"（1）动态地址最大范围111.123.15.5～111.123.15.254；DHCP Discover源IP=0.0.0.0，目的IP=255.255.255.255。（2）首个ARP请求帧目的MAC=FF-FF-FF-FF-FF-FF；获得网关MAC后，承载发往Internet的IP分组的以太网帧目的MAC=00-a1-a1-a1-a1-a1。（3）能访问WWW服务器，因为与主机1同属111.123.15.0/24，无需经过默认网关；不能访问Internet，因为默认网关应为路由器111.123.15.1，却误设为DHCP服务器111.123.15.2。",
+      "analysis":"/24中除网络地址、广播地址及已固定使用的.1～.4外，可动态分配.5～.254。首次DHCP和未知网关MAC都需使用广播；跨网段数据帧的二层目的地址应是默认网关MAC。",
+      "figures":[{"src":"/data/zhenti/assets/2015/q47-network-topology.svg","alt":"2015年第47题DHCP局域网拓扑","caption":"依据2015年原卷第8页逐设备、IP地址和MAC地址重绘。"}],
+      "verification":{"status":"verified","mode":"original-paper-network-cross-check","sources":["noobdream","csgraduates","foreverlink"]}
     }
   }
 }
