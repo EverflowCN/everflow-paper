@@ -15,7 +15,7 @@
   if(body.dataset.view==='zhenti'){
     import('/assets/js/zhenti-qwer.js?v=20260823g').catch(err=>console.error('Everflow 408 QWER shortcuts failed',err));
     const srsFlow=import('/assets/js/zhenti-srs-v2.js?v=20260823b')
-      .then(()=>import('/assets/js/zhenti-srs-error.js?v=20260823a'))
+      .then(()=>import('/assets/js/zhenti-srs-error-v2.js?v=20260823b'))
       .then(()=>import('/assets/js/zhenti-srs-reset.js?v=20260823a'))
       .catch(err=>console.error('Everflow 408 SRS quick cards failed',err));
     srsFlow.finally(()=>import('/assets/js/zhenti-favorites.js?v=20260823a').catch(err=>console.error('Everflow 408 favorites failed',err)));
