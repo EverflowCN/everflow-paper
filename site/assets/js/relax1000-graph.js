@@ -17,10 +17,6 @@ const MAX_COLS=45;
 const SUBJECT_SHORT={ds:'DS',co:'CO',os:'OS',cn:'CN'};
 let data=null,rows=[],selected=null,current='',answerVisible=false;
 try{current=localStorage.getItem(CURRENT_KEY)||''}catch{}
-
-shell.dataset.graphKind='relax1000';
-shell.dataset.fitCols=String(MAX_COLS);
-shell.dataset.fitKey='everflow-408-relax-graph-fit-v2';
 matrix.setAttribute('aria-label','Relax1000 整体图谱');
 
 function recordState(question,records=loadRecords()){
