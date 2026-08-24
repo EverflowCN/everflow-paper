@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -62,6 +62,17 @@ jobs:
               if info['badQuestions']:
                   print(year, 'bad:', ','.join(map(str, info['badQuestions'])))
           PY
+
+      - name: Persist audit report
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/zhenti/audit-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(zhenti): refresh audit report [skip ci]"
+            git push origin HEAD:main
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
