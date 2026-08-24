@@ -4,10 +4,21 @@
   const drawer=shell?.querySelector('[data-question-drawer]');
   const drawerClose=shell?.querySelector('[data-drawer-close]');
   if(!matrix)return;
+
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
   const editableTarget=target=>Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));
   const currentCell=()=>matrix.querySelector('.overview-cell.current')||matrix.querySelector('.overview-cell');
 
+  function activate(target){
+    if(!target)return false;
+    target.click();
+    target.classList.remove('keyboard-active');
+    void target.offsetWidth;
+    target.classList.add('keyboard-active');
+    window.setTimeout(()=>target.classList.remove('keyboard-active'),180);
+    requestAnimationFrame(()=>target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'}));
+    return true;
+  }
   function moveGrid(cell,key){
     if(cell?.dataset?.row==null||cell?.dataset?.col==null)return false;
     let row=Number(cell.dataset.row),col=Number(cell.dataset.col);
@@ -19,20 +30,24 @@
       if(!rowCells.length)return false;
       target=rowCells.reduce((best,node)=>Math.abs(Number(node.dataset.col)-col)<Math.abs(Number(best.dataset.col)-col)?node:best,rowCells[0]);
     }
-    if(!target||target===cell)return false;target.click();requestAnimationFrame(()=>target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'}));return true;
+    return target&&target!==cell?activate(target):false;
   }
-
   function moveTruePaper(cell,key){
     const match=String(cell?.dataset?.key||'').match(/^(\d{4})-(\d{1,2})$/);if(!match)return false;
     let year=Number(match[1]),question=Number(match[2]);
     if(key==='ArrowUp')year=clamp(year+1,2009,2026);else if(key==='ArrowDown')year=clamp(year-1,2009,2026);else if(key==='ArrowLeft')question=clamp(question-1,1,47);else if(key==='ArrowRight')question=clamp(question+1,1,47);else return false;
-    const target=matrix.querySelector(`.overview-cell[data-key="${year}-${question}"]`);if(!target||target===cell)return false;target.click();requestAnimationFrame(()=>target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'}));return true;
+    const target=matrix.querySelector(`.overview-cell[data-key="${year}-${question}"]`);
+    return target&&target!==cell?activate(target):false;
   }
 
   document.addEventListener('keydown',event=>{
     if(editableTarget(event.target))return;
-    if(event.key==='Escape'&&drawer&&!drawer.hidden){drawerClose?.click();event.preventDefault();return}
+    if(event.key==='Escape'&&drawer&&!drawer.hidden){drawerClose?.click();event.preventDefault();event.stopImmediatePropagation();return}
     if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
-    const cell=currentCell();if(moveGrid(cell,event.key)||moveTruePaper(cell,event.key))event.preventDefault();
-  });
+    const cell=currentCell();
+    if(moveGrid(cell,event.key)||moveTruePaper(cell,event.key)){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  },true);
 })();
