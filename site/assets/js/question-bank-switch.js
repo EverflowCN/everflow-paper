@@ -9,7 +9,7 @@ if(['zhenti','graph'].includes(view)){
 
   const css=document.createElement('link');
   css.rel='stylesheet';
-  css.href='/assets/css/question-bank-switch.css?v=20260824-relax2';
+  css.href='/assets/css/question-bank-switch.css?v=20260824-relax4';
   document.head.appendChild(css);
 
   const shell=document.createElement('section');
@@ -27,7 +27,7 @@ if(['zhenti','graph'].includes(view)){
   shell.querySelector('[data-bank-practice]')?.addEventListener('click',()=>{location.href='/relax/'});
 
   if(current==='relax1000'){
-    import(`/assets/js/relax1000-${view}.js?v=20260824-relax1`).catch(error=>{
+    import(`/assets/js/relax1000-${view}.js?v=20260824-relax-overview4`).catch(error=>{
       console.error('Everflow Relax1000 view failed',error);
       const fail=document.createElement('main');
       fail.className='relax-bank-root relax-load-failed';
