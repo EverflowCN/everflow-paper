@@ -2,6 +2,18 @@ const RAW_SITE='https://raw.githubusercontent.com/EverflowCN/408-exercise-paper-
 export const DATA_URL=`${RAW_SITE}/data/questions.json`;
 export const BANK_SOURCE_KEY='everflow-408-bank-source-v1';
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
+export const SRS_KEY='everflow-408-relax-srs-v1';
+export const RELAX_STORAGE_KEYS={
+  records:RECORD_KEY,
+  srs:SRS_KEY,
+  seen:'relax-seen',
+  mistakes:'relax-mistakes',
+  everWrong:'relax-ever-wrong',
+  bookmarks:'relax-bookmarks',
+  subject:'everflow-408-relax-subject',
+  graphCurrent:'everflow-408-relax-graph-current-v3',
+  graphFit:'everflow-408-relax-graph-fit-v1'
+};
 export const SUBJECT_META={
   ds:{name:'数据结构',short:'DS'},
   co:{name:'计算机组成原理',short:'CO'},
@@ -51,6 +63,16 @@ export function patchRecord(rawId,patch){
   document.dispatchEvent(new CustomEvent('everflow:relax-records-change',{detail:{id:key}}));
   return records[key]||{};
 }
+export function rewriteRecords(transform){
+  const records=loadRecords(),next={};
+  for(const [id,record] of Object.entries(records)){
+    const value=transform({...record},id);
+    if(value&&Object.keys(value).some(key=>value[key]!==undefined&&value[key]!==''))next[id]=value;
+  }
+  saveRecords(next);
+  document.dispatchEvent(new CustomEvent('everflow:relax-records-change',{detail:{scope:'all'}}));
+  return next;
+}
 export function compatArray(key){const value=readJson(key,[]);return Array.isArray(value)?value:[]}
 export function compatHas(key,rawId){const target=idKey(rawId);return compatArray(key).some(value=>idKey(value)===target)}
 export function setCompat(key,rawId,present){
@@ -59,23 +81,29 @@ export function setCompat(key,rawId,present){
   writeJson(key,next);
   return next;
 }
+export function clearCompat(...keys){for(const key of keys.flat())try{localStorage.removeItem(key)}catch{}}
+export function clearRelaxStorage({keepPreferences=true}={}){
+  const preserve=keepPreferences?new Set([RELAX_STORAGE_KEYS.subject,RELAX_STORAGE_KEYS.graphFit]):new Set();
+  Object.values(RELAX_STORAGE_KEYS).forEach(key=>{if(!preserve.has(key))try{localStorage.removeItem(key)}catch{}});
+  document.dispatchEvent(new CustomEvent('everflow:relax-records-change',{detail:{scope:'all',reset:true}}));
+}
 export function syncAnswerCompatibility(question,correct){
   const rawId=question?.id;
-  setCompat('relax-seen',rawId,true);
-  setCompat('relax-mistakes',rawId,!correct);
-  if(!correct)setCompat('relax-ever-wrong',rawId,true);
+  setCompat(RELAX_STORAGE_KEYS.seen,rawId,true);
+  setCompat(RELAX_STORAGE_KEYS.mistakes,rawId,!correct);
+  if(!correct)setCompat(RELAX_STORAGE_KEYS.everWrong,rawId,true);
 }
 export function toggleBookmark(question){
-  const rawId=question?.id,current=compatHas('relax-bookmarks',rawId),next=!current;
-  setCompat('relax-bookmarks',rawId,next);
+  const rawId=question?.id,current=compatHas(RELAX_STORAGE_KEYS.bookmarks,rawId),next=!current;
+  setCompat(RELAX_STORAGE_KEYS.bookmarks,rawId,next);
   patchRecord(rawId,{favorite:next||undefined});
   return next;
 }
 export function questionState(question,records=loadRecords()){
   const rec=records[idKey(question)]||{};
-  const seen=Boolean(rec.answer)||compatHas('relax-seen',question?.id);
-  const wrong=rec.correct===false||compatHas('relax-mistakes',question?.id);
-  const favorite=Boolean(rec.favorite)||compatHas('relax-bookmarks',question?.id);
+  const seen=Boolean(rec.answer)||compatHas(RELAX_STORAGE_KEYS.seen,question?.id);
+  const wrong=rec.correct===false||compatHas(RELAX_STORAGE_KEYS.mistakes,question?.id);
+  const favorite=Boolean(rec.favorite)||compatHas(RELAX_STORAGE_KEYS.bookmarks,question?.id);
   return{rec,seen,wrong,favorite};
 }
 export function questionNumber(question,index=0){return question?.number??question?.bookNumber??question?.index??index+1}
