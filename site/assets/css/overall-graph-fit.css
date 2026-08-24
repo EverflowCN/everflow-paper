@@ -1,3 +1,5 @@
+.graph-source-inline{display:inline-flex;align-items:center;gap:7px;margin-left:6px;margin-right:auto;min-width:0}.graph-source-label{font-size:10px;font-weight:900;letter-spacing:.08em;color:var(--index)}.graph-source-segmented{display:inline-flex;align-items:center;padding:2px;border:1px solid var(--frame-line);border-radius:999px;background:var(--page)}.graph-source-segmented button{min-height:26px;padding:4px 10px;border:0;border-radius:999px;background:transparent;color:var(--index);font:inherit;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;touch-action:manipulation}.graph-source-segmented button.active{background:var(--frame);color:#20232a;box-shadow:0 1px 5px rgba(20,22,28,.1)}body.dark .graph-source-segmented button.active{color:#f1f3f6}
+.overview-cell.current{transform:scale(1.12);z-index:8}.overview-cell.keyboard-active{animation:graph-key-active .18s ease}@keyframes graph-key-active{0%{transform:scale(1.02)}55%{transform:scale(1.28)}100%{transform:scale(1.12)}}
 @media (min-width:1000px){
   .overview-stage.graph-fit.drawer-open{grid-template-columns:minmax(0,1fr) 360px}
   .overview-stage.graph-fit .overview-frame{padding:10px 12px;gap:6px}
@@ -5,15 +7,23 @@
   .overview-stage.graph-fit .overview-legend i{width:12px;height:12px;border-radius:4px}
   .overview-stage.graph-fit .overview-scroll{overflow:hidden;scrollbar-width:none;display:grid;place-items:center}
   .overview-stage.graph-fit .overview-scroll::-webkit-scrollbar{display:none}
-  .overview-stage.graph-fit .overview-matrix{width:100%;min-width:0;height:auto;padding:4px;justify-content:center;align-content:start;align-self:center}
+  .overview-stage.graph-fit .overview-matrix{width:100%;min-width:0;height:auto;padding:4px;justify-content:center;align-content:center;align-self:center}
   .overview-stage.graph-fit .overview-index{font-size:8px}
   .overview-stage.graph-fit .overview-year{font-size:9px}
   .overview-stage.graph-fit .overview-cell{border-width:1.5px;border-radius:5px}
-  .overview-stage.graph-fit .overview-cell.current{outline-width:2px;outline-offset:1px}
+  .overview-stage.graph-fit .overview-cell.current{transform:scale(1.18);outline-width:2px;outline-offset:1px;z-index:10}
   .overview-stage.graph-fit .overview-cell.correct::after,
   .overview-stage.graph-fit .overview-cell.wrong::after,
   .overview-stage.graph-fit .overview-cell.reviewed::after,
   .overview-stage.graph-fit .overview-cell.draft::after{left:1px;bottom:1px;width:4px;height:4px;border-width:1px}
+  .overview-stage.graph-fit.graph-fit-dense .overview-index{font-size:6px}
+  .overview-stage.graph-fit.graph-fit-dense .overview-year{font-size:7px}
+  .overview-stage.graph-fit.graph-fit-dense .overview-cell{border-width:1px;border-radius:2px}
+  .overview-stage.graph-fit.graph-fit-dense .overview-cell.current{transform:scale(1.28)}
+  .overview-stage.graph-fit.graph-fit-dense .overview-cell.correct::after,
+  .overview-stage.graph-fit.graph-fit-dense .overview-cell.wrong::after,
+  .overview-stage.graph-fit.graph-fit-dense .overview-cell.reviewed::after,
+  .overview-stage.graph-fit.graph-fit-dense .overview-cell.draft::after{display:none}
 }
 @media (min-width:1600px){
   .overview-stage.graph-fit.drawer-open{grid-template-columns:minmax(0,1fr) 400px}
@@ -21,9 +31,9 @@
   .overview-stage.graph-fit .overview-year{font-size:10px}
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1000px){
-  .overview-stage.graph-fit .overview-cell:hover{transform:scale(1.5);z-index:9;box-shadow:0 5px 18px rgba(28,31,38,.22),inset 0 0 0 1px rgba(255,255,255,.4)}
+  .overview-stage.graph-fit .overview-cell:hover{transform:scale(1.5);z-index:12;box-shadow:0 5px 18px rgba(28,31,38,.22),inset 0 0 0 1px rgba(255,255,255,.4)}
+  .overview-cell.current:hover{transform:scale(1.35)}
 }
-.graph-fit-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 10px;border:1px solid var(--frame-line);border-radius:999px;background:var(--frame);color:var(--index);font:inherit;font-weight:800;white-space:nowrap;cursor:pointer;touch-action:manipulation}
-.graph-fit-toggle:hover{background:var(--page)}
-body.dark .graph-fit-toggle{background:#20242b;color:#c7cbd3;border-color:#383d47}
-@media (max-width:999px){.graph-fit-toggle{display:none!important}}
+.graph-fit-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 10px;border:1px solid var(--frame-line);border-radius:999px;background:var(--frame);color:var(--index);font:inherit;font-weight:800;white-space:nowrap;cursor:pointer;touch-action:manipulation}.graph-fit-toggle:hover{background:var(--page)}body.dark .graph-fit-toggle{background:#20242b;color:#c7cbd3;border-color:#383d47}
+@media (max-width:999px){.graph-fit-toggle{display:none!important}.graph-source-inline{margin-left:4px}.graph-source-label{display:none}.graph-source-segmented button{min-height:25px;padding:4px 8px}}
+@media (max-width:760px){.graph-source-inline{order:5;margin-left:0;margin-right:0}.graph-source-segmented button{font-size:9px;padding:4px 7px}.overview-cell.current{transform:scale(1.1)}}
