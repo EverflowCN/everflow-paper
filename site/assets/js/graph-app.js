@@ -29,7 +29,7 @@ function selectedSource(){const query=new URL(location.href).searchParams.get('s
 function rememberSource(source){try{localStorage.setItem(SOURCE_KEY,source)}catch{}}
 function resetShell(){
   shell.hidden=false;
-  shell.classList.remove('drawer-open','graph-fit','graph-fit-dense');
+  shell.classList.remove('graph-fit','graph-fit-dense');
   shell.dataset.controlsReady='false';
   for(const name of ['--cell-size','--gap','--year-col'])shell.style.removeProperty(name);
   shell.querySelector('[data-overview-matrix]')?.replaceChildren();
