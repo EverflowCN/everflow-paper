@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Everflow Relax1000 智能组卷：按 408 真题结构、章节侧重与错题状态快速生成练习卷">
+  <title>Relax1000 组卷 · Everflow</title>
+  <link rel="icon" href="../assets/everflow-icon.svg">
+  <link rel="stylesheet" href="../assets/css/site.css?v=20260824-full5">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20260824-full5">
+  <link rel="stylesheet" href="../assets/css/relax1000-practice.css?v=20260824-relax2">
+</head>
+<body data-view="relax">
+<header class="topbar">
+  <div class="wrap nav">
+    <a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a>
+    <nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav>
+    <button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
+<div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
+
+<main class="relax-practice" data-relax-app>
+  <section class="relax-hero">
+    <div><div class="eyebrow">RELAX 408 · 27 1000题</div><h1>今天，刷哪一组？</h1><p>直接复用你现有的 1576 道 Relax1000 题库。可按 408 真题结构、章节侧重、错题状态与收藏状态快速组卷。</p></div>
+    <div class="relax-hero-stats"><div><strong data-bank-total>1576</strong><span>题库总量</span></div><div><strong data-seen-total>0</strong><span>已做</span></div><div><strong data-wrong-total>0</strong><span>待攻克错题</span></div></div>
+  </section>
+
+  <section class="relax-builder" data-builder>
+    <div class="relax-section-head"><span>01</span><div><h2>组卷方案</h2><p>先选模式，再决定范围与题目状态。</p></div></div>
+    <div class="relax-mode-grid">
+      <button class="active" type="button" data-mode="simulation"><b>真题结构</b><small>11 / 12 / 10 / 7，自动按章节比例抽题</small><em>40题</em></button>
+      <button type="button" data-mode="emphasis"><b>章节侧重</b><small>约 70% 来自你勾选的重点章节</small><em>专项强化</em></button>
+      <button type="button" data-mode="wrong"><b>错题重练</b><small>优先从未掌握错题中随机抽取</small><em>复盘</em></button>
+      <button type="button" data-mode="quick"><b>快速练习</b><small>随机 10 题，点一下直接开始</small><em>10题</em></button>
+    </div>
+
+    <div class="relax-grid">
+      <section class="relax-panel">
+        <div class="relax-section-head compact"><span>02</span><div><h2>科目与章节</h2><p>仿真模式自动按四科分配；专项模式可自由选择。</p></div></div>
+        <div class="relax-subjects" data-subjects></div>
+        <div class="relax-chapters" data-chapters></div>
+      </section>
+      <aside class="relax-panel relax-settings">
+        <div class="relax-section-head compact"><span>03</span><div><h2>试卷设置</h2><p>状态筛选与题数设置。</p></div></div>
+        <label class="relax-label">题目数量</label>
+        <div class="relax-size" data-size-options><button data-size="10">10</button><button data-size="20">20</button><button data-size="30">30</button><button class="active" data-size="40">40</button><button data-size="50">50</button></div>
+        <label class="relax-label">题目状态</label>
+        <div class="relax-filters"><label><input type="checkbox" value="all" checked>不限</label><label><input type="checkbox" value="unseen">没做过</label><label><input type="checkbox" value="wrong">未掌握错题</label><label><input type="checkbox" value="seen">已做过</label><label><input type="checkbox" value="favorite">已收藏</label></div>
+        <label class="relax-switch"><span><b>随机题序</b><small>每次生成不同排列</small></span><input type="checkbox" data-shuffle checked></label>
+        <button class="relax-generate" type="button" data-generate>生成试卷 →</button>
+        <p class="relax-tip" data-builder-tip>数据与错题状态保存在当前设备，并与原 Relax1000 组卷器兼容。</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="relax-paper" data-paper hidden>
+    <header class="relax-paper-head"><div><button type="button" data-exit>← 返回组卷</button><h1 data-paper-title>Relax1000 练习卷</h1><p><span data-progress>1 / 40</span> · <span data-answered>已答 0</span></p></div><div><strong data-timer>00:00</strong><button type="button" data-submit>交卷</button></div></header>
+    <div class="relax-answer-grid" data-answer-grid></div>
+    <article class="relax-question-card" data-question-card></article>
+    <footer class="relax-paper-nav"><button type="button" data-prev>← 上一题</button><button type="button" data-next>下一题 →</button></footer>
+  </section>
+
+  <section class="relax-result" data-result hidden></section>
+</main>
+
+<footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>Relax1000 · 本地状态兼容原组卷器</span></div></footer>
+<script src="../assets/js/site-runtime-v2.js?v=20260824-relax2"></script>
+<script type="module" src="../assets/js/relax1000-practice.js?v=20260824-relax2"></script>
+</body>
+</html>
