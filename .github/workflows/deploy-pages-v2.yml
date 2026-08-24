@@ -47,7 +47,7 @@ jobs:
           done
           grep -q 'data-resource-search' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html
-          grep -q "everflow-site-v40" site/sw.js
+          grep -q "everflow-site-v41" site/sw.js
           git diff --check
 
   deploy:
@@ -315,7 +315,7 @@ jobs:
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
-          echo '{"build":"20260824-graph-r6-20260825-perf-resource2"}' > site/build.json
+          echo '{"build":"20260824-graph-r6-20260825-perf-resource3"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages

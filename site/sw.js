@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v40';
+const CACHE='everflow-site-v41';
 const SHELL=[
   '/',
   '/study/',
@@ -25,7 +25,8 @@ const SHELL=[
 
 const cacheKey=request=>{
   const url=new URL(request.url);
-  return new Request(`${url.origin}${url.pathname}`,{method:'GET'});
+  if(request.mode==='navigate')url.search='';
+  return new Request(url.href,{method:'GET'});
 };
 
 self.addEventListener('install',event=>{
