@@ -1,7 +1,7 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-const APP_VERSION='20260824-graph-r5';
+const APP_VERSION='20260824-graph-r6';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');
 const sourceHost=shell?.querySelector('[data-graph-source-host]');
@@ -14,7 +14,7 @@ const SOURCES={
     fitKey:'everflow-graph-fit-mode-v1',caption:'年份 × 题号 · 2009—2026',
     load:async()=>{
       await import(`/assets/js/zhenti-data-overlay.js?v=${APP_VERSION}`);
-      await import(`/assets/js/overall-graph.js?v=${APP_VERSION}`);
+      await import(`/assets/js/zhenti-graph.js?v=${APP_VERSION}`);
     }
   },
   relax1000:{
@@ -24,13 +24,8 @@ const SOURCES={
   }
 };
 
-function storedSource(){
-  try{return localStorage.getItem(SOURCE_KEY)==='relax1000'?'relax1000':'zhenti'}catch{return'zhenti'}
-}
-function selectedSource(){
-  const query=new URL(location.href).searchParams.get('source');
-  return Object.hasOwn(SOURCES,query)?query:storedSource();
-}
+function storedSource(){try{return localStorage.getItem(SOURCE_KEY)==='relax1000'?'relax1000':'zhenti'}catch{return'zhenti'}}
+function selectedSource(){const query=new URL(location.href).searchParams.get('source');return Object.hasOwn(SOURCES,query)?query:storedSource()}
 function rememberSource(source){try{localStorage.setItem(SOURCE_KEY,source)}catch{}}
 function resetShell(){
   shell.hidden=false;
