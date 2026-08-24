@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v33';
+const CACHE='everflow-site-v34';
 const SHELL=[
   '/',
   '/assets/css/site.css',
