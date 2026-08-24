@@ -1,18 +1,21 @@
 (()=>{
-  const SUBJECTS=['ds','co','os','cn'];
   const STATE_KEY='oxygen408-progress-v2';
-  const LEGACY={ds:'408_checkin_ds',co:'408_checkin_co'};
-  let data=null,state={},active='ds';
+  const COURSE_SUBJECT='pastpaper';
+  let data=null,state={},course={label:'408课程',items:[]};
   const noteTimers=new Map();
 
   const $=s=>document.querySelector(s);
-  const $$=s=>[...document.querySelectorAll(s)];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const nowIso=()=>new Date().toISOString();
 
   function loadState(){try{state=JSON.parse(localStorage.getItem(STATE_KEY)||'{}')||{}}catch{state={}}}
   function saveState(){localStorage.setItem(STATE_KEY,JSON.stringify(state))}
   function ensure(id){return state[id]||(state[id]={done:false,note:'',updatedAt:''})}
+  function normalizeCourse(payload){
+    if(payload?.course&&Array.isArray(payload.course.items))return payload.course;
+    const items=Object.values(payload?.subjects||{}).flatMap(subject=>subject?.items||[]);
+    return{label:payload?.source?.collection||'408课程',items};
+  }
 
   async function hydrateFromStudyStore(){
     if(!window.EveraStore)return;
@@ -31,60 +34,27 @@
     }catch(e){console.warn('study-store hydrate failed',e)}
   }
 
-  function mirrorCourse(id,subject){
+  function mirrorCourse(id){
     const st=ensure(id);
-    window.EveraStore?.putCourseState({id,subject,done:st.done,note:st.note}).catch?.(()=>{});
+    window.EveraStore?.putCourseState({id,subject:COURSE_SUBJECT,done:st.done,note:st.note}).catch?.(()=>{});
   }
-
-  function migrateLegacy(){
-    let changed=false;
-    for(const key of ['ds','co']){
-      const items=data.subjects?.[key]?.items||[];
-      if(!items.length||!LEGACY[key])continue;
-      try{
-        const old=JSON.parse(localStorage.getItem(LEGACY[key])||'null');
-        const notes=JSON.parse(localStorage.getItem(key==='ds'?'408_notes_ds':'408_notes_co')||'null');
-        if(Array.isArray(old)){
-          old.forEach((v,i)=>{
-            const item=items[i];if(!item)return;
-            if(!state[item.id]){
-              state[item.id]={done:Boolean(v),note:Array.isArray(notes)?String(notes[i]||''):'',updatedAt:nowIso()};changed=true;
-            }
-          });
-        }
-      }catch{}
-    }
-    if(changed)saveState();
-  }
-
-  function mirrorKnownStates(){
-    if(!window.EveraStore||!data)return;
-    SUBJECTS.forEach(key=>(data.subjects?.[key]?.items||[]).forEach(item=>{
-      if(state[item.id])mirrorCourse(item.id,key);
-    }));
-  }
+  function mirrorKnownStates(){if(!window.EveraStore)return;(course.items||[]).forEach(item=>{if(state[item.id])mirrorCourse(item.id)})}
 
   function stats(){
-    let total=0,done=0;
-    SUBJECTS.forEach(key=>{
-      const items=data.subjects?.[key]?.items||[];
-      const d=items.filter(i=>ensure(i.id).done).length;
-      total+=items.length;done+=d;
-      const tab=$(`[data-tab="${key}"]`);
-      if(tab)tab.textContent=`${data.subjects[key].short} ${d}/${items.length}`;
-    });
-    const pct=total?Math.round(done/total*100):0;
-    $('[data-total-text]').textContent=`${done}/${total} 课时`;
-    $('[data-total-percent]').textContent=pct+'%';
-    $('[data-total-bar]').style.width=pct+'%';
+    const items=course.items||[],done=items.filter(item=>ensure(item.id).done).length,total=items.length,pct=total?Math.round(done/total*100):0;
+    const totalText=$('[data-total-text]'),totalPercent=$('[data-total-percent]'),totalBar=$('[data-total-bar]');
+    if(totalText)totalText.textContent=`${done}/${total} 课时`;
+    if(totalPercent)totalPercent.textContent=pct+'%';
+    if(totalBar)totalBar.style.width=pct+'%';
   }
 
   function row(item,i){
     const st=ensure(item.id);
     const when=item.publishedAt?new Date(item.publishedAt*1000).toLocaleDateString('zh-CN'):'';
+    const year=item.year||String(item.title||'').match(/(20\d{2}|19\d{2})年/)?.[1]||i+1;
     return `<tr class="${st.done?'done':''}" data-row="${esc(item.id)}">
       <td><input class="check" type="checkbox" data-check="${esc(item.id)}" ${st.done?'checked':''}></td>
-      <td class="num">${i+1}</td>
+      <td class="num">${esc(year)}</td>
       <td><span class="course-title">${esc(item.title)}</span>${when?`<span class="course-meta">${esc(when)}</span>`:''}</td>
       <td class="mono">${esc(item.duration||'--')}</td>
       <td>${item.url?`<a class="course-link" href="${esc(item.url)}" target="_blank" rel="noopener">B站 ↗</a>`:'<span class="muted">暂无链接</span>'}</td>
@@ -92,64 +62,49 @@
     </tr>`;
   }
 
-  function renderSubject(key){
-    const panel=$(`[data-panel="${key}"]`);
-    const info=data.subjects?.[key];
-    if(!panel||!info)return;
-    const items=info.items||[];
+  function render(){
+    const panel=$('[data-course-panel]'),items=course.items||[];
+    if(!panel)return;
     panel.innerHTML=items.length?`
       <div class="checkin-toolbar">
-        <div><strong>${esc(info.label)}强化</strong> <span class="muted">· ${items.length} 课时</span></div>
+        <div><strong>${esc(course.label||'历年408真题讲解')}</strong> <span class="muted">· ${items.length} 课时</span></div>
         <div class="toolbar-actions">
-          <button class="small-btn" data-all="${key}" data-val="1">全部完成</button>
-          <button class="small-btn" data-all="${key}" data-val="0">全部取消</button>
+          <button class="small-btn" data-all="1">全部完成</button>
+          <button class="small-btn" data-all="0">全部取消</button>
         </div>
       </div>
-      <div class="course-table-wrap"><table class="course-table"><thead><tr><th>✓</th><th>#</th><th>课程名称</th><th>时长</th><th>视频</th><th>备注</th></tr></thead><tbody>${items.map(row).join('')}</tbody></table></div>
-    `:`<div class="empty-state"><strong>${esc(info.label)}强化暂无课程数据</strong></div>`;
-  }
-
-  function render(){
-    SUBJECTS.forEach(renderSubject);stats();switchTab(active);
-  }
-
-  function switchTab(key){
-    active=key;
-    $$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===key));
-    $$('[data-panel]').forEach(p=>p.classList.toggle('active',p.dataset.panel===key));
+      <div class="course-table-wrap"><table class="course-table"><thead><tr><th>✓</th><th>年份</th><th>课程名称</th><th>时长</th><th>视频</th><th>备注</th></tr></thead><tbody>${items.map(row).join('')}</tbody></table></div>
+    `:`<div class="empty-state"><strong>合集暂时还没有可显示的课时</strong></div>`;
+    stats();
   }
 
   async function loadCourseData(){
-    const r=await fetch('../data/oxygen.json');
+    const r=await fetch('../data/oxygen.json',{cache:'no-store'});
     if(!r.ok)throw new Error('course data');
     return r.json();
   }
 
   document.addEventListener('click',e=>{
-    const tab=e.target.closest('[data-tab]');if(tab){switchTab(tab.dataset.tab);return}
-    const all=e.target.closest('[data-all]');if(all){
-      const key=all.dataset.all,val=all.dataset.val==='1',stamp=nowIso();
-      (data.subjects?.[key]?.items||[]).forEach(i=>{const st=ensure(i.id);st.done=val;st.updatedAt=stamp;mirrorCourse(i.id,key)});
-      saveState();renderSubject(key);stats();return;
-    }
+    const all=e.target.closest('[data-all]');if(!all)return;
+    const val=all.dataset.all==='1',stamp=nowIso();
+    (course.items||[]).forEach(item=>{const st=ensure(item.id);st.done=val;st.updatedAt=stamp;mirrorCourse(item.id)});
+    saveState();render();
   });
   document.addEventListener('change',e=>{
-    if(e.target.matches('[data-check]')){
-      const id=e.target.dataset.check,st=ensure(id);st.done=e.target.checked;st.updatedAt=nowIso();saveState();mirrorCourse(id,active);
-      e.target.closest('tr')?.classList.toggle('done',e.target.checked);stats();
-    }
+    if(!e.target.matches('[data-check]'))return;
+    const id=e.target.dataset.check,st=ensure(id);st.done=e.target.checked;st.updatedAt=nowIso();saveState();mirrorCourse(id);
+    e.target.closest('tr')?.classList.toggle('done',e.target.checked);stats();
   });
   document.addEventListener('input',e=>{
-    if(e.target.matches('[data-note]')){
-      const id=e.target.dataset.note,st=ensure(id);st.note=e.target.value;st.updatedAt=nowIso();saveState();
-      clearTimeout(noteTimers.get(id));noteTimers.set(id,setTimeout(()=>mirrorCourse(id,active),450));
-    }
+    if(!e.target.matches('[data-note]'))return;
+    const id=e.target.dataset.note,st=ensure(id);st.note=e.target.value;st.updatedAt=nowIso();saveState();
+    clearTimeout(noteTimers.get(id));noteTimers.set(id,setTimeout(()=>mirrorCourse(id),450));
   });
 
   async function boot(){
     try{
-      loadState();await hydrateFromStudyStore();data=await loadCourseData();migrateLegacy();render();mirrorKnownStates();
-    }catch(err){console.error(err);$('[data-checkin-root]').innerHTML='<div class="empty-state">强化表加载失败，请稍后刷新。</div>'}
+      loadState();await hydrateFromStudyStore();data=await loadCourseData();course=normalizeCourse(data);render();mirrorKnownStates();
+    }catch(err){console.error(err);$('[data-checkin-root]').innerHTML='<div class="empty-state">课程表加载失败，请稍后刷新。</div>'}
   }
   boot();
 })();
