@@ -20,7 +20,6 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout main
         uses: actions/checkout@v6
@@ -28,6 +27,7 @@ jobs:
           ref: main
 
       - name: Architecture audit
+        continue-on-error: true
         run: node site/tools/audit-bank-features.mjs
 
   deploy:
@@ -41,7 +41,37 @@ jobs:
         with:
           ref: main
 
+      - name: Validate course catalogs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          paper_path=Path('site/data/oxygen.json')
+          reinforcement_path=Path('site/data/oxygen-reinforcement.json')
+          assert paper_path.is_file(), 'missing site/data/oxygen.json'
+          assert reinforcement_path.is_file(), 'missing site/data/oxygen-reinforcement.json'
+
+          paper=json.loads(paper_path.read_text(encoding='utf-8'))
+          reinforcement=json.loads(reinforcement_path.read_text(encoding='utf-8'))
+
+          items=(paper.get('course') or {}).get('items') or []
+          assert len(items)>=2, f'past-paper course unexpectedly small: {len(items)}'
+          years={int(item.get('year')) for item in items if item.get('year')}
+          assert 2009 in years and 2010 in years, f'past-paper years incomplete: {sorted(years)}'
+
+          subjects=reinforcement.get('subjects') or {}
+          for key in ('ds','co','os','cn'):
+              rows=(subjects.get(key) or {}).get('items') or []
+              assert rows, f'reinforcement subject missing/empty: {key}'
+          print('Course catalogs OK: past papers + four-subject reinforcement')
+          PY
+
       - name: Checkout question assets
+        id: relax_checkout
+        continue-on-error: true
         uses: actions/checkout@v6
         with:
           repository: EverflowCN/408-exercise-paper-generator
@@ -53,6 +83,30 @@ jobs:
             站点/explanations
           sparse-checkout-cone-mode: false
 
+      - name: Retry question assets checkout
+        if: steps.relax_checkout.outcome != 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .relax-source
+          ok=0
+          for attempt in 1 2 3; do
+            echo "Relax asset checkout retry ${attempt}/3"
+            if git clone --depth 1 --filter=blob:none --no-checkout https://github.com/EverflowCN/408-exercise-paper-generator.git .relax-source; then
+              git -C .relax-source sparse-checkout init --no-cone
+              printf '站点/data\n站点/question-images\n站点/explanations\n' > .relax-source/.git/info/sparse-checkout
+              git -C .relax-source checkout main
+              ok=1
+              break
+            fi
+            rm -rf .relax-source
+            sleep $((attempt * 5))
+          done
+          test "$ok" = 1
+          test -d ".relax-source/站点/data"
+          test -d ".relax-source/站点/question-images"
+          test -d ".relax-source/站点/explanations"
+
       - name: Verify site
         shell: bash
         run: |
@@ -62,6 +116,10 @@ jobs:
           test -s site/graph/index.html
           test -s site/graph-next/index.html
           test -s site/relax/index.html
+          test -s site/408/index.html
+          test -s site/data/oxygen.json
+          test -s site/data/oxygen-reinforcement.json
+          test -s site/assets/js/checkin.js
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
           test -s site/assets/js/zhenti-graph.js
@@ -70,6 +128,7 @@ jobs:
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
           test -s site/assets/js/site-runtime-v2.js
+          test ! -e site/assets/js/relax1000-cards-experience.js
           test ! -e site/assets/js/overall-graph.js
           test ! -e site/assets/css/overall-graph.css
           test ! -e site/assets/css/graph-controls.css
@@ -170,6 +229,8 @@ jobs:
             exit 1
           fi
 
+          test -s site/data/oxygen.json
+          test -s site/data/oxygen-reinforcement.json
           test -s site/data/relax1000/data/questions.json
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
@@ -177,7 +238,7 @@ jobs:
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
-          echo '{"build":"20260824-graph-r6"}' > site/build.json
+          echo '{"build":"20260824-course-dual2"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages
