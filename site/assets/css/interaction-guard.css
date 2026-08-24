@@ -1,0 +1,11 @@
+:root{--z-nav:50;--z-float:240;--z-drawer:720;--z-modal:10020;--z-dialog:10080;--z-immersive:10100;--z-toast:10200}
+[hidden]{display:none!important}
+button:disabled,[aria-disabled="true"]{pointer-events:none!important;cursor:not-allowed!important}
+body.menu-open,body.evera-modal-open,body.evera-immersive-open,body.relax-reset-open{overscroll-behavior:none}
+body.evera-modal-open .mobile-panel,body.evera-immersive-open .mobile-panel,body.relax-reset-open .mobile-panel{pointer-events:none}
+.relax-question-modal{z-index:var(--z-modal)!important;isolation:isolate}
+.relax-question-modal[hidden],.relax-reset-overlay[hidden]{display:none!important}
+.evera-toast-stack{z-index:var(--z-toast)!important;pointer-events:none}
+.evera-toast-stack .evera-toast{pointer-events:auto}
+.question-drawer{z-index:var(--z-drawer)}
+@media(max-width:900px){body.menu-open{overflow:hidden}}
