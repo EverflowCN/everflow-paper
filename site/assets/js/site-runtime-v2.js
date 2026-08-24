@@ -47,7 +47,9 @@
 
   const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))})});menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
 
-  import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));if(body.dataset.view!=='zhenti')return;
+  import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));
+  if(['zhenti','graph'].includes(body.dataset.view))import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));
+  if(body.dataset.view!=='zhenti'||storage.get('everflow-408-bank-source-v1')==='relax1000')return;
   const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss);
   import(asset('/assets/js/zhenti-qwer.js')).catch(err=>console.error('Everflow 408 shortcuts failed',err));
   const srsFlow=import(asset('/assets/js/zhenti-srs-v2.js')).then(()=>import(asset('/assets/js/zhenti-srs-error-v2.js'))).then(()=>import(asset('/assets/js/zhenti-srs-reset.js'))).catch(err=>console.error('Everflow 408 SRS failed',err));
