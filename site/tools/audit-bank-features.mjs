@@ -25,7 +25,7 @@ assert(switcher.includes('>组卷</button>'),'bank switch missing 组卷');
 assert(!switcher.includes('Relax组卷'),'bank switch still says Relax组卷');
 assert(switcher.includes('relax1000-cards.js'),'Relax1000 cards module not loaded');
 assert(builder.includes("QUOTA={ds:11,co:11,os:10,cn:8}"),'408 simulation quota is not 11/11/10/8');
-assert(builder.includes("data-source")===false||paper.includes('data-source="zhenti"'),'408 true-paper source missing');
+assert(paper.includes('data-source="zhenti"'),'408 true-paper source missing');
 assert(paper.includes('data-source="relax"'),'Relax1000 paper source missing');
 assert(paper.includes('data-mode="wrong"'),'wrong-paper mode missing');
 assert(builder.includes('wrongPool()'),'cross-bank wrong pool missing');
