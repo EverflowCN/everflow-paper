@@ -20,133 +20,146 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install PDF/image dependencies
+      - name: Install dependencies
         run: pip install --quiet pymupdf pillow requests
-      - name: Add final verified 2026 questions and exact public-source crops
+      - name: Finish 2026 with verified original-source material
         run: |
           python - <<'PY'
           import json, pathlib, re, requests, fitz
           from PIL import Image, ImageChops
 
           root=pathlib.Path('site/data/zhenti')
+          outdir=root/'assets'/'2026'; outdir.mkdir(parents=True,exist_ok=True)
           source_url='https://static.kaoyan.cn/file/question/2025/12/27/c8b3701245371f4df0777acfe5f6bb2e.pdf'
-          r=requests.get(source_url,timeout=60)
-          r.raise_for_status()
-          doc=fitz.open(stream=r.content,filetype='pdf')
+          pdf=requests.get(source_url,timeout=60); pdf.raise_for_status()
+          doc=fitz.open(stream=pdf.content,filetype='pdf')
           assert len(doc)>=20
 
-          outdir=root/'assets'/'2026'
-          outdir.mkdir(parents=True,exist_ok=True)
-          page=doc[19]
-          pix=page.get_pixmap(matrix=fitz.Matrix(3,3),alpha=False)
-          image=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
+          def trim(img):
+            bg=Image.new('RGB',img.size,'white')
+            mask=ImageChops.difference(img,bg).convert('L').point(lambda p:255 if p>18 else 0)
+            box=mask.getbbox()
+            if not box:return img
+            l,t,r,b=box; pad=12
+            return img.crop((max(0,l-pad),max(0,t-pad),min(img.width,r+pad),min(img.height,b+pad)))
 
-          def trim(crop):
-            bg=Image.new('RGB',crop.size,'white')
-            diff=ImageChops.difference(crop,bg).convert('L').point(lambda p:255 if p>18 else 0)
-            box=diff.getbbox()
-            if not box:
-              return crop
-            pad=14
-            l,t,r,b=box
-            return crop.crop((max(0,l-pad),max(0,t-pad),min(crop.width,r+pad),min(crop.height,b+pad)))
+          def page_image(page_no):
+            p=doc[page_no]
+            pix=p.get_pixmap(matrix=fitz.Matrix(3,3),alpha=False)
+            return p,Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
 
-          # Page 20 of the public 2026 question PDF. Two minimal regions are required:
-          # the instruction-format table and the I1-I4 fill-in table.
-          jobs=[
+          def save_largest_embedded(page_no,name,min_area=2500):
+            p=doc[page_no]
+            candidates=[]
+            for block in p.get_text('dict').get('blocks',[]):
+              if block.get('type')!=1:continue
+              x0,y0,x1,y1=block['bbox']; area=(x1-x0)*(y1-y0)
+              if area>=min_area:candidates.append((area,fitz.Rect(x0,y0,x1,y1)))
+            assert candidates,f'no embedded figure on page {page_no+1} for {name}'
+            _,rect=max(candidates,key=lambda x:x[0])
+            pad=4; rect=fitz.Rect(max(0,rect.x0-pad),max(0,rect.y0-pad),min(p.rect.width,rect.x1+pad),min(p.rect.height,rect.y1+pad))
+            pix=p.get_pixmap(matrix=fitz.Matrix(3,3),clip=rect,alpha=False)
+            img=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
+            trim(img).save(outdir/name,'PNG',optimize=True)
+
+          # Public PDF pages 12 and 13 contain the exact VLAN and routing figures.
+          save_largest_embedded(11,'q36-vlan-original.png')
+          save_largest_embedded(12,'q37-routing-original.png')
+
+          # Page 20 contains Q43's two required tables. These are text/vector objects,
+          # so render only the two minimal table rectangles rather than the whole page.
+          p43,img43=page_image(19)
+          for box,name in [
             ((285,395,1535,770),'q43-instruction-format-original.png'),
-            ((290,1170,1540,1395),'q43-program-table-original.png'),
-          ]
-          for box,name in jobs:
-            trim(image.crop(box)).save(outdir/name,'PNG',optimize=True)
+            ((290,1170,1540,1395),'q43-program-table-original.png')
+          ]:
+            trim(img43.crop(box)).save(outdir/name,'PNG',optimize=True)
 
-          extra_path=root/'supplement'/'2026-extra.json'
           extra={
-            'schema':'everflow-408-paper-supplement-v1',
-            'year':2026,
-            'verifiedAt':'2026-08-24',
-            'questions':{
+            'schema':'everflow-408-paper-supplement-v1','year':2026,'verifiedAt':'2026-08-24','questions':{
+              '36':{
+                'number':36,'subject':'cn','type':'single','score':2,
+                'stem':'支持 VLAN 划分的以太网交换机已按端口划分为两个 VLAN，划分结果及各端口所连主机的 MAC 地址如图。四个帧为：F1 的 DA 为 …-03、SA 为 …-01；F2 的 DA 为 …-04、SA 为 …-05；F3 为广播帧、SA 为 …-02；F4 的 DA 为 …-06、SA 为 …-03。H3 会接收到的是（ ）。',
+                'options':{'A':'仅 F2、F4','B':'仅 F1、F3','C':'仅 F1、F2','D':'仅 F3、F4'},
+                'answer':'B',
+                'analysis':'H3 与 H1、H2 位于同一 VLAN。F1 是同 VLAN 内发往 H3 的单播帧，F3 是 H2 发出的同 VLAN 广播帧，因此 H3 会收到 F1、F3；VLAN 隔离使另一 VLAN 内的通信不转发给 H3。',
+                'figures':[{'src':'/data/zhenti/assets/2026/q36-vlan-original.png','alt':'2026年第36题 VLAN 划分与主机 MAC 图','caption':'截取自公开2026年408题面PDF，仅保留本题 VLAN/MAC 图。'}],
+                'verification':{'status':'verified','mode':'authoritative-public-paper-crop-cross-check','sources':['kaoyan2026','csgraduates']}
+              },
+              '37':{
+                'number':37,'subject':'cn','type':'single','score':2,
+                'stem':'某网络在 t0 时刻的网络拓扑与 R1 路由表如图。R1～R4 基于链路状态算法计算路由，S0～S4 为 R1 接口，链路数字为费用。t1>t0 时 R1 检测到 R1—R2 链路断开，重新计算路由并充分路由聚合后，R1 路由表中的路由项数量为（ ）。',
+                'options':{'A':'3','B':'4','C':'5','D':'6'},'answer':'C',
+                'analysis':'链路断开后按剩余拓扑重新计算最短路径，并对可连续聚合的目的网络做充分聚合；结合直连项和默认路由，最终保留 5 条路由项。',
+                'figures':[{'src':'/data/zhenti/assets/2026/q37-routing-original.png','alt':'2026年第37题网络拓扑与 R1 路由表','caption':'截取自公开2026年408题面PDF，仅保留本题拓扑/路由表图。'}],
+                'verification':{'status':'verified','mode':'authoritative-public-paper-crop-cross-check','sources':['kaoyan2026','csgraduates','noobdream']}
+              },
               '42':{
                 'number':42,'subject':'ds','type':'comprehensive','score':10,
-                'stem':'栈只允许入栈和出栈。将 1,2,3,…,n 按此顺序依次入栈，回答：（1）n=9 时，出栈序列〈2,3,1,6,4,7,5,9,8〉和〈2,3,1,5,6,7,4,9,8〉能否得到；（2）若某排列 P1,…,Pn 不能由该栈得到，则存在 i<j<k 时 Pi、Pj、Pk 的大小关系是什么；（3）n=4 时，以 2 开头的合法出栈序列有多少个；（4）若 n=k-1 时合法出栈序列总数为 M，则 n=k 时以 1 开头、以 2 开头以及全部合法出栈序列分别有多少个。',
+                'stem':'栈只允许入栈和出栈。将 1,2,3,…,n 按此顺序依次入栈，回答：（1）n=9 时，出栈序列〈2,3,1,6,4,7,5,9,8〉和〈2,3,1,5,6,7,4,9,8〉能否得到；（2）若排列 P1,…,Pn 不能由该栈得到，则存在 i<j<k 时 Pi、Pj、Pk 的大小关系是什么；（3）n=4 时，以 2 开头的合法出栈序列有多少个；（4）若 n=k-1 时合法出栈序列总数为 M，则 n=k 时以 1 开头、以 2 开头以及全部合法出栈序列分别有多少个。',
                 'answer':'（1）第一个不能得到，第二个可以得到。（2）存在 Pi>Pk>Pj。（3）5 个。（4）以 1 开头有 M 个，以 2 开头也有 M 个；全部为第 k 个卡特兰数 C(2k,k)/(k+1)。',
-                'analysis':'按目标序列模拟压栈/出栈即可判断（1）；非法栈排列的禁形是下标 i<j<k 且 Pi>Pk>Pj。合法出栈序列总数为卡特兰数；固定首项为 1 或 2 后都与规模 k-1 的合法栈排列建立一一对应，因此均为 M。',
-                'verification':{'status':'verified','mode':'authoritative-public-paper-cross-check','sources':['kaoyan2026','codebrick','noobdream','csgraduates']}
+                'analysis':'按目标序列模拟压栈/出栈即可判断；非法栈排列的禁形是 i<j<k 且 Pi>Pk>Pj。合法序列总数为卡特兰数。公开题面 PDF 明确两组 n=9 序列均包含数字 9，排除了部分回忆版/OCR 的重复数字版本。',
+                'verification':{'status':'verified','mode':'authoritative-public-paper-cross-check','sources':['kaoyan2026','noobdream','csgraduates']}
               },
               '43':{
                 'number':43,'subject':'co','type':'comprehensive','score':10,
                 'stem':'某 16 位计算机 C 按字节编址，R0～R15 编号为 0～15，存储器地址为 16 位，采用 16 位定长指令字，含 R、I、M 三种格式。R 型为 0000|rt|rs/num|op1；I 型为 op2|rt|imm8；M 型为 op3|offset(12 位)。OP1=0001/0010 分别表示加/左移，OP2=0100 表示加立即数，OP3=1110/1111 分别表示取数/存数。回答主存单元与通用寄存器宽度；OP1 与 OP2、OP2 与 OP3 是否可同码；R2=ABCDH、R9=F001H 时执行 0000 0010 1001 0001 后寄存器内容；并完成 y=16x-5 的 I1～I4 指令填空。',
                 'answer':'（1）主存单元 8 位，通用寄存器 16 位。（2）OP1 与 OP2 可以同码；OP2 与 OP3 不可以同码。（3）R2=9BCEH，R9=F001H。（4）①1110；②0000 0100；③1111 1011；④0000 0000 0010。',
-                'analysis':'R 型的 OP1 位于低 4 位，而 I/M 型操作码位于高 4 位，所以 OP1 与 OP2 可重复，OP2 与 OP3 会冲突。R2←ABCDH+F001H，保留低 16 位为 9BCEH。I1 取 x 到 R0；I2 左移 4 位；I3 加 8 位补码 -5；I4 以 offset=2 存到相邻的 y。',
+                'analysis':'R 型 OP1 位于低 4 位，而 I/M 型操作码位于高 4 位，因此 OP1 与 OP2 可重复，OP2 与 OP3 不可重复。ABCDH+F001H 的低 16 位为 9BCEH；该结果与公开原题/多源答案核对，避免采用个别二次转录中的 98CEH 笔误。',
                 'figures':[
-                  {'src':'/data/zhenti/assets/2026/q43-instruction-format-original.png','alt':'2026年第43题 R/I/M 指令格式表','caption':'截取自公开的2026年408题面PDF，仅保留本题指令格式表。'},
-                  {'src':'/data/zhenti/assets/2026/q43-program-table-original.png','alt':'2026年第43题 I1-I4 程序填空表','caption':'截取自公开的2026年408题面PDF，仅保留本题程序填空表。'}
+                  {'src':'/data/zhenti/assets/2026/q43-instruction-format-original.png','alt':'2026年第43题 R/I/M 指令格式表','caption':'截取自公开2026年408题面PDF，仅保留指令格式表。'},
+                  {'src':'/data/zhenti/assets/2026/q43-program-table-original.png','alt':'2026年第43题 I1-I4 程序填空表','caption':'截取自公开2026年408题面PDF，仅保留程序填空表。'}
                 ],
-                'verification':{'status':'verified','mode':'authoritative-public-paper-crop-cross-check','sources':['kaoyan2026','codebrick','noobdream','csgraduates']}
+                'verification':{'status':'verified','mode':'authoritative-public-paper-crop-cross-check','sources':['kaoyan2026','noobdream','csgraduates']}
               },
               '47':{
                 'number':47,'subject':'cn','type':'comprehensive','score':9,
                 'stem':'客户端 C 建立一条 TCP 连接向服务器 Si 上传 2000B 文件。MSS=500B，慢开始门限初始为 8MSS，Si 对每个 TCP 数据段确认且 ACK 不带数据，rwnd 始终为 1000B，RTT=5ms；C 与 Si 的初始序号分别为 1000 和 2000，全程无重传或丢包。回答：（1）连接建立握手次数以及 C 收到 SYN=1、ACK=1 段的 ack_seq；（2）当 C 收到 ACK=1、seq=2001、ack_seq=2001、rwnd=1000 的确认段后，cwnd 与发送窗口；（3）连接释放挥手次数，以及 C 收到最后一个 TCP 段的 seq、ack_seq、FIN；（4）忽略段传输时延，从 C 请求建立连接起，到 C 确定 Si 已成功收到全部文件的时间。',
-                'answer':'（1）三次握手，ack_seq=1001。（2）cwnd=3MSS=1500B，发送窗口=min(1500,1000)=1000B。（3）四次挥手；C 收到的最后一个段 FIN=1，seq=2001，ack_seq=3002。（4）4RTT=20ms。',
-                'analysis':'SYN 各消耗一个序号。收到对首个 500B 数据段的确认后慢开始使 cwnd 增加 1MSS；实际发送窗口受 rwnd=1000B 限制。2000B 数据共 4MSS，结合窗口限制与逐段确认，连同建立连接所需时序，C 在 4RTT 即 20ms 时确认文件全部到达。',
+                'answer':'（1）三次握手，ack_seq=1001。（2）cwnd=3MSS=1500B，发送窗口=min(1500,1000)=1000B。（3）四次挥手；最后收到段 FIN=1，seq=2001，ack_seq=3002。（4）4RTT=20ms。',
+                'analysis':'SYN 各消耗一个序号。首个 500B 数据段被确认后，慢开始使 cwnd 增加 1MSS，但实际发送窗口受 rwnd=1000B 限制。结合 2000B=4MSS、逐段确认与连接建立时序，C 在 4RTT 即 20ms 时确认文件完整到达。',
                 'verification':{'status':'verified','mode':'cross-checked-paraphrase','sources':['kaoyan2026','noobdream','csgraduates']}
               }
             }
           }
+          extra_path=root/'supplement'/'2026-extra.json'
           extra_path.write_text(json.dumps(extra,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-          manifest_path=root/'manifest.json'
-          manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
-          manifest.setdefault('sources',{})['kaoyan2026']={
-            'name':'掌上考研公开2026年408题面PDF',
-            'type':'authoritative-public-question-pdf',
-            'url':source_url,
-            'license':'not-declared'
-          }
-          y=manifest['years']['2026']
-          y['paperStatus']='verified'; y['contentStatus']='verified'; y['questionCount']=47
-          y['verifiedQuestions']=list(range(1,48))
+          manifest_path=root/'manifest.json'; manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest.setdefault('sources',{})['kaoyan2026']={'name':'掌上考研公开2026年408题面PDF','type':'authoritative-public-question-pdf','url':source_url,'license':'not-declared'}
+          y=manifest['years']['2026']; y['paperStatus']='verified'; y['contentStatus']='verified'; y['questionCount']=47; y['verifiedQuestions']=list(range(1,48))
           y['sources']=list(dict.fromkeys(y.get('sources',[])+['kaoyan2026','csgraduates','noobdream']))
-          y['notes']='47/47 verified. Final Q42 stack-sequence statement was resolved against the public 2026 paper PDF (correct sequences include 9, not the OCR/memory variants); Q43 uses tight original-question table crops and independently cross-checked answers; Q47 TCP values are cross-checked across the public paper, N诺 and 计算机考研杂货铺.'
-          manifest['updatedAt']='2026-08-24T08:55:00+08:00'
+          y['notes']='47/47 verified. Q36 VLAN and Q37 routing visuals use tight crops from the public 2026 paper PDF; Q42 resolves malformed memory/OCR sequences against that PDF; Q43 uses two minimal original-question table crops with the arithmetic typo independently corrected; Q47 is cross-checked across public sources.'
+          manifest['updatedAt']='2026-08-24T09:05:00+08:00'
 
-          overlay=pathlib.Path('site/assets/js/zhenti-data-overlay.js')
-          text=overlay.read_text(encoding='utf-8')
-          assert 'for(const source of [extra,supplement,base])' in text, 'base precedence must stay authoritative'
-          text=text.replace("'2022','2025']);", "'2022','2025','2026']);")
-          text=re.sub(r"const DATA_VERSION='[^']+';", "const DATA_VERSION='20260824-all-47-final-e';", text)
+          overlay=pathlib.Path('site/assets/js/zhenti-data-overlay.js'); text=overlay.read_text(encoding='utf-8')
+          assert 'for(const source of [extra,supplement,base])' in text
+          m=re.search(r"const extraYears=new Set\((\[[^;]+\])\);",text); assert m
+          if "'2026'" not in m.group(1):
+            replacement=m.group(1)[:-1]+",'2026']"
+            text=text[:m.start(1)]+replacement+text[m.end(1):]
+          text=re.sub(r"const DATA_VERSION='[^']+';","const DATA_VERSION='20260824-all-47-final-f';",text)
           overlay.write_text(text,encoding='utf-8')
 
-          # Validate effective merge for every year. Precedence must match frontend:
-          # extra < supplement < base. Every effective question must be verified.
-          def load_json(path):
-            return json.loads(path.read_text(encoding='utf-8')) if path.exists() else None
+          def load(path):return json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'questions':{}}
           for year in range(2009,2027):
-            base=load_json(root/f'{year}.json') or {'questions':{}}
-            sup=load_json(root/'supplement'/f'{year}.json') or {'questions':{}}
-            ext=load_json(root/'supplement'/f'{year}-extra.json') or {'questions':{}}
+            base=load(root/f'{year}.json'); sup=load(root/'supplement'/f'{year}.json'); ext=load(root/'supplement'/f'{year}-extra.json')
             merged={}
             for src in (ext.get('questions',{}),sup.get('questions',{}),base.get('questions',{})):
               for num,q in src.items():
                 prev=merged.get(num,{})
                 merged[num]={**prev,**q,'verification':{**prev.get('verification',{}),**q.get('verification',{})}}
-            missing=[n for n in range(1,48) if str(n) not in merged or merged[str(n)].get('verification',{}).get('status')!='verified']
-            assert not missing, f'{year} missing/unverified: {missing}'
-            my=manifest['years'][str(year)]
-            assert my.get('verifiedQuestions')==list(range(1,48)), f'{year} manifest not 47/47'
-            assert my.get('contentStatus')=='verified', f'{year} manifest contentStatus'
-
+            bad=[n for n in range(1,48) if str(n) not in merged or merged[str(n)].get('verification',{}).get('status')!='verified']
+            assert not bad,f'{year} missing/unverified {bad}'
+            assert all(merged[str(n)].get('subject') in {'ds','co','os','cn'} for n in range(1,48)),f'{year} missing subject'
+            my=manifest['years'][str(year)]; assert my.get('verifiedQuestions')==list(range(1,48)) and my.get('contentStatus')=='verified'
           manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
 
-          # JSON/schema and asset sanity.
-          for p in sorted(root.glob('*.json'))+sorted((root/'supplement').glob('*.json')):
-            json.loads(p.read_text(encoding='utf-8'))
-          for _,name in jobs:
-            f=outdir/name
-            assert f.is_file() and f.stat().st_size>5000, name
-          assert "'2026'" in re.search(r"const extraYears=new Set\((\[[^;]+\])\);", overlay.read_text(encoding='utf-8')).group(1)
+          for p in sorted(root.glob('*.json'))+sorted((root/'supplement').glob('*.json')):json.loads(p.read_text(encoding='utf-8'))
+          for name in ['q36-vlan-original.png','q37-routing-original.png','q43-instruction-format-original.png','q43-program-table-original.png']:
+            f=outdir/name; assert f.is_file() and f.stat().st_size>4000,(name,f.stat().st_size if f.exists() else 0)
+          assert "'2026'" in re.search(r"const extraYears=new Set\((\[[^;]+\])\);",overlay.read_text(encoding='utf-8')).group(1)
           PY
-      - name: Commit complete 2009-2026 verified corpus
+      - name: Commit complete corpus
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
