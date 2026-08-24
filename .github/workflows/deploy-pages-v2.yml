@@ -39,6 +39,9 @@ jobs:
           test -s site/assets/js/site-runtime-v2.js
           echo "Everflow site artifact ready"
 
+      - name: Audit bank, graph and paper suite
+        run: node site/tools/audit-bank-features.mjs
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
