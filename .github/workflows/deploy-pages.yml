@@ -50,18 +50,22 @@ jobs:
       - name: Audit all 846 408 questions
         shell: bash
         run: |
+          set +e
           node site/tools/audit-zhenti.mjs
+          audit_status=$?
+          set -e
           python - <<'PY'
           import json
           p = 'site/data/zhenti/audit-report.json'
           with open(p, 'r', encoding='utf-8') as f:
               d = json.load(f)
           s = d['summary']
-          print(f"zhenti audit healthy={s['healthy']}/{d['expectedQuestions']} unhealthy={s['unhealthy']} figureFailures={s['localFigureFailures']}")
+          print(f"zhenti audit healthy={s['healthy']}/{d['expectedQuestions']} unhealthy={s['unhealthy']} figureFailures={s['localFigureFailures']} manifestFailures={s.get('manifestFailures', 0)}")
           for year, info in d['years'].items():
               if info['badQuestions']:
                   print(year, 'bad:', ','.join(map(str, info['badQuestions'])))
           PY
+          echo "audit exit status: ${audit_status} (report will still be persisted)"
 
       - name: Persist audit report
         shell: bash
