@@ -35,6 +35,7 @@ function sync(){
   bar.querySelector('[data-relax-immersive-due]').textContent=stat(0);
   bar.querySelector('[data-relax-immersive-reviewed]').textContent=reviewed();
   const side=bar.querySelector('[data-relax-side-toggle]');side.textContent=cardsRoot.classList.contains('relax-side-collapsed')?'显示侧栏':'隐藏侧栏';
+  const help=cardsRoot.querySelector('.relax-cards-help');if(help&&!help.dataset.fullscreenHelp){help.insertAdjacentHTML('beforeend','<br>Shift + F：畅享全屏');help.dataset.fullscreenHelp='1'}
   bar.hidden=!active;
   if(!active)cardsRoot.classList.remove('relax-side-collapsed');
 }
