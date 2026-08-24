@@ -1,7 +1,7 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-const APP_VERSION='20260824-graph-r4';
+const APP_VERSION='20260824-graph-r5';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');
 const sourceHost=shell?.querySelector('[data-graph-source-host]');
@@ -82,12 +82,6 @@ function showFatal(error){
   const frame=shell.querySelector('.overview-frame');
   if(frame)frame.innerHTML='<div class="drawer-loading"><div><strong>图谱载入失败</strong><p>数据或组件没有完整载入，请刷新后重试。</p></div></div>';
 }
-function closeInitialDrawer(){
-  const drawer=shell.querySelector('[data-question-drawer]');
-  if(drawer&&!drawer.hidden)shell.querySelector('[data-drawer-close]')?.click();
-  const reopen=shell.querySelector('[data-drawer-reopen]');
-  if(reopen)reopen.hidden=true;
-}
 
 const source=selectedSource();
 rememberSource(source);
@@ -97,7 +91,6 @@ mountSourceSwitch(source);
 
 try{
   await SOURCES[source].load();
-  closeInitialDrawer();
   await import(`/assets/js/graph-controls.js?v=${APP_VERSION}`);
   body.dataset.graphReady='true';
   document.dispatchEvent(new CustomEvent('everflow:graph-ready',{detail:{source,version:APP_VERSION}}));
