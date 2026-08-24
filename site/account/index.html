@@ -21,7 +21,7 @@
     <div class="page-head compact-head">
       <div class="eyebrow">ACCOUNT</div>
       <h1>账户</h1>
-      <p>默认使用邮箱 + 密码登录；首次注册或无密码账号可以使用邮箱验证码，忘记密码可通过邮箱验证后重新设置。学习数据仍优先保存在本机，登录后同步到对应账号。</p>
+      <p>默认使用邮箱 + 密码登录；首次注册或无密码账号可以使用邮箱验证码，忘记密码可通过 6 位邮箱验证码重新设置。学习数据仍优先保存在本机，登录后同步到对应账号。</p>
     </div>
 
     <nav class="account-switcher" aria-label="账户与会员"><a class="active" href="./" aria-current="page">账户</a><a href="../membership/">会员</a></nav>
@@ -66,15 +66,37 @@
 
     <section class="study-card auth-primary" data-password-recovery hidden>
       <div class="eyebrow">RECOVERY</div>
-      <h2>设置新密码</h2>
-      <p class="muted" data-recovery-copy>邮箱身份验证完成后，可以在这里设置新的登录密码。</p>
-      <div class="study-form">
+      <h2>重置密码</h2>
+      <p class="muted" data-recovery-copy>先验证邮箱，再设置新的登录密码。</p>
+
+      <div class="study-form" data-recovery-code-stage>
+        <label>账号邮箱<input type="email" autocomplete="email" inputmode="email" data-recovery-email placeholder="you@example.com"></label>
+        <button class="timer-btn primary" type="button" data-recovery-send>发送重置验证码</button>
+        <div class="otp-stage" data-recovery-otp-stage hidden>
+          <div class="field-label">输入邮件中的 6 位验证码</div>
+          <div class="otp-boxes" data-recovery-otp-boxes>
+            <input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="重置验证码第1位">
+            <input inputmode="numeric" maxlength="1" aria-label="重置验证码第2位">
+            <input inputmode="numeric" maxlength="1" aria-label="重置验证码第3位">
+            <input inputmode="numeric" maxlength="1" aria-label="重置验证码第4位">
+            <input inputmode="numeric" maxlength="1" aria-label="重置验证码第5位">
+            <input inputmode="numeric" maxlength="1" aria-label="重置验证码第6位">
+          </div>
+          <div class="otp-actions">
+            <button class="timer-btn primary" type="button" data-recovery-verify>验证邮箱</button>
+            <button class="timer-btn" type="button" data-recovery-resend disabled>60 秒后重发</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="study-form" data-recovery-password-stage hidden>
         <label>新密码<input type="password" autocomplete="new-password" data-recovery-password placeholder="至少 8 位"></label>
         <label>确认新密码<input type="password" autocomplete="new-password" data-recovery-password-confirm placeholder="再次输入新密码"></label>
         <p class="muted">建议使用 8 位以上，并同时包含字母与数字。</p>
         <button class="timer-btn primary" type="button" data-recovery-save>保存新密码</button>
-        <button class="timer-btn" type="button" data-recovery-cancel>返回登录</button>
       </div>
+
+      <button class="timer-btn" type="button" data-recovery-cancel style="margin-top:12px">返回登录</button>
       <div class="auth-feedback" data-recovery-feedback role="status" aria-live="polite"></div>
     </section>
 
@@ -96,6 +118,6 @@
 <script src="../assets/js/site-runtime-v2.js?v=20260824-ui4"></script>
 <script src="../assets/js/study-store.js"></script>
 <script src="../assets/js/cloud-config.js"></script>
-<script type="module" src="../assets/js/account.js?v=20260824-reset1"></script>
+<script type="module" src="../assets/js/account.js?v=20260824-reset2"></script>
 </body>
 </html>
