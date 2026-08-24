@@ -1,0 +1,62 @@
+name: Audit 408 verified corpus
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/data/zhenti/**'
+      - 'site/tools/audit-zhenti.mjs'
+      - 'site/assets/js/zhenti-data-overlay.js'
+      - '.github/workflows/audit-zhenti.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zhenti-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Run exhaustive 846-question audit
+        id: audit
+        continue-on-error: true
+        run: node site/tools/audit-zhenti.mjs
+
+      - name: Print audit summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          p='site/data/zhenti/audit-report.json'
+          with open(p,'r',encoding='utf-8') as f:
+              d=json.load(f)
+          print(json.dumps(d['summary'],ensure_ascii=False))
+          for year, info in d['years'].items():
+              if info['badQuestions'] or info.get('manifestFailureCount'):
+                  print(year, 'bad=', info['badQuestions'], 'manifest=', info.get('manifestFailureCount',0))
+          PY
+
+      - name: Persist audit report
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add site/data/zhenti/audit-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(zhenti): refresh exhaustive audit report [skip ci]'
+            git push origin HEAD:main
+          fi
+
+      - name: Require healthy corpus
+        if: steps.audit.outcome == 'failure'
+        run: exit 1
