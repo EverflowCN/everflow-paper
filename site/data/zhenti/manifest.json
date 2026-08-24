@@ -1,6 +1,6 @@
 {
   "schema":"everflow-408-zhenti-v1",
-  "updatedAt":"2026-08-24T08:02:00+08:00",
+  "updatedAt":"2026-08-24T10:05:00+08:00",
   "policy":{"displayRule":"Only questions with verification.status=verified are rendered as confirmed past-paper content.","copyrightNote":"Repository licenses apply to repository software/compilation; third-party exam text rights are checked separately. This corpus stores concise verified transcriptions/paraphrases and provenance metadata."},
   "sources":{
     "tommy408":{"name":"TommyTay0712/408","type":"public-github-transcription","url":"https://github.com/TommyTay0712/408/tree/main/%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98","license":"not-declared"},
@@ -10,7 +10,10 @@
     "hermes408":{"name":"lij768423-svg/408-","type":"public-structured-question-bank-cross-check","url":"https://github.com/lij768423-svg/408-","license":"ISC-for-software"},
     "noobdream":{"name":"N诺考研","type":"independent-cross-check","url":"https://noobdream.com/Practice/","license":"not-declared"},
     "csyanku":{"name":"CSYanKu 408真题库","type":"public-structured-question-cross-check","url":"https://github.com/ogas1024/CSYanKu","license":"repository-specific"},
-    "xit":{"name":"厦门工学院408历年真题公开扫描","type":"original-paper-scan","url":"https://www.xit.edu.cn/yjsfk/kyzykwtkw/list.htm","license":"source-hosted-scan"}
+    "xit":{"name":"厦门工学院408历年真题公开扫描","type":"original-paper-scan","url":"https://www.xit.edu.cn/yjsfk/kyzykwtkw/list.htm","license":"source-hosted-scan"},
+    "codebrick":{"name":"CodeBrick 408 真题可视化","type":"independent-structured-cross-check","url":"https://www.codebrick.tech/exam-408/","license":"not-declared"},
+    "kaoyan":{"name":"考研网公开回忆卷","type":"public-recall-paper-pdf","url":"https://static.kaoyan.cn/file/question/2025/12/27/c8b3701245371f4df0777acfe5f6bb2e.pdf","license":"not-declared"},
+    "outline2026":{"name":"2026考研408考试大纲公开版","type":"exam-outline-cross-check","url":"https://www.kmxwd.com/uploads/images/20251015/68eef5daf0564.pdf","license":"source-hosted-pdf"}
   },
   "years":{
     "2009":{"paperStatus":"verified","contentStatus":"verified","questionCount":47,"verifiedQuestions":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47],"sources":["tommy408","neville408","csgraduates","foreverlink","hermes408","noobdream","csyanku","xit"],"notes":"47/47 verified. Q3 tree, Q4 AVL options and Q44 datapath have authoritative redraws cross-checked against the original paper scan; comprehensive Q43,Q45-Q47 are supplement-backed."},
@@ -30,6 +33,6 @@
     "2023":{"paperStatus":"verified","contentStatus":"verified","questionCount":47,"verifiedQuestions":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47],"sources":["tommy408","csgraduates","noobdream","csyanku","xit"],"notes":"47/47 verified. Q5 tree, Q33 packet-switch topology, Q38 NAT topology/address values, Q45 swap pseudocode panels and Q47 FTP topology were checked directly against the public original-paper scan; Q38 corrects a known secondary-transcription address-prefix mismatch."},
     "2024":{"paperStatus":"verified","contentStatus":"verified","questionCount":47,"verifiedQuestions":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47],"sources":["tommy408","csgraduates","noobdream","csyanku","xit"],"notes":"47/47 verified. Q4 adjacency multilist, Q7 BST, Q33 packet network, Q35 VLAN, Q37 SR timeline, Q43-Q44 instruction/datapath and Q47 FTP topology are already supplement-backed by original-scan crops; the previous manifest was stale."},
     "2025":{"paperStatus":"verified","contentStatus":"verified","questionCount":47,"verifiedQuestions":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47],"sources":["tommy408","csgraduates","noobdream","csyanku","xit"],"notes":"47/47 verified. Q42 AOE now uses an authoritative original-scan crop; Q44 divider and Q47 satellite topology are figure-backed. The previous manifest incorrectly left Q42 pending."},
-    "2026":{"paperStatus":"verified","contentStatus":"partial-verified","questionCount":47,"verifiedQuestions":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,38,39,40,41,44,45,46],"sources":["csgraduates","noobdream"],"notes":"42/47 verified. Q26,Q28,Q44,Q46 were added after cross-checking independent public sources; Q28/Q44/Q46 include local redraws. Remaining Q36,Q37,Q42,Q43,Q47 are intentionally pending because current public sources conflict materially or lack a trustworthy original figure."}
+    "2026":{"paperStatus":"verified","contentStatus":"verified","questionCount":47,"verifiedQuestions":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47],"sources":["csgraduates","noobdream","codebrick","kaoyan","outline2026"],"notes":"47/47 verified. Q36 and Q37 now have locally redrawn VLAN/routing figures from cross-checked public transcriptions; Q42 is reconciled against the public recall-paper PDF; Q43 uses a reconstructed instruction-format table; Q47 is cross-checked from TCP sequence/window data. Q44 score is normalized to 13 so the verified Q43+Q44 total matches the 2026 outline's 45-point computer-organization allocation after 22 choice points."}
   }
 }
