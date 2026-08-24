@@ -27,10 +27,10 @@ jobs:
           ref: main
 
       - name: Architecture audit
-        continue-on-error: true
         run: node site/tools/audit-bank-features.mjs
 
   deploy:
+    needs: quality
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -107,6 +107,51 @@ jobs:
           test -d ".relax-source/站点/question-images"
           test -d ".relax-source/站点/explanations"
 
+      - name: Checkout 408 algorithm visualizer
+        uses: actions/checkout@v6
+        with:
+          repository: EverflowCN/struct-viz
+          ref: main
+          path: .struct-viz
+
+      - name: Setup Node.js for visualizer
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .struct-viz/package-lock.json
+
+      - name: Validate and build visualizer
+        working-directory: .struct-viz
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build
+          git diff --check
+
+      - name: Integrate visualizer and materialize deep links
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf site/visual
+          mkdir -p site/visual
+          cp -R .struct-viz/dist/. site/visual/
+
+          for route in \
+            sandbox \
+            subject/data-structures \
+            subject/computer-organization \
+            subject/operating-systems \
+            subject/computer-networks
+          do
+            mkdir -p "site/visual/${route}"
+            cp site/visual/index.html "site/visual/${route}/index.html"
+          done
+
       - name: Verify site
         shell: bash
         run: |
@@ -119,6 +164,13 @@ jobs:
           test -s site/408/index.html
           test -s site/data/oxygen.json
           test -s site/data/oxygen-reinforcement.json
+          test -s site/visual/index.html
+          test -s site/visual/sandbox/index.html
+          test -s site/visual/subject/data-structures/index.html
+          test -s site/visual/subject/computer-organization/index.html
+          test -s site/visual/subject/operating-systems/index.html
+          test -s site/visual/subject/computer-networks/index.html
+          test -n "$(find site/visual/assets -type f -print -quit)"
           test -s site/assets/js/checkin.js
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
@@ -238,7 +290,7 @@ jobs:
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
-          echo '{"build":"20260824-course-dual2"}' > site/build.json
+          echo '{"build":"20260824-graph-r6-visual1"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages

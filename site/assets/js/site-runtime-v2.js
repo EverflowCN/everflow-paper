@@ -1,6 +1,6 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260824-bank10';
+  const ASSET_VERSION='20260824-visual1';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
 
@@ -45,7 +45,7 @@
   const complete=(btn,label='完成',restoreMs=1400)=>{if(!btn)return;const original=btn.dataset.everaHtml||btn.innerHTML,cleanLabel=String(label||'完成').replace(/[✓✔]\s*$/,'').trim()||'完成';btn.classList.remove('is-busy');btn.disabled=true;delete btn.dataset.uiIconKey;iconText(btn,'check',cleanLabel);if(restoreMs>0)setTimeout(()=>{btn.disabled=false;btn.innerHTML=original;delete btn.dataset.everaHtml;delete btn.dataset.uiIconKey;upgradeControl(btn)},restoreMs)};
   window.EveraUI={toast,setBusy,complete,icon:iconMarkup,upgradeIcons:upgradeScope};
 
-  const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))})});menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
+  const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))})});menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>1040)setMenu(false)},{passive:true});
 
   import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));
   if(body.dataset.view==='zhenti')import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));

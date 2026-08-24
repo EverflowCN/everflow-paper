@@ -6,6 +6,7 @@
   const items=[
     {href:'/',label:'首页',match:p=>p==='/'},
     {href:'/study/',label:'学习',match:p=>p.startsWith('/study/')||p.startsWith('/408/')},
+    {href:'/visual/',label:'算法可视化',match:p=>p.startsWith('/visual/')},
     {href:'/zhenti/',label:'题库',match:p=>p.startsWith('/zhenti/')},
     {href:'/relax/',label:'组卷',match:p=>p.startsWith('/relax/')},
     {href:'/graph/',label:'整体图谱',match:p=>p.startsWith('/graph/')},
