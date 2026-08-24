@@ -116,7 +116,7 @@
 
   async function loadPaper(year){
     if(window.EverflowZhentiData?.loadPaper)return window.EverflowZhentiData.loadPaper(String(year));
-    const response=await fetch(`/data/zhenti/${year}.json?v=20260824-full4`,{cache:'no-store'});
+    const response=await fetch(`/data/zhenti/${year}.json?v=20260824-full5`,{cache:'no-store'});
     if(!response.ok)throw new Error(`HTTP ${response.status}`);
     return response.json();
   }
