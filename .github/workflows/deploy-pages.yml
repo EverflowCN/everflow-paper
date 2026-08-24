@@ -47,6 +47,22 @@ jobs:
           print('oxygen.json OK:', d.get('updatedAt'))
           PY
 
+      - name: Audit all 846 408 questions
+        shell: bash
+        run: |
+          node site/tools/audit-zhenti.mjs
+          python - <<'PY'
+          import json
+          p = 'site/data/zhenti/audit-report.json'
+          with open(p, 'r', encoding='utf-8') as f:
+              d = json.load(f)
+          s = d['summary']
+          print(f"zhenti audit healthy={s['healthy']}/{d['expectedQuestions']} unhealthy={s['unhealthy']} figureFailures={s['localFigureFailures']}")
+          for year, info in d['years'].items():
+              if info['badQuestions']:
+                  print(year, 'bad:', ','.join(map(str, info['badQuestions'])))
+          PY
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
