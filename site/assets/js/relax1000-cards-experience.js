@@ -59,7 +59,7 @@ async function exitImmersive(){
 trigger.addEventListener('click',()=>isImmersive()?exitImmersive():enterImmersive());
 document.addEventListener('fullscreenchange',sync);document.addEventListener('webkitfullscreenchange',sync);
 subbar.querySelectorAll('[data-relax-subview]').forEach(button=>button.addEventListener('click',()=>setTimeout(sync,0)));
-const observer=new MutationObserver(()=>queueMicrotask(sync));observer.observe(cardsRoot,{childList:true,subtree:true});
+const observer=new MutationObserver(()=>queueMicrotask(sync));observer.observe(cardsRoot,{childList:true});
 window.addEventListener('keydown',event=>{
   if(cardsRoot.hidden)return;
   const el=document.activeElement;if(el&&(['INPUT','TEXTAREA','SELECT'].includes(el.tagName)||el.isContentEditable))return;
