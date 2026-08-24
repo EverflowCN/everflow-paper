@@ -16,7 +16,7 @@
     if(!Number.isFinite(targetMs))throw new Error('invalid exam target');
     clearInterval(countdownTimer);
     const note=$('[data-countdown-note]');
-    const timezone=cfg.timezone||'Asia/Shanghai',dateText=target.toLocaleString('zh-CN',{timeZone,year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+    const timezone=cfg.timezone||'Asia/Shanghai',dateText=target.toLocaleString('zh-CN',{timeZone:timezone,year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
     if(note)note.textContent=`${cfg.official?'官方日期':'预计日期'} · ${dateText}（北京时间）${cfg.official?'':' · 等待教育部公告'}`;
     const tick=()=>{
       const rawDiff=targetMs-Date.now(),diff=Math.max(0,rawDiff);
