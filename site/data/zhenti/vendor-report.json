@@ -1,0 +1,61 @@
+{
+  "generatedAt": "2026-08-24T03:05:53.734Z",
+  "status": "failed",
+  "stage": "download",
+  "externalReferences": 64,
+  "uniqueExternalFigures": 54,
+  "downloaded": 46,
+  "existing": 0,
+  "failed": 8,
+  "failures": [
+    {
+      "year": 2016,
+      "q": 3,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T03-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 6,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T06-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 8,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T08-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 29,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T29-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 33,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T33-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 44,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T44-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 47,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T47-fig1.jpg",
+      "error": "HTTP 404"
+    },
+    {
+      "year": 2016,
+      "q": 45,
+      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T45-fig1.jpg",
+      "error": "HTTP 404"
+    }
+  ],
+  "remainingExternal": 64
+}
