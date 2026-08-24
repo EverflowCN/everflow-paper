@@ -1,35 +1,72 @@
 {
-  "schema": "everflow-408-paper-supplement-v1",
-  "year": 2026,
-  "verifiedAt": "2026-08-23",
-  "questions": {
-    "41": {
-      "number": 41,
-      "subject": "ds",
-      "type": "comprehensive",
-      "score": 13,
-      "stem": "二叉搜索树采用二叉链表存储，结点含 data、left、right。给定二叉搜索树 T 和整数 K，查找树中关键字与 K 之差的绝对值最小的所有结点，并输出该最小绝对值以及这些结点的关键字。要求给出基本思想，并用 C/C++ 描述算法。",
-      "answer": "利用 BST 中序遍历有序的性质。中序扫描时维护当前最小差值 minDiff 和至多两个候选关键字；访问结点 x 时计算 |x-K|：若更小则更新 minDiff 并清空候选，若相等则加入候选；当已经越过 K 且差值开始严格增大时可停止后续遍历。最后输出 minDiff 及所有候选关键字。",
-      "analysis": "关键是利用 BST 的有序性，而不是遍历后再排序。与 K 距离最小的关键字在有序序列中只可能位于 K 的前驱/后继附近，因此满足最小差值的结点最多两个。可以直接沿 BST 搜索路径维护前驱和后继，也可以按中序遍历扫描并在差值由减小转为增大后剪枝。两种写法都能正确处理两个关键字与 K 等距的情况。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+  "schema":"everflow-408-paper-supplement-v1",
+  "year":2026,
+  "verifiedAt":"2026-08-24",
+  "questions":{
+    "26":{
+      "number":26,
+      "subject":"os",
+      "type":"single",
+      "score":2,
+      "stem":"系统中有 8 个进程执行相同的资源访问操作：先 wait(S)，再访问资源，最后 signal(S)。资源信号量 S 的初值为 5。若某时刻 S=-2，其中 m 表示已经执行到“访问资源”位置的进程数，n 表示因申请资源而阻塞的进程数，则 m、n 分别为（ ）。",
+      "options":{"A":"5，2","B":"5，1","C":"6，2","D":"7，1"},
+      "answer":"A",
+      "analysis":"记录型信号量初值 5 表示最多有 5 个进程同时占有该资源。当 S=-2 时，负值绝对值表示有 2 个进程阻塞等待，因此 n=2；5 份资源均已被占用，所以正在访问资源的进程数 m=5。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
     },
-    "45": {
-      "number": 45,
-      "subject": "os",
-      "type": "comprehensive",
-      "score": 7,
-      "stem": "系统采用优先级（数值越大优先级越高）与时间片轮转结合的调度算法，仅在时钟中断时检查并触发抢占；时钟中断间隔 10ms，新进入就绪队列的进程时间片为 50ms。时间片用完回队列时优先级减 1，被更高优先级进程抢占时优先级不变；同优先级按进入就绪队列先后调度。P1(10ms,3,95ms)、P2(10ms,4,20ms)、P3(12ms,2,40ms)、P4(14ms,5,60ms)。求全部完成前的时钟中断次数、CPU 调度次数、各进程首次调度时刻；并判断时间片改为 100ms 后调度次数变化、时钟中断间隔改为 1ms 后系统开销变化。",
-      "answer": "共发生 22 次时钟中断、7 次 CPU 调度。首次调度时刻：P2=10ms，P4=20ms，P1=90ms，P3=140ms。时间片从 50ms 增至 100ms 后，CPU 调度次数减少；时钟中断间隔从 10ms 缩短到 1ms 后，系统开销增大。",
-      "analysis": "10ms 调度 P2；20ms 时 P4 已到达且优先级最高，调度 P4；P4 完成后在 90ms 调度 P1；P1 到 140ms 用完时间片、优先级降为 2，与 P3 同优先级，但 P3 更早进入就绪队列，因此调度 P3；之后再回到 P1。调度检查只在时钟中断点发生，因此进程到达本身不会立刻抢占。",
-      "verification": {
-        "status": "verified",
-        "mode": "cross-checked-paraphrase",
-        "sources": ["csgraduates", "noobdream"]
-      }
+    "28":{
+      "number":28,
+      "subject":"os",
+      "type":"single",
+      "score":2,
+      "stem":"64 位系统采用三级虚拟分页存储管理。虚拟地址从高到低依次由 25 位补充位、9 位一级页表索引、9 位二级页表索引、9 位三级页表索引和 12 位页内偏移组成。若各级页表按该结构完整建立，则第三级页表总共占用的页框数是（ ）。",
+      "options":{"A":"512","B":"32K","C":"256K","D":"128M"},
+      "answer":"C",
+      "analysis":"一级索引有 2^9=512 个表项，每项可指向一个二级页表；每个二级页表又有 512 个表项并可各指向一个三级页表，因此最多需要 512×512=2^18=256K 个三级页表。每个三级页表恰占一个页框，所以答案为 256K。",
+      "figures":[{"src":"/data/zhenti/assets/2026/q28-three-level-page-address.svg","alt":"2026年第28题三级页表虚拟地址结构","caption":"根据公开题面重绘的 25/9/9/9/12 位地址结构。"}],
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase-with-redraw","sources":["csgraduates","noobdream"]}
+    },
+    "41":{
+      "number":41,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":13,
+      "stem":"二叉搜索树采用二叉链表存储，结点含 data、left、right。给定二叉搜索树 T 和整数 K，查找树中关键字与 K 之差的绝对值最小的所有结点，并输出该最小绝对值以及这些结点的关键字。要求给出基本思想，并用 C/C++ 描述算法。",
+      "answer":"利用 BST 中序遍历有序的性质。中序扫描时维护当前最小差值 minDiff 和至多两个候选关键字；访问结点 x 时计算 |x-K|：若更小则更新 minDiff 并清空候选，若相等则加入候选；当已经越过 K 且差值开始严格增大时可停止后续遍历。最后输出 minDiff 及所有候选关键字。",
+      "analysis":"关键是利用 BST 的有序性，而不是遍历后再排序。与 K 距离最小的关键字在有序序列中只可能位于 K 的前驱/后继附近，因此满足最小差值的结点最多两个。可以直接沿 BST 搜索路径维护前驱和后继，也可以按中序遍历扫描并在差值由减小转为增大后剪枝。两种写法都能正确处理两个关键字与 K 等距的情况。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "44":{
+      "number":44,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":15,
+      "stem":"承接第43题的计算机 C。题图给出其部分数据通路，带箭头虚线表示控制信号；IR.rt、IR.rs 分别表示指令寄存器中的 rt、rs 字段，IR11-0 表示低 12 位，并要求取指周期完成 PC 增量。回答：（1）图中①、②属于哪类部件；（2）I 型指令 imm8 可为有符号或无符号数，M 型 offset 为有符号数，Extop 至少需要几位并说明原因；（3）取指周期中 MARsrc、ALUAsrc、ALUBsrc、RegWr 的取值；（4）左移指令周期中 ALUBsrc、RegWsrc、RegDst、RegWr 的取值，并判断其 Extop 能否与 M 型指令相同及原因。",
+      "answer":"（1）①、②均为多路选择器。（2）Extop 至少 1 位，用来区分零扩展与符号扩展。（3）MARsrc=0，ALUAsrc=0，ALUBsrc=1，RegWr=0。（4）ALUBsrc=2，RegWsrc=1，RegDst=1，RegWr=1；Extop 不能与 M 型指令取相同扩展方式，因为左移指令的 shamt 需要零扩展，而 M 型 offset 需要符号扩展。",
+      "analysis":"取指时访存地址来自 PC，ALU 同时完成 PC 加常数得到下一条指令地址，且不写通用寄存器。I 型立即数可能按无符号解释，M 型偏移必须保留符号，因此扩展器至少需要一个控制位选择零扩展/符号扩展。左移立即数作为移位量应零扩展，并把 ALU 结果写回 rt。",
+      "figures":[{"src":"/data/zhenti/assets/2026/q44-datapath.svg","alt":"2026年第44题计算机C部分数据通路重绘","caption":"依据公开回忆卷结构重绘，并与公开文字题面/答案交叉核对。"}],
+      "verification":{"status":"verified","mode":"cross-checked-recovery-redraw","sources":["noobdream","csgraduates"]}
+    },
+    "45":{
+      "number":45,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":7,
+      "stem":"系统采用优先级（数值越大优先级越高）与时间片轮转结合的调度算法，仅在时钟中断时检查并触发抢占；时钟中断间隔 10ms，新进入就绪队列的进程时间片为 50ms。时间片用完回队列时优先级减 1，被更高优先级进程抢占时优先级不变；同优先级按进入就绪队列先后调度。P1(10ms,3,95ms)、P2(10ms,4,20ms)、P3(12ms,2,40ms)、P4(14ms,5,60ms)。求全部完成前的时钟中断次数、CPU 调度次数、各进程首次调度时刻；并判断时间片改为 100ms 后调度次数变化、时钟中断间隔改为 1ms 后系统开销变化。",
+      "answer":"共发生 22 次时钟中断、7 次 CPU 调度。首次调度时刻：P2=10ms，P4=20ms，P1=90ms，P3=140ms。时间片从 50ms 增至 100ms 后，CPU 调度次数减少；时钟中断间隔从 10ms 缩短到 1ms 后，系统开销增大。",
+      "analysis":"10ms 调度 P2；20ms 时 P4 已到达且优先级最高，调度 P4；P4 完成后在 90ms 调度 P1；P1 到 140ms 用完时间片、优先级降为 2，与 P3 同优先级，但 P3 更早进入就绪队列，因此调度 P3；之后再回到 P1。调度检查只在时钟中断点发生，因此进程到达本身不会立刻抢占。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+    },
+    "46":{
+      "number":46,
+      "subject":"os",
+      "type":"comprehensive",
+      "score":8,
+      "stem":"某文件系统目录项包含文件名和索引节点号。盘块大小 4KB，盘块号占 4B；索引节点表保存系统全部索引节点，从盘块 100 起连续占 4096 个盘块，索引节点从 0 编号，每个索引节点 128B，含 5 个直接地址项及一级、二级、三级间接地址项各 1 个。目录结构为 dir/dir1/file，索引节点号分别为 100、201、1000，file 大小为 30KB。回答：（1）file 的索引节点位于哪个盘块；若其索引节点已在内存，访问 file 偏移 21460 的一个字节最多还需读几个盘块；该文件系统最多可存放多少文件；（2）删除非空目录 dir1 时，需要对哪些元数据进行操作。",
+      "answer":"（1）每个盘块可放 4096/128=32 个索引节点，节点1000位于盘块 100+floor(1000/32)=131。5个直接块可覆盖20KB，偏移21460落入一级间接范围；在索引节点已在内存的前提下，最多再读2个盘块：一级间接地址块和目标数据块。索引节点表共可保存4096×32=131072个索引节点，因此最多131072个文件。（2）先递归删除 file：释放其数据块和所用间接块，清磁盘位图，释放索引节点1000并清索引节点位图，删除 dir1 中 file 的目录项；随后释放 dir1 的目录数据块及索引节点201、更新相应位图，并从父目录 dir 中删除 dir1 目录项。",
+      "analysis":"索引节点号按固定大小顺序存入连续索引节点表，因此可用节点号除以每块可容纳节点数定位盘块。偏移21460超过5个直接块的20KB范围，需要一级间接索引。删除非空目录必须先处理其子项，再释放目录自身的索引节点/数据块并同步维护两类位图和父目录项。",
+      "figures":[{"src":"/data/zhenti/assets/2026/q46-directory-inode.svg","alt":"2026年第46题目录结构与索引节点号表","caption":"依据公开题面重绘的 dir/dir1/file 目录结构及索引节点号表。"}],
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase-with-redraw","sources":["noobdream","csgraduates"]}
     }
   }
 }
