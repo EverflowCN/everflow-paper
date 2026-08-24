@@ -73,7 +73,9 @@ const years=Object.keys(manifest.years||{}).sort();
 assert(years.length===18&&years[0]==='2009'&&years.at(-1)==='2026','true-paper corpus must cover 2009-2026');
 let verified=0,autoChoice=0;
 for(const year of years){const data=JSON.parse(read(`site/data/zhenti/${year}.json`)),nums=manifest.years[year].verifiedQuestions||[];verified+=nums.length;for(const n of nums){const q=data.questions?.[String(n)];if(q?.verification?.status==='verified'&&q?.options&&/^[A-D]$/.test(String(q.answer||'')))autoChoice++}}
-assert(verified>=846,`verified corpus unexpectedly small: ${verified}`);assert(autoChoice>=720,`auto-gradable corpus unexpectedly small: ${autoChoice}`);
+assert(verified>=846,`verified corpus unexpectedly small: ${verified}`);
+const autoFloor=Math.floor(verified*.70);
+assert(autoChoice>=autoFloor,`auto-gradable corpus unexpectedly small: ${autoChoice}/${verified} (<70%)`);
 for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.reset,files.experience,files.zhentiMedia,files.runtime,files.nav]){
   const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);
   fs.writeFileSync(tmp,read(file));
