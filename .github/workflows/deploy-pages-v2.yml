@@ -23,7 +23,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
 
@@ -37,12 +37,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
 
       - name: Checkout question assets
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: EverflowCN/408-exercise-paper-generator
           ref: main
@@ -135,7 +135,7 @@ jobs:
           graph=Path('site/assets/js/overall-graph.js')
           if graph.exists():
               text=graph.read_text(encoding='utf-8')
-              text=re.sub(r"if\(/\^https:\\\/\\\/raw\\\.githubusercontent\\\.com\\\//i\.test\(value\)\)return value;?",'',text)
+              text=text.replace("if(/^https:\\/\\/raw\\.githubusercontent\\.com\\//i.test(value))return value;","")
               graph.write_text(text,encoding='utf-8')
 
           wall=Path('site/assets/js/zhenti-wall.js')
