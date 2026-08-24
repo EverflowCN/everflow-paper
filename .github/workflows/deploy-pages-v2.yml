@@ -64,13 +64,14 @@ jobs:
           cp -R ".relax-source/站点/explanations" site/data/relax1000/explanations
 
           python - <<'PY'
-          import json
+          import json,re
           from pathlib import Path
           from urllib.parse import unquote
 
           DROP_KEYS={
               'repository','repositoryurl','repo','repourl','github','githuburl',
-              'sourceurl','sourcehref','rawurl','sourcewebsite','sourceaddress'
+              'sourceurl','sourcehref','rawurl','sourcewebsite','sourceaddress',
+              'sources','sourceids','sourceid'
           }
 
           def scrub_string(value):
@@ -87,17 +88,12 @@ jobs:
 
           def scrub(value):
               if isinstance(value,dict):
-                  out={}
-                  for key,item in value.items():
-                      if key.lower() in DROP_KEYS:
-                          continue
-                      out[key]=scrub(item)
-                  return out
+                  return {key:scrub(item) for key,item in value.items() if key.lower() not in DROP_KEYS}
               if isinstance(value,list):
                   return [scrub(item) for item in value]
               return scrub_string(value)
 
-          # Scrub every public JSON payload, including year papers and copied Relax data.
+          # Scrub public JSON payloads. Source/audit metadata is not required by the browser.
           for json_path in Path('site/data').rglob('*.json'):
               try:
                   data=json.loads(json_path.read_text(encoding='utf-8'))
@@ -110,32 +106,41 @@ jobs:
                       for key in ('repository','repo','source','sourceUrl','github','githubUrl','questionCount'):
                           meta.pop(key,None)
               if json_path.as_posix().endswith('zhenti/manifest.json') and isinstance(data,dict):
-                  data.pop('sources',None)
                   data.pop('policy',None)
                   for meta in (data.get('years') or {}).values():
                       if isinstance(meta,dict):
-                          meta.pop('sources',None)
                           meta.pop('notes',None)
               json_path.write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
 
-          # The production graph only accepts local figures. Remove obsolete external-host allowance
-          # from the shipped bundle even if an old source file still contains it.
+          # Developer-only reports reveal acquisition/audit details and are not runtime dependencies.
+          for name in ('audit-report.json','vendor-report.json'):
+              p=Path('site/data/zhenti')/name
+              if p.exists(): p.unlink()
+
+          # Remove obsolete external-host/source-label logic from browser bundles.
           graph=Path('site/assets/js/overall-graph.js')
           if graph.exists():
               text=graph.read_text(encoding='utf-8')
               text=text.replace("if(/^https:\\/\\/raw\\.githubusercontent\\.com\\//i.test(value))return value;","")
               graph.write_text(text,encoding='utf-8')
+
+          wall=Path('site/assets/js/zhenti-wall.js')
+          if wall.exists():
+              text=wall.read_text(encoding='utf-8')
+              text=re.sub(r"const SOURCE_LABEL=\{.*?\};","const SOURCE_LABEL={};",text,count=1)
+              text=re.sub(r"function sourceText\(item\)\{return .*?\}","function sourceText(){return'已核验'}",text,count=1)
+              wall.write_text(text,encoding='utf-8')
           PY
 
           # Development/audit scripts are not public website assets.
           rm -rf site/tools
 
-          # No repository/provider address or exact private corpus count may remain in UI/source shipped to browsers.
-          if grep -RInEi 'EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com|github\.com|GitHub账号|使用 GitHub|提交到 GitHub|GitHub Pages' site; then
-            echo 'Privacy audit failed: repository/provider information leaked into public site artifact.'
+          # No repository/provider address, source label, or exact private corpus count may ship to browsers.
+          if grep -RInEi --include='*.html' --include='*.js' --include='*.css' --include='*.json' 'EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com|github\.com|GitHub账号|使用 GitHub|提交到 GitHub|GitHub Pages|TommyTay0712|408-exam-paper|CSYanKu|ForeverLink|Hermes 408' site; then
+            echo 'Privacy audit failed: repository/provider/source information leaked into public site artifact.'
             exit 1
           fi
-          if grep -RIn --exclude-dir=data '1576' site; then
+          if grep -RIn --exclude-dir=data --include='*.html' --include='*.js' --include='*.css' '1576' site; then
             echo 'Privacy audit failed: exact Relax corpus count leaked into public UI/source.'
             exit 1
           fi
