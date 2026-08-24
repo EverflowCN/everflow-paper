@@ -1,0 +1,59 @@
+name: Vendor external 408 figures
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/tools/vendor-zhenti-figures.mjs'
+      - '.github/workflows/vendor-zhenti-figures.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zhenti-figure-vendor
+  cancel-in-progress: true
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Vendor all external figures
+        run: node site/tools/vendor-zhenti-figures.mjs
+
+      - name: Audit effective 846-question corpus
+        run: node site/tools/audit-zhenti.mjs
+
+      - name: Require zero external figure references
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          with open('site/data/zhenti/audit-report.json','r',encoding='utf-8') as f:
+              d=json.load(f)
+          s=d['summary']
+          assert s['healthy']==846, s
+          assert s['unhealthy']==0, s
+          assert s['localFigureFailures']==0, s
+          assert s['manifestFailures']==0, s
+          assert s['externalFigureRefs']==0, s
+          print('vendor audit OK:',s)
+          PY
+
+      - name: Persist mirrored figures and rewritten sources
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add site/data/zhenti site/tools/vendor-zhenti-figures.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix(zhenti): mirror all external question figures locally [skip ci]'
+            git push origin HEAD:main
+          fi
