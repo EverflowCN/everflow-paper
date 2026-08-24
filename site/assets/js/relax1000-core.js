@@ -1,6 +1,5 @@
 const RAW_SITE='https://raw.githubusercontent.com/EverflowCN/408-exercise-paper-generator/main/%E7%AB%99%E7%82%B9';
 export const DATA_URL=`${RAW_SITE}/data/questions.json`;
-export const BANK_SOURCE_KEY='everflow-408-bank-source-v1';
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
 export const RELAX_STORAGE_KEYS={
@@ -14,13 +13,7 @@ export const RELAX_STORAGE_KEYS={
   graphCurrent:'everflow-408-relax-graph-current-v3',
   graphFit:'everflow-408-relax-graph-fit-v1'
 };
-export const SUBJECT_META={
-  ds:{name:'数据结构',short:'DS'},
-  co:{name:'计算机组成原理',short:'CO'},
-  os:{name:'操作系统',short:'OS'},
-  cn:{name:'计算机网络',short:'CN'}
-};
-
+const SUBJECT_NAME={ds:'数据结构',co:'计算机组成原理',os:'操作系统',cn:'计算机网络'};
 let dataPromise=null;
 const readJson=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
 const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
@@ -38,7 +31,7 @@ export function optionEntries(question){
   if(options&&typeof options==='object')return Object.entries(options).map(([key,text])=>({key:String(key),text:String(text??'')}));
   return [];
 }
-export function subjectName(id,fallback=''){return SUBJECT_META[id]?.name||fallback||id||'408'}
+export function subjectName(id,fallback=''){return SUBJECT_NAME[id]||fallback||id||'408'}
 export async function loadRelaxData({force=false}={}){
   if(force)dataPromise=null;
   if(dataPromise)return dataPromise;
@@ -62,16 +55,6 @@ export function patchRecord(rawId,patch){
   saveRecords(records);
   document.dispatchEvent(new CustomEvent('everflow:relax-records-change',{detail:{id:key}}));
   return records[key]||{};
-}
-export function rewriteRecords(transform){
-  const records=loadRecords(),next={};
-  for(const [id,record] of Object.entries(records)){
-    const value=transform({...record},id);
-    if(value&&Object.keys(value).some(key=>value[key]!==undefined&&value[key]!==''))next[id]=value;
-  }
-  saveRecords(next);
-  document.dispatchEvent(new CustomEvent('everflow:relax-records-change',{detail:{scope:'all'}}));
-  return next;
 }
 export function compatArray(key){const value=readJson(key,[]);return Array.isArray(value)?value:[]}
 export function compatHas(key,rawId){const target=idKey(rawId);return compatArray(key).some(value=>idKey(value)===target)}
@@ -109,4 +92,3 @@ export function questionState(question,records=loadRecords()){
 export function questionNumber(question,index=0){return question?.number??question?.bookNumber??question?.index??index+1}
 export function questionImages(question){return Array.isArray(question?.questionImages)?question.questionImages:[]}
 export function explanationImages(question){return Array.isArray(question?.explanationImages)?question.explanationImages:[]}
-export function statusLabel(status){return({mastered:'熟练',fuzzy:'模糊',weak:'不会'}[status]||'未标记')}
