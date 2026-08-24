@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v41';
+const CACHE='everflow-site-v42';
 const SHELL=[
   '/',
   '/study/',
@@ -50,10 +50,15 @@ self.addEventListener('activate',event=>{
   })());
 });
 
+async function fetchWithTimeout(request,options={},timeoutMs=4500){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{return await fetch(request,{...options,signal:controller.signal})}finally{clearTimeout(timer)}
+}
+
 async function networkFirst(request){
   const cache=await caches.open(CACHE),key=cacheKey(request);
   try{
-    const response=await fetch(request,{cache:'no-store'});
+    const response=await fetchWithTimeout(request,{cache:'no-store'});
     if(response.ok)await cache.put(key,response.clone());
     return response;
   }catch{
@@ -80,6 +85,9 @@ self.addEventListener('fetch',event=>{
     event.respondWith(staleWhileRevalidate(request));
     return;
   }
-  const fresh=path.startsWith('/data/');
-  event.respondWith(fresh?networkFirst(request):staleWhileRevalidate(request));
+  if(path.startsWith('/data/')&&/\.(?:png|jpe?g|webp|gif|svg)$/i.test(path)){
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+  event.respondWith(path.startsWith('/data/')?networkFirst(request):staleWhileRevalidate(request));
 });

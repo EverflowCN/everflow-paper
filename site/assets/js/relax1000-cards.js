@@ -1,10 +1,10 @@
-import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,questionState,optionEntries,questionImages,assetUrl,questionNumber,subjectName,esc}from'./relax1000-core.js';
+import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,questionState,optionEntries,questionImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20260825-bank1';
 
 const bankRoot=document.querySelector('.relax-wall-root');
 const sourceBar=document.querySelector('.bank-source-shell');
 if(!bankRoot||!sourceBar)throw new Error('Relax1000 bank root missing');
 
-const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/relax1000-cards.css?v=20260824-cards2';document.head.appendChild(css);
+const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/relax1000-cards.css?v=20260825-bank1';document.head.appendChild(css);
 const subbar=document.createElement('section');
 subbar.className='relax-subview-bar';
 subbar.innerHTML='<button class="active" type="button" data-relax-subview="bank">题库墙</button><button type="button" data-relax-subview="cards">速刷卡片</button><span>题库墙与速刷卡片共用答题、错题和掌握状态</span>';
@@ -52,14 +52,14 @@ function schedule(q,grade){
 }
 function reveal(q){if(!selected||revealed)return;revealed=true;const correct=selected===String(q.answer),r=questionState(q).rec;patchRecord(q.id,{answer:selected,draftAnswer:selected,correct,reviewed:true,attempts:(Number(r.attempts)||0)+1});syncAnswerCompatibility(q,correct);renderAll()}
 function skip(q){if(!q)return;skipped.add(String(q.id));currentId='';selected=null;revealed=false;renderAll()}
-function images(q){return questionImages(q).map(src=>assetUrl(src)).filter(Boolean)}
+function images(q){return questionImages(q)}
 function cardHtml(q){
   if(!q)return'<div class="relax-cards-empty"><div><h2>今天的卡片刷完了</h2><p>切换科目，或等下一批卡片到期后继续。</p></div></div>';
   const opts=optionEntries(q),pics=images(q),stateNow=questionState(q),r=rec(q),memory=recall(q);
-  const options=(opts.length?opts:'ABCD'.split('').map(key=>({key,text:''}))).map(o=>{let cls='';if(selected===o.key)cls+=' selected';if(revealed&&String(o.key)===String(q.answer))cls+=' correct';if(revealed&&selected===o.key&&selected!==String(q.answer))cls+=' wrong';return`<button type="button" data-card-answer="${esc(o.key)}" class="${cls.trim()}" ${revealed?'disabled':''}><b>${esc(o.key)}</b><span>${esc(o.text)}</span><kbd>${({A:'Q',B:'W',C:'E',D:'R'})[o.key]||o.key}</kbd></button>`}).join('');
+  const options=(opts.length?opts:'ABCD'.split('').map(key=>({key,text:''}))).map(o=>{let cls='';if(selected===o.key)cls+=' selected';if(revealed&&String(o.key)===String(q.answer))cls+=' correct';if(revealed&&selected===o.key&&selected!==String(q.answer))cls+=' wrong';return`<button type="button" data-card-answer="${esc(o.key)}" class="${cls.trim()}" ${revealed?'disabled':''}><b>${esc(o.key)}</b><span>${esc(o.text||'见原题图中的选项')}</span><kbd>${({A:'Q',B:'W',C:'E',D:'R'})[o.key]||o.key}</kbd></button>`}).join('');
   const answer=revealed?`<div class="relax-card-answer"><strong>${selected===String(q.answer)?'回答正确':'回答错误'} · 正确答案 ${esc(q.answer)}</strong><div>${esc(q.explanation||'')}</div></div>`:'';
   const grades=revealed?`<div class="relax-grade-grid">${[1,2,3,4].map(g=>`<button type="button" data-card-grade="${g}">${g} · ${gradeLabel(g)}<small>${intervalText(nextStability(r,g))}</small></button>`).join('')}</div>`:'';
-  return`<div class="relax-card-main"><div class="relax-card-meta"><span>${esc(subjectName(q.subjectId,q.subject))} · ${esc(q.chapter||'')}</span><b>原册第 ${esc(questionNumber(q))} 题</b></div><h2 class="relax-card-question">${esc(q.stem||'题干以原题截图为准')}</h2>${pics.length?`<div class="relax-card-images">${pics.map((src,i)=>`<img src="${esc(src)}" alt="原题截图 ${i+1}" loading="lazy">`).join('')}</div>`:''}<div class="relax-card-options">${options}</div>${answer}${grades}<div class="relax-card-actions">${revealed?'':`<button class="primary" type="button" data-card-reveal ${selected?'':'disabled'}>翻面 / 提交 · Enter</button>`}<button type="button" data-card-skip>跳过 · S</button></div><div class="relax-card-meta"><span>${stateNow.wrong?'当前错题 · ':''}${stateNow.rec.status==='weak'?'不会':stateNow.rec.status==='fuzzy'?'模糊':stateNow.rec.status==='mastered'?'熟练':'未标记'}</span><span>${memory==null?'新卡':`预计记忆率 ${Math.round(memory*100)}%`}</span></div></div>`;
+  return`<div class="relax-card-main"><div class="relax-card-meta"><span>${esc(subjectName(q.subjectId,q.subject))} · ${esc(q.chapter||'')}</span><b>原册第 ${esc(questionNumber(q))} 题</b></div><h2 class="relax-card-question">${esc(q.stem||'题干以原题截图为准')}</h2>${pics.length?`<div class="relax-card-images">${pics.map((src,i)=>imageMarkup(src,`原题截图 ${i+1}`)).join('')}</div>${usesQuestionImageFallback(q)?'<p class="relax-image-fallback-note">公式或图表请以原题图为准。</p>':''}`:''}<div class="relax-card-options">${options}</div>${answer}${grades}<div class="relax-card-actions">${revealed?'':`<button class="primary" type="button" data-card-reveal ${selected?'':'disabled'}>翻面 / 提交 · Enter</button>`}<button type="button" data-card-skip>跳过 · S</button></div><div class="relax-card-meta"><span>${stateNow.wrong?'当前错题 · ':''}${stateNow.rec.status==='weak'?'不会':stateNow.rec.status==='fuzzy'?'模糊':stateNow.rec.status==='mastered'?'熟练':'未标记'}</span><span>${memory==null?'新卡':`预计记忆率 ${Math.round(memory*100)}%`}</span></div></div>`;
 }
 function render(){
   const info=queueInfo(),q=currentCard(),ret=averageRetention(),day=today();

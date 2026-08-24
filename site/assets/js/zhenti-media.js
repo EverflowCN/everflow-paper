@@ -35,7 +35,11 @@
     const src=safeSrc(fig?.src);if(!src)return null;
     const wrap=document.createElement(option?'div':'figure');
     wrap.className=option?'question-figure question-option-figure':'question-figure';wrap.dataset.mediaGenerated='1';
-    const img=document.createElement('img');img.src=src;img.alt=String(fig?.alt||`${ctx.year}年第${ctx.q}题图`);img.loading='lazy';img.decoding='async';img.draggable=false;img.addEventListener('error',()=>wrap.remove(),{once:true});wrap.appendChild(img);
+    const img=document.createElement('img');img.src=src;img.alt=String(fig?.alt||`${ctx.year}年第${ctx.q}题图`);img.loading='eager';img.decoding='async';img.fetchPriority='high';img.draggable=false;wrap.appendChild(img);
+    const retry=document.createElement('button');retry.type='button';retry.className='question-image-retry';retry.hidden=true;retry.textContent='图片载入失败 · 点击重试';wrap.appendChild(retry);
+    img.addEventListener('load',()=>{img.hidden=false;retry.hidden=true;wrap.classList.remove('is-error')});
+    img.addEventListener('error',()=>{img.hidden=true;retry.hidden=false;wrap.classList.add('is-error')});
+    retry.addEventListener('click',()=>{retry.disabled=true;retry.textContent='正在重试…';img.hidden=false;const join=src.includes('?')?'&':'?';img.src=`${src}${join}retry=${Date.now()}`;setTimeout(()=>{retry.disabled=false;retry.textContent='图片载入失败 · 点击重试'},800)});
     if(fig?.caption){const caption=document.createElement(option?'span':'figcaption');caption.className=option?'question-option-caption':'';caption.textContent=String(fig.caption);wrap.appendChild(caption)}
     return wrap;
   }

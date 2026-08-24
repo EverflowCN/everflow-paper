@@ -1,5 +1,5 @@
 (()=>{
-  const CACHE_KEY='everflow-resource-hub-cache-v2';
+  const CACHE_KEY='everflow-resource-hub-cache-v3';
   const CACHE_MAX_AGE=1000*60*60*24*7;
   const $=selector=>document.querySelector(selector);
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({
@@ -7,38 +7,40 @@
   }[char]));
 
   const fallbackSettings={
-    title:'Everflow 资料中心',
-    subtitle:'408、数学二与站内学习工具，按届别和科目快速查找。',
+    title:'Everflow 做题本与资料',
+    subtitle:'集中查找 408、数学二做题本与课程资料；每项可同时提供百度网盘、夸克网盘或站内入口。',
     footer_note:'Everflow · 彼时流年若水',
-    announcement:'资料与功能持续整理中；失效入口可通过“更新与勘误”反馈。',
+    announcement:'网盘链接仅展示后台已配置的地址；如遇失效，请通过“更新与勘误”反馈。',
     announcement_enabled:true,
     errata_url:'/archive/',
-    updated_note:'面向 27 考研持续更新',
+    updated_note:'做题本 · 双网盘 · 持续更新',
     background_variant:'paper'
   };
   const fallbackItems=[
-    ['408 强化','跟随课程完成四科强化、打卡与进度记录','/408/','408','27','强化','开始学习','',true,'available','408 数据结构 组成原理 操作系统 计算机网络'],
-    ['408 整套真题','2009—2026 年整套模式、真题墙与解析','/zhenti/','408','27','真题','进入题库','/graph/',true,'available','408 真题 真题墙 整套 解析'],
-    ['408 算法可视化','四科核心算法与系统过程逐步演示','/visual/','408','27','NEW','按科目学习','/visual/sandbox/',true,'available','408 算法 可视化 数据结构 操作系统 网络 组成原理'],
-    ['数据结构强化','强化题、进度记录与错题复习','/study/practice/ds-reinforcement/','408','27','DS','开始练习','',false,'available','数据结构 强化 练习 错题'],
-    ['408 · 1800 题','按科目练习与本地、云端进度记录','/study/practice/1800/','408','27','1800','开始刷题','',false,'available','408 1800 选择题 练习'],
-    ['李林 880 · 数学二','章节练习、24 套模拟与下载入口','/study/practice/math-880/','数学二','27','880','章节练习','/study/practice/math-880/simulations.html',true,'available','数学二 李林 880 模拟卷 章节练习'],
-    ['408 整体图谱','把真题、题库与知识点关系放到一张图里','/graph/','工具','通用','GRAPH','打开图谱','',false,'available','408 知识图谱 真题 关系'],
-    ['智能组卷','按条件生成练习卷并保存作答进度','/relax/','工具','通用','','开始组卷','',false,'available','408 组卷 练习卷'],
-    ['学习热力图','查看每日学习记录与连续打卡情况','/study/heatmap/','工具','通用','','查看进度','',false,'available','学习 热力图 打卡 进度'],
-    ['通知通告','查看网站更新、维护与资料勘误','/archive/','站点','通用','','查看通知','',false,'available','通知 公告 更新 勘误'],
-    ['会员与兑换码','查看会员权益、活动与兑换入口','/membership/','站点','通用','','查看会员','',false,'available','会员 Pro 兑换码']
+    ['408 强化课程','两套 408 课程、打卡与进度记录','/408/','课程资料','27','课程','打开课程','',true,'available','408 数据结构 组成原理 操作系统 计算机网络 课程'],
+    ['408 历年真题做题本','2009—2026 年真题墙、整套模式与解析','/zhenti/','408 做题本','27','真题','进入做题本','/graph/',true,'available','408 真题 做题本 真题墙 整套 解析'],
+    ['数据结构强化做题本','强化题、进度记录与错题复习','/study/practice/ds-reinforcement/','408 做题本','27','DS','开始练习','',false,'available','数据结构 强化 做题本 练习 错题'],
+    ['408 · 1800 题','按科目练习与本地、云端进度记录','/study/practice/1800/','408 做题本','27','1800','开始刷题','',false,'available','408 1800 做题本 选择题 练习'],
+    ['智能组卷','真题与章节题按条件生成练习卷','/relax/','408 做题本','通用','','开始组卷','',false,'available','408 组卷 做题本 练习卷'],
+    ['李林 880 · 数学二','章节做题本、24 套模拟与进度记录','/study/practice/math-880/','数学做题本','27','880','章节练习','/study/practice/math-880/simulations.html',true,'available','数学二 李林 880 做题本 模拟卷 章节练习'],
+    ['408 算法可视化','四科核心算法与系统过程逐步演示','/visual/','学习工具','27','NEW','按科目学习','/visual/sandbox/',true,'available','408 算法 可视化 数据结构 操作系统 网络 组成原理'],
+    ['408 整体图谱','把真题、题库与知识点关系放到一张图里','/graph/','学习工具','通用','GRAPH','打开图谱','',false,'available','408 知识图谱 真题 关系'],
+    ['学习热力图','查看每日学习记录与连续打卡情况','/study/heatmap/','学习工具','通用','','查看进度','',false,'available','学习 热力图 打卡 进度']
   ].map((row,index)=>({
     id:`fallback-${index}`,
     title:row[0],subtitle:row[1],url:row[2],category:row[3],cohort:row[4],badge:row[5],
     primary_label:row[6],secondary_url:row[7],featured:row[8],status:row[9],keywords:row[10],
     secondary_label:row[7]?(row[0].includes('880')?'24 套模拟':row[0].includes('可视化')?'打开沙盒':'知识图谱'):'',
+    primary_provider:row[2].startsWith('/')?'site':'auto',secondary_provider:row[7]?.startsWith('/')?'site':'auto',
+    resource_kind:row[3].includes('做题本')?'workbook':row[3].includes('课程')?'course':'tool',
     enabled:true,sort_order:index*10
   }));
 
   const state={settings:fallbackSettings,items:fallbackItems,query:'',cohort:'all',category:'all',source:'local'};
   const statusLabels={available:'可用',updating:'更新中',coming:'即将开放'};
-  const categoryOrder=['408','数学二','工具','站点'];
+  const categoryOrder=['408 做题本','数学做题本','课程资料','学习工具','其他'];
+  const providerLabels={baidu:'百度网盘',quark:'夸克网盘',site:'站内',external:'外部链接',auto:'链接'};
+  const kindLabels={workbook:'做题本',course:'课程',material:'资料',tool:'学习工具',other:'其他'};
 
   function safeUrl(value){
     const raw=String(value||'').trim();
@@ -56,6 +58,14 @@
       return url.origin!==location.origin?`href="${esc(href)}" target="_blank" rel="noopener"`:`href="${esc(href)}"`;
     }catch{return `href="${esc(href)}"`}
   }
+  function inferProvider(value,configured='auto'){
+    if(['baidu','quark','site','external'].includes(configured))return configured;
+    const raw=String(value||'').trim().toLowerCase();
+    if(raw.startsWith('/')&&!raw.startsWith('//'))return'site';
+    if(raw.includes('pan.baidu.com'))return'baidu';
+    if(raw.includes('pan.quark.cn')||raw.includes('quark.cn'))return'quark';
+    return raw?'external':'auto';
+  }
   function normalizeItem(item,index){
     const group=String(item.group_name||'');
     const inferredCategory=group.includes('数学')?'数学二':group.includes('工具')?'工具':group.includes('408')?'408':'站点';
@@ -70,6 +80,9 @@
       primary_label:String(item.primary_label||'立即查看'),
       secondary_label:String(item.secondary_label||''),
       secondary_url:String(item.secondary_url||''),
+      primary_provider:inferProvider(item.url,item.primary_provider),
+      secondary_provider:inferProvider(item.secondary_url,item.secondary_provider),
+      resource_kind:['workbook','course','material','tool','other'].includes(item.resource_kind)?item.resource_kind:(String(item.category||'').includes('做题本')?'workbook':String(item.category||'').includes('课程')?'course':'tool'),
       keywords:String(item.keywords||''),
       enabled:item.enabled!==false,
       featured:item.featured===true,
@@ -90,7 +103,7 @@
     if(state.cohort!=='all'&&item.cohort!==state.cohort)return false;
     if(state.category!=='all'&&item.category!==state.category)return false;
     if(!state.query)return true;
-    const haystack=`${item.title} ${item.subtitle} ${item.category} ${item.cohort} ${item.badge||''} ${item.keywords}`.toLowerCase();
+    const haystack=`${item.title} ${item.subtitle} ${item.category} ${item.cohort} ${item.badge||''} ${item.keywords} ${providerLabels[item.primary_provider]||''} ${providerLabels[item.secondary_provider]||''} ${kindLabels[item.resource_kind]||''}`.toLowerCase();
     return haystack.includes(state.query.toLowerCase());
   }
   function countBy(key,value){return state.items.filter(item=>item.enabled&&(value==='all'||item[key]===value)).length}
@@ -127,17 +140,18 @@
   }
   function renderCard(item){
     const status=item.status||'available';
-    const disabled=status==='coming'||safeUrl(item.url)==='#';
-    const secondary=item.secondary_url?`<a class="resource-card-button" ${linkAttrs(item.secondary_url)}>${esc(item.secondary_label||'备用入口')}</a>`:'';
+    const button=(url,provider,label,primary=false)=>{const disabled=status==='coming'||safeUrl(url)==='#',name=providerLabels[provider]||providerLabels.auto;return `<a class="resource-card-button provider-${esc(provider)}${primary?' primary':''}${disabled?' disabled':''}" ${disabled?'href="#" aria-disabled="true"':linkAttrs(url)}><span class="resource-provider">${esc(name)}</span><span>${esc(label||`打开${name}`)}</span></a>`};
+    const primary=button(item.url,item.primary_provider,item.primary_label,true);
+    const secondary=item.secondary_url?button(item.secondary_url,item.secondary_provider,item.secondary_label):'';
     return `<article class="resource-v2-card${item.featured?' featured':''}">
       <div class="resource-card-top">
-        <div class="resource-card-meta"><span>${esc(item.category)}</span><span>·</span><span>${esc(labelCohort(item.cohort))}</span>${item.badge?`<em class="resource-card-badge">${esc(item.badge)}</em>`:''}</div>
+        <div class="resource-card-meta"><span>${esc(item.category)}</span><span>·</span><span>${esc(kindLabels[item.resource_kind]||kindLabels.other)}</span><span>·</span><span>${esc(labelCohort(item.cohort))}</span>${item.badge?`<em class="resource-card-badge">${esc(item.badge)}</em>`:''}</div>
         <span class="resource-card-status ${esc(status)}">${esc(statusLabels[status]||statusLabels.available)}</span>
       </div>
       <h2>${esc(item.title)}</h2>
       <p>${esc(item.subtitle)}</p>
       <div class="resource-card-actions">
-        <a class="resource-card-button primary${disabled?' disabled':''}" ${disabled?'href="#" aria-disabled="true"':linkAttrs(item.url)}>${esc(item.primary_label)}</a>
+        ${primary}
         ${secondary}
       </div>
     </article>`;
@@ -167,7 +181,7 @@
     const timeout=setTimeout(()=>controller.abort(),5000);
     try{
       const settingsFields='title,subtitle,avatar_url,footer_note,announcement,announcement_enabled,background_variant,errata_url,updated_note';
-      const itemFields='id,title,subtitle,url,icon,group_name,sort_order,enabled,badge,accent,category,cohort,secondary_url,primary_label,secondary_label,status,featured,keywords';
+      const itemFields='id,title,subtitle,url,icon,group_name,sort_order,enabled,badge,accent,category,cohort,secondary_url,primary_label,secondary_label,primary_provider,secondary_provider,resource_kind,status,featured,keywords';
       const [settingsRows,itemRows]=await Promise.all([
         fetchJson(`resource_hub_settings?select=${settingsFields}&id=eq.default&limit=1`,controller.signal),
         fetchJson(`resource_hub_items?select=${itemFields}&enabled=eq.true&order=featured.desc,sort_order.asc,updated_at.desc`,controller.signal)

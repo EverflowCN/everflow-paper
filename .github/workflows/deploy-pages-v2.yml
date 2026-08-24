@@ -27,7 +27,12 @@ jobs:
           ref: main
 
       - name: Architecture audit
-        run: node site/tools/audit-bank-features.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node site/tools/audit-bank-features.mjs
+          node site/tools/build-zhenti-subject-index.mjs --check
+          node site/tools/audit-question-banks.mjs --skip-relax
 
       - name: Validate account, resource hub, workspace, and cache scripts
         shell: bash
@@ -38,6 +43,16 @@ jobs:
             site/assets/js/admin-cloud.js \
             site/assets/js/cloud.js \
             site/assets/js/links.js \
+            site/assets/js/checkin.js \
+            site/assets/js/dashboard.js \
+            site/assets/js/graph-next.js \
+            site/assets/js/paper-builder.js \
+            site/assets/js/relax1000-core.js \
+            site/assets/js/relax1000-graph.js \
+            site/assets/js/zhenti-data-overlay.js \
+            site/assets/js/zhenti-graph.js \
+            site/assets/js/zhenti-media.js \
+            site/assets/js/zhenti-wall.js \
             site/assets/js/site-runtime-v2.js \
             site/assets/js/workspace-v3.js \
             site/assets/js/workspace-operations-v1.js \
@@ -47,7 +62,7 @@ jobs:
           done
           grep -q 'data-resource-search' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html
-          grep -q "everflow-site-v41" site/sw.js
+          grep -q "everflow-site-v42" site/sw.js
           git diff --check
 
   deploy:
@@ -185,6 +200,7 @@ jobs:
           test -s site/408/index.html
           test -s site/data/oxygen.json
           test -s site/data/oxygen-reinforcement.json
+          test -s site/data/zhenti/subject-index.json
           test -s site/visual/index.html
           test -s site/visual/sandbox/index.html
           test -s site/visual/subject/data-structures/index.html
@@ -221,6 +237,9 @@ jobs:
           cp -R ".relax-source/站点/data" site/data/relax1000/data
           cp -R ".relax-source/站点/question-images" site/data/relax1000/question-images
           cp -R ".relax-source/站点/explanations" site/data/relax1000/explanations
+
+          node site/tools/normalize-relax-corpus.mjs --site-root=site
+          node site/tools/audit-question-banks.mjs --site-root=site
 
           python - <<'PY'
           import json,re
@@ -315,7 +334,7 @@ jobs:
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
-          echo '{"build":"20260824-graph-r6-20260825-perf-resource3"}' > site/build.json
+          echo '{"build":"20260825-bank1-resource3-countdown2"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages

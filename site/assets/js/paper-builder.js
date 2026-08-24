@@ -1,4 +1,4 @@
-import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,questionNumber,subjectName,esc}from'./relax1000-core.js';
+import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20260825-bank1';
 
 const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
@@ -112,12 +112,12 @@ function optionList(q){
 }
 function mediaList(q){if(q.source==='relax')return questionImages(q.raw).map(src=>({src:assetUrl(src),alt:'原题截图'}));return(q.figures||[]).filter(f=>f?.src).map(f=>({src:String(f.src),alt:f.alt||`${q.year}年第${q.number}题图`}))}
 function analysisMedia(q){return q.source==='relax'?explanationImages(q.raw).map(src=>({src:assetUrl(src),alt:'解析截图'})):[]}
-function imageStack(list){return list.length?`<div class="relax-source-images">${list.map((item,i)=>`<a href="${esc(item.src)}" target="_blank" rel="noopener"><img src="${esc(item.src)}" alt="${esc(item.alt||`题图${i+1}`)}" loading="lazy"></a>`).join('')}</div>`:''}
+function imageStack(list){return list.length?`<div class="relax-source-images">${list.map((item,i)=>imageMarkup(item.src,item.alt||`题图${i+1}`)).join('')}</div>`:''}
 function renderPaper(){
   const q=paper[index];if(!q)return;els.progress.textContent=`${index+1} / ${paper.length}`;els.answered.textContent=`已答 ${Object.keys(answers).length}`;
   els.grid.innerHTML=paper.map((item,i)=>`<button type="button" data-jump="${i}" class="${i===index?'current':''} ${answers[item.uid]?'answered':''}">${i+1}</button>`).join('');els.grid.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{index=Number(b.dataset.jump);renderPaper()}));
   const opts=optionList(q),chosen=answers[q.uid]||'',media=mediaList(q),state=recordState(q),sourceText=q.source==='zhenti'?`${q.year} 真题 · 第 ${q.number} 题`:`Relax1000 · 原册第 ${q.number} 题`;
-  els.card.innerHTML=`<div class="relax-q-meta"><span>${esc(SUBJECT_LABEL[q.subjectId]||subjectName(q.subjectId))} · ${esc(sourceText)}</span><b>${q.source==='relax'?esc(q.chapter):'已核验真题'}</b><button type="button" data-bookmark>${state.favorite?'★ 已收藏':'☆ 收藏'}</button></div><h2>${esc(q.stem||'题干见下方原题图')}</h2>${imageStack(media)}<div class="relax-options">${opts.map(o=>`<button type="button" data-answer="${esc(o.key)}" class="${chosen===o.key?'selected':''}"><b>${esc(o.key)}</b><span>${esc(o.text)}</span><i>✓</i></button>`).join('')}</div>`;
+  els.card.innerHTML=`<div class="relax-q-meta"><span>${esc(SUBJECT_LABEL[q.subjectId]||subjectName(q.subjectId))} · ${esc(sourceText)}</span><b>${q.source==='relax'?esc(q.chapter):'已核验真题'}</b><button type="button" data-bookmark>${state.favorite?'★ 已收藏':'☆ 收藏'}</button></div><h2>${esc(q.stem||'题干见下方原题图')}</h2>${imageStack(media)}${q.source==='relax'&&usesQuestionImageFallback(q.raw)?'<p class="relax-image-fallback-note">公式或图表请以原题图为准；选项仍可正常作答。</p>':''}<div class="relax-options">${opts.map(o=>`<button type="button" data-answer="${esc(o.key)}" class="${chosen===o.key?'selected':''}"><b>${esc(o.key)}</b><span>${esc(o.text||'见原题图中的选项')}</span><i>✓</i></button>`).join('')}</div>`;
   els.card.querySelectorAll('[data-answer]').forEach(btn=>btn.addEventListener('click',()=>{answers[q.uid]=btn.dataset.answer;renderPaper()}));els.card.querySelector('[data-bookmark]')?.addEventListener('click',()=>{toggleFavorite(q);renderPaper()});els.prev.disabled=index===0;els.next.textContent=index===paper.length-1?'交卷':'下一题 →';
 }
 function handIn(){

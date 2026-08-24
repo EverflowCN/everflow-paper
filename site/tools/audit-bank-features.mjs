@@ -34,10 +34,10 @@ assert(relaxCore.includes("RELAX_ASSET_BASE='/data/relax1000'")&&relaxCore.inclu
 assert(!/EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/i.test(relaxCore),'Relax runtime leaks repository identity/address');
 assert(relaxWall.includes('relax-wall-workspace')&&relaxWall.includes('relax-sidebar'),'Relax wall layout missing');
 
-assert(graph.includes('20260824-graph-r6')&&graph.includes('data-graph-source-host')&&graph.includes('data-graph-view-host'),'graph r6 shell/build marker missing');
+assert(graph.includes('20260825-bank1')&&graph.includes('data-graph-source-host')&&graph.includes('data-graph-view-host'),'graph bank1 shell/build marker missing');
 assert(graph.includes('graph-toolbar-primary')&&graph.includes('graph-toolbar-secondary')&&graph.includes('graph-status-legend'),'graph toolbar hierarchy missing');
 assert(graph.includes('graph-app.js')&&graph.includes('graph.css')&&!graph.includes('overall-graph.css')&&!graph.includes('graph-controls.css'),'graph page must use one graph stylesheet');
-assert(graphApp.includes("APP_VERSION='20260824-graph-r6'")&&graphApp.includes('const SOURCES=')&&graphApp.includes('zhenti:')&&graphApp.includes('relax1000:'),'graph source registry/version missing');
+assert(graphApp.includes("APP_VERSION='20260825-bank1'")&&graphApp.includes('const SOURCES=')&&graphApp.includes('zhenti:')&&graphApp.includes('relax1000:'),'graph source registry/version missing');
 assert(graphApp.includes('zhenti-graph.js')&&!graphApp.includes('overall-graph.js'),'true graph adapter still uses obsolete name');
 assert(graphApp.includes('data-graph-source-host')&&graphApp.includes("url.searchParams.set('source',next)")&&graphApp.includes('location.assign'),'graph source switch lifecycle incomplete');
 assert(graphApp.includes('graph-controls.js'),'shared graph controls missing');
@@ -64,7 +64,7 @@ assert(runtime.includes("if(body.dataset.view==='zhenti')import(asset('/assets/j
 assert(!/raw\.githubusercontent\.com|github\.com/i.test(zhentiMedia),'true-paper media runtime exposes external repository fallback');
 assert(!/GitHub账号|使用 GitHub|提交到 GitHub|GitHub Pages/.test(admin),'admin UI exposes provider/account details');
 assert(deploy.includes('quality:')&&deploy.includes('deploy:')&&deploy.includes('actions/upload-pages-artifact@v4')&&deploy.includes('actions/deploy-pages@v4'),'Pages quality/deploy pipeline incomplete');
-assert(deploy.includes('site/assets/js/zhenti-graph.js')&&deploy.includes('site/assets/css/graph.css')&&deploy.includes('20260824-graph-r6'),'Pages must publish clean graph r6 build');
+assert(deploy.includes('site/assets/js/zhenti-graph.js')&&deploy.includes('site/assets/css/graph.css')&&deploy.includes('20260825-bank1'),'Pages must publish clean bank1 graph build');
 assert(!deploy.includes("Path('site/assets/js/overall-graph.js')"),'deploy retains obsolete graph rewrite step');
 assert(deploy.includes('cancel-in-progress: true')&&deploy.includes('Privacy audit failed'),'Pages concurrency/privacy gate missing');
 
@@ -83,4 +83,4 @@ for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphCont
   fs.rmSync(tmp,{force:true});
   assert(result.status===0,`syntax check failed: ${file}\n${result.stderr||result.stdout}`);
 }
-console.log(`architecture audit OK: graph r6 single CSS + shared controls + clean adapters; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
+console.log(`architecture audit OK: graph bank1 single CSS + shared controls + clean adapters; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);

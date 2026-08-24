@@ -1,5 +1,6 @@
 const RELAX_ASSET_BASE='/data/relax1000';
-export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json`;
+const DATA_VERSION='20260825-bank1';
+export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json?v=${DATA_VERSION}`;
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
 export const RELAX_STORAGE_KEYS={
@@ -23,6 +24,7 @@ export function assetUrl(value){
   const src=String(value||'').trim();
   if(!src)return'';
   if(src.startsWith('data:image/'))return src;
+  if(src.startsWith('/data/'))return src;
   if(src.startsWith(`${RELAX_ASSET_BASE}/`))return src;
   if(/^https?:\/\//i.test(src))return'';
   const clean=src.replace(/^\.\//,'').replace(/^\//,'');
@@ -30,7 +32,7 @@ export function assetUrl(value){
 }
 export function hasBrokenSymbols(value){
   const text=String(value??'');
-  return /\uFFFD/.test(text)||/\?\s*\?/.test(text)||/[锟斤拷�]/.test(text);
+  return /\uFFFD/.test(text)||/\?\s*\?/.test(text)||/(?:锟斤拷|�)/.test(text);
 }
 export function displayText(value,fallback=''){
   const text=String(value??'');
@@ -42,21 +44,50 @@ export function optionEntries(question){
   if(Array.isArray(options))entries=options.map((item,index)=>({key:String(item?.key??'ABCD'[index]??index+1),text:String(item?.text??item?.label??'')}));
   else if(options&&typeof options==='object')entries=Object.entries(options).map(([key,text])=>({key:String(key),text:String(text??'')}));
   if(!entries.length)return entries;
-  const hasImage=Array.isArray(question?.questionImages)&&question.questionImages.length>0;
-  const damagedCount=entries.filter(item=>hasBrokenSymbols(item.text)||item.text.includes('?')).length;
-  if(hasImage&&damagedCount>=2)return[];
-  return entries.map(item=>hasBrokenSymbols(item.text)?{...item,text:''}:item);
+  return entries
+    .filter(item=>/^[A-D]$/.test(item.key))
+    .sort((left,right)=>'ABCD'.indexOf(left.key)-'ABCD'.indexOf(right.key))
+    .map(item=>hasBrokenSymbols(item.text)?{...item,text:''}:item);
+}
+function rawOptionTexts(question){
+  const options=question?.options;
+  if(Array.isArray(options))return options.map(item=>item?.text??item?.label??'');
+  if(options&&typeof options==='object')return Object.values(options);
+  return[];
+}
+export function usesQuestionImageFallback(question){return Boolean(question?.imageFallback)||Boolean(question?.questionImages?.length)&&[question?.stem,...rawOptionTexts(question)].some(hasBrokenSymbols)}
+export function imageMarkup(value,alt='题目图片'){
+  const src=assetUrl(value);if(!src)return'';
+  return `<a class="relax-image-link" href="${esc(src)}" target="_blank" rel="noopener" data-relax-image-frame><img src="${esc(src)}" data-relax-image data-relax-image-src="${esc(src)}" alt="${esc(alt)}" loading="eager" decoding="async" fetchpriority="high" draggable="false"><span class="relax-image-error" role="button" tabindex="0" data-relax-image-retry hidden>图片载入失败 · 点击重试</span></a>`;
 }
 export function subjectName(id,fallback=''){return SUBJECT_NAME[id]||fallback||id||'408'}
 function sanitizeDisplayData(data){
   for(const question of data.questions||[]){
     const hasQuestionImage=Array.isArray(question?.questionImages)&&question.questionImages.length>0;
     const hasExplanationImage=Array.isArray(question?.explanationImages)&&question.explanationImages.length>0;
+    question.imageFallback=hasQuestionImage&&[question?.stem,...rawOptionTexts(question)].some(hasBrokenSymbols);
     if(hasQuestionImage&&hasBrokenSymbols(question?.stem))question.stem='';
     if(hasExplanationImage&&hasBrokenSymbols(question?.explanation))question.explanation='';
   }
   return data;
 }
+
+document.addEventListener('error',event=>{
+  const img=event.target;if(!(img instanceof HTMLImageElement)||!img.matches('[data-relax-image]'))return;
+  const frame=img.closest('[data-relax-image-frame]'),retry=frame?.querySelector('[data-relax-image-retry]');
+  img.hidden=true;frame?.classList.add('is-error');frame?.removeAttribute('href');if(retry)retry.hidden=false;
+},true);
+document.addEventListener('load',event=>{
+  const img=event.target;if(!(img instanceof HTMLImageElement)||!img.matches('[data-relax-image]'))return;
+  const frame=img.closest('[data-relax-image-frame]'),retry=frame?.querySelector('[data-relax-image-retry]'),src=img.dataset.relaxImageSrc||img.src;
+  img.hidden=false;frame?.classList.remove('is-error');if(frame)frame.href=src;if(retry)retry.hidden=true;
+},true);
+document.addEventListener('click',event=>{
+  const retry=event.target.closest?.('[data-relax-image-retry]');if(!retry)return;
+  event.preventDefault();event.stopPropagation();const frame=retry.closest('[data-relax-image-frame]'),img=frame?.querySelector('[data-relax-image]'),src=img?.dataset.relaxImageSrc;
+  if(!img||!src)return;retry.hidden=true;img.hidden=false;const join=src.includes('?')?'&':'?';img.src=`${src}${join}retry=${Date.now()}`;
+});
+document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target?.matches?.('[data-relax-image-retry]'))event.target.click()});
 export async function loadRelaxData({force=false}={}){
   if(force)dataPromise=null;
   if(dataPromise)return dataPromise;

@@ -1,7 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const years=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const DATA_VERSION='20260824-base-priority';
+  const DATA_VERSION='20260825-bank1';
   const mergedCache=new Map();
   const layerCache={base:new Map(),supplement:new Map(),extra:new Map()};
   const MAX_CONCURRENT=4;
@@ -34,7 +34,7 @@
   async function fetchJson(url,{allow404=false,retries=2}={}){
     for(let attempt=0;attempt<=retries;attempt++){
       try{
-        const response=await nativeFetch(url,{cache:'no-store'});
+        const response=await nativeFetch(url,{cache:'default'});
         if(response.ok)return await response.json();
         if(allow404&&response.status===404)return null;
       }catch{}
@@ -125,17 +125,26 @@
     if(!force&&mergedCache.has(year))return mergedCache.get(year);
     const task=withSlot(async()=>{
       if(force)clearYearLayers(year);
-      let [base,supplement,extra]=await Promise.all([loadBase(year),loadSupplement(year),loadExtra(year)]);
+      let base=await loadBase(year),supplement=null,extra=null;
       if(!base)return null;
-      let paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
+      let paper=base;
       let health=auditPaper(paper);
+
+      if(unhealthy(health)){
+        [supplement,extra]=await Promise.all([loadSupplement(year),loadExtra(year)]);
+        if(base)paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
+        health=auditPaper(paper);
+      }
 
       if(unhealthy(health)){
         clearYearLayers(year);
         await sleep(100);
-        [base,supplement,extra]=await Promise.all([loadBase(year),loadSupplement(year),loadExtra(year)]);
-        if(base)paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
-        health=auditPaper(paper);
+        base=await loadBase(year);
+        if(base){
+          [supplement,extra]=await Promise.all([loadSupplement(year),loadExtra(year)]);
+          paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
+          health=auditPaper(paper);
+        }
       }
 
       if(unhealthy(health))console.warn(`[Everflow] ${year} 题库加载不完整`,health);
@@ -178,7 +187,7 @@
     }catch(error){
       console.warn(`[Everflow] ${year} 题库合并失败`,error);
     }
-    return nativeFetch(input,{...init,cache:'no-store'});
+    return nativeFetch(input,{...init,cache:'default'});
   };
 
   if(document.body?.dataset.view!=='zhenti')return;

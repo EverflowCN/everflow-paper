@@ -1,8 +1,8 @@
 import{
   loadRelaxData,loadRecords as loadRelaxRecords,patchRecord as patchRelaxRecord,
   questionState,questionNumber,questionImages,explanationImages,optionEntries,
-  assetUrl,esc as coreEsc,subjectName,idKey
-}from'./relax1000-core.js';
+  imageMarkup,usesQuestionImageFallback,esc as coreEsc,subjectName,idKey
+}from'./relax1000-core.js?v=20260825-bank1';
 
 const root=document.querySelector('[data-atlas-root]');
 const frame=root?.querySelector('.atlas-frame');
@@ -21,7 +21,7 @@ const sourceButtons=root?[...root.querySelectorAll('[data-atlas-source]')]:[];
 const fitButtons=root?[...root.querySelectorAll('[data-atlas-fit]')]:[];
 if(!root||!frame||!canvas||!matrix||!loading||!caption||!drawer||!drawerBody)throw new Error('atlas preview shell missing');
 
-const VERSION='20260824-atlas-v1';
+const VERSION='20260825-bank1';
 const SOURCE_KEY='everflow-graph-next-source-v1';
 const FIT_KEY='everflow-graph-next-fit-v1';
 const CURRENT_KEY={zhenti:'everflow-graph-next-current-zhenti-v1',relax1000:'everflow-graph-next-current-relax-v1'};
@@ -226,7 +226,7 @@ async function loadPaper(year,{force=false}={}){
   const promise=fetch(`/data/zhenti/${key}.json`,{cache:force?'no-store':'default'}).then(response=>response.ok?response.json():null).catch(()=>null);
   paperCache.set(key,promise);return promise;
 }
-function figureHtml(src,alt){const safe=safeZhentiSrc(src);return safe?`<figure class="atlas-figure"><img src="${esc(safe)}" alt="${esc(alt)}" loading="lazy" decoding="async" draggable="false"></figure>`:''}
+function figureHtml(src,alt){const safe=safeZhentiSrc(src),markup=safe?imageMarkup(safe,alt):'';return markup?`<figure class="atlas-figure">${markup}</figure>`:''}
 function renderZhentiQuestion(item,cell){
   if(!item)return'<div class="atlas-message">题目暂时没有载入。</div>';
   if(item.verification?.status&&item.verification.status!=='verified')return'<div class="atlas-message">该题仍在核验中。</div>';
@@ -236,13 +236,13 @@ function renderZhentiQuestion(item,cell){
   const answer=answerVisible?`<div class="atlas-answer-box"><strong>参考答案：${esc(item.answer||'')}</strong><p>${esc(item.analysis||'暂无解析')}</p></div>`:'';
   return `<p class="atlas-stem">${esc(item.stem||'')}</p>${general?`<div class="atlas-figures">${general}</div>`:''}${options}${answer}`;
 }
-function relaxFigure(src,index,label){const url=assetUrl(src);return url?`<figure class="atlas-figure"><img src="${esc(url)}" alt="${esc(label)} ${index+1}" loading="lazy" decoding="async" draggable="false"></figure>`:''}
+function relaxFigure(src,index,label){const markup=imageMarkup(src,`${label} ${index+1}`);return markup?`<figure class="atlas-figure">${markup}</figure>`:''}
 function renderRelaxQuestion(question){
-  const images=questionImages(question),analysisImages=explanationImages(question),entries=optionEntries(question);
+  const images=questionImages(question),analysisImages=explanationImages(question),entries=optionEntries(question),fallback=usesQuestionImageFallback(question);
   const figures=images.length?`<div class="atlas-figures">${images.map((src,i)=>relaxFigure(src,i,'原题截图')).join('')}</div>`:'';
-  const options=entries.length?`<div class="atlas-options">${entries.map(item=>`<div class="atlas-option ${answerVisible&&String(item.key)===String(question.answer)?'answer':''}"><b>${esc(item.key)}.</b><div>${esc(item.text)}</div></div>`).join('')}</div>`:(images.length?`<div class="atlas-options">${'ABCD'.split('').map(key=>`<div class="atlas-option ${answerVisible&&key===String(question.answer)?'answer':''}"><b>${key}.</b><div>以原题截图中的选项为准</div></div>`).join('')}</div>`:'');
+  const options=entries.length?`<div class="atlas-options">${entries.map(item=>`<div class="atlas-option ${answerVisible&&String(item.key)===String(question.answer)?'answer':''}"><b>${esc(item.key)}.</b><div>${esc(item.text||'见原题图中的选项')}</div></div>`).join('')}</div>`:(images.length?`<div class="atlas-options">${'ABCD'.split('').map(key=>`<div class="atlas-option ${answerVisible&&key===String(question.answer)?'answer':''}"><b>${key}.</b><div>以原题截图中的选项为准</div></div>`).join('')}</div>`:'');
   const answer=answerVisible?`<div class="atlas-answer-box"><strong>参考答案：${esc(question.answer||'')}</strong>${analysisImages.length?`<div class="atlas-figures">${analysisImages.map((src,i)=>relaxFigure(src,i,'解析截图')).join('')}</div>`:`<p>${esc(question.explanation||'暂无文字解析')}</p>`}</div>`:'';
-  return `<p class="atlas-stem">${esc(question.stem||'题干以原题截图为准')}</p>${figures}${options}${answer}`;
+  return `<p class="atlas-stem">${esc(question.stem||'题干以原题截图为准')}</p>${figures}${fallback?'<p class="relax-image-fallback-note">公式、图表或损坏文本请以原题图为准。</p>':''}${options}${answer}`;
 }
 function syncStatus(){
   if(!selected)return;

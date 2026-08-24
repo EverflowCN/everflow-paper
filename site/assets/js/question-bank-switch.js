@@ -8,7 +8,7 @@ body.dataset.questionBank=current;
 body.classList.toggle('relax1000-active',current==='relax1000');
 
 const css=document.createElement('link');
-css.rel='stylesheet';css.href='/assets/css/question-bank-switch.css?v=20260824-bank13';document.head.appendChild(css);
+css.rel='stylesheet';css.href='/assets/css/question-bank-switch.css?v=20260825-bank1';document.head.appendChild(css);
 
 const shell=document.createElement('section');
 shell.className='bank-source-shell';shell.setAttribute('aria-label','题库切换');
@@ -22,10 +22,10 @@ shell.querySelectorAll('[data-bank-source]').forEach(button=>button.addEventList
 }));
 
 if(current==='relax1000'){
-  const controls=document.createElement('link');controls.rel='stylesheet';controls.href='/assets/css/relax1000-controls.css?v=20260824-relax13';document.head.appendChild(controls);
-  import('/assets/js/relax1000-wall.js?v=20260824-bankwall4')
-    .then(()=>import('/assets/js/relax1000-cards.js?v=20260824-cards4'))
-    .then(()=>import('/assets/js/relax1000-reset.js?v=20260824-relax13'))
+  const controls=document.createElement('link');controls.rel='stylesheet';controls.href='/assets/css/relax1000-controls.css?v=20260825-bank1';document.head.appendChild(controls);
+  import('/assets/js/relax1000-wall.js?v=20260825-bank1')
+    .then(()=>import('/assets/js/relax1000-cards.js?v=20260825-bank1'))
+    .then(()=>import('/assets/js/relax1000-reset.js?v=20260825-bank1'))
     .catch(error=>{
       console.error('Everflow Relax1000 bank failed',error);
       document.querySelector('.relax-bank-root')?.remove();

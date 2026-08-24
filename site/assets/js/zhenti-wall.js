@@ -7,7 +7,7 @@
   const STORAGE_KEY='everflow-408-zhenti-wall-v1';
   const SHORTCUT_TIP_KEY='everflow-408-shortcut-tip-seen';
   const DATA_BASE='/data/zhenti';
-  const DATA_VERSION='20260824-subject1';
+  const DATA_VERSION='20260825-bank1';
   const STATUS_LABEL={mastered:'熟练',fuzzy:'模糊',weak:'不会'};
   const SOURCE_LABEL={tommy408:'TommyTay0712/408',neville408:'408-exam-paper',csgraduates:'计算机考研杂货铺',foreverlink:'408 ForeverLink',hermes408:'Hermes 408',noobdream:'N诺',csyanku:'CSYanKu',xit:'厦门工学院原卷'};
   const SUBJECTS={
@@ -38,12 +38,22 @@
 
   const paperCache=new Map();
   const subjectIndex=new Map();
+  const indexedYears=new Set();
   let subjectIndexReady=false;
+  function indexPaper(year,paper){
+    if(!paper?.questions)return;
+    for(const q of ALL_QUESTIONS){
+      const item=paper.questions[String(q)];
+      if(item?.subject&&SUBJECTS[item.subject])subjectIndex.set(`${year}-${q}`,item.subject);
+    }
+    indexedYears.add(String(year));
+  }
   async function loadPaper(year){
     if(paperCache.has(year))return paperCache.get(year);
     const promise=fetch(`${DATA_BASE}/${year}.json?v=${DATA_VERSION}`,{cache:'no-store'})
-      .then(r=>r.ok?r.json():null)
-      .catch(()=>null);
+      .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()})
+      .then(paper=>{indexPaper(year,paper);return paper})
+      .catch(error=>{paperCache.delete(year);console.warn(`[Everflow] ${year} 真题读取失败`,error);return null});
     paperCache.set(year,promise);
     return promise;
   }
@@ -62,23 +72,25 @@
     return fallbackSubject(q);
   }
   function questionsForSubject(year,key=subject){
-    if(!subjectIndexReady)return SUBJECTS[key]?.questions||[];
+    if(!subjectIndexReady&&!indexedYears.has(String(year)))return SUBJECTS[key]?.questions||[];
     return ALL_QUESTIONS.filter(q=>subjectForQuestion(q,year)===key);
   }
   function unionQuestions(years,key=subject){
-    if(!subjectIndexReady)return SUBJECTS[key]?.questions||[];
+    if(!subjectIndexReady&&!years.some(year=>indexedYears.has(String(year))))return SUBJECTS[key]?.questions||[];
     const set=new Set();years.forEach(year=>questionsForSubject(year,key).forEach(q=>set.add(q)));
     return [...set].sort((a,b)=>a-b);
   }
   async function buildSubjectIndex(){
-    const papers=await Promise.all(YEARS.map(year=>loadPaper(year)));
-    papers.forEach((paper,i)=>{
-      const year=YEARS[i];
-      for(const q of ALL_QUESTIONS){
-        const item=paper?.questions?.[String(q)];
-        if(item?.subject&&SUBJECTS[item.subject])subjectIndex.set(`${year}-${q}`,item.subject);
+    const response=await fetch(`${DATA_BASE}/subject-index.json?v=${DATA_VERSION}`,{cache:'default'});
+    if(!response.ok)throw new Error(`subject index HTTP ${response.status}`);
+    const payload=await response.json();
+    for(const [year,groups] of Object.entries(payload?.years||{})){
+      for(const [key,numbers] of Object.entries(groups||{})){
+        if(!SUBJECTS[key]||!Array.isArray(numbers))continue;
+        numbers.forEach(q=>subjectIndex.set(`${year}-${q}`,key));
       }
-    });
+      indexedYears.add(String(year));
+    }
     subjectIndexReady=true;
     renderMode();
     document.dispatchEvent(new CustomEvent('everflow:zhenti-subject-index-ready'));
@@ -179,6 +191,11 @@
   async function renderInto(box,year,q,context){
     const token=`${year}-${q}-${Date.now()}`;box.dataset.loadToken=token;box.innerHTML='<div class="question-loading">正在读取并核验题库…</div>';
     const item=await getQuestionData(year,q);if(box.dataset.loadToken!==token)return;
+    if(!item){
+      box.innerHTML=`<div class="question-load-error"><strong>${year} 年第 ${q} 题暂时没有载入</strong><p>网络波动或缓存更新可能导致本次读取失败，重试不会影响答题记录。</p><button type="button" data-question-retry>重新读取</button></div>`;
+      box.querySelector('[data-question-retry]')?.addEventListener('click',()=>renderInto(box,year,q,context));
+      return;
+    }
     if(item?.subject&&SUBJECTS[item.subject]){
       subjectIndex.set(`${year}-${q}`,item.subject);
       if(context==='modal')els.modalPoint.textContent=SUBJECTS[item.subject].name;
@@ -330,5 +347,5 @@
   window.addEventListener('storage',e=>{if(e.key!==STORAGE_KEY)return;records=load();renderMode();if(!els.modal.hidden)renderModal();if(!els.paperSession.hidden)renderPaperSession()});
   window.EveraZhentiWall={openQuestion,subjectForQuestion,questionsForSubject,loadPaper};
 
-  setupRangeSelects();installShortcutHelp();renderMode();buildSubjectIndex().catch(err=>console.error('Everflow subject index failed',err));
+  setupRangeSelects();installShortcutHelp();renderMode();buildSubjectIndex().catch(err=>console.warn('Everflow subject index fallback enabled',err));
 })();

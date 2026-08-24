@@ -1,4 +1,4 @@
-import{RELAX_STORAGE_KEYS,SRS_KEY,loadRecords,saveRecords,clearCompat,clearRelaxStorage}from'./relax1000-core.js';
+import{RELAX_STORAGE_KEYS,SRS_KEY,loadRecords,saveRecords,clearCompat,clearRelaxStorage}from'./relax1000-core.js?v=20260825-bank1';
 
 const subbar=document.querySelector('.relax-subview-bar');
 if(!subbar)throw new Error('Relax1000 subview bar missing');

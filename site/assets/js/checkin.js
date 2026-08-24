@@ -1,7 +1,8 @@
 (()=>{
   const STATE_KEY='oxygen408-progress-v2';
   const SUBJECTS=['ds','co','os','cn'];
-  let state={},paperData=null,reinforcementData=null,mode='paper',subject='ds';
+  const DATA_VERSION='20260825-course2';
+  let state={},paperData=null,reinforcementData=null,mode='paper',subject='ds',booting=false;
   const noteTimers=new Map();
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -10,7 +11,7 @@
   function loadState(){try{state=JSON.parse(localStorage.getItem(STATE_KEY)||'{}')||{}}catch{state={}}}
   function saveState(){localStorage.setItem(STATE_KEY,JSON.stringify(state))}
   function ensure(id){return state[id]||(state[id]={done:false,note:'',updatedAt:''})}
-  async function loadJson(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(url);return r.json()}
+  async function loadJson(url,{force=false}={}){let lastError;for(let attempt=0;attempt<2;attempt++){try{const join=url.includes('?')?'&':'?',r=await fetch(`${url}${join}v=${DATA_VERSION}`,{cache:force||attempt?'reload':'default'});if(!r.ok)throw new Error(`${url} HTTP ${r.status}`);return await r.json()}catch(error){lastError=error}}throw lastError}
 
   async function hydrateFromStore(){
     if(!window.EveraStore)return;
@@ -44,6 +45,7 @@
   }
 
   document.addEventListener('click',e=>{
+    const retry=e.target.closest('[data-course-retry]');if(retry){boot({force:true});return}
     const m=e.target.closest('[data-course-mode]');if(m){mode=m.dataset.courseMode;render();return}
     const s=e.target.closest('[data-subject]');if(s){subject=s.dataset.subject;render();return}
     const all=e.target.closest('[data-all]');if(all){const val=all.dataset.all==='1',stamp=nowIso();for(const item of currentItems()){const st=ensure(item.id);st.done=val;st.updatedAt=stamp;mirror(item.id,currentKind())}saveState();render()}
@@ -51,6 +53,6 @@
   document.addEventListener('change',e=>{if(!e.target.matches('[data-check]'))return;const id=e.target.dataset.check,st=ensure(id);st.done=e.target.checked;st.updatedAt=nowIso();saveState();mirror(id,currentKind());e.target.closest('tr')?.classList.toggle('done',e.target.checked);stats()});
   document.addEventListener('input',e=>{if(!e.target.matches('[data-note]'))return;const id=e.target.dataset.note,st=ensure(id);st.note=e.target.value;st.updatedAt=nowIso();saveState();clearTimeout(noteTimers.get(id));noteTimers.set(id,setTimeout(()=>mirror(id,currentKind()),450))});
 
-  async function boot(){try{loadState();await hydrateFromStore();[paperData,reinforcementData]=await Promise.all([loadJson('../data/oxygen.json'),loadJson('../data/oxygen-reinforcement.json')]);render()}catch(err){console.error(err);$('[data-checkin-root]').innerHTML='<div class="empty-state">课程表加载失败，请稍后刷新。</div>'}}
+  async function boot({force=false}={}){if(booting)return;booting=true;const panel=$('[data-course-panel]');$('[data-total-text]').textContent='正在加载课程…';$('[data-total-percent]').textContent='--';$('[data-total-bar]').style.width='0';panel.innerHTML='<div class="empty-state">正在读取两套课程，请稍候…</div>';try{loadState();const hydration=hydrateFromStore();[paperData,reinforcementData]=await Promise.all([loadJson('../data/oxygen.json',{force}),loadJson('../data/oxygen-reinforcement.json',{force})]);render();await hydration;render()}catch(err){console.error('course catalog load failed',err);$('[data-total-text]').textContent='课程暂未载入';$('[data-total-percent]').textContent='--';panel.innerHTML='<div class="empty-state"><strong>课程表加载失败</strong><p>网络恢复后可以直接重试，不会清空已保存的打卡记录。</p><button class="small-btn" type="button" data-course-retry>重新载入课程</button></div>'}finally{booting=false}}
   boot();
 })();

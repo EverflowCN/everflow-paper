@@ -18,6 +18,7 @@
   const PAPER_CACHE=new Map();
   const SUBJECT_INDEX=new Map();
   const SUBJECT_LABEL={ds:'数据结构',co:'计算机组成原理',os:'操作系统',cn:'计算机网络'};
+  const DATA_VERSION='20260825-bank1';
 
   function parseKey(key){
     const match=String(key||'').match(/^(\d{4})-(\d{1,2})$/);
@@ -57,14 +58,16 @@
     if(PAPER_CACHE.has(key))return PAPER_CACHE.get(key);
     const source=window.EverflowZhentiData?.loadPaper
       ?window.EverflowZhentiData.loadPaper(key,{force})
-      :fetch(`/data/zhenti/${key}.json`,{cache:'no-store'}).then(response=>response.ok?response.json():null);
+      :fetch(`/data/zhenti/${key}.json?v=${DATA_VERSION}`,{cache:force?'no-store':'default'}).then(response=>response.ok?response.json():null);
     const promise=Promise.resolve(source).then(paper=>{if(!paper)PAPER_CACHE.delete(key);return paper}).catch(()=>{PAPER_CACHE.delete(key);return null});
     PAPER_CACHE.set(key,promise);
     return promise;
   }
   async function primeSubjects(){
-    const papers=await Promise.all(YEARS.map(year=>loadPaper(year)));
-    papers.forEach((paper,i)=>{const year=YEARS[i];QUESTIONS.forEach(q=>{const key=paper?.questions?.[String(q)]?.subject;if(key&&SUBJECT_LABEL[key])SUBJECT_INDEX.set(`${year}-${q}`,key)})});
+    const response=await fetch(`/data/zhenti/subject-index.json?v=${DATA_VERSION}`,{cache:'default'});
+    if(!response.ok)throw new Error(`subject index HTTP ${response.status}`);
+    const index=await response.json();
+    for(const [year,subjects]of Object.entries(index?.years||{}))for(const [subject,questions]of Object.entries(subjects||{}))if(SUBJECT_LABEL[subject])for(const q of questions||[])SUBJECT_INDEX.set(`${year}-${q}`,subject);
     render();
     if(selected)updateCell(`${selected.year}-${selected.q}`);
   }
@@ -81,9 +84,9 @@
   function focusCurrentOnce(){if(initialFocusDone||!current||!matchMedia('(max-width:1199px)').matches)return;initialFocusDone=true;requestAnimationFrame(()=>matrix.querySelector(`.overview-cell[data-key="${current}"]`)?.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'}))}
   function render({focusCurrent=false}={}){const fragment=document.createDocumentFragment();fragment.appendChild(indexCell('','overview-corner'));QUESTIONS.forEach(q=>fragment.appendChild(indexCell(String(q),'overview-q')));YEARS.forEach(year=>{fragment.appendChild(indexCell(String(year),'overview-year'));QUESTIONS.forEach(q=>fragment.appendChild(questionCell(year,q)))});matrix.replaceChildren(fragment);if(focusCurrent)focusCurrentOnce();document.dispatchEvent(new CustomEvent('everflow:graph-matrix-ready',{detail:{source:'zhenti',cols:47,rows:19}}))}
 
-  function figureHtml(fig,year,q){const src=safeSrc(fig?.src);if(!src)return'';return `<figure class="drawer-figure"><img src="${esc(src)}" alt="${esc(fig?.alt||`${year}年第${q}题图`)}" loading="lazy" decoding="async" draggable="false"></figure>`}
+  function figureHtml(fig,year,q){const src=safeSrc(fig?.src);if(!src)return'';return `<figure class="drawer-figure"><a class="relax-image-link" href="${esc(src)}" target="_blank" rel="noopener" data-graph-image-frame><img src="${esc(src)}" data-graph-image data-graph-image-src="${esc(src)}" alt="${esc(fig?.alt||`${year}年第${q}题图`)}" loading="eager" decoding="async" fetchpriority="high" draggable="false"><span class="relax-image-error" role="button" tabindex="0" data-graph-image-retry hidden>图片载入失败 · 点击重试</span></a></figure>`}
   function questionHtml(item,year,q){
-    if(!item)return'<div class="drawer-unverified"><strong>题目加载失败</strong><p>题库数据暂时没有完整载入。再次点击本题会自动重试。</p></div>';
+    if(!item)return`<div class="drawer-unverified"><strong>题目加载失败</strong><p>题库数据暂时没有完整载入。</p><button type="button" class="small-btn" data-graph-question-retry="${year}-${q}">重新载入本题</button></div>`;
     if(item.verification?.status!=='verified')return'<div class="drawer-unverified">该题尚未完成核验，暂不展示题干。</div>';
     const figures=Array.isArray(item.figures)?item.figures:[],general=figures.filter(fig=>!fig?.option).map(fig=>figureHtml(fig,year,q)).join(''),optionFigures=new Map();
     figures.filter(fig=>fig?.option).forEach(fig=>{const key=String(fig.option);optionFigures.set(key,(optionFigures.get(key)||'')+figureHtml(fig,year,q))});
@@ -120,6 +123,10 @@
   drawerReopen?.addEventListener('click',()=>{if(selected){showDrawer();refreshSelected()}});
   drawerAnswer?.addEventListener('click',()=>{if(!selected?.item||selected.item.verification?.status!=='verified')return;answerVisible=!answerVisible;if(answerVisible){patchRecord(selected.year,selected.q,{reviewed:true});updateCell(`${selected.year}-${selected.q}`)}refreshSelected()});
   drawerStatuses.forEach(btn=>btn.addEventListener('click',()=>{if(!selected)return;patchRecord(selected.year,selected.q,{status:btn.dataset.drawerStatus||undefined});updateCell(`${selected.year}-${selected.q}`);syncDrawerControls()}));
+  drawerBody.addEventListener('error',event=>{const img=event.target;if(!(img instanceof HTMLImageElement)||!img.matches('[data-graph-image]'))return;const frame=img.closest('[data-graph-image-frame]'),retry=frame?.querySelector('[data-graph-image-retry]');img.hidden=true;frame?.classList.add('is-error');frame?.removeAttribute('href');if(retry)retry.hidden=false},true);
+  drawerBody.addEventListener('load',event=>{const img=event.target;if(!(img instanceof HTMLImageElement)||!img.matches('[data-graph-image]'))return;const frame=img.closest('[data-graph-image-frame]'),retry=frame?.querySelector('[data-graph-image-retry]'),src=img.dataset.graphImageSrc||img.src;img.hidden=false;frame?.classList.remove('is-error');if(frame)frame.href=src;if(retry)retry.hidden=true},true);
+  drawerBody.addEventListener('click',event=>{const questionRetry=event.target.closest('[data-graph-question-retry]');if(questionRetry){const parsed=parseKey(questionRetry.dataset.graphQuestionRetry);if(parsed)openQuestion(parsed.year,parsed.q);return}const retry=event.target.closest('[data-graph-image-retry]');if(!retry)return;event.preventDefault();event.stopPropagation();const frame=retry.closest('[data-graph-image-frame]'),img=frame?.querySelector('[data-graph-image]'),src=img?.dataset.graphImageSrc;if(!img||!src)return;retry.hidden=true;img.hidden=false;img.src=`${src}${src.includes('?')?'&':'?'}retry=${Date.now()}`});
+  drawerBody.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-graph-image-retry]'))event.target.click()});
 
   function refresh(){records=loadRecords();try{current=localStorage.getItem(CURRENT_KEY)||current}catch{}if(!parseKey(current))current=latestKey(records)||'2026-1';render();if(selected)syncDrawerControls()}
   window.addEventListener('pageshow',event=>{if(event.persisted)refresh()});
