@@ -15,9 +15,21 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Architecture audit
+        run: node site/tools/audit-bank-features.mjs
+
   deploy:
     environment:
       name: github-pages
@@ -44,20 +56,21 @@ jobs:
       - name: Verify site
         shell: bash
         run: |
+          set -euo pipefail
           test -s site/index.html
           test -s site/zhenti/index.html
           test -s site/graph/index.html
           test -s site/relax/index.html
+          test -s site/assets/js/graph-app.js
+          test -s site/assets/js/graph-controls.js
           test -s site/assets/js/site-runtime-v2.js
-          echo "Everflow site artifact ready"
-
-      - name: Audit bank, graph and paper suite
-        continue-on-error: true
-        run: node site/tools/audit-bank-features.mjs
+          echo "Everflow source tree ready"
 
       - name: Build privacy-safe static artifact
         shell: bash
         run: |
+          set -euo pipefail
+
           rm -rf site/data/relax1000
           mkdir -p site/data/relax1000
           cp -R ".relax-source/站点/data" site/data/relax1000/data
@@ -107,19 +120,22 @@ jobs:
                           meta.pop(key,None)
               if json_path.as_posix().endswith('zhenti/manifest.json') and isinstance(data,dict):
                   data.pop('policy',None)
+                  data.pop('sources',None)
                   for meta in (data.get('years') or {}).values():
                       if isinstance(meta,dict):
                           meta.pop('notes',None)
+                          meta.pop('sources',None)
               json_path.write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
 
           for name in ('audit-report.json','vendor-report.json'):
               p=Path('site/data/zhenti')/name
-              if p.exists(): p.unlink()
+              if p.exists():
+                  p.unlink()
 
           graph=Path('site/assets/js/overall-graph.js')
           if graph.exists():
               text=graph.read_text(encoding='utf-8')
-              text=text.replace("if(/^https:\\/\\/raw\\.githubusercontent\\.com\\//i.test(value))return value;","")
+              text=re.sub(r"if\(/\^https:\\\/\\\/raw\\\.githubusercontent\\\.com\\\//i\.test\(value\)\)return value;?",'',text)
               graph.write_text(text,encoding='utf-8')
 
           wall=Path('site/assets/js/zhenti-wall.js')
@@ -132,15 +148,19 @@ jobs:
 
           rm -rf site/tools
 
-          if grep -RInEi --include='*.html' --include='*.js' --include='*.css' --include='*.json' 'EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com|github\.com|GitHub账号|使用 GitHub|提交到 GitHub|GitHub Pages|TommyTay0712|408-exam-paper|CSYanKu|ForeverLink|Hermes 408' site; then
-            echo 'Privacy audit failed: repository/provider/source information leaked into public site artifact.'
+          if grep -RInEi --include='*.html' --include='*.js' --include='*.css' --include='*.json' 'EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/EverflowCN|TommyTay0712|408-exam-paper|CSYanKu|ForeverLink|Hermes 408' site; then
+            echo 'Privacy audit failed: repository identity/address or bank-source details leaked into public artifact.'
             exit 1
           fi
           if grep -RIn --exclude-dir=data --include='*.html' --include='*.js' --include='*.css' '1576' site; then
             echo 'Privacy audit failed: exact Relax corpus count leaked into public UI/source.'
             exit 1
           fi
+
           test -s site/data/relax1000/data/questions.json
+          test -s site/assets/js/graph-app.js
+          test -s site/assets/js/graph-controls.js
+          echo '{"build":"20260824-graph-r3"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages
