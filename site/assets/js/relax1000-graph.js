@@ -2,8 +2,6 @@ import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questi
 
 const shell=document.querySelector('[data-graph-shell]');
 const matrix=shell?.querySelector('[data-overview-matrix]');
-const scroll=shell?.querySelector('.overview-scroll');
-const legend=shell?.querySelector('.overview-legend');
 const drawer=shell?.querySelector('[data-question-drawer]');
 const drawerBody=shell?.querySelector('[data-drawer-body]');
 const drawerTitle=shell?.querySelector('[data-drawer-title]');
@@ -12,7 +10,7 @@ const drawerClose=shell?.querySelector('[data-drawer-close]');
 const drawerReopen=shell?.querySelector('[data-drawer-reopen]');
 const drawerAnswer=shell?.querySelector('[data-drawer-answer]');
 const drawerStatuses=shell?[...shell.querySelectorAll('[data-drawer-status]')]:[];
-if(!shell||!matrix||!scroll||!legend||!drawer||!drawerBody||!drawerTitle||!drawerMeta||!drawerAnswer)throw new Error('shared graph shell missing');
+if(!shell||!matrix||!drawer||!drawerBody||!drawerTitle||!drawerMeta||!drawerAnswer)throw new Error('shared graph shell missing');
 
 const CURRENT_KEY='everflow-408-relax-graph-current-v4';
 const MAX_COLS=45;
@@ -22,12 +20,8 @@ try{current=localStorage.getItem(CURRENT_KEY)||''}catch{}
 
 shell.dataset.graphKind='relax1000';
 shell.dataset.fitCols=String(MAX_COLS);
-shell.dataset.fitLabel='适应宽度';
 shell.dataset.fitKey='everflow-408-relax-graph-fit-v2';
 matrix.setAttribute('aria-label','Relax1000 整体图谱');
-
-const legacyCaption=[...legend.querySelectorAll('span')].find(node=>node.textContent?.includes('建议配合纸质版'));
-if(legacyCaption)legacyCaption.textContent='按章节分行 · 每行最多 45 题';
 
 function recordState(question,records=loadRecords()){
   const state=questionState(question,records),rec=state.rec||{};
@@ -130,5 +124,3 @@ data=await loadRelaxData();
 buildRows();
 if(!data.questions.some(q=>idKey(q)===current))current=idKey(data.questions[0]);
 renderMatrix({focus:true});
-const initial=data.questions.find(q=>idKey(q)===current)||data.questions[0];
-if(initial)openQuestion(initial);
