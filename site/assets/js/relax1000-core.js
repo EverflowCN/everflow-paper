@@ -28,11 +28,24 @@ export function assetUrl(value){
   const clean=src.replace(/^\.\//,'').replace(/^\//,'');
   return `${RELAX_ASSET_BASE}/${clean}`;
 }
+export function hasBrokenSymbols(value){
+  const text=String(value??'');
+  return /\uFFFD/.test(text)||/\?\s*\?/.test(text)||/[锟斤拷�]/.test(text);
+}
+export function displayText(value,fallback=''){
+  const text=String(value??'');
+  return hasBrokenSymbols(text)?String(fallback??''):text;
+}
 export function optionEntries(question){
   const options=question?.options;
-  if(Array.isArray(options))return options.map((item,index)=>({key:String(item?.key??'ABCD'[index]??index+1),text:String(item?.text??item?.label??'')}));
-  if(options&&typeof options==='object')return Object.entries(options).map(([key,text])=>({key:String(key),text:String(text??'')}));
-  return [];
+  let entries=[];
+  if(Array.isArray(options))entries=options.map((item,index)=>({key:String(item?.key??'ABCD'[index]??index+1),text:String(item?.text??item?.label??'')}));
+  else if(options&&typeof options==='object')entries=Object.entries(options).map(([key,text])=>({key:String(key),text:String(text??'')}));
+  if(!entries.length)return entries;
+  const hasImage=Array.isArray(question?.questionImages)&&question.questionImages.length>0;
+  const damagedCount=entries.filter(item=>hasBrokenSymbols(item.text)||item.text.includes('?')).length;
+  if(hasImage&&damagedCount>=2)return entries.map(item=>({...item,text:''}));
+  return entries.map(item=>hasBrokenSymbols(item.text)?{...item,text:''}:item);
 }
 export function subjectName(id,fallback=''){return SUBJECT_NAME[id]||fallback||id||'408'}
 export async function loadRelaxData({force=false}={}){
