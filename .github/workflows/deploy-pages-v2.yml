@@ -62,7 +62,7 @@ jobs:
           done
           grep -q 'data-resource-search' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html
-          grep -q "everflow-site-v42" site/sw.js
+          grep -q "everflow-site-v43" site/sw.js
           git diff --check
 
   deploy:
