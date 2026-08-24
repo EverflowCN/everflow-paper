@@ -1,4 +1,7 @@
 (()=>{
+  if(!document.querySelector('link[data-interaction-guard]')){
+    const guard=document.createElement('link');guard.rel='stylesheet';guard.href='/assets/css/interaction-guard.css?v=20260824-privacy2';guard.dataset.interactionGuard='';document.head.appendChild(guard);
+  }
   const path=location.pathname.replace(/\/{2,}/g,'/');
   const items=[
     {href:'/',label:'首页',match:p=>p==='/'},
