@@ -1,13 +1,10 @@
 (()=>{
   const $=s=>document.querySelector(s);
   const pad=n=>String(Math.max(0,n)).padStart(2,'0');
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const progressKey='oxygen408-progress-v2';
-  const REFRESH_MS=2*60*1000;
-  let lastOxygenVersion='';
 
   async function loadJson(path){
-    const r=await fetch(path+'?t='+Date.now(),{cache:'no-store'});
+    const r=await fetch(path);
     if(!r.ok) throw new Error(path+' load failed');
     return r.json();
   }
@@ -34,17 +31,7 @@
     try{return JSON.parse(localStorage.getItem(progressKey)||'{}')||{}}catch{return{}}
   }
 
-  function syncLabel(source={}){
-    const status=source.syncStatus||'seed';
-    const states=source.subjectStatus||{};
-    const okCount=['ds','co','os','cn'].filter(k=>states[k]?.ok).length;
-    if(status==='ok')return '自动同步正常 · 4/4';
-    if(status==='partial')return `部分同步 · ${okCount}/4（将自动重试）`;
-    if(status==='error')return '本轮同步失败 · 将自动重试';
-    return '自动同步已启用';
-  }
-
-  function renderOxygen(data){
+  function renderCourse(data){
     const progress=readProgress();
     const subjects=data.subjects||{};
     let total=0,done=0;
@@ -59,34 +46,13 @@
       const meta=card.querySelector('[data-subject-meta]');
       const bar=card.querySelector('.mini-progress>span');
       if(num)num.textContent=`${d}/${items.length}`;
-      if(meta)meta.textContent=items.length?`${Math.round(d/items.length*100)}% · ${items.length} 课时`:'等待课程更新';
+      if(meta)meta.textContent=items.length?`${Math.round(d/items.length*100)}% · ${items.length} 课时`:'暂无课程';
       if(bar)bar.style.width=(items.length?d/items.length*100:0)+'%';
     });
     const all=$('[data-overall-study]');
-    if(all)all.textContent=total?`${done}/${total} 课时 · ${Math.round(done/total*100)}%`:'等待同步';
-    const sync=$('[data-oxygen-sync]');
-    if(sync){
-      const dt=data.updatedAt?new Date(data.updatedAt):null;
-      sync.innerHTML=`<span class="status-dot"></span>${esc(syncLabel(data.source))} · ${dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步'} · 页面每2分钟自动刷新`;
-      sync.title=String(data.source?.message||'');
-    }
-  }
-
-  async function refreshOxygen(force=false){
-    try{
-      const oxygen=await loadJson('data/oxygen.json');
-      const version=String(oxygen.updatedAt||'')+'|'+['ds','co','os','cn'].map(k=>(oxygen.subjects?.[k]?.items||[]).length).join(',');
-      if(!force&&version===lastOxygenVersion)return;
-      lastOxygenVersion=version;
-      renderOxygen(oxygen);
-    }catch(err){
-      console.error(err);
-      const s=$('[data-oxygen-sync]');
-      if(s&&!lastOxygenVersion)s.textContent='数据暂时加载失败，请刷新重试。';
-    }
+    if(all)all.textContent=total?`${done}/${total} 课时 · ${Math.round(done/total*100)}%`:'暂无课程数据';
   }
 
   loadJson('data/exam.json').then(renderCountdown).catch(console.error);
-  refreshOxygen(true);
-  setInterval(()=>refreshOxygen(false),REFRESH_MS);
+  loadJson('data/oxygen.json').then(renderCourse).catch(console.error);
 })();

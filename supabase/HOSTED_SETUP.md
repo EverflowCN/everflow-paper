@@ -27,13 +27,3 @@ Recommended subject:
 `{{ .Token }} 是你的 Everflow 密码重置验证码`
 
 The recovery template must contain `{{ .Token }}` and should not contain `{{ .ConfirmationURL }}`. The frontend verifies this code with `verifyOtp(..., type: 'recovery')`, then calls `updateUser({ password })`. The old recovery-link flow remains compatible as a fallback for previously sent emails.
-
-## 3. Workspace → 408 update manual trigger
-
-The `oxygen-sync` Edge Function can read public workflow status without a GitHub token. Manual `workflow_dispatch` and failed-run retry require an Edge Function secret named:
-
-`EVERFLOW_GITHUB_TOKEN`
-
-Create a fine-grained GitHub token with access limited to `EverflowCN/everflow-paper` and the minimum Actions/Contents permissions needed to dispatch/re-run the existing workflow, then add it **directly in Supabase Edge Function Secrets**. Never put the token in `site/`, `localStorage`, a browser bundle, or GitHub source.
-
-When this secret is absent, Workspace should show the GitHub integration as optional/read-only; it must not mark Supabase/Auth/Database as unhealthy.

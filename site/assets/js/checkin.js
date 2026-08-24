@@ -2,8 +2,7 @@
   const SUBJECTS=['ds','co','os','cn'];
   const STATE_KEY='oxygen408-progress-v2';
   const LEGACY={ds:'408_checkin_ds',co:'408_checkin_co'};
-  const REFRESH_MS=2*60*1000;
-  let data=null,state={},active='ds',lastVersion='';
+  let data=null,state={},active='ds';
   const noteTimers=new Map();
 
   const $=s=>document.querySelector(s);
@@ -88,7 +87,7 @@
       <td class="num">${i+1}</td>
       <td><span class="course-title">${esc(item.title)}</span>${when?`<span class="course-meta">${esc(when)}</span>`:''}</td>
       <td class="mono">${esc(item.duration||'--')}</td>
-      <td>${item.url?`<a class="course-link" href="${esc(item.url)}" target="_blank" rel="noopener">B站 ↗</a>`:'<span class="muted">待补链接</span>'}</td>
+      <td>${item.url?`<a class="course-link" href="${esc(item.url)}" target="_blank" rel="noopener">B站 ↗</a>`:'<span class="muted">暂无链接</span>'}</td>
       <td><input class="note-input" data-note="${esc(item.id)}" value="${esc(st.note||'')}" placeholder="备注"></td>
     </tr>`;
   }
@@ -107,26 +106,11 @@
         </div>
       </div>
       <div class="course-table-wrap"><table class="course-table"><thead><tr><th>✓</th><th>#</th><th>课程名称</th><th>时长</th><th>视频</th><th>备注</th></tr></thead><tbody>${items.map(row).join('')}</tbody></table></div>
-    `:`<div class="empty-state"><strong>${esc(info.label)}强化暂未同步到课程</strong><br><span>自动任务会持续检查「就是氧气11」的新视频。</span></div>`;
-  }
-
-  function syncLabel(source={}){
-    const status=source.syncStatus||'seed';
-    const states=source.subjectStatus||{};
-    const okCount=SUBJECTS.filter(k=>states[k]?.ok).length;
-    if(status==='ok')return source.mode==='supabase-native'?'云端即时同步正常 · 4/4':'自动同步正常 · 4/4';
-    if(status==='partial')return `部分同步 · ${okCount}/4，失败科目将自动重试`;
-    if(status==='error')return '本轮同步失败，系统将自动重试';
-    return '自动同步已启用';
+    `:`<div class="empty-state"><strong>${esc(info.label)}强化暂无课程数据</strong></div>`;
   }
 
   function render(){
-    SUBJECTS.forEach(renderSubject);stats();
-    const dt=data.updatedAt?new Date(data.updatedAt):null;
-    $('[data-sync-time]').textContent=dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('zh-CN',{hour12:false}):'等待首次同步';
-    $('[data-sync-status]').textContent=syncLabel(data.source)+' · 页面每2分钟自动刷新';
-    $('[data-sync-status]').title=String(data.source?.message||'');
-    switchTab(active);
+    SUBJECTS.forEach(renderSubject);stats();switchTab(active);
   }
 
   function switchTab(key){
@@ -135,51 +119,10 @@
     $$('[data-panel]').forEach(p=>p.classList.toggle('active',p.dataset.panel===key));
   }
 
-  async function fetchStatic(){
-    const r=await fetch('../data/oxygen.json?t='+Date.now(),{cache:'no-store'});
-    if(!r.ok)throw new Error('oxygen data');
+  async function loadCourseData(){
+    const r=await fetch('../data/oxygen.json');
+    if(!r.ok)throw new Error('course data');
     return r.json();
-  }
-
-  async function fetchNativeCatalog(){
-    const cfg=window.EVERFLOW_CLOUD||{};
-    if(!cfg.url||!cfg.publishableKey)return null;
-    const h={apikey:cfg.publishableKey,Authorization:`Bearer ${cfg.publishableKey}`};
-    const [rowsRes,metaRes]=await Promise.all([
-      fetch(`${cfg.url}/rest/v1/oxygen_catalog?select=subject,item_id,title,duration,url,bvid,published_at&order=published_at.asc,item_id.asc`,{headers:h,cache:'no-store'}),
-      fetch(`${cfg.url}/rest/v1/oxygen_catalog_meta?id=eq.default&select=updated_at,sync_status,message,subject_status,source`,{headers:h,cache:'no-store'})
-    ]);
-    if(!rowsRes.ok||!metaRes.ok)return null;
-    const rows=await rowsRes.json(),metas=await metaRes.json();
-    if(!Array.isArray(rows)||!rows.length)return null;
-    const meta=Array.isArray(metas)?metas[0]||{}:{};
-    const labels={ds:['数据结构','DS'],co:['计算机组成原理','CO'],os:['操作系统','OS'],cn:['计算机网络','CN']};
-    const subjects={};
-    for(const key of SUBJECTS){
-      subjects[key]={label:labels[key][0],short:labels[key][1],items:rows.filter(r=>r.subject===key).map(r=>({id:r.item_id,title:r.title,duration:r.duration||'',url:r.url||'',bvid:r.bvid||'',publishedAt:Number(r.published_at||0)}))};
-    }
-    return {updatedAt:meta.updated_at||null,subjects,source:{syncStatus:meta.sync_status||'seed',message:meta.message||'',subjectStatus:meta.subject_status||{},mode:'supabase-native',...(meta.source||{})}};
-  }
-
-  async function refreshData(initial=false){
-    try{
-      const [staticResult,nativeResult]=await Promise.allSettled([fetchStatic(),fetchNativeCatalog()]);
-      const staticData=staticResult.status==='fulfilled'?staticResult.value:null;
-      const nativeData=nativeResult.status==='fulfilled'?nativeResult.value:null;
-      if(!staticData&&!nativeData)throw new Error('oxygen data');
-      const staticTime=staticData?.updatedAt?new Date(staticData.updatedAt).getTime():0;
-      const nativeTime=nativeData?.updatedAt?new Date(nativeData.updatedAt).getTime():0;
-      const next=nativeData&&nativeTime>=staticTime?nativeData:(staticData||nativeData);
-      const version=String(next.updatedAt||'')+'|'+SUBJECTS.map(k=>(next.subjects?.[k]?.items||[]).length).join(',');
-      if(!initial&&version===lastVersion)return;
-      if(!initial&&document.activeElement?.matches?.('.note-input'))return;
-      data=next;lastVersion=version;
-      if(initial)migrateLegacy();
-      render();mirrorKnownStates();
-    }catch(err){
-      console.error(err);
-      if(initial)$('[data-checkin-root]').innerHTML='<div class="empty-state">强化表加载失败，请稍后刷新。</div>';
-    }
   }
 
   document.addEventListener('click',e=>{
@@ -204,7 +147,9 @@
   });
 
   async function boot(){
-    loadState();await hydrateFromStudyStore();await refreshData(true);setInterval(()=>refreshData(false),REFRESH_MS);
+    try{
+      loadState();await hydrateFromStudyStore();data=await loadCourseData();migrateLegacy();render();mirrorKnownStates();
+    }catch(err){console.error(err);$('[data-checkin-root]').innerHTML='<div class="empty-state">强化表加载失败，请稍后刷新。</div>'}
   }
   boot();
 })();
