@@ -1,21 +1,12 @@
-name: Deploy Everflow Blog to GitHub Pages
+name: Legacy Everflow Pages Deploy (manual only)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'site/**'
-      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -28,30 +19,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-
-      - name: Verify oxygen data exists
-        shell: bash
-        run: |
-          test -s site/data/oxygen.json
-          python - <<'PY'
-          import json
-          p = 'site/data/oxygen.json'
-          with open(p, 'r', encoding='utf-8') as f:
-              d = json.load(f)
-          assert d.get('updatedAt'), 'oxygen.json missing updatedAt'
-          for key in ('ds', 'co', 'os', 'cn'):
-              assert key in d.get('subjects', {}), f'missing subject: {key}'
-          print('oxygen.json OK:', d.get('updatedAt'))
-          PY
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
