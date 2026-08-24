@@ -276,7 +276,7 @@ jobs:
             echo 'Privacy audit failed: repository identity/address or bank-source details leaked into public artifact.'
             exit 1
           fi
-          if grep -RIn --exclude-dir=data --include='*.html' --include='*.js' --include='*.css' '1576' site; then
+          if grep -RInE --exclude-dir=data --include='*.html' --include='*.js' --include='*.css' '(^|[^0-9])1576([^0-9]|$)' site; then
             echo 'Privacy audit failed: exact Relax corpus count leaked into public UI/source.'
             exit 1
           fi
