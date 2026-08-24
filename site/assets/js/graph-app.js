@@ -85,6 +85,8 @@ function showFatal(error){
 function closeInitialDrawer(){
   const drawer=shell.querySelector('[data-question-drawer]');
   if(drawer&&!drawer.hidden)shell.querySelector('[data-drawer-close]')?.click();
+  const reopen=shell.querySelector('[data-drawer-reopen]');
+  if(reopen)reopen.hidden=true;
 }
 
 const source=selectedSource();
