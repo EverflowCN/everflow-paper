@@ -6,6 +6,7 @@ on:
     paths:
       - 'site/data/zhenti/**'
       - 'site/tools/audit-zhenti.mjs'
+      - 'site/tools/vendor-zhenti-figures.mjs'
       - 'site/assets/js/zhenti-data-overlay.js'
       - '.github/workflows/audit-zhenti.yml'
   workflow_dispatch:
@@ -35,21 +36,11 @@ jobs:
           for(const year of [2017,2018]){
             const file=`site/data/zhenti/${year}.json`;
             let text=fs.readFileSync(file,'utf8');
-            try{
-              JSON.parse(text);
-              console.log(`${year}.json already valid`);
-              continue;
-            }catch(first){
-              const repaired=text+'}';
-              try{
-                JSON.parse(repaired);
-                fs.writeFileSync(file,repaired,'utf8');
-                console.log(`${year}.json repaired by appending one closing brace`);
-              }catch(second){
-                console.error(`${year}.json was not a one-brace truncation`, first.message, second.message);
-                process.exitCode=1;
-              }
-            }
+            try{JSON.parse(text);console.log(`${year}.json valid`);continue;}catch(first){}
+            const repaired=text+'}';
+            JSON.parse(repaired);
+            fs.writeFileSync(file,repaired,'utf8');
+            console.log(`${year}.json repaired by appending one closing brace`);
           }
           NODE
 
@@ -57,22 +48,15 @@ jobs:
         shell: bash
         run: |
           node - <<'NODE'
-          const fs=require('fs'),path=require('path');
-          let bad=0;
-          function walk(dir){
-            for(const ent of fs.readdirSync(dir,{withFileTypes:true})){
-              const p=path.join(dir,ent.name);
-              if(ent.isDirectory())walk(p);
-              else if(ent.name.endsWith('.json')){
-                try{JSON.parse(fs.readFileSync(p,'utf8'));}
-                catch(e){bad++;console.error('JSON syntax error:',p,e.message);}
-              }
-            }
-          }
-          walk('site/data/zhenti');
-          if(bad)process.exit(1);
-          console.log('All zhenti JSON files parse successfully');
+          const fs=require('fs'),path=require('path');let bad=0;
+          function walk(dir){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,ent.name);if(ent.isDirectory())walk(p);else if(ent.name.endsWith('.json')){try{JSON.parse(fs.readFileSync(p,'utf8'));}catch(e){bad++;console.error('JSON syntax error:',p,e.message);}}}}
+          walk('site/data/zhenti');if(bad)process.exit(1);console.log('All zhenti JSON files parse successfully');
           NODE
+
+      - name: Vendor all external question figures
+        id: vendor
+        continue-on-error: true
+        run: node site/tools/vendor-zhenti-figures.mjs
 
       - name: Run exhaustive 846-question audit
         id: audit
@@ -82,34 +66,44 @@ jobs:
       - name: Print audit summary
         if: always()
         run: |
-          if [ ! -f site/data/zhenti/audit-report.json ]; then
-            echo 'audit-report.json was not generated'
-            exit 0
-          fi
-          python - <<'PY'
+          if [ -f site/data/zhenti/vendor-report.json ]; then
+            python - <<'PY'
           import json
-          p='site/data/zhenti/audit-report.json'
-          with open(p,'r',encoding='utf-8') as f:
-              d=json.load(f)
-          print(json.dumps(d['summary'],ensure_ascii=False))
-          for year, info in d['years'].items():
-              if info['badQuestions'] or info.get('manifestFailureCount'):
-                  print(year, 'bad=', info['badQuestions'], 'manifest=', info.get('manifestFailureCount',0))
+          with open('site/data/zhenti/vendor-report.json','r',encoding='utf-8') as f:d=json.load(f)
+          print('vendor:',json.dumps({k:d.get(k) for k in ('status','stage','externalReferences','uniqueExternalFigures','downloaded','existing','failed','remainingExternal')},ensure_ascii=False))
+          for row in d.get('failures',[]):print('vendor failure:',json.dumps(row,ensure_ascii=False))
           PY
+          fi
+          if [ -f site/data/zhenti/audit-report.json ]; then
+            python - <<'PY'
+          import json
+          with open('site/data/zhenti/audit-report.json','r',encoding='utf-8') as f:d=json.load(f)
+          print('audit:',json.dumps(d['summary'],ensure_ascii=False))
+          for year,info in d['years'].items():
+              if info['badQuestions'] or info.get('manifestFailureCount'):print(year,'bad=',info['badQuestions'],'manifest=',info.get('manifestFailureCount',0))
+          PY
+          fi
 
-      - name: Persist corpus repairs and audit report
+      - name: Persist successful corpus vendoring
         if: always()
         shell: bash
+        env:
+          VENDOR_OUTCOME: ${{ steps.vendor.outcome }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/data/zhenti/2017.json site/data/zhenti/2018.json
-          if [ -f site/data/zhenti/audit-report.json ]; then git add site/data/zhenti/audit-report.json; fi
+          if [ "$VENDOR_OUTCOME" = "success" ]; then
+            git add site/data/zhenti
+          else
+            git add site/data/zhenti/2017.json site/data/zhenti/2018.json
+            if [ -f site/data/zhenti/vendor-report.json ]; then git add site/data/zhenti/vendor-report.json; fi
+            if [ -f site/data/zhenti/audit-report.json ]; then git add site/data/zhenti/audit-report.json; fi
+          fi
           if ! git diff --cached --quiet; then
-            git commit -m 'fix(zhenti): repair corpus JSON and refresh audit [skip ci]'
+            git commit -m 'fix(zhenti): vendor figures and refresh exhaustive audit [skip ci]'
             git push origin HEAD:main
           fi
 
-      - name: Require healthy corpus
-        if: steps.audit.outcome == 'failure'
+      - name: Require healthy local-only corpus
+        if: steps.vendor.outcome == 'failure' || steps.audit.outcome == 'failure'
         run: exit 1
