@@ -82,6 +82,10 @@ function showFatal(error){
   const frame=shell.querySelector('.overview-frame');
   if(frame)frame.innerHTML='<div class="drawer-loading"><div><strong>图谱载入失败</strong><p>数据或组件没有完整载入，请刷新后重试。</p></div></div>';
 }
+function closeInitialDrawer(){
+  const drawer=shell.querySelector('[data-question-drawer]');
+  if(drawer&&!drawer.hidden)shell.querySelector('[data-drawer-close]')?.click();
+}
 
 const source=selectedSource();
 rememberSource(source);
@@ -91,6 +95,7 @@ mountSourceSwitch(source);
 
 try{
   await SOURCES[source].load();
+  closeInitialDrawer();
   await import(`/assets/js/graph-controls.js?v=${APP_VERSION}`);
   body.dataset.graphReady='true';
   document.dispatchEvent(new CustomEvent('everflow:graph-ready',{detail:{source,version:APP_VERSION}}));
