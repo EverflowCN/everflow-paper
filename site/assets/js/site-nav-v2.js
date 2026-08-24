@@ -3,7 +3,8 @@
   const items=[
     {href:'/',label:'首页',match:p=>p==='/'},
     {href:'/study/',label:'学习',match:p=>p.startsWith('/study/')||p.startsWith('/408/')},
-    {href:'/zhenti/',label:'题库',match:p=>p.startsWith('/zhenti/')||p.startsWith('/relax/')},
+    {href:'/zhenti/',label:'题库',match:p=>p.startsWith('/zhenti/')},
+    {href:'/relax/',label:'组卷',match:p=>p.startsWith('/relax/')},
     {href:'/graph/',label:'整体图谱',match:p=>p.startsWith('/graph/')},
     {href:'/links/',label:'资源',match:p=>p.startsWith('/links/')},
     {href:'/archive/',label:'通知通告',match:p=>p.startsWith('/archive/')||p.startsWith('/notice/')||p.startsWith('/post/')},
