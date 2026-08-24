@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 const ROOT=process.cwd();
 const SITE=path.join(ROOT,'site');
 const DATA=path.join(SITE,'data','zhenti');
+const REPORT_FILE=path.join(DATA,'vendor-report.json');
 const SOURCE_DIRS=[DATA,path.join(DATA,'supplement')];
 const ALLOWED_HOSTS=new Set(['raw.githubusercontent.com']);
 
@@ -13,7 +14,7 @@ function jsonFiles(dir){
   return fs.readdirSync(dir,{withFileTypes:true})
     .filter(ent=>ent.isFile()&&ent.name.endsWith('.json'))
     .map(ent=>path.join(dir,ent.name))
-    .filter(file=>!file.endsWith('audit-report.json')&&!file.endsWith('manifest.json'));
+    .filter(file=>!file.endsWith('audit-report.json')&&!file.endsWith('vendor-report.json')&&!file.endsWith('manifest.json'));
 }
 
 function extFor(url){
@@ -28,6 +29,10 @@ function sourceYear(url,fallback){
   return match?.[1]||String(fallback);
 }
 
+function writeReport(data){
+  fs.writeFileSync(REPORT_FILE,`${JSON.stringify({generatedAt:new Date().toISOString(),...data},null,2)}\n`,'utf8');
+}
+
 const files=[...SOURCE_DIRS.flatMap(jsonFiles)];
 const fileState=new Map();
 const refs=[];
@@ -36,7 +41,10 @@ const unique=new Map();
 for(const file of files){
   const text=fs.readFileSync(file,'utf8');
   let doc;
-  try{doc=JSON.parse(text)}catch(error){throw new Error(`${path.relative(ROOT,file)} is invalid JSON: ${error.message}`)}
+  try{doc=JSON.parse(text)}catch(error){
+    writeReport({status:'failed',stage:'parse',file:path.relative(ROOT,file),error:error.message});
+    throw new Error(`${path.relative(ROOT,file)} is invalid JSON: ${error.message}`);
+  }
   fileState.set(file,{text,changed:false});
   const year=doc?.year||path.basename(file).match(/(20\d{2})/)?.[1];
   for(const [q,item] of Object.entries(doc?.questions||{})){
@@ -44,7 +52,10 @@ for(const file of files){
       const src=String(fig?.src||'').trim();
       if(!/^https:\/\//i.test(src))continue;
       const url=new URL(src);
-      if(!ALLOWED_HOSTS.has(url.hostname))throw new Error(`unapproved external figure host: ${src}`);
+      if(!ALLOWED_HOSTS.has(url.hostname)){
+        writeReport({status:'failed',stage:'scan',error:`unapproved external figure host: ${src}`});
+        throw new Error(`unapproved external figure host: ${src}`);
+      }
       const hash=crypto.createHash('sha1').update(src).digest('hex').slice(0,12);
       const ext=extFor(src);
       const assetYear=sourceYear(src,year);
@@ -81,14 +92,21 @@ async function worker(){
       downloaded++;
       console.log(`downloaded ${path.relative(ROOT,ref.dest)} (${bytes.length} bytes)`);
     }catch(error){
-      failures.push({src:ref.src,error:String(error?.message||error)});
-      console.error('DOWNLOADFAIL',ref.src,error?.message||error);
+      const entry={year:ref.year,q:ref.q,src:ref.src,error:String(error?.message||error)};
+      failures.push(entry);
+      console.error('DOWNLOADFAIL',JSON.stringify(entry));
     }
   }
 }
 
 await Promise.all(Array.from({length:Math.min(8,queue.length||1)},()=>worker()));
 if(failures.length){
+  writeReport({
+    status:'failed',stage:'download',
+    externalReferences:refs.length,uniqueExternalFigures:unique.size,
+    downloaded,existing,failed:failures.length,failures,
+    remainingExternal:refs.length
+  });
   console.error(JSON.stringify(failures,null,2));
   process.exit(1);
 }
@@ -117,6 +135,13 @@ for(const file of files){
     }
   }
 }
+
+writeReport({
+  status:remaining===0?'ok':'failed',stage:'complete',
+  externalReferences:refs.length,uniqueExternalFigures:unique.size,
+  downloaded,existing,failed:0,changedFiles,remainingExternal:remaining,
+  localAssets:[...unique.values()].map(ref=>({year:ref.year,q:ref.q,source:ref.src,local:ref.rel}))
+});
 
 console.log(`downloaded=${downloaded} existing=${existing} changedFiles=${changedFiles} remainingExternal=${remaining}`);
 if(remaining!==0)process.exit(1);
