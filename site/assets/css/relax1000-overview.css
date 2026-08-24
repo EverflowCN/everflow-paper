@@ -1,5 +1,10 @@
-body.relax1000-active[data-view="graph"] .bank-source-shell{margin-top:8px}
-body.relax1000-active[data-view="graph"] .relax-overview-stage{height:calc(100dvh - var(--topbar-h) - 70px);padding-top:8px}
+@import url('/assets/css/overall-graph.css?v=20260824-bank5');
+@import url('/assets/css/overall-graph-fit.css?v=20260824-bank5');
+
+body.relax1000-active[data-view="graph"] .bank-source-shell,
+body.relax1000-active[data-view="zhenti"] .bank-source-shell{margin-top:8px}
+body.relax1000-active[data-view="graph"] .relax-overview-stage,
+body.relax1000-active[data-view="zhenti"] .relax-overview-stage{height:calc(100dvh - var(--topbar-h) - 70px);padding-top:8px}
 .relax-overview-stage .overview-frame{height:100%}
 .relax-overview-stage .overview-legend{justify-content:flex-start}
 .relax-overview-caption{margin-left:auto;padding:5px 10px;border:1px solid var(--frame-line);border-radius:999px;background:var(--page);color:var(--index);font-weight:800}
@@ -10,4 +15,13 @@ body.relax1000-active[data-view="graph"] .relax-overview-stage{height:calc(100dv
 .relax-overview-stage .drawer-option.relax-drawer-correct{border-color:#28a677;background:#eefaf5}
 .relax-overview-stage .drawer-subnote{margin:10px 0 0;font-size:11px;color:#858b95;line-height:1.6}
 body.dark .relax-overview-stage .drawer-option.relax-drawer-correct{background:#173129;border-color:#2b8e6d}
-@media(max-width:760px){body.relax1000-active[data-view="graph"] .bank-source-shell{margin-top:5px;padding:0 7px}.bank-source-inner{gap:7px;min-height:48px}.bank-source-note{display:none}.bank-source-segmented button{padding:7px 10px}.relax-overview-caption{display:none}body.relax1000-active[data-view="graph"] .relax-overview-stage{height:calc(100dvh - var(--topbar-h) - 58px);padding-top:4px}}
+@media(max-width:760px){
+  body.relax1000-active[data-view="graph"] .bank-source-shell,
+  body.relax1000-active[data-view="zhenti"] .bank-source-shell{margin-top:5px;padding:0 7px}
+  .bank-source-inner{gap:7px;min-height:48px}
+  .bank-source-note{display:none}
+  .bank-source-segmented button{padding:7px 10px}
+  .relax-overview-caption{display:none}
+  body.relax1000-active[data-view="graph"] .relax-overview-stage,
+  body.relax1000-active[data-view="zhenti"] .relax-overview-stage{height:calc(100dvh - var(--topbar-h) - 58px);padding-top:4px}
+}
