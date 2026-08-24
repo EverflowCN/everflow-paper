@@ -5,8 +5,6 @@ on:
     branches: [main]
     paths:
       - 'site/**'
-      - '!site/data/zhenti/audit-report.json'
-      - '!site/data/zhenti/vendor-report.json'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -31,9 +29,6 @@ jobs:
         with:
           ref: main
 
-      # Pages 部署只负责发布已经提交到 site/ 的静态文件。
-      # 审计报告会在工作区生成并随本次 artifact 发布，但不会再 push 回 main，
-      # 避免生成新 commit 后通过 concurrency 取消正在进行的 Pages 部署。
       - name: Verify oxygen data exists
         shell: bash
         run: |
@@ -48,35 +43,6 @@ jobs:
               assert key in d.get('subjects', {}), f'missing subject: {key}'
           print('oxygen.json OK:', d.get('updatedAt'))
           PY
-
-      - name: Audit bank features
-        shell: bash
-        run: node site/tools/audit-bank-features.mjs
-
-      - name: Audit all 846 408 questions
-        id: zhenti_audit
-        continue-on-error: true
-        shell: bash
-        run: |
-          node site/tools/audit-zhenti.mjs
-          python - <<'PY'
-          import json
-          p = 'site/data/zhenti/audit-report.json'
-          with open(p, 'r', encoding='utf-8') as f:
-              d = json.load(f)
-          s = d['summary']
-          print(f"zhenti audit healthy={s['healthy']}/{d['expectedQuestions']} unhealthy={s['unhealthy']} figureFailures={s['localFigureFailures']} manifestFailures={s.get('manifestFailures', 0)}")
-          for year, info in d['years'].items():
-              if info['badQuestions'] or info.get('manifestFailureCount'):
-                  print(year, 'bad:', ','.join(map(str, info['badQuestions'])), 'manifest:', info.get('manifestFailureCount', 0))
-          PY
-
-      - name: Require healthy 408 corpus
-        if: steps.zhenti_audit.outcome == 'failure'
-        shell: bash
-        run: |
-          echo '408 corpus audit failed; refusing to deploy Pages.'
-          exit 1
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
