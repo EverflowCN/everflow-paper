@@ -1,4 +1,4 @@
-import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,toggleBookmark,optionEntries,assetUrl,questionImages,explanationImages,questionNumber,subjectName,esc}from'./relax1000-core.js';
+import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,questionNumber,subjectName,esc}from'./relax1000-core.js';
 
 const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
@@ -25,10 +25,10 @@ function normalizeRelax(q){return{source:'relax',uid:`relax:${q.id}`,raw:q,id:q.
 function normalizeZhenti(year,item){return{source:'zhenti',uid:`zhenti:${year}-${item.number}`,id:`${year}-${item.number}`,year:Number(year),number:Number(item.number),subjectId:item.subject||'ds',chapterId:String(year),chapter:`${year} 年真题`,stem:item.stem||'',answer:String(item.answer||''),explanation:item.analysis||'',options:item.options||{},figures:Array.isArray(item.figures)?item.figures:[],raw:item}}
 
 async function loadZhenti(){
-  const manifest=await fetch('/data/zhenti/manifest.json?v=20260824-paper7',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`真题目录 HTTP ${r.status}`);return r.json()});
+  const manifest=await fetch('/data/zhenti/manifest.json?v=20260824-paper8',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`真题目录 HTTP ${r.status}`);return r.json()});
   const entries=Object.entries(manifest?.years||{}).filter(([,meta])=>Array.isArray(meta.verifiedQuestions)&&meta.verifiedQuestions.length);
   const groups=await Promise.all(entries.map(async([year,meta])=>{
-    const paper=await fetch(`/data/zhenti/${year}.json?v=20260824-paper7`,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+    const paper=await fetch(`/data/zhenti/${year}.json?v=20260824-paper8`,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
     if(!paper)return[];
     return meta.verifiedQuestions.map(n=>paper.questions?.[String(n)]).filter(item=>item?.verification?.status==='verified'&&item?.options&&/^[A-D]$/.test(String(item.answer||''))).map(item=>normalizeZhenti(year,item));
   }));
@@ -36,10 +36,10 @@ async function loadZhenti(){
 }
 
 function zhentiRecords(){return storage.json(ZHENTI_KEY,{})}
-function relaxRecord(q){return loadRecords()[String(q.raw.id)]||{}}
+function relaxRecord(q){return questionState(q.raw).rec}
 function recordState(q){
   if(q.source==='relax'){
-    const rec=relaxRecord(q);return{rec,seen:Boolean(rec.answer||rec.reviewed||rec.status),wrong:rec.correct===false||rec.status==='weak',favorite:Boolean(rec.favorite)};
+    const state=questionState(q.raw);return{rec:state.rec,seen:state.seen,wrong:state.wrong||state.rec.status==='weak',favorite:state.favorite};
   }
   const rec=zhentiRecords()[`${q.year}-${q.number}`]||{};return{rec,seen:Boolean(rec.answer||rec.reviewed||rec.status||Number.isFinite(Number(rec.selfScore))),wrong:rec.correct===false||rec.status==='weak',favorite:Boolean(rec.favorite)};
 }
@@ -67,13 +67,11 @@ function activePool(){return mode==='wrong'?wrongPool():filterByState(selectedPo
 function syncStats(){
   const pool=mode==='wrong'?[...zhentiQuestions,...relaxQuestions]:sourcePool(source);let seen=0,wrong=0;pool.forEach(q=>{const s=recordState(q);if(s.seen)seen++;if(s.wrong)wrong++});els.bankTotal.textContent=pool.length;els.seenTotal.textContent=seen;els.wrongTotal.textContent=wrong;
 }
-function renderSources(){
-  $$('[data-source]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.source===source);btn.disabled=mode==='wrong'});
-}
+function renderSources(){$$('[data-source]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.source===source);btn.disabled=mode==='wrong'})}
 function renderSubjects(){
   const pool=mode==='wrong'?[...zhentiQuestions,...relaxQuestions]:sourcePool(source);const counts=Object.fromEntries(SUBJECT_ORDER.map(s=>[s,pool.filter(q=>q.subjectId===s).length]));
-  els.subjects.innerHTML=`<button type="button" data-subject="all" class="${scope==='all'?'active':''}"><b>全部</b><small>${pool.length} 题</small></button>`+SUBJECT_ORDER.map(s=>`<button type="button" data-subject="${s}" class="${scope===s?'active':''}"><b>${SUBJECT_LABEL[s]}</b><small>${counts[s]} 题</small></button>`).join('');
-  els.subjects.querySelectorAll('[data-subject]').forEach(btn=>btn.addEventListener('click',()=>{scope=btn.dataset.subject;renderSubjects();syncStats()}));
+  els.subjects.innerHTML=`<button type="button" data-subject="all" class="${scope==='all'?'active':''}"><b>全部</b><small>${pool.length} 题</small></button>`+SUBJECT_ORDER.map(s=>`<button type="button" data-subject="${s}" class="${scope===s?'active':''}" ${mode==='simulation'?'disabled':''}><b>${SUBJECT_LABEL[s]}</b><small>${counts[s]} 题</small></button>`).join('');
+  els.subjects.querySelectorAll('[data-subject]').forEach(btn=>btn.addEventListener('click',()=>{if(mode==='simulation')return;scope=btn.dataset.subject;renderSubjects();renderRanges();syncStats()}));
 }
 function renderRanges(){
   if(mode==='wrong'){
@@ -94,40 +92,36 @@ function renderRanges(){
 }
 function syncSizeButtons(){$$('[data-size]').forEach(b=>{b.classList.toggle('active',Number(b.dataset.size)===size);b.disabled=mode==='simulation'})}
 function syncBuilder(){renderSources();renderSubjects();renderRanges();syncSizeButtons();syncStats();els.tip.textContent=mode==='simulation'?'按 408 当前选择题结构：数据结构 11、计组 11、操作系统 10、计网 8。':mode==='wrong'?'双题库错题合并组卷；不会把未作答题自动写入错题本。':source==='zhenti'?'仅使用已核验且可自动判分的历年真题选择题。':'使用 Relax1000 现有题目、答案、解析及原题截图。'}
-function setMode(next){mode=next;$$('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='simulation')size=40;if(mode==='wrong')size=20;if(mode==='quick')size=10;syncBuilder()}
+function setMode(next){mode=next;$$('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='simulation'){size=40;scope='all'}if(mode==='wrong')size=20;if(mode==='quick')size=10;syncBuilder()}
 function setSource(next){if(mode==='wrong')return;source=next==='relax'?'relax':'zhenti';storage.set(SOURCE_KEY,source);scope='all';syncBuilder()}
 
-function simulationPaper(pool){
-  const result=[];const used=new Set();
-  for(const sid of SUBJECT_ORDER){const subjectPool=pool.filter(q=>q.subjectId===sid),picked=choose(subjectPool,QUOTA[sid],true);picked.forEach(q=>{used.add(q.uid);result.push(q)})}
-  if(result.length<40)result.push(...choose(pool.filter(q=>!used.has(q.uid)),40-result.length,true));
-  return result.slice(0,40);
-}
+function simulationPaper(pool){const result=[];for(const sid of SUBJECT_ORDER)result.push(...choose(pool.filter(q=>q.subjectId===sid),QUOTA[sid],true));return result}
 function generate(){
-  let pool=activePool();if(!pool.length){window.EveraUI?.toast?.('当前范围没有可用题目',{type:'error'});return}
-  paper=mode==='simulation'?simulationPaper(pool):choose(pool,size,true);if(!paper.length)return;
-  if($('[data-shuffle]')?.checked)paper=shuffle(paper);answers={};index=0;seconds=0;clearInterval(timer);timer=setInterval(()=>{seconds++;els.timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`},1000);
-  els.builder.hidden=true;els.result.hidden=true;els.paper.hidden=false;
-  const label=mode==='wrong'?'双题库错题组卷':mode==='simulation'?'408 仿真组卷':mode==='quick'?'快速练习':'范围专项';const src=mode==='wrong'?'真题 + Relax1000':source==='zhenti'?'408 真题':'Relax1000';els.paperTitle.textContent=`${label} · ${src}`;renderPaper();window.scrollTo({top:0,behavior:'smooth'});
+  const pool=activePool();if(!pool.length){window.EveraUI?.toast?.('当前范围没有可用题目',{type:'error'});return}
+  if(mode==='simulation'){
+    const shortage=SUBJECT_ORDER.find(s=>pool.filter(q=>q.subjectId===s).length<QUOTA[s]);
+    if(shortage){window.EveraUI?.toast?.(`${SUBJECT_LABEL[shortage]} 可用题量不足，无法保持 11/11/10/8 仿真结构`,{type:'error'});return}
+  }
+  paper=mode==='simulation'?simulationPaper(pool):choose(pool,size,true);if(!paper.length)return;if($('[data-shuffle]')?.checked)paper=shuffle(paper);answers={};index=0;seconds=0;clearInterval(timer);timer=setInterval(()=>{seconds++;els.timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`},1000);
+  els.builder.hidden=true;els.result.hidden=true;els.paper.hidden=false;const label=mode==='wrong'?'双题库错题组卷':mode==='simulation'?'408 仿真组卷':mode==='quick'?'快速练习':'范围专项';const src=mode==='wrong'?'真题 + Relax1000':source==='zhenti'?'408 真题':'Relax1000';els.paperTitle.textContent=`${label} · ${src}`;renderPaper();window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function optionList(q){if(q.source==='relax')return optionEntries(q.raw);return Object.entries(q.options||{}).map(([key,text])=>({key,text}))}
-function mediaList(q){
-  if(q.source==='relax')return questionImages(q.raw).map(src=>({src:assetUrl(src),alt:'原题截图'}));
-  return(q.figures||[]).filter(f=>f?.src).map(f=>({src:String(f.src),alt:f.alt||`${q.year}年第${q.number}题图`}));
+function optionList(q){
+  if(q.source==='relax'){const entries=optionEntries(q.raw);return entries.length?entries:'ABCD'.split('').map(key=>({key,text:''}))}
+  return Object.entries(q.options||{}).map(([key,text])=>({key,text}));
 }
+function mediaList(q){if(q.source==='relax')return questionImages(q.raw).map(src=>({src:assetUrl(src),alt:'原题截图'}));return(q.figures||[]).filter(f=>f?.src).map(f=>({src:String(f.src),alt:f.alt||`${q.year}年第${q.number}题图`}))}
 function analysisMedia(q){return q.source==='relax'?explanationImages(q.raw).map(src=>({src:assetUrl(src),alt:'解析截图'})):[]}
 function imageStack(list){return list.length?`<div class="relax-source-images">${list.map((item,i)=>`<a href="${esc(item.src)}" target="_blank" rel="noopener"><img src="${esc(item.src)}" alt="${esc(item.alt||`题图${i+1}`)}" loading="lazy"></a>`).join('')}</div>`:''}
 function renderPaper(){
   const q=paper[index];if(!q)return;els.progress.textContent=`${index+1} / ${paper.length}`;els.answered.textContent=`已答 ${Object.keys(answers).length}`;
   els.grid.innerHTML=paper.map((item,i)=>`<button type="button" data-jump="${i}" class="${i===index?'current':''} ${answers[item.uid]?'answered':''}">${i+1}</button>`).join('');els.grid.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{index=Number(b.dataset.jump);renderPaper()}));
-  const opts=optionList(q),chosen=answers[q.uid]||'',media=mediaList(q),state=recordState(q);const sourceText=q.source==='zhenti'?`${q.year} 真题 · 第 ${q.number} 题`:`Relax1000 · 原册第 ${q.number} 题`;
+  const opts=optionList(q),chosen=answers[q.uid]||'',media=mediaList(q),state=recordState(q),sourceText=q.source==='zhenti'?`${q.year} 真题 · 第 ${q.number} 题`:`Relax1000 · 原册第 ${q.number} 题`;
   els.card.innerHTML=`<div class="relax-q-meta"><span>${esc(SUBJECT_LABEL[q.subjectId]||subjectName(q.subjectId))} · ${esc(sourceText)}</span><b>${q.source==='relax'?esc(q.chapter):'已核验真题'}</b><button type="button" data-bookmark>${state.favorite?'★ 已收藏':'☆ 收藏'}</button></div><h2>${esc(q.stem||'题干见下方原题图')}</h2>${imageStack(media)}<div class="relax-options">${opts.map(o=>`<button type="button" data-answer="${esc(o.key)}" class="${chosen===o.key?'selected':''}"><b>${esc(o.key)}</b><span>${esc(o.text)}</span><i>✓</i></button>`).join('')}</div>`;
   els.card.querySelectorAll('[data-answer]').forEach(btn=>btn.addEventListener('click',()=>{answers[q.uid]=btn.dataset.answer;renderPaper()}));els.card.querySelector('[data-bookmark]')?.addEventListener('click',()=>{toggleFavorite(q);renderPaper()});els.prev.disabled=index===0;els.next.textContent=index===paper.length-1?'交卷':'下一题 →';
 }
 function handIn(){
-  clearInterval(timer);timer=null;let correct=0;const rows=[];
-  paper.forEach(q=>{const answer=answers[q.uid]||'',ok=Boolean(answer)&&answer===q.answer;if(ok)correct++;if(answer)persistAnswer(q,answer,ok);if(!ok)rows.push(q)});syncStats();els.paper.hidden=true;els.result.hidden=false;const score=paper.length?Math.round(correct/paper.length*100):0;
+  clearInterval(timer);timer=null;let correct=0;const rows=[];paper.forEach(q=>{const answer=answers[q.uid]||'',ok=Boolean(answer)&&answer===q.answer;if(ok)correct++;if(answer)persistAnswer(q,answer,ok);if(!ok)rows.push(q)});syncStats();els.paper.hidden=true;els.result.hidden=false;const score=paper.length?Math.round(correct/paper.length*100):0;
   els.result.innerHTML=`<section class="relax-result-hero"><div><span>本次完成</span><h1>${correct} / ${paper.length}</h1><p>正确率 ${score}% · 用时 ${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} · 未作答不会自动记为错题</p></div><button type="button" data-again>再组一套</button></section><section class="relax-result-list"><h2>${rows.length?`错题 / 未作答复盘 · ${rows.length} 题`:'本套全对'}</h2>${rows.map(q=>{const am=analysisMedia(q);return`<article><header><b>${esc(SUBJECT_LABEL[q.subjectId])} · ${q.source==='zhenti'?`${q.year} 第${q.number}题`:`Relax1000 第${q.number}题`}</b><span>你的答案 ${esc(answers[q.uid]||'未作答')} · 正确答案 ${esc(q.answer)}</span></header><h3>${esc(q.stem||'')}</h3>${imageStack(mediaList(q))}<details><summary>查看解析</summary>${am.length?imageStack(am):`<p>${esc(q.explanation||'暂无文字解析')}</p>`}</details></article>`}).join('')}</section>`;
   els.result.querySelector('[data-again]')?.addEventListener('click',()=>{els.result.hidden=true;els.builder.hidden=false;syncBuilder();window.scrollTo({top:0,behavior:'smooth'})});window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -137,6 +131,4 @@ $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{i
 els.generate.addEventListener('click',generate);els.prev.addEventListener('click',()=>{if(index>0){index--;renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder()});
 document.addEventListener('keydown',e=>{if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 
-try{
-  [relaxData,zhentiQuestions]=await Promise.all([loadRelaxData(),loadZhenti()]);relaxQuestions=relaxData.questions.map(normalizeRelax);selectedChapters=new Set(relaxData.subjects.flatMap(s=>s.chapters.map(c=>c.id)));syncBuilder();
-}catch(error){console.error(error);els.builder.innerHTML=`<section class="paper-builder-error"><h2>组卷题库载入失败</h2><p>${esc(error.message||error)}</p><button type="button" onclick="location.reload()">重新载入</button></section>`}
+try{[relaxData,zhentiQuestions]=await Promise.all([loadRelaxData(),loadZhenti()]);relaxQuestions=relaxData.questions.map(normalizeRelax);selectedChapters=new Set(relaxData.subjects.flatMap(s=>s.chapters.map(c=>c.id)));syncBuilder()}catch(error){console.error(error);els.builder.innerHTML=`<section class="paper-builder-error"><h2>组卷题库载入失败</h2><p>${esc(error.message||error)}</p><button type="button" onclick="location.reload()">重新载入</button></section>`}
