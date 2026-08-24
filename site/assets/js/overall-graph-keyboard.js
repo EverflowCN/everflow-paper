@@ -1,5 +1,8 @@
 (()=>{
-  const matrix=document.querySelector('[data-overview-matrix]');
+  const shell=document.querySelector('[data-graph-shell]');
+  const matrix=shell?.querySelector('[data-overview-matrix]');
+  const drawer=shell?.querySelector('[data-question-drawer]');
+  const drawerClose=shell?.querySelector('[data-drawer-close]');
   if(!matrix)return;
   const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
   const editableTarget=target=>Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));
@@ -27,7 +30,9 @@
   }
 
   document.addEventListener('keydown',event=>{
-    if(editableTarget(event.target)||!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
+    if(editableTarget(event.target))return;
+    if(event.key==='Escape'&&drawer&&!drawer.hidden){drawerClose?.click();event.preventDefault();return}
+    if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
     const cell=currentCell();if(moveGrid(cell,event.key)||moveTruePaper(cell,event.key))event.preventDefault();
   });
 })();
