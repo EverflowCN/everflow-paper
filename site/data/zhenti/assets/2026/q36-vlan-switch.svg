@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">2026年第36题 VLAN 交换机与主机连接</title>
+  <desc id="desc">24端口交换机划分两个VLAN，H1至H6及MAC地址、端口位置和F1至F4地址关系。</desc>
+  <rect width="960" height="560" fill="#fff"/>
+  <text x="480" y="42" text-anchor="middle" font-size="24" font-weight="700" font-family="Arial,'PingFang SC',sans-serif" fill="#111827">VLAN 交换机与主机连接</text>
+  <rect x="180" y="112" width="600" height="180" rx="20" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+  <line x1="490" y1="112" x2="490" y2="292" stroke="#94a3b8" stroke-width="3" stroke-dasharray="10 8"/>
+  <text x="330" y="140" text-anchor="middle" font-size="17" font-weight="700" font-family="Arial,'PingFang SC',sans-serif" fill="#0f766e">VLAN A</text>
+  <text x="635" y="140" text-anchor="middle" font-size="17" font-weight="700" font-family="Arial,'PingFang SC',sans-serif" fill="#7c3aed">VLAN B</text>
+  <text x="330" y="165" text-anchor="middle" font-size="13" font-family="Arial,'PingFang SC',sans-serif" fill="#475569">端口 13–19、1–7</text>
+  <text x="635" y="165" text-anchor="middle" font-size="13" font-family="Arial,'PingFang SC',sans-serif" fill="#475569">端口 20–24、8–12</text>
+
+  <g font-family="Arial,'PingFang SC',sans-serif" font-size="13" fill="#111827">
+    <rect x="220" y="196" width="150" height="54" rx="12" fill="#ecfeff" stroke="#14b8a6"/>
+    <text x="295" y="217" text-anchor="middle" font-weight="700">H1 · port 13</text><text x="295" y="238" text-anchor="middle">…-01</text>
+    <rect x="390" y="196" width="80" height="54" rx="12" fill="#ecfeff" stroke="#14b8a6"/>
+    <text x="430" y="217" text-anchor="middle" font-weight="700">H2</text><text x="430" y="238" text-anchor="middle">…-02</text>
+    <rect x="300" y="258" width="140" height="54" rx="12" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="370" y="279" text-anchor="middle" font-weight="700">H3 · port 5</text><text x="370" y="300" text-anchor="middle">…-03</text>
+
+    <rect x="520" y="196" width="110" height="54" rx="12" fill="#f5f3ff" stroke="#8b5cf6"/>
+    <text x="575" y="217" text-anchor="middle" font-weight="700">H4</text><text x="575" y="238" text-anchor="middle">…-04</text>
+    <rect x="650" y="196" width="110" height="54" rx="12" fill="#f5f3ff" stroke="#8b5cf6"/>
+    <text x="705" y="217" text-anchor="middle" font-weight="700">H5</text><text x="705" y="238" text-anchor="middle">…-05</text>
+    <rect x="585" y="258" width="110" height="54" rx="12" fill="#f5f3ff" stroke="#8b5cf6"/>
+    <text x="640" y="279" text-anchor="middle" font-weight="700">H6</text><text x="640" y="300" text-anchor="middle">…-06</text>
+  </g>
+
+  <g font-family="Arial,'PingFang SC',sans-serif" font-size="14" fill="#1f2937">
+    <text x="120" y="370" font-weight="700">F1</text><text x="170" y="370">DA …-03 (H3) · SA …-01 (H1)</text>
+    <text x="120" y="410" font-weight="700">F2</text><text x="170" y="410">DA …-04 (H4) · SA …-05 (H5)</text>
+    <text x="120" y="450" font-weight="700">F3</text><text x="170" y="450">DA FF-FF-FF-FF-FF-FF · SA …-02 (H2)</text>
+    <text x="120" y="490" font-weight="700">F4</text><text x="170" y="490">DA …-06 (H6) · SA …-03 (H3)</text>
+  </g>
+  <text x="480" y="535" text-anchor="middle" font-size="12" font-family="Arial,'PingFang SC',sans-serif" fill="#64748b">依据公开题面逐端口重绘；用于保留 VLAN 归属与 MAC 地址关系。</text>
+</svg>
