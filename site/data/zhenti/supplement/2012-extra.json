@@ -11,7 +11,7 @@
       "options":{"A":"d，e，f","B":"e，d，f","C":"f，d，e","D":"f，e，d"},
       "answer":"C",
       "analysis":"按 Dijkstra 每轮从尚未确定的顶点中选择当前最短距离者。b、c 先确定后，后续依次确定 f、d、e，因此选 C。",
-      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T07.png","alt":"2012年第7题原题有向带权图","caption":"固定到公开题库提交 62a608c6 的原题截图，保留全部边权。"}],
+      "figures":[{"src":"/data/zhenti/assets/2012/source-33cdc4585a80.png","alt":"2012年第7题原题有向带权图","caption":"固定到公开题库提交 62a608c6 的原题截图，保留全部边权。"}],
       "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
     },
     "9":{
@@ -22,7 +22,7 @@
       "options":{"A":"60","B":"60，62","C":"62，65","D":"65"},
       "answer":"D",
       "analysis":"删除 78 后需要按 3 阶 B 树的最小关键字数约束进行借位/合并并重新平衡。调整完成后最右叶结点只含关键字 65，选 D。",
-      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T09.png","alt":"2012年第9题原题3阶B树","caption":"固定到公开题库提交 62a608c6 的原题截图，保留删除前 B 树结构。"}],
+      "figures":[{"src":"/data/zhenti/assets/2012/source-d616dad89ebc.png","alt":"2012年第9题原题3阶B树","caption":"固定到公开题库提交 62a608c6 的原题截图，保留删除前 B 树结构。"}],
       "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
     },
     "44":{
@@ -33,7 +33,7 @@
       "stem":"某16位计算机中带符号整数用补码表示，数据Cache与指令Cache分离。指令系统含ADD、SHL、SHR、LOAD、STORE。CPU采用IF、ID、EX、M、WB五段流水，按序发射、按序完成，无数据转发，且同一寄存器不能在同一周期读写。回答：（1）x=-513存R1，执行SHR R1后R1内容；（2）连续4条指令无阻塞时所需周期数；（3）题图所示x=a+b指令流水中I3的ID段和I4的IF段为何阻塞；（4）x=x×2+a至少需要多少周期，并给出可行指令序列/流水安排。",
       "answer":"（1）R1=FEFFH。（2）8个时钟周期。（3）I3与前面的LOAD结果存在RAW数据相关，必须等相关寄存器写回后才能在ID读出；按序发射使I3停在ID时，后续I4也不能继续取指，因此I4的IF被阻塞。（4）至少17个时钟周期。一个可行序列为 LOAD R1,[x]；LOAD R2,[a]；SHL R1；ADD R1,R2（结果写R2）；STORE R2,[x]。",
       "analysis":"-513 的16位补码为 FDFFH，算术右移保留符号位得到 FEFFH。无阻塞5段流水执行4条需5+3=8拍；无转发时相关指令必须等到WB结束后再读寄存器，因此会产生空泡，最优安排下第（4）问为17拍。",
-      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T44.png","alt":"2012年第44题原题流水线时序图","caption":"固定到公开题库提交 62a608c6 的原题截图，保留指令格式和流水线时序图。"}],
+      "figures":[{"src":"/data/zhenti/assets/2012/source-bc7de5a1e7dd.png","alt":"2012年第44题原题流水线时序图","caption":"固定到公开题库提交 62a608c6 的原题截图，保留指令格式和流水线时序图。"}],
       "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
     },
     "47":{
@@ -44,7 +44,7 @@
       "stem":"主机H通过快速以太网连接Internet，H的IP为192.168.0.8，服务器S的IP为211.68.71.80。题表给出H抓到的5个IP分组前40B十六进制内容，以及一个S发出分组的前40B。回答：（1）哪些分组由H发送、哪些完成TCP三次握手、哪些通过快速以太网时需填充；（2）S已收到多少字节应用层数据；（3）给定S发出与H收到的同一分组TTL，求经过的路由器数。",
       "answer":"（1）1、3、4号分组由H发送；1、2、3号完成TCP连接建立；3、5号IP分组总长度40B，小于以太网最小有效载荷46B，因此需要填充。（2）5号分组确认号 846B41D6H 与3号分组数据起始序号 846B41C6H 相差 10H，因此S已收到16B应用层数据。（3）S发出时TTL=40H=64，H捕获时TTL=31H=49，共经过15台路由器。",
       "analysis":"由IP首部源地址判方向，由TCP SYN/ACK标志判三次握手，由IP总长度判以太网填充。TCP累计确认号与初始数据序号之差给出已接收字节数；同一IP分组的TTL差给出路由跳数。原题第2号分组首字节印为43H，IHL异常，但不影响本题所需字段判读。",
-      "figures":[{"src":"https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T47.png","alt":"2012年第47题原题IP/TCP报文表与首部图","caption":"固定到公开题库提交 62a608c6 的原题截图，完整保留十六进制报文字段与首部结构。"}],
+      "figures":[{"src":"/data/zhenti/assets/2012/source-f785d29476ed.png","alt":"2012年第47题原题IP/TCP报文表与首部图","caption":"固定到公开题库提交 62a608c6 的原题截图，完整保留十六进制报文字段与首部结构。"}],
       "verification":{"status":"verified","mode":"cross-checked-original-scan","sources":["csgraduates","csyanku"]}
     }
   }

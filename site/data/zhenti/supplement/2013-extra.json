@@ -12,7 +12,7 @@
       "options": {"A": "1,2,1,2", "B": "2,2,1,1", "C": "3,4,2,3", "D": "4,4,2,2"},
       "answer": "C",
       "analysis": "邻接矩阵不对称，因此为有向图。顶点的度=入度+出度，也就是对应行与对应列中非零元素个数之和，依次为 3、4、2、3。",
-      "figures": [{"src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T07.png", "alt": "2013年第7题原题截图", "caption": "原题截图，保留邻接矩阵及四个选项。"}],
+      "figures": [{"src": "/data/zhenti/assets/2013/source-8a7a11c62dbc.png", "alt": "2013年第7题原题截图", "caption": "原题截图，保留邻接矩阵及四个选项。"}],
       "verification": {"status": "verified", "mode": "cross-checked-original-question-screenshot", "sources": ["csyanku"]}
     },
     "8": {
@@ -24,7 +24,7 @@
       "options": {"A": "h,c,a,b,d,e,g,f", "B": "e,a,f,g,b,h,c,d", "C": "d,b,c,a,h,e,f,g", "D": "a,b,c,d,h,e,f,g"},
       "answer": "D",
       "analysis": "按广度优先遍历的分层访问规则逐项检查，A、B、C 均可由相应起点和邻接点访问次序得到；D 不满足 BFS 的分层访问次序，因此选 D。",
-      "figures": [{"src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T08.png", "alt": "2013年第8题原题无向图截图", "caption": "原题截图，直接保留无向图结构，避免手工重绘造成边连接错误。"}],
+      "figures": [{"src": "/data/zhenti/assets/2013/source-de90b5fab447.png", "alt": "2013年第8题原题无向图截图", "caption": "原题截图，直接保留无向图结构，避免手工重绘造成边连接错误。"}],
       "verification": {"status": "verified", "mode": "cross-checked-original-question-screenshot", "sources": ["csyanku"]}
     },
     "9": {
@@ -36,7 +36,7 @@
       "options": {"A": "c 和 e", "B": "d 和 c", "C": "f 和 d", "D": "f 和 h"},
       "answer": "C",
       "analysis": "该 AOE 网的关键路径为 b-d-c-g、b-d-e-h、b-f-h。要缩短总工期，必须同时压缩覆盖全部关键路径的活动；同时加快 d 和 f 可覆盖三条关键路径，因此选 C。",
-      "figures": [{"src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T09.png", "alt": "2013年第9题 AOE 网原题截图", "caption": "AOE 网直接使用原题截图，保留活动与箭线关系。"}],
+      "figures": [{"src": "/data/zhenti/assets/2013/source-eeda6bc2526d.png", "alt": "2013年第9题 AOE 网原题截图", "caption": "AOE 网直接使用原题截图，保留活动与箭线关系。"}],
       "verification": {"status": "verified", "mode": "cross-checked-original-question-screenshot", "sources": ["csyanku"]}
     },
     "34": {
@@ -48,7 +48,7 @@
       "options": {"A": "0011 0110", "B": "1010 1101", "C": "0101 0010", "D": "1100 0101"},
       "answer": "A",
       "analysis": "10BaseT 使用曼彻斯特编码。按题图给出的每个比特周期中间电平跳变方向逐位还原，可得比特串 0011 0110。",
-      "figures": [{"src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T34.png", "alt": "2013年第34题 10BaseT 波形原题截图", "caption": "波形图直接使用原题截图，避免重绘时改变跳变位置。"}],
+      "figures": [{"src": "/data/zhenti/assets/2013/source-e7647af2dcc3.png", "alt": "2013年第34题 10BaseT 波形原题截图", "caption": "波形图直接使用原题截图，避免重绘时改变跳变位置。"}],
       "verification": {"status": "verified", "mode": "cross-checked-original-question-screenshot", "sources": ["csyanku"]}
     },
     "44": {
@@ -59,7 +59,7 @@
       "stem": "某计算机采用16位定长指令字，CPU标志寄存器含CF、ZF、NF。题目给出条件转移指令格式、检测规则、OFFSET相对偏移规则、一个具体指令实例以及对应数据通路图。回答：（1）存储器按字节还是按字编址，反向最多跳转多少条指令；（2）给定200CH处指令及两组标志位时执行后PC值；（3）实现无符号数“小于等于”转移时C、Z、N取值；（4）指出数据通路中①～③的名称或功能。",
       "answer": "（1）按字节编址；向后最多跳转127条指令。（2）指令检测ZF、NF，OFFSET=E3H。CF=0、ZF=0、NF=1时发生转移，PC=1FD4H；CF=1、ZF=0、NF=0时不转移，PC=200EH。（3）C=1，Z=1，N=0。（4）①指令寄存器；②左移一位的移位部件；③加法器，用于计算(PC+2)+2×OFFSET。",
       "analysis": "16位指令顺序地址按PC+2递增，说明按字节编址。8位补码OFFSET最小为-128，目标地址为PC+2+2×OFFSET，因此相对当前指令最多向后跨127条。第（2）问按检测位OR规则决定是否转移；第（4）问的数据通路完成偏移量取出、符号扩展/左移和目标地址相加。",
-      "figures": [{"src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T44.png", "alt": "2013年第44题条件转移指令与数据通路原题截图", "caption": "指令格式、实例和数据通路均直接使用原题截图。"}],
+      "figures": [{"src": "/data/zhenti/assets/2013/source-7e4c036acb9f.png", "alt": "2013年第44题条件转移指令与数据通路原题截图", "caption": "指令格式、实例和数据通路均直接使用原题截图。"}],
       "verification": {"status": "verified", "mode": "cross-checked-original-question-screenshot", "sources": ["csyanku"]}
     },
     "47": {
@@ -70,7 +70,7 @@
       "stem": "Internet 中两个自治系统 AS1、AS2 的网络拓扑如题图。AS1由R1连接两个子网，AS2由R2、R3互联并连接3个子网；题图给出各子网地址、R2接口名以及R1、R3部分接口IP。回答：（1）利用路由聚合给出R2尽可能少的路由表项；（2）R2收到目的IP为194.17.20.200的分组时从哪个接口转发；（3）R1与R2之间使用什么路由协议，报文封装在哪个传输层协议中。",
       "answer": "（1）R2可保留三项：153.14.5.0/24，下一跳153.14.3.2，经S0；194.17.20.0/23，下一跳194.17.24.2，经S1；194.17.20.128/25为直连，经E0。（2）194.17.20.200同时匹配/23与/25，按最长前缀匹配经E0转发。（3）R1与R2属于不同自治系统，使用BGP（BGP-4）；BGP报文封装在TCP报文段中。",
       "analysis": "先对可聚合的目的网络做前缀聚合，同时保留R2直连网络的更具体前缀。转发时采用最长前缀匹配。跨自治系统交换路由使用BGP，而BGP以TCP作为传输层协议。",
-      "figures": [{"src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T47.png", "alt": "2013年第47题自治系统与路由器拓扑原题截图", "caption": "网络拓扑直接使用原题截图，保留接口名、子网前缀和地址标注。"}],
+      "figures": [{"src": "/data/zhenti/assets/2013/source-ccfac6f6451e.png", "alt": "2013年第47题自治系统与路由器拓扑原题截图", "caption": "网络拓扑直接使用原题截图，保留接口名、子网前缀和地址标注。"}],
       "verification": {"status": "verified", "mode": "cross-checked-original-question-screenshot", "sources": ["csyanku"]}
     }
   }

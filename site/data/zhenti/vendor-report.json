@@ -1,61 +1,447 @@
 {
-  "generatedAt": "2026-08-24T03:05:53.734Z",
-  "status": "failed",
-  "stage": "download",
+  "generatedAt": "2026-08-24T03:07:06.589Z",
+  "status": "ok",
+  "stage": "complete",
   "externalReferences": 64,
   "uniqueExternalFigures": 54,
-  "downloaded": 46,
+  "downloaded": 54,
   "existing": 0,
-  "failed": 8,
-  "failures": [
+  "fallbacks": 8,
+  "failed": 0,
+  "changedFiles": 9,
+  "remainingExternal": 0,
+  "localAssets": [
+    {
+      "year": 2012,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T07.png",
+      "local": "/data/zhenti/assets/2012/source-33cdc4585a80.png",
+      "size": 71223
+    },
+    {
+      "year": 2012,
+      "q": 9,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T09.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T09.png",
+      "local": "/data/zhenti/assets/2012/source-d616dad89ebc.png",
+      "size": 50890
+    },
+    {
+      "year": 2012,
+      "q": 44,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T44.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T44.png",
+      "local": "/data/zhenti/assets/2012/source-bc7de5a1e7dd.png",
+      "size": 291368
+    },
+    {
+      "year": 2012,
+      "q": 47,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T47.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2012/408%E7%9C%9F%E9%A2%98-2012-T47.png",
+      "local": "/data/zhenti/assets/2012/source-f785d29476ed.png",
+      "size": 361091
+    },
+    {
+      "year": 2013,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T07.png",
+      "local": "/data/zhenti/assets/2013/source-8a7a11c62dbc.png",
+      "size": 19343
+    },
+    {
+      "year": 2013,
+      "q": 8,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T08.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T08.png",
+      "local": "/data/zhenti/assets/2013/source-de90b5fab447.png",
+      "size": 43932
+    },
+    {
+      "year": 2013,
+      "q": 9,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T09.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T09.png",
+      "local": "/data/zhenti/assets/2013/source-eeda6bc2526d.png",
+      "size": 60241
+    },
+    {
+      "year": 2013,
+      "q": 34,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T34.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T34.png",
+      "local": "/data/zhenti/assets/2013/source-e7647af2dcc3.png",
+      "size": 34420
+    },
+    {
+      "year": 2013,
+      "q": 44,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T44.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T44.png",
+      "local": "/data/zhenti/assets/2013/source-7e4c036acb9f.png",
+      "size": 221140
+    },
+    {
+      "year": 2013,
+      "q": 47,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T47.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2013/408%E7%9C%9F%E9%A2%98-2013-T47.png",
+      "local": "/data/zhenti/assets/2013/source-ccfac6f6451e.png",
+      "size": 215326
+    },
+    {
+      "year": 2014,
+      "q": 4,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T04.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T04.png",
+      "local": "/data/zhenti/assets/2014/source-c7834c191367.png",
+      "size": 28845
+    },
+    {
+      "year": 2014,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T07.png",
+      "local": "/data/zhenti/assets/2014/source-0aa4e6de8280.png",
+      "size": 32534
+    },
+    {
+      "year": 2014,
+      "q": 34,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T34.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T34.png",
+      "local": "/data/zhenti/assets/2014/source-9a3fbe016c34.png",
+      "size": 89250
+    },
+    {
+      "year": 2014,
+      "q": 42,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T42.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T42.png",
+      "local": "/data/zhenti/assets/2014/source-16d3ee2e2f87.png",
+      "size": 259192
+    },
+    {
+      "year": 2014,
+      "q": 43,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T43.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2014/408%E7%9C%9F%E9%A2%98-2014-T43.png",
+      "local": "/data/zhenti/assets/2014/source-1dda543b1bc7.png",
+      "size": 75257
+    },
     {
       "year": 2016,
       "q": 3,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T03-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T03-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T03.png",
+      "local": "/data/zhenti/assets/2016/source-6188c7ed696b.png",
+      "size": 97923
     },
     {
       "year": 2016,
       "q": 6,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T06-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T06-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T06.png",
+      "local": "/data/zhenti/assets/2016/source-4e21ca3c9808.png",
+      "size": 37735
     },
     {
       "year": 2016,
       "q": 8,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T08-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T08-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T08.png",
+      "local": "/data/zhenti/assets/2016/source-5910391dddfe.png",
+      "size": 47790
+    },
+    {
+      "year": 2016,
+      "q": 17,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T17.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T17.png",
+      "local": "/data/zhenti/assets/2016/source-d71c4d19a15a.png",
+      "size": 31402
     },
     {
       "year": 2016,
       "q": 29,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T29-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T29-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T29.png",
+      "local": "/data/zhenti/assets/2016/source-7e44614b23c2.png",
+      "size": 32850
     },
     {
       "year": 2016,
       "q": 33,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T33-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T33-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T33.png",
+      "local": "/data/zhenti/assets/2016/source-17dcc58ecaea.png",
+      "size": 90319
+    },
+    {
+      "year": 2016,
+      "q": 42,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T42.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T42.png",
+      "local": "/data/zhenti/assets/2016/source-d65647c8ba15.png",
+      "size": 41066
+    },
+    {
+      "year": 2016,
+      "q": 43,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T43.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T43.png",
+      "local": "/data/zhenti/assets/2016/source-7c79202e3f6d.png",
+      "size": 64134
     },
     {
       "year": 2016,
       "q": 44,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T44-fig1.jpg",
-      "error": "HTTP 404"
-    },
-    {
-      "year": 2016,
-      "q": 47,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T47-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T44-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T44.png",
+      "local": "/data/zhenti/assets/2016/source-97ad87d69ed1.png",
+      "size": 150618
     },
     {
       "year": 2016,
       "q": 45,
-      "src": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T45-fig1.jpg",
-      "error": "HTTP 404"
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T45-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T45.png",
+      "local": "/data/zhenti/assets/2016/source-004d15d802f5.png",
+      "size": 166420
+    },
+    {
+      "year": 2016,
+      "q": 46,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T46.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T46.png",
+      "local": "/data/zhenti/assets/2016/source-49bdaf9461b2.png",
+      "size": 94555
+    },
+    {
+      "year": 2016,
+      "q": 47,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T47-fig1.jpg",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2016/408%E7%9C%9F%E9%A2%98-2016-T47.png",
+      "local": "/data/zhenti/assets/2016/source-1f370b3b9ec8.png",
+      "size": 153383
+    },
+    {
+      "year": 2017,
+      "q": 8,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2017/408%E7%9C%9F%E9%A2%98-2017-T08.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2017/408%E7%9C%9F%E9%A2%98-2017-T08.png",
+      "local": "/data/zhenti/assets/2017/source-9e2ff65b8413.png",
+      "size": 70573
+    },
+    {
+      "year": 2018,
+      "q": 6,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T06.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T06.png",
+      "local": "/data/zhenti/assets/2018/source-6636a528f00b.png",
+      "size": 27092
+    },
+    {
+      "year": 2018,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T07.png",
+      "local": "/data/zhenti/assets/2018/source-ebd3de02eb33.png",
+      "size": 27971
+    },
+    {
+      "year": 2018,
+      "q": 37,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T37.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T37.png",
+      "local": "/data/zhenti/assets/2018/source-85389f68613e.png",
+      "size": 103293
+    },
+    {
+      "year": 2018,
+      "q": 42,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T42.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T42.png",
+      "local": "/data/zhenti/assets/2018/source-d196869d7c53.png",
+      "size": 122454
+    },
+    {
+      "year": 2018,
+      "q": 44,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T44.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T44.png",
+      "local": "/data/zhenti/assets/2018/source-981c2804e9b3.png",
+      "size": 277590
+    },
+    {
+      "year": 2018,
+      "q": 45,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T45.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T45.png",
+      "local": "/data/zhenti/assets/2018/source-015b9ef76538.png",
+      "size": 81336
+    },
+    {
+      "year": 2018,
+      "q": 47,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T47.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2018/408%E7%9C%9F%E9%A2%98-2018-T47.png",
+      "local": "/data/zhenti/assets/2018/source-9540a6145b62.png",
+      "size": 150120
+    },
+    {
+      "year": 2020,
+      "q": 5,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T05.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T05.png",
+      "local": "/data/zhenti/assets/2020/source-65d678df5f83.png",
+      "size": 22148
+    },
+    {
+      "year": 2020,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T07.png",
+      "local": "/data/zhenti/assets/2020/source-d167b7f7d08d.png",
+      "size": 51525
+    },
+    {
+      "year": 2020,
+      "q": 33,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T33.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T33.png",
+      "local": "/data/zhenti/assets/2020/source-630b23ef18f1.png",
+      "size": 20802
+    },
+    {
+      "year": 2020,
+      "q": 35,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T35.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T35.png",
+      "local": "/data/zhenti/assets/2020/source-ae1a70deb2aa.png",
+      "size": 49792
+    },
+    {
+      "year": 2020,
+      "q": 37,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T37.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T37.png",
+      "local": "/data/zhenti/assets/2020/source-aff8898475ae.png",
+      "size": 53503
+    },
+    {
+      "year": 2020,
+      "q": 40,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T40.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T40.png",
+      "local": "/data/zhenti/assets/2020/source-63a9cb0fa540.png",
+      "size": 132929
+    },
+    {
+      "year": 2020,
+      "q": 47,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T47.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2020/408%E7%9C%9F%E9%A2%98-2020-T47.png",
+      "local": "/data/zhenti/assets/2020/source-98299374b99d.png",
+      "size": 157567
+    },
+    {
+      "year": 2021,
+      "q": 6,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T06.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T06.png",
+      "local": "/data/zhenti/assets/2021/source-3131a927cd7f.png",
+      "size": 23030
+    },
+    {
+      "year": 2021,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T07.png",
+      "local": "/data/zhenti/assets/2021/source-c2cf8a7a1d68.png",
+      "size": 21924
+    },
+    {
+      "year": 2021,
+      "q": 8,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T08.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T08.png",
+      "local": "/data/zhenti/assets/2021/source-510e64fffe55.png",
+      "size": 58980
+    },
+    {
+      "year": 2021,
+      "q": 28,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T28.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T28.png",
+      "local": "/data/zhenti/assets/2021/source-0a7c781a2977.png",
+      "size": 89021
+    },
+    {
+      "year": 2021,
+      "q": 34,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T34.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T34.png",
+      "local": "/data/zhenti/assets/2021/source-e770917afffd.png",
+      "size": 38706
+    },
+    {
+      "year": 2021,
+      "q": 40,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T40.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T40.png",
+      "local": "/data/zhenti/assets/2021/source-fe2d4ced2e17.png",
+      "size": 73535
+    },
+    {
+      "year": 2021,
+      "q": 43,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T43.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T43.png",
+      "local": "/data/zhenti/assets/2021/source-712db701eb02.png",
+      "size": 215602
+    },
+    {
+      "year": 2021,
+      "q": 47,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T47.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2021/408%E7%9C%9F%E9%A2%98-2021-T47.png",
+      "local": "/data/zhenti/assets/2021/source-78bfa1c79260.png",
+      "size": 205371
+    },
+    {
+      "year": 2022,
+      "q": 7,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T07.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T07.png",
+      "local": "/data/zhenti/assets/2022/source-0c7e3615d216.png",
+      "size": 26695
+    },
+    {
+      "year": 2022,
+      "q": 8,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T08.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T08.png",
+      "local": "/data/zhenti/assets/2022/source-abb7a6f24eae.png",
+      "size": 52343
+    },
+    {
+      "year": 2022,
+      "q": 36,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T36.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T36.png",
+      "local": "/data/zhenti/assets/2022/source-162445e34360.png",
+      "size": 55415
+    },
+    {
+      "year": 2022,
+      "q": 43,
+      "source": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T43.png",
+      "fetchedFrom": "https://raw.githubusercontent.com/ogas1024/CSYanKu/62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9/content/_images/qbank/408%E7%9C%9F%E9%A2%98/2022/408%E7%9C%9F%E9%A2%98-2022-T43.png",
+      "local": "/data/zhenti/assets/2022/source-78060c0c4600.png",
+      "size": 238752
     }
-  ],
-  "remainingExternal": 64
+  ]
 }
