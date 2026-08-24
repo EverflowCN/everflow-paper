@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes,viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7fb">
+  <meta name="everflow-build" content="20260824-atlas-v1">
+  <title>新整体图谱预览 · Everflow</title>
+  <link rel="icon" href="../assets/everflow-icon.svg">
+  <link rel="stylesheet" href="../assets/css/site.css?v=20260824-atlas-v1">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20260824-atlas-v1">
+  <link rel="stylesheet" href="../assets/css/graph-next.css?v=20260824-atlas-v1">
+</head>
+<body data-view="graph">
+<header class="topbar">
+  <div class="wrap nav">
+    <a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a>
+    <nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav>
+    <button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
+<div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
+
+<main class="atlas-page" data-atlas-root>
+  <section class="atlas-frame">
+    <header class="atlas-toolbar">
+      <div class="atlas-title">
+        <div class="atlas-title-line"><strong>新整体图谱</strong><span>PREVIEW</span></div>
+        <p data-atlas-caption>正在准备图谱…</p>
+      </div>
+      <div class="atlas-source" role="tablist" aria-label="题库来源">
+        <button type="button" role="tab" data-atlas-source="zhenti">408 真题</button>
+        <button type="button" role="tab" data-atlas-source="relax1000">Relax1000</button>
+      </div>
+      <div class="atlas-view" role="group" aria-label="图谱显示模式">
+        <button type="button" data-atlas-fit="fit">全览</button>
+        <button type="button" data-atlas-fit="native">放大</button>
+      </div>
+      <div class="atlas-legend" aria-label="掌握状态">
+        <span><i class="mastered"></i>熟悉</span>
+        <span><i class="fuzzy"></i>模糊</span>
+        <span><i class="weak"></i>不会</span>
+        <span><i class="unmarked"></i>未做</span>
+      </div>
+      <div class="atlas-hint">方向键移动 · Enter 打开 · Esc 关闭</div>
+    </header>
+
+    <div class="atlas-canvas" data-atlas-canvas>
+      <div class="atlas-matrix" data-atlas-matrix role="grid" aria-label="新整体图谱"></div>
+      <div class="atlas-empty" data-atlas-loading>正在载入数据…</div>
+    </div>
+
+    <aside class="atlas-drawer" data-atlas-drawer hidden aria-label="题目预览">
+      <header class="atlas-drawer-head">
+        <div><strong data-atlas-drawer-title>题目</strong><span data-atlas-drawer-meta></span></div>
+        <button type="button" data-atlas-close aria-label="关闭题目">×</button>
+      </header>
+      <div class="atlas-drawer-body" data-atlas-drawer-body></div>
+      <footer class="atlas-drawer-footer">
+        <div class="atlas-status-actions">
+          <button type="button" data-atlas-status="mastered">熟悉</button>
+          <button type="button" data-atlas-status="fuzzy">模糊</button>
+          <button type="button" data-atlas-status="weak">不会</button>
+          <button type="button" data-atlas-status="">清除</button>
+        </div>
+        <button class="atlas-answer" type="button" data-atlas-answer>查看答案</button>
+      </footer>
+    </aside>
+  </section>
+</main>
+
+<script src="../assets/js/site-runtime-v2.js?v=20260824-atlas-v1"></script>
+<script type="module" src="../assets/js/graph-next.js?v=20260824-atlas-v1"></script>
+</body>
+</html>
