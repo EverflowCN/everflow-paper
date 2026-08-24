@@ -1,6 +1,6 @@
 (()=>{
   if(!document.querySelector('link[data-interaction-guard]')){
-    const guard=document.createElement('link');guard.rel='stylesheet';guard.href='/assets/css/interaction-guard.css?v=20260824-privacy3';guard.dataset.interactionGuard='';document.head.appendChild(guard);
+    const guard=document.createElement('link');guard.rel='stylesheet';guard.href='/assets/css/interaction-guard.css?v=20260824-privacy4';guard.dataset.interactionGuard='';document.head.appendChild(guard);
   }
   const path=location.pathname.replace(/\/{2,}/g,'/');
   const items=[
@@ -49,6 +49,16 @@
   const layerObserver=new MutationObserver(()=>{if(topLayerOpen())dismissMenu()});
   layerObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
   document.addEventListener('fullscreenchange',dismissMenu);document.addEventListener('webkitfullscreenchange',dismissMenu);
+
+  // Prevent accidental double taps/clicks on expensive or destructive actions while preserving normal buttons.
+  const guarded='button[data-generate],button[data-submit],button[data-relax-reset-do],button[data-srs-reset-do]';
+  document.addEventListener('click',event=>{
+    const button=event.target?.closest?.(guarded);if(!button)return;
+    const now=performance.now(),last=Number(button.dataset.everaActionAt||0);
+    if(last&&now-last<420){event.preventDefault();event.stopImmediatePropagation();return}
+    button.dataset.everaActionAt=String(now);
+    window.setTimeout(()=>{if(button.isConnected)delete button.dataset.everaActionAt},500);
+  },true);
 
   document.addEventListener('everflow:membership-change',event=>{
     if(!event.detail?.active)return;
