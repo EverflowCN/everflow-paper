@@ -5,7 +5,6 @@ if(!subbar)throw new Error('Relax1000 subview bar missing');
 
 const BASELINE_KEY='everflow-408-relax-srs-reset-baseline-v1';
 const TOAST_KEY='everflow-408-relax-reset-toast';
-const DAY=86400000;
 const readJson=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
 const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
 const dateKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -18,7 +17,6 @@ function ensureBaseline(){
     Object.keys(data.days).sort().reverse().slice(14).forEach(day=>delete data.days[day]);
     writeJson(BASELINE_KEY,data);
   }
-  return data.days[key];
 }
 ensureBaseline();
 
