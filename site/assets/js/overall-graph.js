@@ -51,13 +51,29 @@
   function statusText(record){if(record?.status==='mastered')return'熟悉';if(record?.status==='fuzzy')return'模糊';if(record?.status==='weak')return'不会';return'未标记'}
 
   function safeSrc(src){const value=String(src||'').trim();if(!value)return'';if(value.startsWith('/data/zhenti/assets/'))return value;if(/^https:\/\/raw\.githubusercontent\.com\//i.test(value))return value;if(/^data:image\/(?:png|jpeg|webp|svg\+xml);/i.test(value))return value;return''}
-  function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]))}
+  function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
-  async function loadPaper(year){
-    if(PAPER_CACHE.has(year))return PAPER_CACHE.get(year);
-    const promise=fetch(`/data/zhenti/${year}.json?v=20260824-subject1`,{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null);
-    PAPER_CACHE.set(year,promise);return promise;
+  async function loadPaper(year,{force=false}={}){
+    const key=String(year);
+    if(force){
+      PAPER_CACHE.delete(key);
+      window.EverflowZhentiData?.clear(key);
+    }
+    if(PAPER_CACHE.has(key))return PAPER_CACHE.get(key);
+    const source=window.EverflowZhentiData?.loadPaper
+      ?window.EverflowZhentiData.loadPaper(key,{force})
+      :fetch(`/data/zhenti/${key}.json?v=20260824-full4`,{cache:'no-store'}).then(response=>response.ok?response.json():null);
+    const promise=Promise.resolve(source).then(paper=>{
+      if(!paper)PAPER_CACHE.delete(key);
+      return paper;
+    }).catch(()=>{
+      PAPER_CACHE.delete(key);
+      return null;
+    });
+    PAPER_CACHE.set(key,promise);
+    return promise;
   }
+
   async function primeSubjects(){
     const papers=await Promise.all(YEARS.map(year=>loadPaper(year)));
     papers.forEach((paper,i)=>{const year=YEARS[i];QUESTIONS.forEach(q=>{const key=paper?.questions?.[String(q)]?.subject;if(key&&SUBJECT_LABEL[key])SUBJECT_INDEX.set(`${year}-${q}`,key)})});
@@ -78,7 +94,8 @@
 
   function figureHtml(fig,year,q){const src=safeSrc(fig?.src);if(!src)return'';return `<figure class="drawer-figure"><img src="${esc(src)}" alt="${esc(fig?.alt||`${year}年第${q}题图`)}" loading="lazy" decoding="async" draggable="false"></figure>`}
   function questionHtml(item,year,q){
-    if(!item||item.verification?.status!=='verified')return'<div class="drawer-unverified">该题尚未完成核验，暂不展示题干。</div>';
+    if(!item)return'<div class="drawer-unverified"><strong>题目加载失败</strong><p>题库数据暂时没有完整载入。再次点击本题会自动重试。</p></div>';
+    if(item.verification?.status!=='verified')return'<div class="drawer-unverified">该题尚未完成核验，暂不展示题干。</div>';
     const figures=Array.isArray(item.figures)?item.figures:[],general=figures.filter(fig=>!fig?.option).map(fig=>figureHtml(fig,year,q)).join(''),optionFigures=new Map();
     figures.filter(fig=>fig?.option).forEach(fig=>{const key=String(fig.option);optionFigures.set(key,(optionFigures.get(key)||'')+figureHtml(fig,year,q))});
     const options=item.options?`<div class="drawer-options">${Object.entries(item.options).map(([key,value])=>`<div class="drawer-option"><b>${esc(key)}.</b><div>${esc(value)}${optionFigures.get(String(key))||''}</div></div>`).join('')}</div>`:'',answer=answerVisible?`<div class="drawer-answer-box"><strong>参考答案：${esc(item.answer)}</strong><p>${esc(item.analysis||'暂无解析')}</p></div>`:'';
@@ -90,8 +107,15 @@
 
   async function openQuestion(year,q){
     const key=`${year}-${q}`;selectCurrent(key);selected={year,q,item:null};answerVisible=false;showDrawer();drawerTitle.textContent=`${year} · 第 ${q} 题`;drawerMeta.textContent=`${SUBJECT_LABEL[subjectFor(year,q)]} · ${q<=40?'选择题':'综合应用题'}`;drawerBody.innerHTML='<div class="drawer-loading">正在读取题目…</div>';drawerAnswer.hidden=true;syncDrawerControls();
-    const token=++loadToken,paper=await loadPaper(year);if(token!==loadToken||!selected||selected.year!==year||selected.q!==q)return;
-    const item=paper?.questions?.[String(q)]||null;selected.item=item;if(item?.subject&&SUBJECT_LABEL[item.subject])SUBJECT_INDEX.set(key,item.subject);const subject=item?.subject||subjectFor(year,q);updateCell(key);drawerMeta.textContent=`${SUBJECT_LABEL[subject]||SUBJECT_LABEL[subjectFor(year,q)]} · ${item?.type==='comprehensive'||q>40?'综合应用题':'选择题'}`;drawerBody.innerHTML=questionHtml(item,year,q);drawerAnswer.hidden=!(item&&item.verification?.status==='verified');syncDrawerControls();
+    const token=++loadToken;
+    let paper=await loadPaper(year);
+    let item=paper?.questions?.[String(q)]||null;
+    if(!item||item.verification?.status!=='verified'){
+      paper=await loadPaper(year,{force:true});
+      item=paper?.questions?.[String(q)]||null;
+    }
+    if(token!==loadToken||!selected||selected.year!==year||selected.q!==q)return;
+    selected.item=item;if(item?.subject&&SUBJECT_LABEL[item.subject])SUBJECT_INDEX.set(key,item.subject);const subject=item?.subject||subjectFor(year,q);updateCell(key);drawerMeta.textContent=`${SUBJECT_LABEL[subject]||SUBJECT_LABEL[subjectFor(year,q)]} · ${item?.type==='comprehensive'||q>40?'综合应用题':'选择题'}`;drawerBody.innerHTML=questionHtml(item,year,q);drawerAnswer.hidden=!(item&&item.verification?.status==='verified');syncDrawerControls();
   }
   function refreshSelected(){if(!selected)return;drawerBody.innerHTML=questionHtml(selected.item,selected.year,selected.q);syncDrawerControls()}
 
