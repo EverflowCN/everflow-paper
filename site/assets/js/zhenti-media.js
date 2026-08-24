@@ -1,6 +1,7 @@
 (()=>{
   const SUBJECT_LABEL={ds:'数据结构',co:'计算机组成原理',os:'操作系统',cn:'计算机网络'};
   const SUBJECT_SHORT={ds:'DS',co:'CO',os:'OS',cn:'CN'};
+  const CSYANKU_COMMIT='62a608c6b9103d11b5dc2d5ce8383d4adf0c49e9';
   const seen=new WeakMap();
 
   function currentContext(box){
@@ -28,6 +29,11 @@
     if(/^https:\/\/raw\.githubusercontent\.com\//i.test(value))return value;
     if(/^data:image\/(?:png|jpeg|webp|svg\+xml);/i.test(value))return value;
     return'';
+  }
+
+  function originalFallback(ctx){
+    const q=String(ctx.q).padStart(2,'0');
+    return `https://raw.githubusercontent.com/ogas1024/CSYanKu/${CSYANKU_COMMIT}/content/_images/qbank/408%E7%9C%9F%E9%A2%98/${ctx.year}/408%E7%9C%9F%E9%A2%98-${ctx.year}-T${q}.png`;
   }
 
   function applyMeta(item,kind){
@@ -59,6 +65,12 @@
     img.loading='lazy';
     img.decoding='async';
     img.draggable=false;
+    img.addEventListener('error',()=>{
+      if(img.dataset.fallbackTried)return;
+      img.dataset.fallbackTried='1';
+      const fallback=originalFallback(ctx);
+      if(fallback!==img.src)img.src=fallback;
+    });
     wrap.appendChild(img);
 
     if(fig?.caption){
@@ -102,6 +114,13 @@
     }
   }
 
+  async function loadPaper(year){
+    if(window.EverflowZhentiData?.loadPaper)return window.EverflowZhentiData.loadPaper(String(year));
+    const response=await fetch(`/data/zhenti/${year}.json?v=20260824-full4`,{cache:'no-store'});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    return response.json();
+  }
+
   async function enhance(box){
     const ctx=currentContext(box);
     const live=box.querySelector('.question-live');
@@ -112,11 +131,13 @@
     seen.set(live,key);
 
     try{
-      const response=await fetch(`/data/zhenti/${ctx.year}.json?v=20260824-stable`,{cache:'no-store'});
-      if(!response.ok)throw new Error(`HTTP ${response.status}`);
-      const paper=await response.json();
-      const item=paper?.questions?.[String(ctx.q)];
-      if(!item||item.verification?.status!=='verified')return;
+      let paper=await loadPaper(ctx.year);
+      let item=paper?.questions?.[String(ctx.q)];
+      if((!item||item.verification?.status!=='verified')&&window.EverflowZhentiData?.loadPaper){
+        paper=await window.EverflowZhentiData.loadPaper(String(ctx.year),{force:true});
+        item=paper?.questions?.[String(ctx.q)];
+      }
+      if(!item||item.verification?.status!=='verified')throw new Error('question unavailable');
       applyMeta(item,ctx.kind);
       renderFigures(live,item,ctx);
     }catch{
