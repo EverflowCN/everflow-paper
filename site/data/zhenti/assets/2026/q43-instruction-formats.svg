@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="500" viewBox="0 0 1040 500" role="img" aria-labelledby="title desc">
+  <title id="title">2026年第43题 指令格式与程序填空</title>
+  <desc id="desc">16位计算机的R型、I型、M型指令功能，以及题43第四问的四条机器指令填空表。</desc>
+  <rect width="1040" height="500" fill="#fff"/>
+  <text x="520" y="40" text-anchor="middle" font-size="24" font-weight="700" font-family="Arial,'PingFang SC',sans-serif" fill="#111827">16 位指令格式与程序表</text>
+  <g font-family="Arial,'PingFang SC',sans-serif" font-size="15" fill="#111827">
+    <rect x="70" y="80" width="900" height="185" rx="16" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="100" y="118" font-weight="700">R 型</text><text x="180" y="118">R[rt] ← R[rt] op1 R[rs]　或　R[rt] ← R[rt] op1 num</text>
+    <text x="100" y="158" font-weight="700">I 型</text><text x="180" y="158">R[rt] ← R[rt] op2 imm8</text>
+    <text x="100" y="198" font-weight="700">M 型</text><text x="180" y="198">R[0] ← M[R[15]+offset]　或　M[R[15]+offset] ← R[0]</text>
+    <text x="100" y="238">OP1：0001 加 / 0010 左移　　OP2：0100 加立即数　　OP3：1110 取数 / 1111 存数</text>
+  </g>
+  <g font-family="Consolas,'SFMono-Regular',monospace" font-size="16" fill="#0f172a">
+    <rect x="130" y="300" width="780" height="150" rx="14" fill="#fff" stroke="#cbd5e1"/>
+    <line x1="130" y1="338" x2="910" y2="338" stroke="#e2e8f0"/>
+    <line x1="130" y1="376" x2="910" y2="376" stroke="#e2e8f0"/>
+    <line x1="130" y1="414" x2="910" y2="414" stroke="#e2e8f0"/>
+    <line x1="250" y1="300" x2="250" y2="450" stroke="#e2e8f0"/>
+    <text x="165" y="325" font-family="Arial,'PingFang SC',sans-serif" font-weight="700">地址</text><text x="285" y="325" font-family="Arial,'PingFang SC',sans-serif" font-weight="700">内容</text>
+    <text x="175" y="363">11</text><text x="285" y="363">① 0000 0000 0000</text>
+    <text x="175" y="401">12</text><text x="285" y="401">0000 ② 0010</text>
+    <text x="175" y="439">13</text><text x="285" y="439">0100 0000 ③</text>
+    <text x="670" y="439">14 → 1111 ④</text>
+  </g>
+  <text x="520" y="482" text-anchor="middle" font-size="12" font-family="Arial,'PingFang SC',sans-serif" fill="#64748b">依据公开题面结构化重绘；用于显示指令类型、操作码位置及第四问填空位置。</text>
+</svg>
