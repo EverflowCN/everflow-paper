@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="0 0 1500 760" role="img" aria-labelledby="title desc">
+<title id="title">2026年第44题计算机C部分数据通路</title>
+<desc id="desc">依据公开回忆卷重绘的通用寄存器组、两个多路选择器、扩展器、ALU、PC、MAR、MDR、CU与主存数据通路。</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#20242a"/></marker><style>.b{fill:#fff;stroke:#20242a;stroke-width:3}.t{font-family:Arial,'PingFang SC','Microsoft YaHei',sans-serif;fill:#111}.l{fill:none;stroke:#20242a;stroke-width:3;marker-end:url(#arrow)}.c{fill:none;stroke:#59636f;stroke-width:2;stroke-dasharray:9 7;marker-end:url(#arrow)}</style></defs>
+<rect width="1500" height="760" fill="#fff"/>
+<text class="t" x="42" y="44" font-size="26" font-weight="700">题 44 · 计算机 C 部分数据通路（结构重绘）</text>
+
+<!-- register selectors ①② -->
+<polygon class="b" points="220,100 300,100 285,165 235,165"/><text class="t" x="260" y="140" text-anchor="middle" font-size="24">① MUX</text>
+<polygon class="b" points="390,100 470,100 455,165 405,165"/><text class="t" x="430" y="140" text-anchor="middle" font-size="24">② MUX</text>
+<text class="t" x="215" y="82" font-size="20">ZR.rt / IR.rt</text><text class="t" x="385" y="82" font-size="20">ZR.rs / IR.rs</text>
+<path class="l" d="M260 165V210"/><path class="l" d="M430 165V210"/>
+
+<!-- GPRS -->
+<rect class="b" x="160" y="210" width="390" height="170" rx="8"/><text class="t" x="355" y="278" text-anchor="middle" font-size="31" font-weight="700">GPRS</text><text class="t" x="355" y="320" text-anchor="middle" font-size="24">通用寄存器组</text>
+<text class="t" x="235" y="235" font-size="19">ra</text><text class="t" x="445" y="235" font-size="19">rb</text><text class="t" x="172" y="338" font-size="19">rw</text><text class="t" x="515" y="275" font-size="19">busA</text><text class="t" x="515" y="345" font-size="19">busB</text>
+
+<!-- RegDst -->
+<polygon class="b" points="72,270 130,270 120,335 82,335"/><text class="t" x="101" y="309" text-anchor="middle" font-size="17">MUX</text><text class="t" x="45" y="250" font-size="19">RegDst</text><path class="l" d="M120 304H160"/>
+
+<!-- extender -->
+<rect class="b" x="275" y="470" width="150" height="66"/><text class="t" x="350" y="512" text-anchor="middle" font-size="24">扩展器</text><text class="t" x="248" y="505" font-size="20">IR₁₁₋₀</text><text class="t" x="434" y="505" font-size="20">16</text><text class="t" x="318" y="566" font-size="19">Extop</text>
+
+<!-- ALU input muxes -->
+<polygon class="b" points="650,220 718,220 708,292 660,292"/><text class="t" x="684" y="260" text-anchor="middle" font-size="17">MUX</text><text class="t" x="640" y="197" font-size="18">AluASrc</text>
+<polygon class="b" points="650,350 718,350 708,450 660,450"/><text class="t" x="684" y="405" text-anchor="middle" font-size="17">MUX</text><text class="t" x="646" y="474" font-size="18">AluBSrc</text><text class="t" x="632" y="375" font-size="16">0</text><text class="t" x="632" y="405" font-size="16">1</text><text class="t" x="632" y="435" font-size="16">2</text>
+<path class="l" d="M550 270H650"/><path class="l" d="M550 345H650"/><path class="l" d="M425 503H610V430H650"/>
+
+<!-- PC -->
+<rect class="b" x="665" y="92" width="125" height="62"/><text class="t" x="728" y="132" text-anchor="middle" font-size="28">PC</text><text class="t" x="704" y="78" font-size="18">PCin</text><path class="l" d="M728 154V220"/>
+
+<!-- ALU -->
+<polygon class="b" points="760,245 875,280 875,405 760,440 790,342"/><text class="t" x="825" y="350" text-anchor="middle" font-size="30" font-weight="700">ALU</text><text class="t" x="742" y="290" font-size="19">A</text><text class="t" x="742" y="405" font-size="19">B</text><text class="t" x="813" y="472" font-size="18">AluCtr</text><path class="l" d="M708 256H775"/><path class="l" d="M708 398H775"/>
+
+<!-- MAR mux and MAR -->
+<polygon class="b" points="965,250 1030,250 1020,325 975,325"/><text class="t" x="998" y="293" text-anchor="middle" font-size="17">MUX</text><text class="t" x="955" y="350" font-size="18">MAR Src</text>
+<rect class="b" x="1070" y="265" width="115" height="62"/><text class="t" x="1128" y="304" text-anchor="middle" font-size="27">MAR</text><path class="l" d="M875 340H965"/><path class="l" d="M1020 290H1070"/>
+
+<!-- 2R CU main memory -->
+<rect class="b" x="1035" y="92" width="75" height="55"/><text class="t" x="1073" y="128" text-anchor="middle" font-size="25">2R</text>
+<rect class="b" x="1160" y="80" width="125" height="130"/><text class="t" x="1222" y="153" text-anchor="middle" font-size="31" font-weight="700">CU</text>
+<rect class="b" x="1330" y="155" width="125" height="330"/><text class="t" x="1393" y="330" text-anchor="middle" font-size="34" font-weight="700">主存</text>
+<path class="l" d="M1110 120H1160"/><path class="l" d="M1185 296H1330"/><text class="t" x="1225" y="282" font-size="18">ABUS</text><path class="l" d="M1285 145H1330"/><text class="t" x="1295" y="130" font-size="18">CBUS</text>
+
+<!-- MDR and data bus -->
+<rect class="b" x="1110" y="445" width="115" height="62"/><text class="t" x="1168" y="484" text-anchor="middle" font-size="27">MDR</text><path class="l" d="M1225 475H1330"/><path class="l" d="M1110 475H930V540H560"/>
+
+<!-- writeback mux -->
+<polygon class="b" points="485,515 550,515 540,610 495,610"/><text class="t" x="518" y="568" text-anchor="middle" font-size="17">MUX</text><text class="t" x="460" y="642" font-size="18">RegWSrc</text><path class="l" d="M495 562H135V340"/><text class="t" x="95" y="365" font-size="18">busW</text>
+
+<!-- control lines -->
+<path class="c" d="M1222 210V250H1000"/><path class="c" d="M1222 210V520H520"/><path class="c" d="M1222 80V36"/><text class="t" x="1240" y="42" font-size="18">CBUS</text>
+<path class="c" d="M728 92V62"/><path class="c" d="M684 220V185"/><path class="c" d="M684 450V493"/><path class="c" d="M825 440V500"/>
+
+<text class="t" x="48" y="715" font-size="20" fill="#5f6670">注：实线为主要数据通路，虚线为控制信号；结构依据公开回忆卷题44图重绘。</text>
+</svg>
