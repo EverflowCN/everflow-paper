@@ -29,6 +29,18 @@ jobs:
         with:
           ref: main
 
+      - name: Checkout question assets
+        uses: actions/checkout@v4
+        with:
+          repository: EverflowCN/408-exercise-paper-generator
+          ref: main
+          path: .relax-source
+          sparse-checkout: |
+            站点/data
+            站点/question-images
+            站点/explanations
+          sparse-checkout-cone-mode: false
+
       - name: Verify site
         shell: bash
         run: |
@@ -41,6 +53,74 @@ jobs:
 
       - name: Audit bank, graph and paper suite
         run: node site/tools/audit-bank-features.mjs
+
+      - name: Build privacy-safe static artifact
+        shell: bash
+        run: |
+          rm -rf site/data/relax1000
+          mkdir -p site/data/relax1000
+          cp -R ".relax-source/站点/data" site/data/relax1000/data
+          cp -R ".relax-source/站点/question-images" site/data/relax1000/question-images
+          cp -R ".relax-source/站点/explanations" site/data/relax1000/explanations
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import unquote
+
+          def scrub_string(value):
+              if not isinstance(value, str):
+                  return value
+              decoded = unquote(value)
+              if 'github.com' not in value.lower() and 'raw.githubusercontent.com' not in value.lower():
+                  return value
+              for marker in ('/question-images/', '/explanations/'):
+                  if marker in decoded:
+                      return marker.lstrip('/') + decoded.split(marker, 1)[1]
+              return ''
+
+          def scrub(value):
+              if isinstance(value, dict):
+                  out = {}
+                  for key, item in value.items():
+                      low = key.lower()
+                      if low in {'repository','repositoryurl','repo','repourl','github','githuburl','sourceurl','sourcehref','rawurl'}:
+                          continue
+                      out[key] = scrub(item)
+                  return out
+              if isinstance(value, list):
+                  return [scrub(item) for item in value]
+              return scrub_string(value)
+
+          relax = Path('site/data/relax1000/data/questions.json')
+          data = scrub(json.loads(relax.read_text(encoding='utf-8')))
+          if isinstance(data.get('meta'), dict):
+              for key in ('repository','repo','source','sourceUrl','github','githubUrl'):
+                  data['meta'].pop(key, None)
+          relax.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+          manifest_path = Path('site/data/zhenti/manifest.json')
+          if manifest_path.exists():
+              manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+              manifest.pop('sources', None)
+              manifest.pop('policy', None)
+              for meta in (manifest.get('years') or {}).values():
+                  if isinstance(meta, dict):
+                      meta.pop('sources', None)
+                      meta.pop('notes', None)
+              manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+          PY
+
+          # Development/audit scripts are not part of the public website.
+          rm -rf site/tools
+
+          # Never publish the private-facing repository identity or source address in the site artifact.
+          if grep -RInE --exclude-dir='data/zhenti/assets' 'EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/EverflowCN' site; then
+            echo 'Privacy audit failed: repository identity leaked into site artifact.'
+            exit 1
+          fi
+          test -s site/data/relax1000/data/questions.json
+          echo "Privacy-safe artifact ready"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
