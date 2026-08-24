@@ -15,7 +15,7 @@ if(['zhenti','graph'].includes(view)){
   const shell=document.createElement('section');
   shell.className='bank-source-shell';
   shell.setAttribute('aria-label','题库切换');
-  shell.innerHTML=`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-segmented" role="tablist"><button type="button" data-bank-source="zhenti" class="${current==='zhenti'?'active':''}">408 真题</button><button type="button" data-bank-source="relax1000" class="${current==='relax1000'?'active':''}">Relax1000</button></div><a class="bank-source-practice" href="/relax/">Relax组卷 →</a><span class="bank-source-note">${current==='relax1000'?'1576 道选择题 · 数据来自你的 Relax1000 仓库':'2009—2026 · 已核验真题'}</span></div>`;
+  shell.innerHTML=`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-segmented" role="tablist"><button type="button" data-bank-source="zhenti" class="${current==='zhenti'?'active':''}">408 真题</button><button type="button" data-bank-source="relax1000" class="${current==='relax1000'?'active':''}">Relax1000</button><button type="button" data-bank-practice>Relax组卷</button></div><span class="bank-source-note">${current==='relax1000'?'1576 道选择题 · 数据来自你的 Relax1000 仓库':'2009—2026 · 已核验真题'}</span></div>`;
   const main=document.querySelector('main');
   if(main)main.before(shell);else document.body.appendChild(shell);
   shell.querySelectorAll('[data-bank-source]').forEach(button=>button.addEventListener('click',()=>{
@@ -24,6 +24,7 @@ if(['zhenti','graph'].includes(view)){
     try{localStorage.setItem(KEY,next)}catch{}
     location.reload();
   }));
+  shell.querySelector('[data-bank-practice]')?.addEventListener('click',()=>{location.href='/relax/'});
 
   if(current==='relax1000'){
     import(`/assets/js/relax1000-${view}.js?v=20260824-relax1`).catch(error=>{
