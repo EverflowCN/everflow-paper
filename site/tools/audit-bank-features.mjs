@@ -10,7 +10,7 @@ const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',
   bankSwitcher:'site/assets/js/question-bank-switch.js',graphSwitcher:'site/assets/js/graph-source-switch.js',
-  graphFit:'site/assets/js/overall-graph-fit.js',graphKeyboard:'site/assets/js/overall-graph-keyboard.js',
+  graphFit:'site/assets/js/overall-graph-fit.js',graphKeyboard:'site/assets/js/overall-graph-keyboard.js',graphFitCss:'site/assets/css/overall-graph-fit.css',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
   builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',experience:'site/assets/js/relax1000-cards-experience.js',
   zhentiMedia:'site/assets/js/zhenti-media.js',controls:'site/assets/css/relax1000-controls.css',interaction:'site/assets/css/interaction-guard.css',
@@ -22,7 +22,7 @@ assert(!exists('site/assets/js/relax1000-practice.js'),'obsolete relax1000-pract
 assert(!exists('site/assets/css/relax1000-overview.css'),'obsolete Relax-specific graph stylesheet must stay deleted');
 
 const text=Object.fromEntries(Object.entries(files).map(([key,p])=>[key,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graphSwitcher,graphFit,graphKeyboard,relaxCore,relaxWall,relaxGraph,builder,cards,reset,experience,zhentiMedia,controls,interaction,bank,graph,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graphSwitcher,graphFit,graphKeyboard,graphFitCss,relaxCore,relaxWall,relaxGraph,builder,cards,reset,experience,zhentiMedia,controls,interaction,bank,graph,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(!nav.includes("label:'真题墙'"),'top nav still exposes 真题墙');
@@ -65,17 +65,23 @@ assert(graphSwitcher.includes("KEY='everflow-408-graph-source-v1'"),'graph must 
 assert(graphSwitcher.includes('loadTrueGraph')&&graphSwitcher.includes('loadRelaxGraph'),'graph selected-only boot missing');
 assert(graphSwitcher.includes('overall-graph.js')&&graphSwitcher.includes('relax1000-graph.js'),'graph implementations missing');
 assert(graphSwitcher.includes('overall-graph-keyboard.js')&&graphSwitcher.includes('overall-graph-fit.js'),'shared graph controls must load for both sources');
-assert(graphSwitcher.includes('resetSharedStage')&&graphSwitcher.includes('syncViewport'),'shared graph shell reset/viewport guard missing');
+assert(graphSwitcher.includes('resetSharedStage'),'shared graph shell reset missing');
+assert(graphSwitcher.includes("stage?.querySelector('.overview-legend')")&&graphSwitcher.includes('graph-source-inline'),'graph source switch must live inside the shared graph frame');
+assert(!graphSwitcher.includes('question-bank-switch.css'),'graph source switch must not depend on bank-page switch styles');
 assert(!graphSwitcher.includes('original.hidden=true'),'graph switch must not hide one graph under a second graph instance');
+assert(graphSwitcher.includes("stage.dataset.fitLabel='适应屏幕'"),'both graph sources must expose the same fit-screen action');
 assert(graph.includes('graph-source-switch.js'),'graph page must load graph source switcher');
 assert(!graph.includes('<script src="../assets/js/overall-graph.js')&&!graph.includes('<script src="../assets/js/zhenti-data-overlay.js'),'graph page still double-boots hidden implementation');
 assert(relaxGraph.includes("document.querySelector('[data-graph-shell]')"),'Relax graph must reuse the true-paper graph shell');
 assert(relaxGraph.includes("querySelector('[data-overview-matrix]')")&&relaxGraph.includes("querySelector('[data-question-drawer]')"),'Relax graph must reuse shared matrix and drawer');
 assert(!relaxGraph.includes("document.createElement('main')")&&!relaxGraph.includes('relax-overview-stage'),'Relax graph must not create a second graph stage');
 assert(relaxGraph.includes('const MAX_COLS=45')&&relaxGraph.includes('start+=MAX_COLS'),'Relax graph must split rows at 45 cells');
-assert(relaxGraph.includes("shell.dataset.fitCols=String(MAX_COLS)")&&relaxGraph.includes("shell.dataset.fitRows=String(rows.length+1)"),'Relax graph must delegate 45-column fit dimensions to shared fitter');
-assert(graphFit.includes("shell.dataset.fitCols")&&graphFit.includes("shell.dataset.fitRows")&&graphFit.includes("shell.dataset.fitLabel"),'shared fit module must be data-driven');
-assert(graphKeyboard.includes("data-row")&&graphKeyboard.includes("data-col"),'shared keyboard must support Relax matrix coordinates');
+assert(relaxGraph.includes("shell.dataset.fitCols=String(MAX_COLS)")&&relaxGraph.includes("shell.dataset.fitRows=String(rows.length+1)"),'Relax graph must delegate fit dimensions to shared fitter');
+assert(graphFit.includes('matrixFits()')&&graphFit.includes('function verify('),'shared fit must verify actual rendered width and height');
+assert(graphFit.includes('Math.max(3')&&graphFit.includes('scroll.clientHeight'),'fit must be able to shrink dense Relax rows to full-screen bounds');
+assert(graphKeyboard.includes('data-row')&&graphKeyboard.includes('data-col')&&graphKeyboard.includes('moveTruePaper'),'shared keyboard must support both graph coordinate systems');
+assert(graphKeyboard.includes('keyboard-active')&&graphKeyboard.includes('stopImmediatePropagation'),'keyboard navigation feedback/isolation missing');
+assert(graphFitCss.includes('.overview-cell.current{transform:scale(')&&graphFitCss.includes('.graph-source-inline'),'current-cell emphasis or inline graph switch styling missing');
 
 assert(builder.includes("QUOTA={ds:11,co:11,os:10,cn:8}"),'408 simulation quota is not 11/11/10/8');
 assert(paper.includes('data-source="zhenti"')&&paper.includes('data-source="relax"'),'paper sources missing');
@@ -110,4 +116,4 @@ assert(verified>=846,`verified true-paper corpus unexpectedly small: ${verified}
 
 const jsFiles=[files.entry,files.bankSwitcher,files.graphSwitcher,files.graphFit,files.graphKeyboard,files.relaxCore,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.reset,files.experience,files.zhentiMedia,files.runtime,files.nav];
 for(const file of jsFiles){const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);fs.writeFileSync(tmp,read(file));const result=spawnSync(process.execPath,['--check',tmp],{encoding:'utf8'});fs.rmSync(tmp,{force:true});assert(result.status===0,`syntax check failed: ${file}\n${result.stderr||result.stdout}`)}
-console.log(`privacy/interaction/unified-graph audit OK: ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable; Relax reuses true-paper graph shell`);
+console.log(`privacy/interaction/unified-graph audit OK: ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable; full-fit + shared keyboard + inline source switch OK`);
