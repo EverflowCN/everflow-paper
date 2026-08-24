@@ -44,10 +44,19 @@ export function optionEntries(question){
   if(!entries.length)return entries;
   const hasImage=Array.isArray(question?.questionImages)&&question.questionImages.length>0;
   const damagedCount=entries.filter(item=>hasBrokenSymbols(item.text)||item.text.includes('?')).length;
-  if(hasImage&&damagedCount>=2)return entries.map(item=>({...item,text:''}));
+  if(hasImage&&damagedCount>=2)return[];
   return entries.map(item=>hasBrokenSymbols(item.text)?{...item,text:''}:item);
 }
 export function subjectName(id,fallback=''){return SUBJECT_NAME[id]||fallback||id||'408'}
+function sanitizeDisplayData(data){
+  for(const question of data.questions||[]){
+    const hasQuestionImage=Array.isArray(question?.questionImages)&&question.questionImages.length>0;
+    const hasExplanationImage=Array.isArray(question?.explanationImages)&&question.explanationImages.length>0;
+    if(hasQuestionImage&&hasBrokenSymbols(question?.stem))question.stem='';
+    if(hasExplanationImage&&hasBrokenSymbols(question?.explanation))question.explanation='';
+  }
+  return data;
+}
 export async function loadRelaxData({force=false}={}){
   if(force)dataPromise=null;
   if(dataPromise)return dataPromise;
@@ -55,7 +64,7 @@ export async function loadRelaxData({force=false}={}){
     .then(response=>{if(!response.ok)throw new Error(`Relax1000 data HTTP ${response.status}`);return response.json()})
     .then(data=>{
       if(!data||!Array.isArray(data.questions)||!Array.isArray(data.subjects))throw new Error('Relax1000 data schema invalid');
-      return data;
+      return sanitizeDisplayData(data);
     })
     .catch(error=>{dataPromise=null;throw error});
   return dataPromise;
