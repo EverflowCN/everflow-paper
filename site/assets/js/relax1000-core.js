@@ -1,5 +1,5 @@
-const RAW_SITE='https://raw.githubusercontent.com/EverflowCN/408-exercise-paper-generator/main/%E7%AB%99%E7%82%B9';
-export const DATA_URL=`${RAW_SITE}/data/questions.json`;
+const RELAX_ASSET_BASE='/data/relax1000';
+export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json`;
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
 export const RELAX_STORAGE_KEYS={
@@ -22,8 +22,11 @@ export const idKey=value=>String(value?.id??value??'');
 export function assetUrl(value){
   const src=String(value||'').trim();
   if(!src)return'';
-  if(/^https?:\/\//i.test(src)||src.startsWith('data:'))return src;
-  return `${RAW_SITE}${src.startsWith('/')?'':'/'}${src}`;
+  if(src.startsWith('data:image/'))return src;
+  if(src.startsWith(`${RELAX_ASSET_BASE}/`))return src;
+  if(/^https?:\/\//i.test(src))return'';
+  const clean=src.replace(/^\.\//,'').replace(/^\//,'');
+  return `${RELAX_ASSET_BASE}/${clean}`;
 }
 export function optionEntries(question){
   const options=question?.options;
