@@ -97,9 +97,12 @@
       }
       if(!String(item.stem||'').trim())incomplete.push(q);
       if((item.type==='single'||q<=40)&&(!item.options||!Object.keys(item.options).length||!String(item.answer||'').trim()))incomplete.push(q);
+      if(q>40&&!String(item.answer||'').trim())incomplete.push(q);
     }
     return {missing:[...new Set(missing)],incomplete:[...new Set(incomplete)]};
   }
+
+  function unhealthy(health){return health.missing.length>0||health.incomplete.length>0}
 
   function clearYearLayers(year){
     layerCache.base.delete(year);
@@ -116,7 +119,7 @@
       let paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
       let health=auditPaper(paper);
 
-      if(health.missing.length){
+      if(unhealthy(health)){
         clearYearLayers(year);
         await sleep(100);
         [base,supplement,extra]=await Promise.all([loadBase(year),loadSupplement(year),loadExtra(year)]);
@@ -124,15 +127,13 @@
         health=auditPaper(paper);
       }
 
-      if(health.missing.length||health.incomplete.length){
-        console.warn(`[Everflow] ${year} 题库加载不完整`,health);
-      }
+      if(unhealthy(health))console.warn(`[Everflow] ${year} 题库加载不完整`,health);
       return paper;
     });
 
     mergedCache.set(year,task);
     const result=await task;
-    if(!result||auditPaper(result).missing.length)mergedCache.delete(year);
+    if(!result||unhealthy(auditPaper(result)))mergedCache.delete(year);
     return result;
   }
 
