@@ -11,24 +11,24 @@ const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',bankSwitcher:'site/assets/js/question-bank-switch.js',
   graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphCss:'site/assets/css/graph.css',trueGraph:'site/assets/js/zhenti-graph.js',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
-  builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',experience:'site/assets/js/relax1000-cards-experience.js',
+  builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',
   zhentiMedia:'site/assets/js/zhenti-media.js',paper:'site/relax/index.html',admin:'site/admin/index.html',manifest:'site/data/zhenti/manifest.json',deploy:'.github/workflows/deploy-pages-v2.yml'
 };
 for(const p of Object.values(files))assert(exists(p),`missing ${p}`);
 for(const p of [
-  'site/assets/js/relax1000-practice.js','site/assets/css/relax1000-overview.css','site/assets/js/graph-source-switch.js',
+  'site/assets/js/relax1000-practice.js','site/assets/js/relax1000-cards-experience.js','site/assets/css/relax1000-overview.css','site/assets/js/graph-source-switch.js',
   'site/assets/js/overall-graph-fit.js','site/assets/js/overall-graph-keyboard.js','site/assets/css/overall-graph-fit.css',
   'site/assets/js/overall-graph.js','site/assets/css/overall-graph.css','site/assets/css/graph-controls.css'
 ])assert(!exists(p),`obsolete file must stay deleted: ${p}`);
 
 const text=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphCss,trueGraph,relaxCore,relaxWall,relaxGraph,builder,cards,reset,experience,zhentiMedia,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphCss,trueGraph,relaxCore,relaxWall,relaxGraph,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(entry.includes("source==='zhenti'")&&entry.includes('zhenti-wall.js'),'true-paper selected-only boot missing');
 assert(bankSwitcher.includes('408 真题')&&bankSwitcher.includes('Relax1000')&&!bankSwitcher.includes('relax1000-graph.js'),'bank switch architecture invalid');
+assert(!bankSwitcher.includes('relax1000-cards-experience.js'),'broken Relax fullscreen module must stay retired');
 assert(cards.includes('题库墙')&&cards.includes('速刷卡片'),'Relax cards subview missing');
-assert(experience.includes('⛶ 畅享全屏')&&experience.includes("event.shiftKey&&String(event.key).toUpperCase()==='F'"),'Relax fullscreen contract missing');
 for(const choice of ['answers','status','favorites','today','srs','all'])assert(reset.includes(`data-relax-reset-choice="${choice}"`),`Relax reset missing ${choice}`);
 assert(relaxCore.includes("RELAX_ASSET_BASE='/data/relax1000'")&&relaxCore.includes('RELAX_STORAGE_KEYS'),'Relax core/data contract missing');
 assert(!/EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/i.test(relaxCore),'Relax runtime leaks repository identity/address');
@@ -76,7 +76,7 @@ for(const year of years){const data=JSON.parse(read(`site/data/zhenti/${year}.js
 assert(verified>=846,`verified corpus unexpectedly small: ${verified}`);
 const autoFloor=Math.floor(verified*.70);
 assert(autoChoice>=autoFloor,`auto-gradable corpus unexpectedly small: ${autoChoice}/${verified} (<70%)`);
-for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.reset,files.experience,files.zhentiMedia,files.runtime,files.nav]){
+for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
   const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);
   fs.writeFileSync(tmp,read(file));
   const result=spawnSync(process.execPath,['--check',tmp],{encoding:'utf8'});
