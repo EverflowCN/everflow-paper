@@ -6,7 +6,7 @@
   let countdownTimer=0;
 
   async function loadJson(path){
-    const r=await fetch(`${path}${path.includes('?')?'&':'?'}v=20260825-countdown2`,{cache:'default'});
+    const r=await fetch(`${path}${path.includes('?')?'&':'?'}v=20260825-countdown3`,{cache:'default'});
     if(!r.ok)throw new Error(path+' load failed');
     return r.json();
   }

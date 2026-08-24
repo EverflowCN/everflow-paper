@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v42';
+const CACHE='everflow-site-v43';
 const SHELL=[
   '/',
   '/study/',
@@ -82,7 +82,7 @@ self.addEventListener('fetch',event=>{
   if(url.origin!==self.location.origin)return;
   const path=url.pathname;
   if(request.mode==='navigate'){
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(networkFirst(request));
     return;
   }
   if(path.startsWith('/data/')&&/\.(?:png|jpe?g|webp|gif|svg)$/i.test(path)){
