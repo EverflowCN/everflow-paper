@@ -1,5 +1,6 @@
 Everflow deployment probe
-version: 20260824-1247
+version: 20260824-1251
+workflow: deploy-pages-v2.yml
 architecture: bank|paper-builder|graph separated
 bank: 408 true papers + Relax1000 wall
 paper-builder: standalone
