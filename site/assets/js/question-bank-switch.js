@@ -14,7 +14,7 @@ const shell=document.createElement('section');
 shell.className='bank-source-shell';shell.setAttribute('aria-label','题库切换');
 shell.innerHTML=`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-segmented" role="tablist"><button type="button" data-bank-source="zhenti" class="${current==='zhenti'?'active':''}">408 真题</button><button type="button" data-bank-source="relax1000" class="${current==='relax1000'?'active':''}">Relax1000</button></div><span class="bank-source-note">${current==='relax1000'?'1576 道选择题 · 题库墙 / 速刷卡片':'2009—2026 · 真题墙 / 整套真题 / 速刷卡片'}</span></div>`;
 const main=document.querySelector('main');
-(main||document.body).before?.(shell)||(document.body.appendChild(shell));
+if(main)main.before(shell);else document.body.appendChild(shell);
 shell.querySelectorAll('[data-bank-source]').forEach(button=>button.addEventListener('click',()=>{
   const next=button.dataset.bankSource;if(next===current)return;
   try{localStorage.setItem(KEY,next)}catch{}
