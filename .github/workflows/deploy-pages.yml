@@ -48,12 +48,11 @@ jobs:
           PY
 
       - name: Audit all 846 408 questions
+        id: zhenti_audit
+        continue-on-error: true
         shell: bash
         run: |
-          set +e
           node site/tools/audit-zhenti.mjs
-          audit_status=$?
-          set -e
           python - <<'PY'
           import json
           p = 'site/data/zhenti/audit-report.json'
@@ -62,12 +61,12 @@ jobs:
           s = d['summary']
           print(f"zhenti audit healthy={s['healthy']}/{d['expectedQuestions']} unhealthy={s['unhealthy']} figureFailures={s['localFigureFailures']} manifestFailures={s.get('manifestFailures', 0)}")
           for year, info in d['years'].items():
-              if info['badQuestions']:
-                  print(year, 'bad:', ','.join(map(str, info['badQuestions'])))
+              if info['badQuestions'] or info.get('manifestFailureCount'):
+                  print(year, 'bad:', ','.join(map(str, info['badQuestions'])), 'manifest:', info.get('manifestFailureCount', 0))
           PY
-          echo "audit exit status: ${audit_status} (report will still be persisted)"
 
       - name: Persist audit report
+        if: always()
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -77,6 +76,13 @@ jobs:
             git commit -m "chore(zhenti): refresh audit report [skip ci]"
             git push origin HEAD:main
           fi
+
+      - name: Require healthy 408 corpus
+        if: steps.zhenti_audit.outcome == 'failure'
+        shell: bash
+        run: |
+          echo '408 corpus audit failed; refusing to deploy Pages.'
+          exit 1
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
