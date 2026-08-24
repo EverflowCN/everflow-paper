@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updatedAt": "2026-08-24T20:16:00+08:00",
+  "updatedAt": "2026-08-24T20:29:00+08:00",
   "source": {
     "up": "就是氧气11",
     "collection": "历年408计算机基础综合真题讲解-27优化版",
@@ -8,7 +8,7 @@
     "url": "https://www.bilibili.com/video/BV1MW8i6tEa1",
     "auto": true,
     "syncStatus": "ok",
-    "message": "已切换到27优化版历年408真题讲解合集；当前收录公开可确认课时，后续按合集追加。"
+    "message": "已确认合集当前至少更新 2 课时：2009、2010。后续每天检查一次并按合集追加。"
   },
   "course": {
     "id": "oxygen-408-pastpaper-27",
@@ -22,6 +22,13 @@
         "duration": "2:05:09",
         "url": "https://www.bilibili.com/video/BV1MW8i6tEa1",
         "bvid": "BV1MW8i6tEa1"
+      },
+      {
+        "id": "year:2010",
+        "year": 2010,
+        "title": "2010年408计算机基础综合真题讲解-27优化版",
+        "duration": "2:17:19",
+        "url": "https://www.bilibili.com/video/BV1MW8i6tEa1"
       }
     ]
   }
