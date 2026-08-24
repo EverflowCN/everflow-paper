@@ -29,6 +29,13 @@ function sourceYear(url,fallback){
   return match?.[1]||String(fallback);
 }
 
+function candidates(src){
+  const out=[src];
+  const fallback=src.replace(/-fig\d+\.(?:jpe?g|png)$/i,'.png');
+  if(fallback!==src)out.push(fallback);
+  return out;
+}
+
 function writeReport(data){
   fs.writeFileSync(REPORT_FILE,`${JSON.stringify({generatedAt:new Date().toISOString(),...data},null,2)}\n`,'utf8');
 }
@@ -56,12 +63,7 @@ for(const file of files){
         writeReport({status:'failed',stage:'scan',error:`unapproved external figure host: ${src}`});
         throw new Error(`unapproved external figure host: ${src}`);
       }
-      const hash=crypto.createHash('sha1').update(src).digest('hex').slice(0,12);
-      const ext=extFor(src);
-      const assetYear=sourceYear(src,year);
-      const rel=`/data/zhenti/assets/${assetYear}/source-${hash}.${ext}`;
-      const dest=path.join(SITE,rel.replace(/^\//,''));
-      const ref={file,year:Number(year),q:Number(q),src,rel,dest};
+      const ref={file,year:Number(year),q:Number(q),src};
       refs.push(ref);
       if(!unique.has(src))unique.set(src,ref);
     }
@@ -72,7 +74,8 @@ console.log(`external figure references: ${refs.length}`);
 console.log(`unique external figures: ${unique.size}`);
 
 const failures=[];
-let downloaded=0,existing=0;
+const resolved=new Map();
+let downloaded=0,existing=0,fallbacks=0;
 const queue=[...unique.values()];
 let cursor=0;
 
@@ -81,21 +84,47 @@ async function worker(){
     const index=cursor++;
     if(index>=queue.length)return;
     const ref=queue[index];
-    fs.mkdirSync(path.dirname(ref.dest),{recursive:true});
-    if(fs.existsSync(ref.dest)&&fs.statSync(ref.dest).size>100){existing++;continue;}
-    try{
-      const response=await fetch(ref.src,{redirect:'follow',headers:{'User-Agent':'Everflow-Zhenti-Vendor/1.0'}});
-      if(!response.ok)throw new Error(`HTTP ${response.status}`);
-      const bytes=Buffer.from(await response.arrayBuffer());
-      if(bytes.length<100)throw new Error(`image too small: ${bytes.length} bytes`);
-      fs.writeFileSync(ref.dest,bytes);
-      downloaded++;
-      console.log(`downloaded ${path.relative(ROOT,ref.dest)} (${bytes.length} bytes)`);
-    }catch(error){
-      const entry={year:ref.year,q:ref.q,src:ref.src,error:String(error?.message||error)};
+    let success=null,lastError='unknown error';
+
+    for(const candidate of candidates(ref.src)){
+      try{
+        const response=await fetch(candidate,{redirect:'follow',headers:{'User-Agent':'Everflow-Zhenti-Vendor/1.0'}});
+        if(!response.ok){lastError=`${candidate} -> HTTP ${response.status}`;continue;}
+        const bytes=Buffer.from(await response.arrayBuffer());
+        if(bytes.length<100){lastError=`${candidate} -> image too small: ${bytes.length} bytes`;continue;}
+        const contentType=String(response.headers.get('content-type')||'');
+        if(contentType&&!contentType.startsWith('image/')&&!contentType.includes('octet-stream')){
+          lastError=`${candidate} -> unexpected content-type ${contentType}`;continue;
+        }
+        success={candidate,bytes};
+        break;
+      }catch(error){lastError=`${candidate} -> ${String(error?.message||error)}`;}
+    }
+
+    if(!success){
+      const entry={year:ref.year,q:ref.q,src:ref.src,error:lastError};
       failures.push(entry);
       console.error('DOWNLOADFAIL',JSON.stringify(entry));
+      continue;
     }
+
+    const actual=success.candidate;
+    const hash=crypto.createHash('sha1').update(ref.src).digest('hex').slice(0,12);
+    const ext=extFor(actual);
+    const assetYear=sourceYear(actual,ref.year);
+    const rel=`/data/zhenti/assets/${assetYear}/source-${hash}.${ext}`;
+    const dest=path.join(SITE,rel.replace(/^\//,''));
+    fs.mkdirSync(path.dirname(dest),{recursive:true});
+
+    if(fs.existsSync(dest)&&fs.statSync(dest).size>100){
+      existing++;
+    }else{
+      fs.writeFileSync(dest,success.bytes);
+      downloaded++;
+    }
+    if(actual!==ref.src)fallbacks++;
+    resolved.set(ref.src,{rel,dest,fetchedFrom:actual,size:success.bytes.length});
+    console.log(`resolved ${ref.year}-${ref.q}: ${actual===ref.src?'direct':'fallback'} -> ${path.relative(ROOT,dest)} (${success.bytes.length} bytes)`);
   }
 }
 
@@ -104,7 +133,7 @@ if(failures.length){
   writeReport({
     status:'failed',stage:'download',
     externalReferences:refs.length,uniqueExternalFigures:unique.size,
-    downloaded,existing,failed:failures.length,failures,
+    downloaded,existing,fallbacks,failed:failures.length,failures,
     remainingExternal:refs.length
   });
   console.error(JSON.stringify(failures,null,2));
@@ -112,9 +141,11 @@ if(failures.length){
 }
 
 for(const ref of refs){
+  const target=resolved.get(ref.src);
+  if(!target)throw new Error(`missing resolved target for ${ref.src}`);
   const state=fileState.get(ref.file);
   if(!state.text.includes(ref.src))continue;
-  state.text=state.text.split(ref.src).join(ref.rel);
+  state.text=state.text.split(ref.src).join(target.rel);
   state.changed=true;
 }
 
@@ -139,9 +170,12 @@ for(const file of files){
 writeReport({
   status:remaining===0?'ok':'failed',stage:'complete',
   externalReferences:refs.length,uniqueExternalFigures:unique.size,
-  downloaded,existing,failed:0,changedFiles,remainingExternal:remaining,
-  localAssets:[...unique.values()].map(ref=>({year:ref.year,q:ref.q,source:ref.src,local:ref.rel}))
+  downloaded,existing,fallbacks,failed:0,changedFiles,remainingExternal:remaining,
+  localAssets:[...unique.values()].map(ref=>{
+    const target=resolved.get(ref.src);
+    return {year:ref.year,q:ref.q,source:ref.src,fetchedFrom:target?.fetchedFrom,local:target?.rel,size:target?.size};
+  })
 });
 
-console.log(`downloaded=${downloaded} existing=${existing} changedFiles=${changedFiles} remainingExternal=${remaining}`);
+console.log(`downloaded=${downloaded} existing=${existing} fallbacks=${fallbacks} changedFiles=${changedFiles} remainingExternal=${remaining}`);
 if(remaining!==0)process.exit(1);
