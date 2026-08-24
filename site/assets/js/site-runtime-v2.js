@@ -1,11 +1,11 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260824-bank8';
+  const ASSET_VERSION='20260824-bank10';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
 
   const ICONS={menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',moon:'<path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',close:'<path d="M18 6 6 18M6 6l12 12"/>',check:'<path d="m5 12 4 4L19 6"/>',alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.7 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',chevronLeft:'<path d="m15 18-6-6 6-6"/>',chevronRight:'<path d="m9 18 6-6-6-6"/>',arrowLeft:'<path d="M19 12H5M11 18l-6-6 6-6"/>',arrowRight:'<path d="M5 12h14M13 6l6 6-6 6"/>',pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5Z"/>',star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/>',eraser:'<path d="m7 20-4-4L14.5 4.5a2.1 2.1 0 0 1 3 0l2 2a2.1 2.1 0 0 1 0 3L9 20Z"/><path d="m11 8 5 5M7 20h13"/>',panel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>',keyboard:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M17 14h.01M7 14h6"/>'};
-  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const iconMarkup=name=>`<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name]||ICONS.info}</svg>`;
   window.EveraIcons={markup:iconMarkup,names:Object.keys(ICONS)};
 
@@ -18,7 +18,7 @@
     if(el.matches('[data-theme]'))return syncThemeIcons();
     if(el.matches('[data-menu]')){iconOnly(el,'menu');return}
     if(el.matches('.modal-clear')){iconOnly(el,'eraser');return}
-    if(el.matches('.modal-close,.membership-close,.membership-nav-close,[data-drawer-close],[data-shortcut-close]')){iconOnly(el,'close');return}
+    if(el.matches('.modal-close,.membership-close,.membership-nav-close,[data-drawer-close],[data-relax-drawer-close],[data-shortcut-close]')){iconOnly(el,'close');return}
     if(el.matches('[data-tool="analysis"]')){iconText(el,'book','看解析');return}
     if(el.matches('[data-tool="note"]')){iconText(el,'pencil','笔记');return}
     if(el.matches('[data-tool="timer"]')){preserveLiveLabelIcon(el,'clock','[data-timer-text]');return}
@@ -48,7 +48,7 @@
   const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))})});menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false)},{passive:true});
 
   import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));
-  if(['zhenti','graph'].includes(body.dataset.view))import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));
+  if(body.dataset.view==='zhenti')import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));
   if(body.dataset.view!=='zhenti'||storage.get('everflow-408-bank-source-v1')==='relax1000')return;
   const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss);
   import(asset('/assets/js/zhenti-qwer.js')).catch(err=>console.error('Everflow 408 shortcuts failed',err));
