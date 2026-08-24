@@ -1,6 +1,6 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260824-visual1';
+  const ASSET_VERSION='20260825-perf2';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
 
@@ -46,6 +46,27 @@
   window.EveraUI={toast,setBusy,complete,icon:iconMarkup,upgradeIcons:upgradeScope};
 
   const menu=document.querySelector('.mobile-panel'),menuButtons=[...document.querySelectorAll('[data-menu]')];const setMenu=open=>{if(!menu)return;menu.classList.toggle('open',open);body.classList.toggle('menu-open',open);menuButtons.forEach(btn=>btn.setAttribute('aria-expanded',open?'true':'false'))};menuButtons.forEach(btn=>{btn.setAttribute('aria-expanded','false');btn.addEventListener('click',event=>{event.stopPropagation();setMenu(!menu?.classList.contains('open'))})});menu?.addEventListener('click',event=>{if(event.target.closest('a'))setMenu(false)});document.addEventListener('click',event=>{if(menu?.classList.contains('open')&&!menu.contains(event.target)&&!event.target.closest('[data-menu]'))setMenu(false)});document.addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});window.addEventListener('resize',()=>{if(window.innerWidth>1040)setMenu(false)},{passive:true});
+
+  const prefetchedRoutes=new Set();
+  const prefetchRoute=target=>{
+    const anchor=target?.closest?.('a[href]');
+    if(!anchor||anchor.target==='_blank'||anchor.hasAttribute('download'))return;
+    let url;
+    try{url=new URL(anchor.href,location.href)}catch{return}
+    if(url.origin!==location.origin||url.pathname===location.pathname||prefetchedRoutes.has(url.pathname))return;
+    prefetchedRoutes.add(url.pathname);
+    const hint=document.createElement('link');
+    hint.rel='prefetch';hint.href=url.pathname;hint.as='document';
+    document.head.appendChild(hint);
+  };
+  ['pointerover','focusin','touchstart'].forEach(type=>document.addEventListener(type,event=>prefetchRoute(event.target),{passive:true,capture:true}));
+
+  const registerServiceWorker=()=>{
+    if(!('serviceWorker' in navigator)||location.protocol!=='https:')return;
+    const run=()=>navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(err=>console.warn('Everflow offline cache unavailable',err));
+    if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:2500});else setTimeout(run,800);
+  };
+  if(document.readyState==='complete')registerServiceWorker();else window.addEventListener('load',registerServiceWorker,{once:true});
 
   import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));
   if(body.dataset.view==='zhenti')import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));

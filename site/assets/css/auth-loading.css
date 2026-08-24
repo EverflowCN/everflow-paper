@@ -1,0 +1,21 @@
+.auth-loading-card {
+  overflow: hidden;
+}
+
+.auth-loading-line {
+  height: 4px;
+  margin-top: 18px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--soft) 0%, var(--red) 45%, var(--soft) 90%);
+  background-size: 220% 100%;
+  animation: auth-loading 1.1s ease-in-out infinite;
+}
+
+@keyframes auth-loading {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-loading-line { animation: none; }
+}

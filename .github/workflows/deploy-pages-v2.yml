@@ -29,6 +29,27 @@ jobs:
       - name: Architecture audit
         run: node site/tools/audit-bank-features.mjs
 
+      - name: Validate account, resource hub, workspace, and cache scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            site/assets/js/account.js \
+            site/assets/js/admin-cloud.js \
+            site/assets/js/cloud.js \
+            site/assets/js/links.js \
+            site/assets/js/site-runtime-v2.js \
+            site/assets/js/workspace-v3.js \
+            site/assets/js/workspace-operations-v1.js \
+            site/sw.js
+          do
+            node --check "$file"
+          done
+          grep -q 'data-resource-search' site/links/index.html
+          grep -q 'data-ws-panel="operations"' site/workspace/index.html
+          grep -q "everflow-site-v40" site/sw.js
+          git diff --check
+
   deploy:
     needs: quality
     environment:
@@ -180,6 +201,10 @@ jobs:
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
           test -s site/assets/js/site-runtime-v2.js
+          test -s site/assets/js/links.js
+          test -s site/assets/js/workspace-operations-v1.js
+          test -s site/assets/css/resource-hub-v2.css
+          test -s site/assets/css/auth-loading.css
           test ! -e site/assets/js/relax1000-cards-experience.js
           test ! -e site/assets/js/overall-graph.js
           test ! -e site/assets/css/overall-graph.css
@@ -290,7 +315,7 @@ jobs:
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
           test -s site/assets/css/graph-next.css
-          echo '{"build":"20260824-graph-r6-visual1"}' > site/build.json
+          echo '{"build":"20260824-graph-r6-20260825-perf-resource2"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages

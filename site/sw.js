@@ -1,12 +1,22 @@
-const CACHE='everflow-site-v39';
+const CACHE='everflow-site-v40';
 const SHELL=[
   '/',
+  '/study/',
+  '/zhenti/',
+  '/links/',
+  '/account/',
+  '/workspace/',
+  '/visual/',
   '/assets/css/site.css',
   '/assets/css/responsive.css',
   '/assets/css/interaction-guard.css',
   '/assets/css/graph.css',
+  '/assets/css/resource-hub-v2.css',
+  '/assets/css/auth-loading.css',
   '/assets/js/site-runtime-v2.js',
   '/assets/js/site-nav-v2.js',
+  '/assets/js/cloud-config.js',
+  '/assets/js/links.js',
   '/assets/js/graph-app.js',
   '/assets/js/graph-controls.js',
   '/assets/everflow-icon.svg',
@@ -65,6 +75,10 @@ self.addEventListener('fetch',event=>{
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
   const path=url.pathname;
-  const fresh=request.mode==='navigate'||path.startsWith('/data/')||/\.(?:js|css|json|webmanifest)$/i.test(path);
+  if(request.mode==='navigate'){
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+  const fresh=path.startsWith('/data/');
   event.respondWith(fresh?networkFirst(request):staleWhileRevalidate(request));
 });
