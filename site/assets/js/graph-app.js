@@ -1,17 +1,17 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-const APP_VERSION='20260824-graph-r3';
+const APP_VERSION='20260824-graph-r4';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');
-const legend=shell?.querySelector('.overview-legend');
+const sourceHost=shell?.querySelector('[data-graph-source-host]');
 const caption=shell?.querySelector('[data-graph-caption]');
-if(!shell||!legend)throw new Error('graph shell missing');
+if(!shell||!sourceHost||!caption)throw new Error('graph shell missing');
 
 const SOURCES={
   zhenti:{
     label:'408 真题',kind:'zhenti',cols:47,rows:19,
-    fitKey:'everflow-graph-fit-mode-v1',caption:'建议配合纸质版真题更佳',
+    fitKey:'everflow-graph-fit-mode-v1',caption:'年份 × 题号 · 2009—2026',
     load:async()=>{
       await import(`/assets/js/zhenti-data-overlay.js?v=${APP_VERSION}`);
       await import(`/assets/js/overall-graph.js?v=${APP_VERSION}`);
@@ -19,7 +19,7 @@ const SOURCES={
   },
   relax1000:{
     label:'Relax1000',kind:'relax1000',cols:45,rows:1,
-    fitKey:'everflow-408-relax-graph-fit-v2',caption:'按章节分行 · 每行最多 45 题',
+    fitKey:'everflow-408-relax-graph-fit-v2',caption:'章节 × 题序 · 每行最多 45 题',
     load:async()=>import(`/assets/js/relax1000-graph.js?v=${APP_VERSION}`)
   }
 };
@@ -35,13 +35,14 @@ function rememberSource(source){try{localStorage.setItem(SOURCE_KEY,source)}catc
 function resetShell(){
   shell.hidden=false;
   shell.classList.remove('drawer-open','graph-fit','graph-fit-dense');
+  shell.dataset.controlsReady='false';
   for(const name of ['--cell-size','--gap','--year-col'])shell.style.removeProperty(name);
   shell.querySelector('[data-overview-matrix]')?.replaceChildren();
   const drawer=shell.querySelector('[data-question-drawer]');
   if(drawer){
     drawer.hidden=true;
-    const body=drawer.querySelector('[data-drawer-body]');
-    if(body)body.innerHTML='<div class="drawer-loading">正在读取题目…</div>';
+    const drawerBody=drawer.querySelector('[data-drawer-body]');
+    if(drawerBody)drawerBody.innerHTML='<div class="drawer-loading">正在读取题目…</div>';
   }
   const reopen=shell.querySelector('[data-drawer-reopen]');
   if(reopen)reopen.hidden=true;
@@ -53,20 +54,17 @@ function configureShell(source){
   shell.dataset.graphKind=config.kind;
   shell.dataset.fitCols=String(config.cols);
   shell.dataset.fitRows=String(config.rows);
-  shell.dataset.fitLabel='适应屏幕';
   shell.dataset.fitKey=config.fitKey;
-  if(caption)caption.textContent=config.caption;
+  caption.textContent=config.caption;
 }
 function mountSourceSwitch(source){
-  legend.querySelector('[data-graph-source-switch]')?.remove();
+  sourceHost.replaceChildren();
   const control=document.createElement('div');
   control.className='graph-source-inline';
   control.dataset.graphSourceSwitch='';
-  control.setAttribute('aria-label','图谱切换');
-  control.innerHTML=`<span class="graph-source-label">图谱</span><div class="graph-source-segmented" role="tablist">${Object.entries(SOURCES).map(([key,item])=>`<button type="button" role="tab" aria-selected="${key===source}" data-graph-source="${key}" class="${key===source?'active':''}">${item.label}</button>`).join('')}</div>`;
-  const statusItems=[...legend.children].filter(node=>node.matches?.('span')&&node.querySelector?.('i')).slice(0,4);
-  const anchor=statusItems.at(-1);
-  if(anchor)anchor.after(control);else legend.prepend(control);
+  control.setAttribute('aria-label','图谱来源');
+  control.innerHTML=`<div class="graph-source-segmented" role="tablist">${Object.entries(SOURCES).map(([key,item])=>`<button type="button" role="tab" aria-selected="${key===source}" data-graph-source="${key}" class="${key===source?'active':''}">${item.label}</button>`).join('')}</div>`;
+  sourceHost.appendChild(control);
   control.addEventListener('click',event=>{
     const button=event.target.closest('[data-graph-source]');
     if(!button)return;
