@@ -26,26 +26,71 @@
       "figures":[{"src":"/data/zhenti/assets/2026/q28-three-level-page-address.svg","alt":"2026年第28题三级页表虚拟地址结构","caption":"根据公开题面重绘的 25/9/9/9/12 位地址结构。"}],
       "verification":{"status":"verified","mode":"cross-checked-paraphrase-with-redraw","sources":["csgraduates","noobdream"]}
     },
+    "36":{
+      "number":36,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"支持 VLAN 划分的以太网交换机已按端口划分两个 VLAN，各端口连接主机的 MAC 地址如题图。给定以太帧：F1 的 DA=00-1A-2B-3C-4D-03、SA=00-1A-2B-3C-4D-01；F2 的 DA=...-04、SA=...-05；F3 的 DA=FF-FF-FF-FF-FF-FF、SA=...-02；F4 的 DA=...-06、SA=...-03。H3 会接收到的是（ ）。",
+      "options":{"A":"仅 F2、F4","B":"仅 F1、F3","C":"仅 F1、F2","D":"仅 F3、F4"},
+      "answer":"B",
+      "analysis":"H1、H2、H3 同属 VLAN1，H4、H5、H6 属于 VLAN2。F1 是 VLAN1 内发往 H3 的单播帧，因此 H3 接收；F3 是 H2 发出的 VLAN1 广播帧，H3 也接收。F2 完全位于 VLAN2；F4 从 H3 发往另一个 VLAN 的 H6，在没有三层转发的情况下不会作为入站帧送回 H3。因此仅 F1、F3。",
+      "figures":[{"src":"/data/zhenti/assets/2026/q36-vlan-switch.svg","alt":"2026年第36题VLAN交换机、端口、主机MAC与F1至F4关系","caption":"依据公开题面逐端口重绘，保留 VLAN 归属、主机 MAC 与四个帧的地址关系。"}],
+      "verification":{"status":"verified","mode":"cross-checked-public-question-with-redraw","sources":["csgraduates","codebrick"]}
+    },
+    "37":{
+      "number":37,
+      "subject":"cn",
+      "type":"single",
+      "score":2,
+      "stem":"某网络在 t0 时刻的拓扑与 R1 路由如题图所示，R1～R4 基于链路状态路由算法计算路由。若 t1>t0 时 R1 检测到 R1 与 R2 之间链路断开，R1 重新计算路由并进行充分路由聚合后，路由表中的路由条目数量为（ ）。",
+      "options":{"A":"3","B":"4","C":"5","D":"6"},
+      "answer":"C",
+      "analysis":"断链后，199.10.20.0/27 经 R3→R2 到达，199.10.20.32/27 经 R3，二者下一跳相同且前缀连续，可聚合为 199.10.20.0/26；199.10.20.64/27 与 199.10.20.128/25 经 R4，但地址范围不能继续合法聚合。再计入默认路由和 R1 的直连路由，共 5 条，选 C。",
+      "figures":[{"src":"/data/zhenti/assets/2026/q37-route-topology.svg","alt":"2026年第37题链路状态路由与聚合拓扑","caption":"依据公开题面和链路状态重算结果重绘，保留解题所需链路费用、目的前缀和断链关系。"}],
+      "verification":{"status":"verified","mode":"cross-checked-routing-reconstruction","sources":["codebrick","csgraduates"]}
+    },
     "41":{
       "number":41,
       "subject":"ds",
       "type":"comprehensive",
       "score":13,
       "stem":"二叉搜索树采用二叉链表存储，结点含 data、left、right。给定二叉搜索树 T 和整数 K，查找树中关键字与 K 之差的绝对值最小的所有结点，并输出该最小绝对值以及这些结点的关键字。要求给出基本思想，并用 C/C++ 描述算法。",
-      "answer":"利用 BST 中序遍历有序的性质。中序扫描时维护当前最小差值 minDiff 和至多两个候选关键字；访问结点 x 时计算 |x-K|：若更小则更新 minDiff 并清空候选，若相等则加入候选；当已经越过 K 且差值开始严格增大时可停止后续遍历。最后输出 minDiff 及所有候选关键字。",
-      "analysis":"关键是利用 BST 的有序性，而不是遍历后再排序。与 K 距离最小的关键字在有序序列中只可能位于 K 的前驱/后继附近，因此满足最小差值的结点最多两个。可以直接沿 BST 搜索路径维护前驱和后继，也可以按中序遍历扫描并在差值由减小转为增大后剪枝。两种写法都能正确处理两个关键字与 K 等距的情况。",
-      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","noobdream"]}
+      "answer":"利用 BST 的有序性质沿搜索路径维护 K 的最佳前驱和后继；若直接命中 K，则最小差为 0 且答案为 K。否则比较最终前驱与后继到 K 的距离，较小者为答案，相等时两者都输出。",
+      "analysis":"BST 中比 K 小的最大关键字和比 K 大的最小关键字决定全局最小绝对差，无需遍历整棵树。沿根到空指针的一条搜索路径即可不断更新前驱/后继，时间 O(h)，额外空间 O(1)，其中 h 为树高。",
+      "verification":{"status":"verified","mode":"cross-checked-paraphrase","sources":["csgraduates","codebrick","noobdream"]}
+    },
+    "42":{
+      "number":42,
+      "subject":"ds",
+      "type":"comprehensive",
+      "score":10,
+      "stem":"栈的基本操作有入栈和出栈，将序列 1,2,3,…,n 依次入栈。回答：（1）n=9 时，出栈序列 {2,3,1,6,4,7,5,9,8} 和 {2,3,1,5,6,7,4,9,8} 能否得到；（2）对出栈序列 P1,P2,…,Pn，若存在 i<j<k 的三项使序列不可能由栈得到，给出 Pi、Pj、Pk 的大小关系；（3）n=4 时，以 2 开头的合法出栈序列有多少个；（4）若 n=k-1 时合法出栈序列总数为 M，求 n=k 时以 1 开头、以 2 开头以及全部合法出栈序列的数量。",
+      "answer":"（1）第一个不能，第二个能。（2）存在 Pi>Pk>Pj（等价于 Pj<Pk<Pi）的 312 型禁模式。（3）5 个。（4）以 1 开头为 M 个，以 2 开头也为 M 个；全部为第 k 个卡特兰数 C_k=binom(2k,k)/(k+1)=((4k-2)/(k+1))M。",
+      "analysis":"按目标序列模拟顺序入栈即可判断（1）。合法栈排列恰好避开 312 型模式，因此非法序列存在 i<j<k 且 Pi>Pk>Pj。n=4 时枚举以2开头可得5种。总合法数为卡特兰数 C_n；C_k/C_(k-1)=2(2k-1)/(k+1)，得到总数关于 M 的表达式。",
+      "verification":{"status":"verified","mode":"cross-checked-public-paper-transcription","sources":["codebrick","kaoyan","noobdream"]}
+    },
+    "43":{
+      "number":43,
+      "subject":"co",
+      "type":"comprehensive",
+      "score":10,
+      "stem":"某 16 位计算机按字节编址，通用寄存器 R0～R15，存储器地址为 16 位，采用定长指令字，具有 R、I、M 三类指令。R 型执行寄存器运算或移位，I 型执行立即数运算，M 型以 R15+offset 形成访存地址。回答：（1）主存单元和通用寄存器宽度；（2）op1 与 op2、op2 与 op3 的编码能否相同；（3）R2=ABCDH、R9=F001H 时执行给定 R 型加法指令后的 R2、R9；（4）变量 x、y 为16位带符号整数且 x 地址在 R15 中，用4条指令实现 y=16x-5，补全题表①～④。",
+      "answer":"（1）主存单元 8 位，通用寄存器 16 位。（2）op1 与 op2 可以相同，因为字段位置不同；op2 与 op3 不可以相同，因为编码位置冲突。（3）R2=9BCEH，R9=F001H。（4）①1110；②0000 0100；③1111 1011；④0000 0000 0010。",
+      "analysis":"按字节编址使一个主存单元为8位，16位机的通用寄存器宽度为16位。给定机器指令对应 R2←R2+R9，低16位结果为9BCEH，R9不变。程序先由 M 型取 x，再左移4位得到16x，用立即数 -5 相加，最后以相邻地址偏移2字节存入 y。",
+      "figures":[{"src":"/data/zhenti/assets/2026/q43-instruction-formats.svg","alt":"2026年第43题R/I/M型指令格式与程序填空表","caption":"依据公开题面重绘，保留指令类型、操作码位置和①～④填空位置。"}],
+      "verification":{"status":"verified","mode":"cross-checked-instruction-transcription","sources":["codebrick","noobdream"]}
     },
     "44":{
       "number":44,
       "subject":"co",
       "type":"comprehensive",
-      "score":15,
+      "score":13,
       "stem":"承接第43题的计算机 C。题图给出其部分数据通路，带箭头虚线表示控制信号；IR.rt、IR.rs 分别表示指令寄存器中的 rt、rs 字段，IR11-0 表示低 12 位，并要求取指周期完成 PC 增量。回答：（1）图中①、②属于哪类部件；（2）I 型指令 imm8 可为有符号或无符号数，M 型 offset 为有符号数，Extop 至少需要几位并说明原因；（3）取指周期中 MARsrc、ALUAsrc、ALUBsrc、RegWr 的取值；（4）左移指令周期中 ALUBsrc、RegWsrc、RegDst、RegWr 的取值，并判断其 Extop 能否与 M 型指令相同及原因。",
       "answer":"（1）①、②均为多路选择器。（2）Extop 至少 1 位，用来区分零扩展与符号扩展。（3）MARsrc=0，ALUAsrc=0，ALUBsrc=1，RegWr=0。（4）ALUBsrc=2，RegWsrc=1，RegDst=1，RegWr=1；Extop 不能与 M 型指令取相同扩展方式，因为左移指令的 shamt 需要零扩展，而 M 型 offset 需要符号扩展。",
-      "analysis":"取指时访存地址来自 PC，ALU 同时完成 PC 加常数得到下一条指令地址，且不写通用寄存器。I 型立即数可能按无符号解释，M 型偏移必须保留符号，因此扩展器至少需要一个控制位选择零扩展/符号扩展。左移立即数作为移位量应零扩展，并把 ALU 结果写回 rt。",
+      "analysis":"取指时访存地址来自 PC，ALU 同时完成 PC 增量且不写通用寄存器。I 型立即数可能按无符号解释，而 M 型 offset 必须保留符号，因此扩展器至少需要一个控制位选择零/符号扩展。公开回忆题面在本题总分标注上存在 14/15 等冲突；本题 score 按 2026 大纲计组总分45、选择题22分且Q43为10分进行一致性校正为13分。",
       "figures":[{"src":"/data/zhenti/assets/2026/q44-datapath.svg","alt":"2026年第44题计算机C部分数据通路重绘","caption":"依据公开回忆卷结构重绘，并与公开文字题面/答案交叉核对。"}],
-      "verification":{"status":"verified","mode":"cross-checked-recovery-redraw","sources":["noobdream","csgraduates"]}
+      "verification":{"status":"verified","mode":"cross-checked-recovery-redraw-score-normalized","sources":["noobdream","csgraduates","outline2026"]}
     },
     "45":{
       "number":45,
@@ -67,6 +112,16 @@
       "analysis":"索引节点号按固定大小顺序存入连续索引节点表，因此可用节点号除以每块可容纳节点数定位盘块。偏移21460超过5个直接块的20KB范围，需要一级间接索引。删除非空目录必须先处理其子项，再释放目录自身的索引节点/数据块并同步维护两类位图和父目录项。",
       "figures":[{"src":"/data/zhenti/assets/2026/q46-directory-inode.svg","alt":"2026年第46题目录结构与索引节点号表","caption":"依据公开题面重绘的 dir/dir1/file 目录结构及索引节点号表。"}],
       "verification":{"status":"verified","mode":"cross-checked-paraphrase-with-redraw","sources":["noobdream","csgraduates"]}
+    },
+    "47":{
+      "number":47,
+      "subject":"cn",
+      "type":"comprehensive",
+      "score":9,
+      "stem":"客户端 C 建立一条 TCP 连接向服务器 S 上传总长度 2000B 的文件。拥塞窗口初始阈值为 8MSS，MSS=500B，服务器对每个 TCP 数据段确认且确认段不携带数据，接收窗口 rwnd 始终为1000B，RTT=5ms。C 和 S 建立连接时的初始序号分别为1000和2000，传输过程中无重传和丢包。回答：（1）连接建立需要几次握手，C 收到 SYN=1、ACK=1 的段时确认序号是多少；（2）C 收到 ACK=1、seq=2001、ack_seq=2001、rwnd=1000 的确认段后，拥塞窗口和发送窗口分别是多少；（3）连接释放需要几次挥手，C 收到服务器最后一个 FIN 段时的 seq、ack_seq、FIN；（4）从开始建立连接到 C 确认服务器成功收到全部文件至少需要多长时间（忽略段传输时延）。",
+      "answer":"（1）三次握手，ack_seq=1001。（2）cwnd=3MSS=1500B，发送窗口=min(cwnd,rwnd)=1000B。（3）四次挥手；服务器 FIN 段 seq=2001，ack_seq=3002，FIN=1。（4）至少 4RTT=20ms。",
+      "analysis":"SYN 各消耗一个序号，因此第一次数据从 C 的1001开始。慢开始阶段收到新 ACK 后拥塞窗口按 MSS 增长，但实际发送窗口还受 rwnd=1000B 限制。2000B 数据占用序号1001～3000，随后 C 的 FIN 序号为3001且也消耗一个序号，因此服务器 FIN+ACK 对其确认到3002。连接建立占1RTT，受窗口限制完成文件并取得累计确认再需3RTT，总计4RTT。",
+      "verification":{"status":"verified","mode":"cross-checked-tcp-sequence-analysis","sources":["noobdream","csgraduates"]}
     }
   }
 }
