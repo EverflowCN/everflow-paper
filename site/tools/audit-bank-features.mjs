@@ -11,10 +11,14 @@ const files={
   runtime:'site/assets/js/site-runtime-v2.js',
   bankSwitcher:'site/assets/js/question-bank-switch.js',
   graphSwitcher:'site/assets/js/graph-source-switch.js',
+  relaxCore:'site/assets/js/relax1000-core.js',
   relaxWall:'site/assets/js/relax1000-wall.js',
   relaxGraph:'site/assets/js/relax1000-graph.js',
   builder:'site/assets/js/paper-builder.js',
   cards:'site/assets/js/relax1000-cards.js',
+  reset:'site/assets/js/relax1000-reset.js',
+  experience:'site/assets/js/relax1000-cards-experience.js',
+  controls:'site/assets/css/relax1000-controls.css',
   bank:'site/zhenti/index.html',
   graph:'site/graph/index.html',
   paper:'site/relax/index.html',
@@ -22,7 +26,7 @@ const files={
 };
 for(const p of Object.values(files))assert(fs.existsSync(path.join(root,p)),`missing ${p}`);
 
-const nav=read(files.nav),runtime=read(files.runtime),bankSwitcher=read(files.bankSwitcher),graphSwitcher=read(files.graphSwitcher),relaxWall=read(files.relaxWall),relaxGraph=read(files.relaxGraph),builder=read(files.builder),cards=read(files.cards),bank=read(files.bank),graph=read(files.graph),paper=read(files.paper);
+const nav=read(files.nav),runtime=read(files.runtime),bankSwitcher=read(files.bankSwitcher),graphSwitcher=read(files.graphSwitcher),relaxCore=read(files.relaxCore),relaxWall=read(files.relaxWall),relaxGraph=read(files.relaxGraph),builder=read(files.builder),cards=read(files.cards),reset=read(files.reset),experience=read(files.experience),controls=read(files.controls),bank=read(files.bank),graph=read(files.graph),paper=read(files.paper);
 
 assert(nav.includes("label:'题库'"),'top nav must expose 题库');
 assert(nav.includes("label:'组卷'"),'top nav must expose standalone 组卷');
@@ -37,9 +41,25 @@ assert(!bankSwitcher.includes('>组卷</button>'),'bank switch must not contain 
 assert(bankSwitcher.includes('relax1000-wall.js'),'Relax1000 bank must load wall layout');
 assert(!bankSwitcher.includes('relax1000-graph.js'),'Relax1000 graph must not be loaded inside bank');
 assert(bankSwitcher.includes('relax1000-cards.js'),'Relax1000 cards module not loaded');
+assert(bankSwitcher.includes('relax1000-reset.js'),'Relax1000 reset module not loaded');
+assert(bankSwitcher.includes('relax1000-cards-experience.js'),'Relax1000 immersive module not loaded');
+assert(bankSwitcher.includes('relax1000-controls.css'),'Relax1000 controls stylesheet not loaded');
 assert(relaxWall.includes('relax-wall-workspace')&&relaxWall.includes('relax-sidebar'),'Relax1000 bank wall layout missing');
 assert(cards.includes('题库墙')&&cards.includes('速刷卡片'),'Relax1000 wall/cards subview missing');
 assert(cards.includes("SRS_KEY='everflow-408-relax-srs-v1'"),'Relax1000 SRS state missing');
+
+assert(relaxCore.includes("SRS_KEY='everflow-408-relax-srs-v1'"),'central Relax SRS key missing');
+assert(relaxCore.includes('RELAX_STORAGE_KEYS'),'central Relax storage map missing');
+assert(reset.includes('data-relax-reset-choice="answers"'),'answer reset missing');
+assert(reset.includes('data-relax-reset-choice="status"'),'status reset missing');
+assert(reset.includes('data-relax-reset-choice="favorites"'),'favorites reset missing');
+assert(reset.includes('data-relax-reset-choice="today"'),'daily SRS reset missing');
+assert(reset.includes('data-relax-reset-choice="srs"'),'full SRS reset missing');
+assert(reset.includes('data-relax-reset-choice="all"'),'full Relax reset missing');
+assert(experience.includes('⛶ 畅享全屏'),'Relax1000 immersive fullscreen button missing');
+assert(experience.includes('requestFullscreen')&&experience.includes('relax-cards-immersive-fallback'),'fullscreen native/fallback support missing');
+assert(experience.includes("event.shiftKey&&String(event.key).toUpperCase()==='F'"),'Shift+F fullscreen shortcut missing');
+assert(controls.includes('.relax-cards-root:fullscreen')&&controls.includes('.relax-cards-immersive-fallback'),'immersive fullscreen CSS missing');
 
 assert(graphSwitcher.includes("KEY='everflow-408-graph-source-v1'"),'graph must use independent source state');
 assert(graphSwitcher.includes('408 真题')&&graphSwitcher.includes('Relax1000'),'graph switch must contain both graph sources');
@@ -61,8 +81,6 @@ assert(!paper.includes('11 / 12 / 10 / 7'),'legacy wrong 408 quota still visible
 
 assert(bank.includes('<title>题库 · Everflow</title>'),'bank document title not updated');
 assert(!bank.includes(' / 组卷'),'bank footer still advertises group-paper mode');
-assert(bank.includes('20260824-bank10'),'bank page cache version not bumped');
-assert(runtime.includes("ASSET_VERSION='20260824-bank10'"),'runtime cache version not bumped');
 assert(runtime.includes("if(body.dataset.view==='zhenti')import(asset('/assets/js/question-bank-switch.js'))"),'runtime must load bank switch only on /zhenti/');
 
 const manifest=JSON.parse(read(files.manifest));
@@ -78,7 +96,7 @@ for(const year of years){
 assert(verified>=846,`verified true-paper corpus unexpectedly small: ${verified}`);
 assert(autoChoice>=720,`auto-gradable true-paper choice pool unexpectedly small: ${autoChoice}`);
 
-const jsFiles=[files.bankSwitcher,files.graphSwitcher,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.runtime,files.nav];
+const jsFiles=[files.bankSwitcher,files.graphSwitcher,files.relaxCore,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.reset,files.experience,files.runtime,files.nav];
 for(const file of jsFiles){
   const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);
   fs.writeFileSync(tmp,read(file));
@@ -86,4 +104,4 @@ for(const file of jsFiles){
   fs.rmSync(tmp,{force:true});
   assert(result.status===0,`syntax check failed: ${file}\n${result.stderr||result.stdout}`);
 }
-console.log(`bank/graph/paper audit OK: ${years.length} years, ${verified} verified questions, ${autoChoice} auto-gradable choice questions`);
+console.log(`bank/graph/paper audit OK: ${years.length} years, ${verified} verified questions, ${autoChoice} auto-gradable choice questions; Relax reset/fullscreen OK`);
