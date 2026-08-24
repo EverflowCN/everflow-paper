@@ -5,7 +5,7 @@ const ROOT = process.cwd();
 const SITE = path.join(ROOT, 'site');
 const DATA = path.join(SITE, 'data', 'zhenti');
 const YEARS = Array.from({ length: 18 }, (_, i) => 2009 + i);
-const EXTRA_YEARS = new Set([2010, 2011, 2012, 2013, 2014, 2017, 2018, 2020, 2021, 2022, 2025]);
+const VALID_SUBJECTS = new Set(['ds', 'co', 'os', 'cn']);
 
 function readJson(file, optional = false) {
   if (!fs.existsSync(file)) {
@@ -15,21 +15,31 @@ function readJson(file, optional = false) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-function mergeQuestionSets(...sources) {
+function isVerified(question) {
+  return question?.verification?.status === 'verified';
+}
+
+// Base-year JSON is authoritative. A supplement is a whole-question fallback only
+// when base does not yet contain a verified version of that question. Extra is the
+// final fallback. This mirrors the frontend loader and prevents stale supplements
+// from overriding newer verified base entries.
+function resolveQuestion(baseQuestion, supplementQuestion, extraQuestion) {
+  if (isVerified(baseQuestion)) return baseQuestion;
+  if (isVerified(supplementQuestion)) return supplementQuestion;
+  if (isVerified(extraQuestion)) return extraQuestion;
+  return baseQuestion || supplementQuestion || extraQuestion || null;
+}
+
+function mergeQuestionSets(base, supplement, extra) {
   const merged = {};
-  for (const source of sources) {
-    if (!source) continue;
-    for (const [number, patch] of Object.entries(source)) {
-      const previous = merged[number] || {};
-      merged[number] = {
-        ...previous,
-        ...patch,
-        verification: {
-          ...(previous.verification || {}),
-          ...(patch?.verification || {})
-        }
-      };
-    }
+  const numbers = new Set([
+    ...Object.keys(base || {}),
+    ...Object.keys(supplement || {}),
+    ...Object.keys(extra || {})
+  ]);
+  for (const number of numbers) {
+    const question = resolveQuestion(base?.[number], supplement?.[number], extra?.[number]);
+    if (question) merged[number] = question;
   }
   return merged;
 }
@@ -43,6 +53,7 @@ function localFigurePath(src) {
   return path.join(SITE, String(src).replace(/^\//, ''));
 }
 
+const manifest = readJson(path.join(DATA, 'manifest.json'));
 const report = {
   generatedAt: new Date().toISOString(),
   range: '2009-2026',
@@ -52,15 +63,14 @@ const report = {
   years: {},
   failures: [],
   figureFailures: [],
+  manifestFailures: [],
   externalFigures: []
 };
 
 for (const year of YEARS) {
   const base = readJson(path.join(DATA, `${year}.json`));
   const supplement = readJson(path.join(DATA, 'supplement', `${year}.json`), true);
-  const extra = EXTRA_YEARS.has(year)
-    ? readJson(path.join(DATA, 'supplement', `${year}-extra.json`), true)
-    : null;
+  const extra = readJson(path.join(DATA, 'supplement', `${year}-extra.json`), true);
 
   const paper = {
     ...base,
@@ -80,11 +90,15 @@ for (const year of YEARS) {
     if (!item) {
       problems.push(issue(year, q, 'missing-question', '最终合并数据中不存在该题'));
     } else {
-      if (item.verification?.status === 'verified') verified++;
+      if (isVerified(item)) verified++;
       else problems.push(issue(year, q, 'not-verified', String(item.verification?.status || 'missing')));
 
       if (!String(item.stem || '').trim()) {
         problems.push(issue(year, q, 'empty-stem', '题干为空'));
+      }
+
+      if (!VALID_SUBJECTS.has(item.subject)) {
+        problems.push(issue(year, q, 'missing-or-invalid-subject', String(item.subject || 'missing')));
       }
 
       const isChoice = item.type === 'single' || q <= 40;
@@ -140,6 +154,24 @@ for (const year of YEARS) {
     }
   }
 
+  const manifestYear = manifest?.years?.[String(year)];
+  const expectedNumbers = Array.from({ length: 47 }, (_, i) => i + 1);
+  const manifestProblems = [];
+  if (!manifestYear) {
+    manifestProblems.push({ year, code: 'manifest-year-missing' });
+  } else {
+    if (manifestYear.questionCount !== 47) {
+      manifestProblems.push({ year, code: 'manifest-question-count', detail: String(manifestYear.questionCount) });
+    }
+    if (manifestYear.contentStatus !== 'verified' || manifestYear.paperStatus !== 'verified') {
+      manifestProblems.push({ year, code: 'manifest-status', detail: `${manifestYear.paperStatus}/${manifestYear.contentStatus}` });
+    }
+    if (JSON.stringify(manifestYear.verifiedQuestions) !== JSON.stringify(expectedNumbers)) {
+      manifestProblems.push({ year, code: 'manifest-verified-questions', detail: JSON.stringify(manifestYear.verifiedQuestions || []) });
+    }
+  }
+  report.manifestFailures.push(...manifestProblems);
+
   report.years[String(year)] = {
     expected: 47,
     mergedCount: Object.keys(paper.questions || {}).length,
@@ -147,16 +179,21 @@ for (const year of YEARS) {
     healthy,
     figures,
     failureCount: yearFailures.length,
+    manifestFailureCount: manifestProblems.length,
     badQuestions: [...new Set(yearFailures.map(x => x.q))]
   };
 }
 
 report.summary = {
-  allHealthy: report.healthyQuestions === report.expectedQuestions && report.figureFailures.length === 0,
+  allHealthy:
+    report.healthyQuestions === report.expectedQuestions &&
+    report.figureFailures.length === 0 &&
+    report.manifestFailures.length === 0,
   healthy: report.healthyQuestions,
   unhealthy: report.expectedQuestions - report.healthyQuestions,
   failureEntries: report.failures.length,
   localFigureFailures: report.figureFailures.length,
+  manifestFailures: report.manifestFailures.length,
   externalFigureRefs: report.externalFigures.length
 };
 
@@ -165,6 +202,12 @@ fs.writeFileSync(out, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 
 console.log(`408 audit: ${report.healthyQuestions}/${report.expectedQuestions} healthy`);
 for (const [year, info] of Object.entries(report.years)) {
-  if (info.failureCount) console.log(`${year}: healthy=${info.healthy}/47 bad=${info.badQuestions.join(',')}`);
+  if (info.failureCount || info.manifestFailureCount) {
+    console.log(`${year}: healthy=${info.healthy}/47 bad=${info.badQuestions.join(',')} manifest=${info.manifestFailureCount}`);
+  }
 }
+console.log(`figure failures: ${report.figureFailures.length}`);
+console.log(`manifest failures: ${report.manifestFailures.length}`);
 console.log(`report: ${path.relative(ROOT, out)}`);
+
+if (!report.summary.allHealthy) process.exitCode = 1;
