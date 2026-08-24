@@ -47,6 +47,10 @@ jobs:
           print('oxygen.json OK:', d.get('updatedAt'))
           PY
 
+      - name: Audit bank features
+        shell: bash
+        run: node site/tools/audit-bank-features.mjs
+
       - name: Audit all 846 408 questions
         id: zhenti_audit
         continue-on-error: true
