@@ -21,26 +21,26 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs'),path=require('path');
-          const root='site/data/zhenti';
+          let bad=0;
           function walk(dir){
             for(const ent of fs.readdirSync(dir,{withFileTypes:true})){
               const p=path.join(dir,ent.name);
               if(ent.isDirectory())walk(p);
               else if(ent.name.endsWith('.json')){
-                const text=fs.readFileSync(p,'utf8');
-                try{JSON.parse(text);}
-                catch(e){
-                  console.log('JSONFAIL',p,e.message);
-                  const m=String(e.message).match(/position (\d+)/);
-                  if(m){const pos=Number(m[1]);console.log('CONTEXT',JSON.stringify(text.slice(Math.max(0,pos-250),pos+250)));}
-                }
+                try{JSON.parse(fs.readFileSync(p,'utf8'));}
+                catch(e){bad++;console.log('JSONFAIL',p,e.message);}
               }
             }
           }
-          walk(root);
+          walk('site/data/zhenti');
+          console.log('JSON syntax failures:',bad);
+          if(bad)process.exit(1);
           NODE
 
-      - name: Run exhaustive 846-question audit
+      - name: Vendor every external question figure
+        run: node site/tools/vendor-zhenti-figures.mjs
+
+      - name: Run exhaustive 846-question audit after vendoring
         id: audit
         continue-on-error: true
         run: node site/tools/audit-zhenti.mjs
@@ -57,17 +57,27 @@ jobs:
           p='site/data/zhenti/audit-report.json'
           with open(p,'r',encoding='utf-8') as f:
               d=json.load(f)
-          print('SUMMARY', json.dumps(d['summary'], ensure_ascii=False))
-          for year, info in d['years'].items():
-              print('YEAR', year, json.dumps(info, ensure_ascii=False))
+          print('SUMMARY',json.dumps(d['summary'],ensure_ascii=False))
+          for year,info in d['years'].items():
+              if info['badQuestions'] or info.get('manifestFailureCount'):
+                  print('YEAR',year,json.dumps(info,ensure_ascii=False))
           for row in d['failures']:
-              print('FAIL', json.dumps(row, ensure_ascii=False))
-          for row in d.get('figureFailures', []):
-              print('FIGFAIL', json.dumps(row, ensure_ascii=False))
-          for row in d.get('manifestFailures', []):
-              print('MANIFESTFAIL', json.dumps(row, ensure_ascii=False))
+              print('FAIL',json.dumps(row,ensure_ascii=False))
+          for row in d.get('figureFailures',[]):
+              print('FIGFAIL',json.dumps(row,ensure_ascii=False))
           PY
 
-      - name: Require healthy corpus
-        if: steps.audit.outcome == 'failure'
-        run: exit 1
+      - name: Require healthy local-only corpus
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          with open('site/data/zhenti/audit-report.json','r',encoding='utf-8') as f:d=json.load(f)
+          s=d['summary']
+          assert s['healthy']==846,s
+          assert s['unhealthy']==0,s
+          assert s['localFigureFailures']==0,s
+          assert s['manifestFailures']==0,s
+          assert s['externalFigureRefs']==0,s
+          print('LOCAL-ONLY AUDIT OK')
+          PY
