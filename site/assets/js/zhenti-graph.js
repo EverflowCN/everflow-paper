@@ -92,8 +92,8 @@
     return `<p class="drawer-stem">${esc(item.stem||'')}</p>${general?`<div class="drawer-figures">${general}</div>`:''}${options}${answer}`;
   }
   function syncDrawerControls(){if(!selected)return;const record=records[`${selected.year}-${selected.q}`]||{};drawerStatuses.forEach(btn=>btn.classList.toggle('active',btn.dataset.drawerStatus===(record.status||'')));drawerAnswer.textContent=answerVisible?'收起答案':'查看答案'}
-  function showDrawer(){drawer.hidden=false;drawerReopen.hidden=true;shell.classList.add('drawer-open')}
-  function hideDrawer(){drawer.hidden=true;shell.classList.remove('drawer-open');drawerReopen.hidden=!selected}
+  function showDrawer(){drawer.hidden=false;drawerReopen.hidden=true}
+  function hideDrawer(){drawer.hidden=true;drawerReopen.hidden=!selected}
   async function openQuestion(year,q){
     const key=`${year}-${q}`;
     selectCurrent(key);selected={year,q,item:null};answerVisible=false;showDrawer();
