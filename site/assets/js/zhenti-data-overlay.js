@@ -1,8 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const years=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const extraYears=new Set(['2010','2011','2012','2013','2014','2017','2018','2020','2021','2022','2025']);
-  const DATA_VERSION='20260824-full5';
+  const DATA_VERSION='20260824-base-priority';
   const mergedCache=new Map();
   const layerCache={base:new Map(),supplement:new Map(),extra:new Map()};
   const MAX_CONCURRENT=4;
@@ -66,22 +65,33 @@
   }
 
   function loadExtra(year){
-    if(!extraYears.has(year))return Promise.resolve(null);
     return cachedLayer(layerCache.extra,year,()=>fetchJson(`/data/zhenti/supplement/${year}-extra.json?v=${DATA_VERSION}`,{allow404:true}));
+  }
+
+  function isVerified(question){
+    return question?.verification?.status==='verified';
+  }
+
+  // Base-year JSON is authoritative. Supplements are question-level fallbacks only:
+  // they may fill a question that is not yet verified in base, but never patch/override
+  // an already verified base question field-by-field.
+  function resolveQuestion(baseQuestion,supplementQuestion,extraQuestion){
+    if(isVerified(baseQuestion))return baseQuestion;
+    if(isVerified(supplementQuestion))return supplementQuestion;
+    if(isVerified(extraQuestion))return extraQuestion;
+    return baseQuestion||supplementQuestion||extraQuestion||null;
   }
 
   function mergeQuestionSets(base,supplement,extra){
     const merged={};
-    for(const source of [base,supplement,extra]){
-      if(!source)continue;
-      for(const [number,patch] of Object.entries(source)){
-        const previous=merged[number]||{};
-        merged[number]={
-          ...previous,
-          ...patch,
-          verification:{...(previous.verification||{}),...(patch?.verification||{})}
-        };
-      }
+    const numbers=new Set([
+      ...Object.keys(base||{}),
+      ...Object.keys(supplement||{}),
+      ...Object.keys(extra||{})
+    ]);
+    for(const number of numbers){
+      const question=resolveQuestion(base?.[number],supplement?.[number],extra?.[number]);
+      if(question)merged[number]=question;
     }
     return merged;
   }
@@ -96,7 +106,8 @@
         continue;
       }
       if(!String(item.stem||'').trim())incomplete.push(q);
-      if((item.type==='single'||q<=40)&&(!item.options||!Object.keys(item.options).length||!String(item.answer||'').trim()))incomplete.push(q);
+      if(!['ds','co','os','cn'].includes(item.subject))incomplete.push(q);
+      if((item.type==='single'||q<=40)&&(!item.options||Object.keys(item.options).length<4||!String(item.answer||'').trim()))incomplete.push(q);
       if(q>40&&!String(item.answer||'').trim())incomplete.push(q);
     }
     return {missing:[...new Set(missing)],incomplete:[...new Set(incomplete)]};
