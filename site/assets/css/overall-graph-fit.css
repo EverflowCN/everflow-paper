@@ -1,11 +1,11 @@
 @media (min-width:1000px){
   .overview-stage.graph-fit.drawer-open{grid-template-columns:minmax(0,1fr) 360px}
-  .overview-stage.graph-fit .overview-frame{padding:10px 12px 12px;gap:6px}
+  .overview-stage.graph-fit .overview-frame{padding:10px 12px;gap:6px}
   .overview-stage.graph-fit .overview-legend{min-height:26px;gap:10px;font-size:11px}
   .overview-stage.graph-fit .overview-legend i{width:12px;height:12px;border-radius:4px}
-  .overview-stage.graph-fit .overview-scroll{overflow:hidden;scrollbar-width:none}
+  .overview-stage.graph-fit .overview-scroll{overflow:hidden;scrollbar-width:none;display:grid;place-items:center}
   .overview-stage.graph-fit .overview-scroll::-webkit-scrollbar{display:none}
-  .overview-stage.graph-fit .overview-matrix{width:100%;min-width:0;height:100%;padding:4px;justify-content:center;align-content:center}
+  .overview-stage.graph-fit .overview-matrix{width:100%;min-width:0;height:auto;padding:4px;justify-content:center;align-content:start;align-self:center}
   .overview-stage.graph-fit .overview-index{font-size:8px}
   .overview-stage.graph-fit .overview-year{font-size:9px}
   .overview-stage.graph-fit .overview-cell{border-width:1.5px;border-radius:5px}
