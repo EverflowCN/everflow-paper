@@ -60,12 +60,15 @@ jobs:
           test -s site/index.html
           test -s site/zhenti/index.html
           test -s site/graph/index.html
+          test -s site/graph-next/index.html
           test -s site/relax/index.html
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
           test -s site/assets/js/zhenti-graph.js
           test -s site/assets/js/relax1000-graph.js
+          test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
+          test -s site/assets/css/graph-next.css
           test -s site/assets/js/site-runtime-v2.js
           test ! -e site/assets/js/overall-graph.js
           test ! -e site/assets/css/overall-graph.css
@@ -90,21 +93,29 @@ jobs:
 
           DROP_KEYS={
               'repository','repositoryurl','repo','repourl','github','githuburl',
+              'source','sourcename','sourcelabel','sourcekey','sourcepath',
               'sourceurl','sourcehref','rawurl','sourcewebsite','sourceaddress',
-              'sources','sourceids','sourceid'
+              'sources','sourceids','sourceid','origin','originurl',
+              'provider','providerurl','provenance','vendor','vendorurl'
           }
+          SENSITIVE_MARKERS=(
+              'everflowcn','408-exercise-paper-generator','tommytay0712',
+              '408-exam-paper','csyanku','foreverlink','hermes 408'
+          )
 
           def scrub_string(value):
               if not isinstance(value,str):
                   return value
-              lower=value.lower()
-              if 'github.com' not in lower and 'raw.githubusercontent.com' not in lower:
-                  return value
               decoded=unquote(value)
+              lower=decoded.lower()
               for marker in ('/question-images/','/explanations/'):
                   if marker in decoded:
                       return marker.lstrip('/')+decoded.split(marker,1)[1]
-              return ''
+              if 'github.com' in lower or 'raw.githubusercontent.com' in lower:
+                  return ''
+              if any(marker in lower for marker in SENSITIVE_MARKERS):
+                  return ''
+              return value
 
           def scrub(value):
               if isinstance(value,dict):
@@ -143,6 +154,8 @@ jobs:
               text=wall.read_text(encoding='utf-8')
               text=re.sub(r"const SOURCE_LABEL=\{.*?\};","const SOURCE_LABEL={};",text,count=1)
               text=re.sub(r"function sourceText\(item\)\{return .*?\}","function sourceText(){return'已核验'}",text,count=1)
+              for marker in ('TommyTay0712','408-exam-paper','CSYanKu','ForeverLink','Hermes 408'):
+                  text=text.replace(marker,'')
               wall.write_text(text,encoding='utf-8')
           PY
 
@@ -161,7 +174,9 @@ jobs:
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
           test -s site/assets/js/zhenti-graph.js
+          test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
+          test -s site/assets/css/graph-next.css
           echo '{"build":"20260824-graph-r6"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
