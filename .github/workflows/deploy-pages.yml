@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - '!site/data/zhenti/audit-report.json'
+      - '!site/data/zhenti/vendor-report.json'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -30,8 +32,8 @@ jobs:
           ref: main
 
       # Pages 部署只负责发布已经提交到 site/ 的静态文件。
-      # 氧气课程同步会更新 site/data/oxygen.json，并显式 dispatch 本工作流。
-      # 不再让无关的 LL880 构建/校验阻塞课程数据上线。
+      # 审计报告会在工作区生成并随本次 artifact 发布，但不会再 push 回 main，
+      # 避免生成新 commit 后通过 concurrency 取消正在进行的 Pages 部署。
       - name: Verify oxygen data exists
         shell: bash
         run: |
@@ -68,18 +70,6 @@ jobs:
               if info['badQuestions'] or info.get('manifestFailureCount'):
                   print(year, 'bad:', ','.join(map(str, info['badQuestions'])), 'manifest:', info.get('manifestFailureCount', 0))
           PY
-
-      - name: Persist audit report
-        if: always()
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data/zhenti/audit-report.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(zhenti): refresh audit report [skip ci]"
-            git push origin HEAD:main
-          fi
 
       - name: Require healthy 408 corpus
         if: steps.zhenti_audit.outcome == 'failure'
