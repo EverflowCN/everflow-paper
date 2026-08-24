@@ -4,13 +4,15 @@ let client=null,readyResolve,syncing=false;
 const ready=new Promise(r=>readyResolve=r);
 const fromCourse=r=>({id:r.course_id,subject:r.subject,done:r.done,note:r.note||'',completedAt:r.completed_at,updatedAt:r.updated_at,deviceId:r.device_id||'',syncState:'cloud'});
 const toCourse=(r,userId)=>({user_id:userId,course_id:r.id,subject:r.subject||'unknown',done:Boolean(r.done),note:r.note||'',completed_at:r.completedAt||null,device_id:r.deviceId||'',updated_at:r.updatedAt||new Date().toISOString()});
+const RECOVERY_KEY='everflow-password-recovery-v1';
+const recoveryAccountUrl=()=>new URL('../../account/?reset=1',import.meta.url).href;
 
 async function init(){
   if(!enabled){readyResolve(null);document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false}}));return null}
   try{
     const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm');
     client=createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    client.auth.onAuthStateChange((event,session)=>{document.dispatchEvent(new CustomEvent('everflow:auth-change',{detail:{event,user:session?.user||null}}));if(session?.user&&navigator.onLine!==false)setTimeout(()=>syncAll().catch(()=>{}),0)});
+    client.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){try{sessionStorage.setItem(RECOVERY_KEY,'1')}catch{}const target=new URL(recoveryAccountUrl()),here=location.pathname.replace(/\/index\.html$/,'/'),wanted=target.pathname.replace(/\/index\.html$/,'/');if(here!==wanted){location.replace(target.href);return}}document.dispatchEvent(new CustomEvent('everflow:auth-change',{detail:{event,user:session?.user||null}}));if(session?.user&&navigator.onLine!==false)setTimeout(()=>syncAll().catch(()=>{}),0)});
     readyResolve(client);document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:true}}));
     const {data}=await client.auth.getSession();if(data?.session?.user&&navigator.onLine!==false)syncAll().catch(()=>{});return client;
   }catch(err){console.error('Everflow cloud init failed',err);readyResolve(null);document.dispatchEvent(new CustomEvent('everflow:cloud-ready',{detail:{enabled:false,error:String(err)}}));document.dispatchEvent(new CustomEvent('everflow:cloud-error',{detail:{message:'云端初始化失败'}}));return null}
@@ -20,6 +22,8 @@ async function signIn(email,password){await ready;if(!client)throw new Error('�
 async function signUp(email,password){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signUp({email,password})}
 async function signInOtp(email){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.signInWithOtp({email,options:{shouldCreateUser:true}})}
 async function verifyOtp(email,token){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.verifyOtp({email,token:String(token||'').replace(/\D/g,''),type:'email'})}
+async function resetPassword(email,redirectTo){await ready;if(!client)throw new Error('云同步尚未配置');const first=await client.auth.resetPasswordForEmail(email,redirectTo?{redirectTo}:undefined);if(first.error&&redirectTo&&/redirect/i.test(String(first.error.message||first.error)))return client.auth.resetPasswordForEmail(email);return first}
+async function updatePassword(password){await ready;if(!client)throw new Error('云同步尚未配置');return client.auth.updateUser({password})}
 async function signOut(){await ready;if(!client)return;return client.auth.signOut()}
 
 async function pushLocal(userId){const local=await EveraStore.exportAll();const courseRows=(local.courseStates||[]).map(r=>toCourse(r,userId));if(courseRows.length){const {error}=await client.from('course_states').upsert(courseRows,{onConflict:'user_id,course_id'});if(error)throw error}return {courseRows}}
@@ -54,5 +58,5 @@ async function saveResourceItem(input={}){await requireOwner();const user=await 
 async function deleteResourceItem(id){await requireOwner();const {error}=await client.from('resource_hub_items').delete().eq('id',id);if(error)throw error;return true}
 async function getOwnerAudit(){await requireOwner();const {data,error}=await client.from('admin_audit').select('id,actor_user_id,action,target_user_id,detail,created_at').order('created_at',{ascending:false}).limit(100);if(error)throw error;return data||[]}
 let syncTimer;document.addEventListener('everflow:study-change',()=>{if(syncing)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncAll().catch(()=>{}),1200)});addEventListener('online',()=>syncAll().catch(()=>{}));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})});setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll().catch(()=>{})},5*60*1000);
-window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,verifyOtp,signOut,syncAll,listPracticeStates,savePracticeState,savePracticeStates,deletePracticeState,isOwner,getOwnerOverview,ownerUsers,membership,listNotices,getNotice,saveNotice,deleteNotice,getResourceHub,saveResourceSettings,saveResourceItem,deleteResourceItem,getOwnerAudit};
+window.EveraCloud={enabled,ready,getUser,signIn,signUp,signInOtp,verifyOtp,resetPassword,updatePassword,signOut,syncAll,listPracticeStates,savePracticeState,savePracticeStates,deletePracticeState,isOwner,getOwnerOverview,ownerUsers,membership,listNotices,getNotice,saveNotice,deleteNotice,getResourceHub,saveResourceSettings,saveResourceItem,deleteResourceItem,getOwnerAudit};
 init();

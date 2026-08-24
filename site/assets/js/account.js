@@ -1,11 +1,12 @@
-import './cloud.js';
+import './cloud.js?v=20260824-reset1';
 
 (()=>{
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],ui=()=>window.EveraUI||{};
-  const OTP_COOLDOWN_KEY='everflow-otp-cooldown-until-v1';
-  let cooldownTimer=null,lastOtpEmail='';
+  const OTP_COOLDOWN_KEY='everflow-otp-cooldown-until-v1',RECOVERY_KEY='everflow-password-recovery-v1';
+  let cooldownTimer=null,lastOtpEmail='',recoveryMode=false;
+  try{recoveryMode=new URLSearchParams(location.search).get('reset')==='1'||sessionStorage.getItem(RECOVERY_KEY)==='1'}catch{}
   const planLabel=p=>p==='pro'?'Pro':p==='member'?'普通会员':'普通用户';
-  const friendly=e=>{const s=String(e?.message||e||'操作失败');if(/invalid login credentials/i.test(s))return'邮箱或密码不正确。';if(/token.*expired|otp.*expired|expired/i.test(s))return'验证码已过期，请重新获取。';if(/invalid.*token|otp.*invalid/i.test(s))return'验证码不正确，请检查后重试。';if(/rate limit|too many|email rate|over_email_send_rate_limit|429/i.test(s))return'邮件服务当前达到发送频率限制，请稍后再试。已有验证码请直接使用；已有密码可直接登录。';if(/network|fetch/i.test(s))return'网络连接异常，请检查网络。';return s};
+  const friendly=e=>{const s=String(e?.message||e||'操作失败');if(/invalid login credentials/i.test(s))return'邮箱或密码不正确。';if(/token.*expired|otp.*expired|expired/i.test(s))return'验证信息已过期，请重新获取。';if(/invalid.*token|otp.*invalid/i.test(s))return'验证信息不正确，请检查后重试。';if(/auth session missing|session.*missing/i.test(s))return'重置链接已失效，请返回登录并重新发送重置邮件。';if(/password.*short|weak password|least .*characters/i.test(s))return'新密码不符合要求，请至少使用 8 位密码。';if(/same password|different from.*old/i.test(s))return'新密码不能与原密码相同。';if(/rate limit|too many|email rate|over_email_send_rate_limit|429/i.test(s))return'邮件服务当前达到发送频率限制，请稍后再试。已有验证码请直接使用；已有密码可直接登录。';if(/network|fetch/i.test(s))return'网络连接异常，请检查网络。';return s};
   const cooldownRemaining=()=>{try{return Math.max(0,Math.ceil((Number(localStorage.getItem(OTP_COOLDOWN_KEY)||0)-Date.now())/1000))}catch{return 0}};
   function setCooldown(seconds){try{localStorage.setItem(OTP_COOLDOWN_KEY,String(Date.now()+Math.max(0,Number(seconds)||0)*1000))}catch{}enforceCooldown()}
   function enforceCooldown(){
@@ -21,9 +22,25 @@ import './cloud.js';
   }
   function feedback(title,text,type='info',sel='[data-auth-feedback]'){const el=$(sel);if(!el)return;el.className=`auth-feedback show ${type}`;el.innerHTML='';const a=document.createElement('strong'),b=document.createElement('span');a.textContent=title;b.textContent=text;el.append(a,b)}
   function msg(text,bad=false){const el=$('[data-account-message]');if(el){el.textContent=text;el.style.color=bad?'var(--red)':'var(--muted)'}}
+  function enterRecoveryMode(){recoveryMode=true;try{sessionStorage.setItem(RECOVERY_KEY,'1')}catch{}}
+  function leaveRecoveryMode(){recoveryMode=false;try{sessionStorage.removeItem(RECOVERY_KEY)}catch{}try{const u=new URL(location.href);u.searchParams.delete('reset');u.hash='';history.replaceState(null,'',u.href)}catch{}}
   async function renderMembership(user){const p=$('[data-account-membership]'),d=$('[data-account-membership-detail]');if(!p||!d)return;if(!user){p.textContent='普通用户';d.textContent='登录后可查看会员状态';return}try{const s=await EveraCloud.membership('status');p.textContent=planLabel(s.plan);const x=s.membership?.effective_expires_at;d.textContent=s.active?(x?`有效至 ${new Date(x).toLocaleDateString('zh-CN')}`:'当前有效'):'当前无有效会员';if(s.active){try{localStorage.setItem('everflow-membership-nav-hidden-v1','1')}catch{}document.dispatchEvent(new CustomEvent('everflow:membership-change',{detail:{active:true,plan:s.plan}}))}}catch{p.textContent='普通用户';d.textContent='会员状态暂时无法读取'}}
   async function renderOwner(user){const section=$('[data-owner-workspace]');if(!section)return;if(!user){section.hidden=true;return}try{section.hidden=!(await EveraCloud.isOwner())}catch{section.hidden=true}}
-  async function renderAuth(){await EveraCloud.ready;const user=await EveraCloud.getUser();$('[data-auth-guest]')&&($('[data-auth-guest]').hidden=!!user);$('[data-auth-signed]')&&($('[data-auth-signed]').hidden=!user);const status=$('[data-cloud-status]');if(status)status.textContent=EveraCloud.enabled?(navigator.onLine?'云端在线':'当前离线'):'本地模式';if(user){$('[data-user-email]')&&($('[data-user-email]').textContent=user.email||'');$('[data-user-role]')&&($('[data-user-role]').textContent=user.app_metadata?.role==='owner'?'Owner':'User');try{const x=JSON.parse(localStorage.getItem('everflow-last-cloud-sync')||'null');$('[data-last-sync]')&&($('[data-last-sync]').textContent=x?.at?new Date(x.at).toLocaleString('zh-CN',{hour12:false}):'尚未同步')}catch{}await renderMembership(user)}await renderOwner(user)}
+  async function renderAuth(){
+    await EveraCloud.ready;
+    const user=await EveraCloud.getUser(),guest=$('[data-auth-guest]'),signed=$('[data-auth-signed]'),recovery=$('[data-password-recovery]');
+    if(recoveryMode){
+      if(guest)guest.hidden=true;if(signed)signed.hidden=true;if(recovery)recovery.hidden=false;await renderOwner(null);
+      const copy=$('[data-recovery-copy]');if(copy)copy.textContent=user?'邮箱身份验证已完成，请设置新的登录密码。':'当前没有有效的密码重置会话。';
+      const box=$('[data-recovery-feedback]');
+      if(box&&!box.classList.contains('show'))feedback(user?'可以重置':'重置链接无效',user?'设置新密码后将返回登录页。':'请返回登录页重新发送重置邮件。',user?'success':'error','[data-recovery-feedback]');
+      return;
+    }
+    if(recovery)recovery.hidden=true;if(guest)guest.hidden=!!user;if(signed)signed.hidden=!user;
+    const status=$('[data-cloud-status]');if(status)status.textContent=EveraCloud.enabled?(navigator.onLine?'云端在线':'当前离线'):'本地模式';
+    if(user){$('[data-user-email]')&&($('[data-user-email]').textContent=user.email||'');$('[data-user-role]')&&($('[data-user-role]').textContent=user.app_metadata?.role==='owner'?'Owner':'User');try{const x=JSON.parse(localStorage.getItem('everflow-last-cloud-sync')||'null');$('[data-last-sync]')&&($('[data-last-sync]').textContent=x?.at?new Date(x.at).toLocaleString('zh-CN',{hour12:false}):'尚未同步')}catch{}await renderMembership(user)}
+    await renderOwner(user);
+  }
   function otpInputs(){return $$('[data-otp-boxes] input')}
   function otpValue(){return otpInputs().map(x=>x.value.replace(/\D/g,'')).join('').slice(0,6)}
   function fillOtp(value){const digits=String(value||'').replace(/\D/g,'').slice(0,6).split('');otpInputs().forEach((x,i)=>x.value=digits[i]||'');const next=otpInputs()[Math.min(digits.length,5)];next?.focus()}
@@ -47,15 +64,50 @@ import './cloud.js';
   }
   async function verifyOtp(btn){const email=lastOtpEmail||($('[data-auth-email]')?.value||'').trim().toLowerCase(),token=otpValue();if(token.length!==6){feedback('验证码不完整','请输入邮件中的 6 位验证码。','error');return}ui().setBusy?.(btn,true,'验证中…');try{const {error}=await EveraCloud.verifyOtp(email,token);if(error)throw error;ui().complete?.(btn,'登录成功');ui().toast?.('验证码验证成功，账号已登录。',{type:'success',title:'登录成功'});await EveraCloud.syncAll().catch(()=>{});await renderAuth();feedback('登录成功','408 打卡已切换到当前账号的数据空间。','success','[data-auth-feedback-signed]')}catch(e){const t=friendly(e);feedback('验证失败',t,'error');ui().toast?.(t,{type:'error',title:'验证失败'});ui().setBusy?.(btn,false)}}
   async function passwordLogin(btn){const email=($('[data-auth-email]')?.value||'').trim().toLowerCase(),password=$('[data-auth-password]')?.value||'';if(!email||!password){feedback('信息不完整','请输入邮箱和密码。','error');return}ui().setBusy?.(btn,true,'登录中…');try{const {error}=await EveraCloud.signIn(email,password);if(error)throw error;ui().toast?.('密码登录成功。',{type:'success',title:'登录成功'});await EveraCloud.syncAll().catch(()=>{});await renderAuth()}catch(e){const t=friendly(e);feedback('登录失败',t,'error');ui().toast?.(t,{type:'error',title:'登录失败'})}finally{ui().setBusy?.(btn,false)}}
+  async function requestPasswordReset(btn){
+    const email=($('[data-auth-email]')?.value||'').trim().toLowerCase();
+    if(!/^\S+@\S+\.\S+$/.test(email)){feedback('先填写邮箱','请先在上方输入需要重置密码的邮箱地址。','error');$('[data-auth-email]')?.focus();return}
+    ui().setBusy?.(btn,true,'发送中…');
+    try{
+      const redirectTo=new URL('./?reset=1',location.href);redirectTo.hash='';
+      const {error}=await EveraCloud.resetPassword(email,redirectTo.href);if(error)throw error;
+      feedback('重置邮件已发送',`请查看 ${email} 的邮件，点击“重置密码”链接后会回到此页设置新密码。`,'success');
+      ui().toast?.('重置密码邮件已发送。',{type:'success',title:'请查看邮箱',duration:5000});
+    }catch(e){const t=friendly(e);feedback('发送失败',t,'error');ui().toast?.(t,{type:'error',title:'发送失败'})}
+    finally{ui().setBusy?.(btn,false)}
+  }
+  async function saveNewPassword(btn){
+    const password=$('[data-recovery-password]')?.value||'',confirm=$('[data-recovery-password-confirm]')?.value||'';
+    if(password.length<8){feedback('密码太短','新密码至少需要 8 位。','error','[data-recovery-feedback]');return}
+    if(password!==confirm){feedback('两次密码不一致','请重新确认两次输入的新密码。','error','[data-recovery-feedback]');return}
+    ui().setBusy?.(btn,true,'保存中…');
+    try{
+      const user=await EveraCloud.getUser();if(!user)throw new Error('auth session missing');
+      const email=user.email||'';
+      const {error}=await EveraCloud.updatePassword(password);if(error)throw error;
+      leaveRecoveryMode();
+      await EveraCloud.signOut();
+      if(email&&$('[data-auth-email]'))$('[data-auth-email]').value=email;
+      if($('[data-auth-password]'))$('[data-auth-password]').value='';
+      if($('[data-recovery-password]'))$('[data-recovery-password]').value='';
+      if($('[data-recovery-password-confirm]'))$('[data-recovery-password-confirm]').value='';
+      await renderAuth();
+      feedback('密码已重置','请使用刚刚设置的新密码登录。','success');
+      ui().toast?.('新密码已保存，请重新登录。',{type:'success',title:'重置成功',duration:5000});
+    }catch(e){const t=friendly(e);feedback('重置失败',t,'error','[data-recovery-feedback]');ui().toast?.(t,{type:'error',title:'重置失败'})}
+    finally{ui().setBusy?.(btn,false)}
+  }
   async function exportData(btn){ui().setBusy?.(btn,true,'导出中…');try{const data=await EveraStore.exportAll(),blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`everflow-408-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);msg('408 本地备份已导出。');ui().toast?.('JSON 备份已生成。',{type:'success',title:'导出成功'})}finally{ui().setBusy?.(btn,false)}}
   async function importData(file){try{const payload=JSON.parse(await file.text());await EveraStore.importAll(payload);msg('备份已合并到本机。');ui().toast?.('备份已合并。',{type:'success',title:'导入成功'});await EveraCloud.syncAll().catch(()=>{});renderAuth()}catch(e){const t=friendly(e);msg(t,true);ui().toast?.(t,{type:'error',title:'导入失败'})}}
 
   otpInputs().forEach((input,i)=>{input.addEventListener('input',()=>{input.value=input.value.replace(/\D/g,'').slice(-1);if(input.value&&i<5)otpInputs()[i+1].focus();if(otpValue().length===6)$('[data-otp-verify]')?.focus()});input.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!input.value&&i>0)otpInputs()[i-1].focus();if(e.key==='ArrowLeft'&&i>0)otpInputs()[i-1].focus();if(e.key==='ArrowRight'&&i<5)otpInputs()[i+1].focus()});input.addEventListener('paste',e=>{const t=e.clipboardData?.getData('text')||'';if(/\d{4,}/.test(t)){e.preventDefault();fillOtp(t)}})});
-  $('[data-otp-send]')?.addEventListener('click',e=>sendOtp(e.currentTarget));$('[data-otp-resend]')?.addEventListener('click',e=>sendOtp(e.currentTarget,true));$('[data-otp-verify]')?.addEventListener('click',e=>verifyOtp(e.currentTarget));$('[data-login-password]')?.addEventListener('click',e=>passwordLogin(e.currentTarget));
+  $('[data-otp-send]')?.addEventListener('click',e=>sendOtp(e.currentTarget));$('[data-otp-resend]')?.addEventListener('click',e=>sendOtp(e.currentTarget,true));$('[data-otp-verify]')?.addEventListener('click',e=>verifyOtp(e.currentTarget));$('[data-login-password]')?.addEventListener('click',e=>passwordLogin(e.currentTarget));$('[data-forgot-password]')?.addEventListener('click',e=>requestPasswordReset(e.currentTarget));$('[data-recovery-save]')?.addEventListener('click',e=>saveNewPassword(e.currentTarget));
+  $('[data-recovery-cancel]')?.addEventListener('click',async()=>{leaveRecoveryMode();await EveraCloud.signOut().catch(()=>{});await renderAuth();feedback('已返回登录','如需重置密码，可以重新发送重置邮件。','info')});
   [$('[data-auth-email]'),$('[data-auth-password]')].forEach(input=>input?.addEventListener('keydown',event=>{if(event.key!=='Enter'||!$('[data-auth-password]')?.value)return;event.preventDefault();$('[data-login-password]')?.click()}));
+  [$('[data-recovery-password]'),$('[data-recovery-password-confirm]')].forEach(input=>input?.addEventListener('keydown',event=>{if(event.key!=='Enter')return;event.preventDefault();$('[data-recovery-save]')?.click()}));
   $('[data-logout]')?.addEventListener('click',async e=>{ui().setBusy?.(e.currentTarget,true,'退出中…');await EveraCloud.signOut();ui().setBusy?.(e.currentTarget,false);ui().toast?.('已退出当前账号。',{type:'success',title:'已退出'});renderAuth()});
   $('[data-sync-now]')?.addEventListener('click',async e=>{const btn=e.currentTarget;ui().setBusy?.(btn,true,'同步中…');try{const r=await EveraCloud.syncAll();if(r.ok){feedback('同步完成',`已同步 ${r.courses} 条课程状态。`,'success','[data-auth-feedback-signed]');ui().complete?.(btn,'同步完成');ui().toast?.('本机与云端 408 打卡已合并。',{type:'success',title:'同步完成'})}else throw new Error(r.reason||'同步未完成')}catch(err){const t=friendly(err);feedback('同步失败',`${t} 本机数据仍然保留。`,'error','[data-auth-feedback-signed]');ui().setBusy?.(btn,false)}});
   $('[data-export]')?.addEventListener('click',e=>exportData(e.currentTarget));$('[data-import-file]')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importData(f)});
-  document.addEventListener('everflow:auth-change',renderAuth);document.addEventListener('everflow:cloud-sync',renderAuth);document.addEventListener('everflow:membership-change',renderAuth);addEventListener('online',renderAuth);addEventListener('offline',renderAuth);addEventListener('storage',event=>{if(event.key===OTP_COOLDOWN_KEY)enforceCooldown()});
+  document.addEventListener('everflow:auth-change',event=>{if(event.detail?.event==='PASSWORD_RECOVERY')enterRecoveryMode();renderAuth()});document.addEventListener('everflow:cloud-sync',renderAuth);document.addEventListener('everflow:membership-change',renderAuth);addEventListener('online',renderAuth);addEventListener('offline',renderAuth);addEventListener('storage',event=>{if(event.key===OTP_COOLDOWN_KEY)enforceCooldown()});
   enforceCooldown();Promise.resolve(window.EveraStore?.init()).then(renderAuth).catch(console.error);
 })();

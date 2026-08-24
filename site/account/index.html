@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow 账户、密码登录、验证码登录与云同步">
+  <meta name="description" content="Everflow 账户、密码登录、验证码登录、密码重置与云同步">
   <link rel="manifest" href="../manifest.webmanifest">
   <title>账户 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
@@ -21,7 +21,7 @@
     <div class="page-head compact-head">
       <div class="eyebrow">ACCOUNT</div>
       <h1>账户</h1>
-      <p>默认使用邮箱 + 密码登录；没有密码、首次注册或忘记密码时，再使用邮箱验证码。学习数据仍优先保存在本机，登录后同步到对应账号。</p>
+      <p>默认使用邮箱 + 密码登录；首次注册或无密码账号可以使用邮箱验证码，忘记密码可通过邮箱验证后重新设置。学习数据仍优先保存在本机，登录后同步到对应账号。</p>
     </div>
 
     <nav class="account-switcher" aria-label="账户与会员"><a class="active" href="./" aria-current="page">账户</a><a href="../membership/">会员</a></nav>
@@ -35,6 +35,7 @@
         <label>邮箱<input type="email" autocomplete="email" inputmode="email" data-auth-email placeholder="you@example.com"></label>
         <label>密码<input type="password" autocomplete="current-password" data-auth-password placeholder="输入账号密码"></label>
         <button class="timer-btn primary" type="button" data-login-password>密码登录</button>
+        <button class="timer-btn" type="button" data-forgot-password>忘记密码 / 重置密码</button>
       </div>
 
       <details class="password-fallback otp-fallback">
@@ -63,6 +64,20 @@
       <div class="auth-feedback" data-auth-feedback role="status" aria-live="polite"></div>
     </section>
 
+    <section class="study-card auth-primary" data-password-recovery hidden>
+      <div class="eyebrow">RECOVERY</div>
+      <h2>设置新密码</h2>
+      <p class="muted" data-recovery-copy>邮箱身份验证完成后，可以在这里设置新的登录密码。</p>
+      <div class="study-form">
+        <label>新密码<input type="password" autocomplete="new-password" data-recovery-password placeholder="至少 8 位"></label>
+        <label>确认新密码<input type="password" autocomplete="new-password" data-recovery-password-confirm placeholder="再次输入新密码"></label>
+        <p class="muted">建议使用 8 位以上，并同时包含字母与数字。</p>
+        <button class="timer-btn primary" type="button" data-recovery-save>保存新密码</button>
+        <button class="timer-btn" type="button" data-recovery-cancel>返回登录</button>
+      </div>
+      <div class="auth-feedback" data-recovery-feedback role="status" aria-live="polite"></div>
+    </section>
+
     <section class="study-card" data-auth-signed hidden>
       <div class="section-head"><div><div class="eyebrow">SIGNED IN</div><h2>已登录</h2></div><span class="sync-badge" data-cloud-status>正在检查…</span></div>
       <p><strong data-user-email></strong> · <span data-user-role>User</span></p>
@@ -81,6 +96,6 @@
 <script src="../assets/js/site-runtime-v2.js?v=20260824-ui4"></script>
 <script src="../assets/js/study-store.js"></script>
 <script src="../assets/js/cloud-config.js"></script>
-<script type="module" src="../assets/js/account.js"></script>
+<script type="module" src="../assets/js/account.js?v=20260824-reset1"></script>
 </body>
 </html>
