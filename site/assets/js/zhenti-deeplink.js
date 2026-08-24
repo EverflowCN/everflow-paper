@@ -1,4 +1,9 @@
 (()=>{
+  const arrowScript=document.createElement('script');
+  arrowScript.src='/assets/js/zhenti-arrow-grid.js?v=20260824-arrows1';
+  arrowScript.async=true;
+  document.head.appendChild(arrowScript);
+
   const params=new URLSearchParams(location.search);
   const year=Number(params.get('year'));
   const q=Number(params.get('q'));
