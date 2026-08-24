@@ -1,11 +1,14 @@
-const CACHE='everflow-site-v35';
+const CACHE='everflow-site-v36';
 const SHELL=[
   '/',
   '/assets/css/site.css',
   '/assets/css/responsive.css',
   '/assets/css/interaction-guard.css',
+  '/assets/css/graph-controls.css',
   '/assets/js/site-runtime-v2.js',
   '/assets/js/site-nav-v2.js',
+  '/assets/js/graph-app.js',
+  '/assets/js/graph-controls.js',
   '/assets/everflow-icon.svg',
   '/manifest.webmanifest'
 ];
