@@ -17,6 +17,29 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Diagnose every JSON file
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const root='site/data/zhenti';
+          function walk(dir){
+            for(const ent of fs.readdirSync(dir,{withFileTypes:true})){
+              const p=path.join(dir,ent.name);
+              if(ent.isDirectory())walk(p);
+              else if(ent.name.endsWith('.json')){
+                const text=fs.readFileSync(p,'utf8');
+                try{JSON.parse(text);}
+                catch(e){
+                  console.log('JSONFAIL',p,e.message);
+                  const m=String(e.message).match(/position (\d+)/);
+                  if(m){const pos=Number(m[1]);console.log('CONTEXT',JSON.stringify(text.slice(Math.max(0,pos-250),pos+250)));}
+                }
+              }
+            }
+          }
+          walk(root);
+          NODE
+
       - name: Run exhaustive 846-question audit
         id: audit
         continue-on-error: true
@@ -25,6 +48,10 @@ jobs:
       - name: Print full audit report
         if: always()
         run: |
+          if [ ! -f site/data/zhenti/audit-report.json ]; then
+            echo 'audit-report.json was not generated'
+            exit 0
+          fi
           python - <<'PY'
           import json
           p='site/data/zhenti/audit-report.json'
