@@ -63,8 +63,11 @@ jobs:
           test -s site/relax/index.html
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
+          test -s site/assets/js/zhenti-graph.js
+          test -s site/assets/js/relax1000-graph.js
           test -s site/assets/css/graph.css
           test -s site/assets/js/site-runtime-v2.js
+          test ! -e site/assets/js/overall-graph.js
           test ! -e site/assets/css/overall-graph.css
           test ! -e site/assets/css/graph-controls.css
           echo "Everflow source tree ready"
@@ -157,8 +160,9 @@ jobs:
           test -s site/data/relax1000/data/questions.json
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
+          test -s site/assets/js/zhenti-graph.js
           test -s site/assets/css/graph.css
-          echo '{"build":"20260824-graph-r5"}' > site/build.json
+          echo '{"build":"20260824-graph-r6"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages
