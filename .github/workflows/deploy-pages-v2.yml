@@ -160,7 +160,7 @@ jobs:
           test -s site/data/relax1000/data/questions.json
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
-          echo '{"build":"20260824-graph-r3"}' > site/build.json
+          echo '{"build":"20260824-graph-r4"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages
