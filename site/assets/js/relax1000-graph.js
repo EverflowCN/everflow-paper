@@ -98,8 +98,8 @@ function syncDrawer(){
   drawerStatuses.forEach(button=>button.classList.toggle('active',button.dataset.drawerStatus===(state.rec.status||'')));
   drawerAnswer.textContent=answerVisible?'收起答案':'查看答案';
 }
-function showDrawer(){drawer.hidden=false;if(drawerReopen)drawerReopen.hidden=true;shell.classList.add('drawer-open')}
-function hideDrawer(){drawer.hidden=true;shell.classList.remove('drawer-open');if(drawerReopen)drawerReopen.hidden=!selected}
+function showDrawer(){drawer.hidden=false;if(drawerReopen)drawerReopen.hidden=true}
+function hideDrawer(){drawer.hidden=true;if(drawerReopen)drawerReopen.hidden=!selected}
 function openQuestion(question){
   selected=question;answerVisible=false;selectCurrent(question);showDrawer();
   const row=rows.find(item=>item.questions.some(q=>idKey(q)===idKey(question)));
