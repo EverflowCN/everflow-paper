@@ -22,25 +22,27 @@ jobs:
           python-version: '3.12'
       - name: Install PDF/image dependencies
         run: pip install --quiet pymupdf pillow requests
-      - name: Ensure exact 2024 original-paper figures exist
+      - name: Crop exact 2016 original-paper figures and localize supplements
         run: |
           python - <<'PY'
-          import os, requests, fitz
+          import os, json, pathlib, requests, fitz
           from PIL import Image, ImageChops
-          url='https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/6b611f5c-55d9-4612-8ff9-30b028731314.pdf'
+
+          root=pathlib.Path('site/data/zhenti')
+          url='https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/a62b9584-568c-4139-aaa8-3cba0bfc8f80.pdf'
           r=requests.get(url,timeout=60); r.raise_for_status()
           doc=fitz.open(stream=r.content,filetype='pdf')
-          outdir='site/data/zhenti/assets/2024'; os.makedirs(outdir,exist_ok=True)
+          outdir=root/'assets'/'2016'; outdir.mkdir(parents=True,exist_ok=True)
           jobs=[
-            (0,(580,1790,1310,2165),'q04-adjacency-multilist-original.png'),
-            (1,(820,770,1225,1185),'q07-bst-original.png'),
-            (5,(830,1040,1515,1595),'q33-packet-network-original.png'),
-            (6,(245,115,1545,800),'q35-vlan-switch-original.png'),
-            (6,(675,1140,1245,1925),'q37-sr-timeline-original.png'),
-            (9,(190,135,1590,935),'q43-instruction-format-original.png'),
-            (9,(260,1000,1575,1870),'q43-datapath-original.png'),
-            (11,(355,1170,1285,1705),'q44-memory-table-original.png'),
-            (14,(325,465,1470,1305),'q47-as-topology-original.png'),
+            (0,(380,1930,1460,2280),'q03-tracks-original.png'),
+            (1,(730,430,1050,900),'q06-dfs-graph-original.png'),
+            (1,(560,1070,1230,1510),'q08-dijkstra-original.png'),
+            (2,(620,1060,1210,1280),'q17-instruction-format-original.png'),
+            (4,(590,420,1240,640),'q29-workset-timeline-original.png'),
+            (5,(280,160,1490,1010),'q33-41-network-topology-original.png'),
+            (6,(430,1730,1460,2230),'q44-interrupt-timing-original.png'),
+            (7,(200,180,1600,930),'q45-vm-cache-original.png'),
+            (7,(480,1700,1370,2200),'q47-directory-fat-original.png'),
           ]
           rendered={}
           def trim(crop):
@@ -54,49 +56,52 @@ jobs:
             if page_no not in rendered:
               pix=doc[page_no].get_pixmap(matrix=fitz.Matrix(3,3),alpha=False)
               rendered[page_no]=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
-            path=os.path.join(outdir,name)
-            trim(rendered[page_no].crop(box)).save(path,'PNG',optimize=True)
-          PY
-      - name: Validate corpora and finalize metadata/cache
-        run: |
-          python - <<'PY'
-          import json, pathlib, datetime
-          root=pathlib.Path('site/data/zhenti')
-          # Validate all year and supplement JSON currently in the repository.
-          for p in sorted(root.glob('*.json'))+sorted((root/'supplement').glob('*.json')):
-            json.loads(p.read_text(encoding='utf-8'))
+            trim(rendered[page_no].crop(box)).save(outdir/name,'PNG',optimize=True)
 
-          required_2024=['q04-adjacency-multilist-original.png','q07-bst-original.png','q33-packet-network-original.png','q35-vlan-switch-original.png','q37-sr-timeline-original.png','q43-instruction-format-original.png','q43-datapath-original.png','q44-memory-table-original.png','q47-as-topology-original.png']
-          for name in required_2024:
-            assert (root/'assets'/'2024'/name).is_file(), name
-          assert (root/'assets'/'2025'/'q42-aoe-original.png').is_file()
+          sp=root/'supplement'/'2016.json'
+          data=json.loads(sp.read_text(encoding='utf-8'))
+          mapping={
+            '3':'q03-tracks-original.png','6':'q06-dfs-graph-original.png','8':'q08-dijkstra-original.png',
+            '17':'q17-instruction-format-original.png','29':'q29-workset-timeline-original.png',
+            **{str(i):'q33-41-network-topology-original.png' for i in range(33,42)},
+            '44':'q44-interrupt-timing-original.png','45':'q45-vm-cache-original.png','47':'q47-directory-fat-original.png'
+          }
+          for qnum,name in mapping.items():
+            q=data['questions'][qnum]
+            q['figures']=[{
+              'src':f'/data/zhenti/assets/2016/{name}',
+              'alt':f'2016年第{qnum}题原卷必要图表',
+              'caption':'截取自厦门工学院公开的2016年408原卷，仅保留本题作答所需图表区域。'
+            }]
+            q['verification']={'status':'verified','mode':'authoritative-original-scan-crop','sources':['xit','csgraduates','csyanku']}
+          data['verifiedAt']='2026-08-24'
+          sp.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-          mpath=root/'manifest.json'
-          manifest=json.loads(mpath.read_text(encoding='utf-8'))
-          for year,note in {
-            '2024':'47/47 verified. Previously missing adjacency-multilist, BST, packet-network, VLAN, SR timeline, instruction-format/datapath, memory-table and AS-topology questions are now backed by tight crops from the public original-paper scan.',
-            '2025':'47/47 verified. Q42 now uses a tight crop of the original AOE network from the public 2025 paper; Q44 and Q47 remain scan-verified figure-backed questions.'
-          }.items():
-            y=manifest['years'][year]
-            y['paperStatus']='verified'; y['contentStatus']='verified'
-            y['questionCount']=47; y['verifiedQuestions']=list(range(1,48)); y['notes']=note
-            src=list(dict.fromkeys(y.get('sources',[])+['xit','csgraduates','noobdream']))
-            y['sources']=src
-          manifest['updatedAt']='2026-08-24T08:00:00+08:00'
-          mpath.write_text(json.dumps(manifest,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
+          manifest_path=root/'manifest.json'
+          manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+          y=manifest['years']['2016']
+          y['contentStatus']='verified'; y['paperStatus']='verified'; y['questionCount']=47; y['verifiedQuestions']=list(range(1,48))
+          y['sources']=list(dict.fromkeys(y.get('sources',[])+['xit','csgraduates','csyanku']))
+          y['notes']='47/47 verified. All previously missing figure/topology questions now use tight local crops from the public 2016 original-paper scan; supplements fill missing questions while base-year JSON remains authoritative.'
+          manifest['updatedAt']='2026-08-24T08:10:00+08:00'
+          manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
 
           overlay=pathlib.Path('site/assets/js/zhenti-data-overlay.js')
           text=overlay.read_text(encoding='utf-8')
-          old='20260824-2025-q44q47-b'
-          new='20260824-2024-2025-complete-a'
-          if old in text:text=text.replace(old,new)
+          assert 'for(const source of [extra,supplement,base])' in text, 'base-year precedence regressed'
+          import re
+          text=re.sub(r"const DATA_VERSION='[^']+';", "const DATA_VERSION='20260824-2016-original-crops-d';", text)
           overlay.write_text(text,encoding='utf-8')
+
+          for p in sorted(root.glob('*.json'))+sorted((root/'supplement').glob('*.json')):
+            json.loads(p.read_text(encoding='utf-8'))
+          for name in mapping.values(): assert (outdir/name).is_file(), name
           PY
-      - name: Commit verified batch
+      - name: Commit verified 2016 crop batch
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/data/zhenti/assets/2024 site/data/zhenti/manifest.json site/assets/js/zhenti-data-overlay.js
+          git add site/data/zhenti/assets/2016 site/data/zhenti/supplement/2016.json site/data/zhenti/manifest.json site/assets/js/zhenti-data-overlay.js
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Finalize verified 2024 and 2025 past papers'
+          git commit -m 'Use original-paper crops for verified 2016 questions'
           git push
