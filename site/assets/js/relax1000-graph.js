@@ -1,4 +1,4 @@
-import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questionImages,explanationImages,optionEntries,imageMarkup,usesQuestionImageFallback,esc,subjectName,idKey}from'./relax1000-core.js?v=20260825-bank1';
+import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questionImages,explanationImages,optionEntries,imageMarkup,usesQuestionImageFallback,esc,subjectName,idKey}from'./relax1000-core.js?v=20260825-bank2';
 
 const shell=document.querySelector('[data-graph-shell]');
 const matrix=shell?.querySelector('[data-overview-matrix]');
@@ -30,8 +30,8 @@ function recordState(question,records=loadRecords()){
 }
 function statusText(state){if(state.rec.status==='mastered')return'熟悉';if(state.rec.status==='fuzzy')return'模糊';if(state.rec.status==='weak')return'不会';return'未标记'}
 function answerText(state){if(state.answer==='correct')return'答对';if(state.answer==='wrong')return'答错';if(state.answer==='reviewed')return'已查看';if(state.answer==='draft')return'作答中';return'未作答'}
-function cellClasses(question,records){
-  const state=recordState(question,records),classes=['overview-cell',question.subjectId||'ds',state.answer];
+function cellClasses(question,state){
+  const classes=['overview-cell',question.subjectId||'ds',state.answer];
   if(state.rec.status)classes.push(`status-${state.rec.status}`);
   if(state.favorite)classes.push('is-bookmarked');
   if(idKey(question)===current)classes.push('current');
@@ -39,9 +39,14 @@ function cellClasses(question,records){
 }
 function buildRows(){
   rows=[];
+  const grouped=new Map();
+  for(const question of data.questions||[]){
+    const key=`${question.subjectId}\u0000${question.chapterId}`;
+    const bucket=grouped.get(key);if(bucket)bucket.push(question);else grouped.set(key,[question]);
+  }
   for(const subj of data.subjects||[]){
     (subj.chapters||[]).forEach((chapter,index)=>{
-      const questions=data.questions.filter(q=>q.subjectId===subj.id&&q.chapterId===chapter.id);
+      const questions=grouped.get(`${subj.id}\u0000${chapter.id}`)||[];
       const chunks=[];
       for(let start=0;start<questions.length;start+=MAX_COLS)chunks.push(questions.slice(start,start+MAX_COLS));
       (chunks.length?chunks:[[]]).forEach((chunk,chunkIndex)=>{
@@ -68,7 +73,7 @@ function renderMatrix({focus=false}={}){
       const question=row.questions[col];
       if(!question){const blank=document.createElement('div');blank.className='overview-blank';blank.setAttribute('aria-hidden','true');fragment.appendChild(blank);continue}
       const state=recordState(question,records),button=document.createElement('button'),number=questionNumber(question,col);
-      button.type='button';button.className=cellClasses(question,records);button.dataset.key=`relax:${idKey(question)}`;button.dataset.row=String(rowIndex);button.dataset.col=String(col);button.dataset.relaxId=idKey(question);button.setAttribute('role','gridcell');
+      button.type='button';button.className=cellClasses(question,state);button.dataset.key=`relax:${idKey(question)}`;button.dataset.row=String(rowIndex);button.dataset.col=String(col);button.dataset.relaxId=idKey(question);button.setAttribute('role','gridcell');
       button.setAttribute('aria-label',`${row.subject}，${row.chapter}，第${number}题，${statusText(state)}，${answerText(state)}`);
       button.title=`${row.subject} · ${row.chapter} · 第 ${number} 题 · ${statusText(state)} · ${answerText(state)}`;
       button.addEventListener('click',()=>openQuestion(question));fragment.appendChild(button);
