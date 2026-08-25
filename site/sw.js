@@ -1,8 +1,9 @@
-const CACHE='everflow-site-v44';
+const CACHE='everflow-site-v45';
 const SHELL=[
   '/',
   '/study/',
   '/zhenti/',
+  '/relax/',
   '/links/',
   '/account/',
   '/workspace/',
@@ -12,6 +13,8 @@ const SHELL=[
   '/assets/css/interaction-guard.css',
   '/assets/css/graph.css',
   '/assets/css/resource-hub-v2.css',
+  '/assets/css/relax1000-practice.css',
+  '/assets/css/paper-builder.css',
   '/assets/css/auth-loading.css',
   '/assets/js/site-runtime-v2.js',
   '/assets/js/site-nav-v2.js',
@@ -19,6 +22,8 @@ const SHELL=[
   '/assets/js/links.js',
   '/assets/js/graph-app.js',
   '/assets/js/graph-controls.js',
+  '/assets/js/paper-builder.js',
+  '/assets/js/relax1000-core.js',
   '/assets/everflow-icon.svg',
   '/manifest.webmanifest'
 ];
@@ -50,7 +55,7 @@ self.addEventListener('activate',event=>{
   })());
 });
 
-async function fetchWithTimeout(request,options={},timeoutMs=4500){
+async function fetchWithTimeout(request,options={},timeoutMs=4000){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{return await fetch(request,{...options,signal:controller.signal})}finally{clearTimeout(timer)}
 }
@@ -58,7 +63,7 @@ async function fetchWithTimeout(request,options={},timeoutMs=4500){
 async function networkFirst(request){
   const cache=await caches.open(CACHE),key=cacheKey(request);
   try{
-    const response=await fetchWithTimeout(request,{cache:'no-store'});
+    const response=await fetchWithTimeout(request,{cache:'no-cache'});
     if(response.ok)await cache.put(key,response.clone());
     return response;
   }catch{
@@ -66,13 +71,17 @@ async function networkFirst(request){
   }
 }
 
-async function staleWhileRevalidate(request){
+async function staleWhileRevalidate(request,event){
   const cache=await caches.open(CACHE),key=cacheKey(request),cached=await cache.match(key);
-  const fresh=fetch(request).then(async response=>{
+  const fresh=fetch(request,{cache:'no-cache'}).then(async response=>{
     if(response.ok)await cache.put(key,response.clone());
     return response;
   }).catch(()=>null);
-  return cached||(await fresh)||Response.error();
+  if(cached){
+    event?.waitUntil(fresh.then(()=>undefined));
+    return cached;
+  }
+  return (await fresh)||Response.error();
 }
 
 self.addEventListener('fetch',event=>{
@@ -85,9 +94,13 @@ self.addEventListener('fetch',event=>{
     event.respondWith(networkFirst(request));
     return;
   }
-  if(path.startsWith('/data/')&&/\.(?:png|jpe?g|webp|gif|svg)$/i.test(path)){
-    event.respondWith(staleWhileRevalidate(request));
+  if(path.startsWith('/data/relax1000/')){
+    event.respondWith(staleWhileRevalidate(request,event));
     return;
   }
-  event.respondWith(path.startsWith('/data/')?networkFirst(request):staleWhileRevalidate(request));
+  if(path.startsWith('/data/')&&/\.(?:png|jpe?g|webp|gif|svg)$/i.test(path)){
+    event.respondWith(staleWhileRevalidate(request,event));
+    return;
+  }
+  event.respondWith(path.startsWith('/data/')?networkFirst(request):staleWhileRevalidate(request,event));
 });
