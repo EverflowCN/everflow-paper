@@ -1,5 +1,5 @@
 const RELAX_ASSET_BASE='/data/relax1000';
-const DATA_VERSION='20260825-bank1';
+const DATA_VERSION='20260825-bank2';
 export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json?v=${DATA_VERSION}`;
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
@@ -16,9 +16,21 @@ export const RELAX_STORAGE_KEYS={
 };
 const SUBJECT_NAME={ds:'数据结构',co:'计算机组成原理',os:'操作系统',cn:'计算机网络'};
 let dataPromise=null;
-const readJson=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
-const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
-export const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const jsonCache=new Map();
+const setCache=new Map();
+const readJson=(key,fallback)=>{
+  if(jsonCache.has(key))return jsonCache.get(key);
+  let value=fallback;
+  try{const parsed=JSON.parse(localStorage.getItem(key)||'null');value=parsed??fallback}catch{}
+  jsonCache.set(key,value);return value;
+};
+const writeJson=(key,value)=>{
+  jsonCache.set(key,value);setCache.delete(key);
+  try{localStorage.setItem(key,JSON.stringify(value))}catch{}
+};
+const invalidateKey=key=>{if(!key){jsonCache.clear();setCache.clear();return}jsonCache.delete(key);setCache.delete(key)};
+window.addEventListener('storage',event=>invalidateKey(event.key));
+export const esc=value=>String(value??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
 export const idKey=value=>String(value?.id??value??'');
 export function assetUrl(value){
   const src=String(value||'').trim();
@@ -88,10 +100,11 @@ document.addEventListener('click',event=>{
   if(!img||!src)return;retry.hidden=true;img.hidden=false;const join=src.includes('?')?'&':'?';img.src=`${src}${join}retry=${Date.now()}`;
 });
 document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target?.matches?.('[data-relax-image-retry]'))event.target.click()});
+
 export async function loadRelaxData({force=false}={}){
   if(force)dataPromise=null;
   if(dataPromise)return dataPromise;
-  dataPromise=fetch(DATA_URL,{cache:force?'no-store':'default'})
+  dataPromise=fetch(DATA_URL,{cache:force?'reload':'force-cache'})
     .then(response=>{if(!response.ok)throw new Error(`Relax1000 data HTTP ${response.status}`);return response.json()})
     .then(data=>{
       if(!data||!Array.isArray(data.questions)||!Array.isArray(data.subjects))throw new Error('Relax1000 data schema invalid');
@@ -113,17 +126,22 @@ export function patchRecord(rawId,patch){
   return records[key]||{};
 }
 export function compatArray(key){const value=readJson(key,[]);return Array.isArray(value)?value:[]}
-export function compatHas(key,rawId){const target=idKey(rawId);return compatArray(key).some(value=>idKey(value)===target)}
+function compatSet(key){
+  if(setCache.has(key))return setCache.get(key);
+  const set=new Set(compatArray(key).map(idKey));setCache.set(key,set);return set;
+}
+export function compatHas(key,rawId){return compatSet(key).has(idKey(rawId))}
 export function setCompat(key,rawId,present){
-  const target=idKey(rawId),next=compatArray(key).filter(value=>idKey(value)!==target);
+  const target=idKey(rawId),current=compatArray(key),next=current.filter(value=>idKey(value)!==target);
   if(present)next.push(rawId);
   writeJson(key,next);
+  setCache.set(key,new Set(next.map(idKey)));
   return next;
 }
-export function clearCompat(...keys){for(const key of keys.flat())try{localStorage.removeItem(key)}catch{}}
+export function clearCompat(...keys){for(const key of keys.flat()){try{localStorage.removeItem(key)}catch{}invalidateKey(key)}}
 export function clearRelaxStorage({keepPreferences=true}={}){
   const preserve=keepPreferences?new Set([RELAX_STORAGE_KEYS.subject,RELAX_STORAGE_KEYS.graphFit]):new Set();
-  Object.values(RELAX_STORAGE_KEYS).forEach(key=>{if(!preserve.has(key))try{localStorage.removeItem(key)}catch{}});
+  Object.values(RELAX_STORAGE_KEYS).forEach(key=>{if(!preserve.has(key)){try{localStorage.removeItem(key)}catch{}invalidateKey(key)}});
   document.dispatchEvent(new CustomEvent('everflow:relax-records-change',{detail:{scope:'all',reset:true}}));
 }
 export function syncAnswerCompatibility(question,correct){
