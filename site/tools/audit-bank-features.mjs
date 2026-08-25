@@ -64,7 +64,7 @@ assert(runtime.includes("if(body.dataset.view==='zhenti')import(asset('/assets/j
 assert(!/raw\.githubusercontent\.com|github\.com/i.test(zhentiMedia),'true-paper media runtime exposes external repository fallback');
 assert(!/GitHub账号|使用 GitHub|提交到 GitHub|GitHub Pages/.test(admin),'admin UI exposes provider/account details');
 assert(deploy.includes('quality:')&&deploy.includes('deploy:')&&deploy.includes('actions/upload-pages-artifact@v4')&&deploy.includes('actions/deploy-pages@v4'),'Pages quality/deploy pipeline incomplete');
-assert(deploy.includes('site/assets/js/zhenti-graph.js')&&deploy.includes('site/assets/css/graph.css')&&deploy.includes('20260825-bank1'),'Pages must publish clean bank1 graph build');
+assert(deploy.includes('site/assets/js/zhenti-graph.js')&&deploy.includes('site/assets/css/graph.css')&&/20260825-bank(?:1|2)/.test(deploy),'Pages must publish a compatible bank graph build');
 assert(!deploy.includes("Path('site/assets/js/overall-graph.js')"),'deploy retains obsolete graph rewrite step');
 assert(deploy.includes('cancel-in-progress: true')&&deploy.includes('Privacy audit failed'),'Pages concurrency/privacy gate missing');
 
