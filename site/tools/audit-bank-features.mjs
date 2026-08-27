@@ -11,6 +11,7 @@ const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',bankSwitcher:'site/assets/js/question-bank-switch.js',
   graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphCss:'site/assets/css/graph.css',trueGraph:'site/assets/js/zhenti-graph.js',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
+  relaxReader:'site/assets/js/relax1000-reader.js',relaxReaderPage:'site/zhenti/relax-reader/index.html',relaxReaderNavCss:'site/assets/css/relax1000-reader-nav.css',
   builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',
   zhentiMedia:'site/assets/js/zhenti-media.js',paper:'site/relax/index.html',admin:'site/admin/index.html',manifest:'site/data/zhenti/manifest.json',deploy:'.github/workflows/deploy-pages-v2.yml'
 };
@@ -22,7 +23,7 @@ for(const p of [
 ])assert(!exists(p),`obsolete file must stay deleted: ${p}`);
 
 const text=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphCss,trueGraph,relaxCore,relaxWall,relaxGraph,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphCss,trueGraph,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(entry.includes("source==='zhenti'")&&entry.includes('zhenti-wall.js'),'true-paper selected-only boot missing');
@@ -33,6 +34,13 @@ for(const choice of ['answers','status','favorites','today','srs','all'])assert(
 assert(relaxCore.includes("RELAX_ASSET_BASE='/data/relax1000'")&&relaxCore.includes('RELAX_STORAGE_KEYS'),'Relax core/data contract missing');
 assert(!/EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/i.test(relaxCore),'Relax runtime leaks repository identity/address');
 assert(relaxWall.includes('relax-wall-workspace')&&relaxWall.includes('relax-sidebar'),'Relax wall layout missing');
+assert(relaxWall.includes('/zhenti/relax-reader/')&&!relaxWall.includes('relax-question-modal'),'Relax wall must route to isolated reader and must not recreate modal reader');
+assert(relaxReaderPage.includes('relax1000-reader-nav.css')&&relaxReaderPage.includes('relax1000-reader.js'),'Relax standalone reader assets missing');
+assert(relaxReader.includes('relax-reader-layout')&&relaxReader.includes('data-reader-jump')&&relaxReader.includes('refreshNavSelection'),'Relax reader lightweight navigation contract missing');
+assert(relaxReader.includes("status==='mastered'")&&relaxReader.includes("status==='fuzzy'")&&relaxReader.includes("status==='weak'"),'Relax reader state mapping missing');
+assert(!relaxReader.includes('relax-question-modal')&&!relaxReader.includes('backdrop-filter'),'Relax reader must remain independent document flow');
+assert(relaxReaderNavCss.includes('.relax-reader-nav-item.is-mastered')&&relaxReaderNavCss.includes('.relax-reader-nav-item.is-fuzzy')&&relaxReaderNavCss.includes('.relax-reader-nav-item.is-weak'),'Relax reader heatmap state CSS missing');
+assert(relaxReaderNavCss.includes('background:#e6f7ee')&&relaxReaderNavCss.includes('background:#fff4c9'),'Relax reader mastered/fuzzy colors must remain green/yellow');
 
 assert(graph.includes('20260825-bank1')&&graph.includes('data-graph-source-host')&&graph.includes('data-graph-view-host'),'graph bank1 shell/build marker missing');
 assert(graph.includes('graph-toolbar-primary')&&graph.includes('graph-toolbar-secondary')&&graph.includes('graph-status-legend'),'graph toolbar hierarchy missing');
@@ -76,11 +84,11 @@ for(const year of years){const data=JSON.parse(read(`site/data/zhenti/${year}.js
 assert(verified>=846,`verified corpus unexpectedly small: ${verified}`);
 const autoFloor=Math.floor(verified*.70);
 assert(autoChoice>=autoFloor,`auto-gradable corpus unexpectedly small: ${autoChoice}/${verified} (<70%)`);
-for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
+for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxReader,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
   const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);
   fs.writeFileSync(tmp,read(file));
   const result=spawnSync(process.execPath,['--check',tmp],{encoding:'utf8'});
   fs.rmSync(tmp,{force:true});
   assert(result.status===0,`syntax check failed: ${file}\n${result.stderr||result.stdout}`);
 }
-console.log(`architecture audit OK: graph bank1 single CSS + shared controls + clean adapters; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
+console.log(`architecture audit OK: isolated Relax reader + lightweight heatmap nav; graph bank1 single CSS + shared controls; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
