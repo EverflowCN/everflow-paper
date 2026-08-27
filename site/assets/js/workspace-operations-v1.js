@@ -1,89 +1,16 @@
 (()=>{
   const $=selector=>document.querySelector(selector);
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[char]));
-  const routes=[
-    ['主网站','/'],
-    ['学习中心','/study/'],
-    ['408 真题','/zhenti/'],
-    ['资料中心','/links/'],
-    ['算法可视化','/visual/'],
-    ['可视化深链','/visual/subject/data-structures'],
-    ['账户中心','/account/']
-  ];
-
-  const setMessage=(message,bad=false)=>{
-    const box=$('[data-operations-message]');
-    if(!box)return;box.textContent=message;box.style.color=bad?'#b4232d':'';
-  };
-  const setBusy=(button,busy,label)=>{
-    if(!button)return;
-    if(busy){button.dataset.label=button.textContent;button.disabled=true;button.textContent=label}
-    else{button.disabled=false;button.textContent=button.dataset.label||button.textContent;delete button.dataset.label}
-  };
-  async function waitCloud(){
-    for(let count=0;count<100;count+=1){
-      if(window.EveraAdminCloud)return window.EveraAdminCloud;
-      await new Promise(resolve=>setTimeout(resolve,80));
-    }
-    throw new Error('管理服务加载超时');
-  }
-  function renderRoutes(results){
-    const root=$('[data-operations-routes]');if(!root)return;
-    root.innerHTML=results.map(result=>`<div class="ws-row"><div><strong>${esc(result.name)}</strong><small>${esc(result.path)}</small></div><span class="pill ${result.ok?'ok':'bad'}">${result.ok?`${result.status} · ${result.ms}ms`:esc(result.error||String(result.status))}</span></div>`).join('');
-  }
-  async function checkRoute([name,path]){
-    const started=performance.now();
-    try{
-      const response=await fetch(path,{cache:'no-store',credentials:'same-origin',headers:{'X-Everflow-Healthcheck':'workspace'}});
-      response.body?.cancel().catch(()=>{});
-      return {name,path,status:response.status,ok:response.ok,ms:Math.round(performance.now()-started)};
-    }catch(error){return {name,path,status:0,ok:false,ms:Math.round(performance.now()-started),error:error.message||'网络错误'}}
-  }
-  async function checkAll(button){
-    setBusy(button,true,'检查中…');setMessage('正在并行检查关键页面。');
-    try{
-      const results=await Promise.all(routes.map(checkRoute));renderRoutes(results);
-      const failed=results.filter(result=>!result.ok);
-      setMessage(failed.length?`${failed.length} 个路由需要处理。`:`${results.length} 个关键路由全部正常。`,failed.length>0);
-    }finally{setBusy(button,false)}
-  }
-  async function inspectLocalState(){
-    const cacheLabel=$('[data-operations-cache]'),storageLabel=$('[data-operations-storage]');
-    try{
-      const names='caches' in window?await caches.keys():[];
-      if(cacheLabel)cacheLabel.textContent=names.filter(name=>name.startsWith('everflow-site-')).join('、')||'尚未建立';
-    }catch{if(cacheLabel)cacheLabel.textContent='读取失败'}
-    try{
-      const estimate=await navigator.storage?.estimate?.();
-      if(storageLabel)storageLabel.textContent=estimate?.usage!=null?`${(estimate.usage/1024/1024).toFixed(1)} MB`:'浏览器未提供';
-    }catch{if(storageLabel)storageLabel.textContent='读取失败'}
-  }
-  async function updateCache(button){
-    setBusy(button,true,'更新中…');setMessage('正在安装最新离线缓存。');
-    try{
-      if(!('serviceWorker' in navigator))throw new Error('当前浏览器不支持离线缓存');
-      const registration=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
-      await registration.update();
-      await Promise.all(routes.map(([,path])=>fetch(path,{cache:'reload'}).then(response=>response.body?.cancel()).catch(()=>null)));
-      await inspectLocalState();setMessage('前台缓存已更新，下一次切换页面会直接使用最新缓存。');
-    }catch(error){setMessage(error.message||'缓存更新失败',true)}finally{setBusy(button,false)}
-  }
-  async function exportConfiguration(button){
-    setBusy(button,true,'导出中…');
-    try{
-      const cloud=await waitCloud();await cloud.requireOwner();
-      const [settings,resources]=await Promise.all([cloud.getResourceSettings(),cloud.listResourceItems()]);
-      const payload={schemaVersion:2,exportedAt:new Date().toISOString(),site:'evera.top',resourceHub:{settings,items:resources}};
-      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');
-      anchor.href=url;anchor.download=`everflow-operations-${new Date().toISOString().slice(0,10)}.json`;anchor.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);setMessage('运营配置已导出；文件不包含用户、会员或学习记录。');
-    }catch(error){setMessage(error.message||'导出失败',true)}finally{setBusy(button,false)}
-  }
-
-  $('[data-operations-check]')?.addEventListener('click',event=>checkAll(event.currentTarget));
-  $('[data-operations-cache-update]')?.addEventListener('click',event=>updateCache(event.currentTarget));
-  $('[data-operations-export]')?.addEventListener('click',event=>exportConfiguration(event.currentTarget));
-  inspectLocalState();
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const routes=[['主网站','/'],['学习中心','/study/'],['408 真题','/zhenti/'],['资料中心','/links/'],['算法可视化','/visual/'],['可视化深链','/visual/subject/data-structures'],['账户中心','/account/']];
+  const setMessage=(message,bad=false)=>{const box=$('[data-operations-message]');if(!box)return;box.textContent=message;box.style.color=bad?'#b4232d':''};
+  const setBusy=(button,busy,label)=>{if(!button)return;if(busy){button.dataset.label=button.textContent;button.disabled=true;button.textContent=label}else{button.disabled=false;button.textContent=button.dataset.label||button.textContent;delete button.dataset.label}};
+  async function waitCloud(){for(let count=0;count<100;count+=1){if(window.EveraAdminCloud)return window.EveraAdminCloud;await new Promise(resolve=>setTimeout(resolve,80))}throw new Error('管理服务加载超时')}
+  function renderRoutes(results){const root=$('[data-operations-routes]');if(!root)return;root.innerHTML=results.map(result=>`<div class="ws-row"><div><strong>${esc(result.name)}</strong><small>${esc(result.path)}</small></div><span class="pill ${result.ok?'ok':'bad'}">${result.ok?`${result.status} · ${result.ms}ms`:esc(result.error||String(result.status))}</span></div>`).join('')}
+  async function checkRoute([name,path]){const started=performance.now();try{const response=await fetch(path,{cache:'no-store',credentials:'same-origin',headers:{'X-Everflow-Healthcheck':'workspace'}});response.body?.cancel().catch(()=>{});return{name,path,status:response.status,ok:response.ok,ms:Math.round(performance.now()-started)}}catch(error){return{name,path,status:0,ok:false,ms:Math.round(performance.now()-started),error:error.message||'网络错误'}}}
+  async function checkAll(button){setBusy(button,true,'检查中…');setMessage('正在并行检查关键页面。');try{const results=await Promise.all(routes.map(checkRoute));renderRoutes(results);const failed=results.filter(result=>!result.ok);setMessage(failed.length?`${failed.length} 个路由需要处理。`:`${results.length} 个关键路由全部正常。`,failed.length>0)}finally{setBusy(button,false)}}
+  async function inspectLocalState(){const cacheLabel=$('[data-operations-cache]'),storageLabel=$('[data-operations-storage]');try{const names='caches' in window?await caches.keys():[];if(cacheLabel)cacheLabel.textContent=names.filter(name=>name.startsWith('everflow-site-')).join('、')||'尚未建立'}catch{if(cacheLabel)cacheLabel.textContent='读取失败'}try{const estimate=await navigator.storage?.estimate?.();if(storageLabel)storageLabel.textContent=estimate?.usage!=null?`${(estimate.usage/1024/1024).toFixed(1)} MB`:'浏览器未提供'}catch{if(storageLabel)storageLabel.textContent='读取失败'}}
+  async function updateCache(button){setBusy(button,true,'更新中…');setMessage('正在安装最新离线缓存。');try{if(!('serviceWorker' in navigator))throw new Error('当前浏览器不支持离线缓存');const registration=await navigator.serviceWorker.register('/sw.js',{scope:'/'});await registration.update();await Promise.all(routes.map(([,path])=>fetch(path,{cache:'reload'}).then(response=>response.body?.cancel()).catch(()=>null)));await inspectLocalState();setMessage('前台缓存已更新，下一次切换页面会直接使用最新缓存。')}catch(error){setMessage(error.message||'缓存更新失败',true)}finally{setBusy(button,false)}}
+  async function exportConfiguration(button){setBusy(button,true,'导出中…');try{const cloud=await waitCloud();await cloud.requireOwner();const [settings,resources]=await Promise.all([cloud.getResourceSettings(),cloud.listResourceItems()]);const payload={schemaVersion:2,exportedAt:new Date().toISOString(),site:'evera.top',resourceHub:{settings,items:resources}},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download=`everflow-operations-${new Date().toISOString().slice(0,10)}.json`;anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setMessage('运营配置已导出；文件不包含用户、会员或学习记录。')}catch(error){setMessage(error.message||'导出失败',true)}finally{setBusy(button,false)}}
+  $('[data-operations-check]')?.addEventListener('click',event=>checkAll(event.currentTarget));$('[data-operations-cache-update]')?.addEventListener('click',event=>updateCache(event.currentTarget));$('[data-operations-export]')?.addEventListener('click',event=>exportConfiguration(event.currentTarget));inspectLocalState();
 })();
+import('./workspace-course-admin-v1.js?v=20260828-course-admin1').catch(console.error);

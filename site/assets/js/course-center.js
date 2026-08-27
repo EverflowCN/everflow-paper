@@ -1,0 +1,6 @@
+(()=>{
+  const root=document.querySelector('[data-course-center]');if(!root)return;
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),icon=c=>c.kind==='past-paper'?'408':c.kind==='reinforcement'?'4科':'课程',kindText=c=>c.kind==='past-paper'?'历年真题讲解':c.kind==='reinforcement'?'四科强化课程':'自定义课程';
+  async function render(){try{const data=await window.EveraCourseCatalog?.load?.();if(!data?.catalogs?.length)return;root.innerHTML=data.catalogs.map(c=>{const items=data.itemMap.get(c.id)||[],subjects=[...new Set(items.map(x=>x.subject).filter(Boolean))],detail=c.subtitle||`${kindText(c)} · ${items.length} 课时${subjects.length>1?` · ${subjects.map(s=>s.toUpperCase()).join(' / ')}`:''}`;return `<article class="learning-lane"><div class="learning-lane-head"><div><h3>${esc(c.title)}</h3><p>${esc(detail)}</p></div><div class="learning-lane-icon">${esc(icon(c))}</div></div><div class="learning-hero-actions"><a class="learning-btn primary" href="../../408/?course=${encodeURIComponent(c.id)}">进入课程打卡</a>${c.source_url?`<a class="learning-btn" href="${esc(c.source_url)}" target="_blank" rel="noopener">打开课程来源</a>`:''}</div></article>`}).join('')}catch(error){console.warn('course center cloud catalog unavailable',error)}}
+  render();
+})();
