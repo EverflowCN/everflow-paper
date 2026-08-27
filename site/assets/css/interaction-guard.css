@@ -2,7 +2,8 @@
 [hidden]{display:none!important}
 button:disabled,[aria-disabled="true"]{pointer-events:none!important;cursor:not-allowed!important}
 body.menu-open,body.evera-modal-open,body.evera-immersive-open,body.relax-reset-open{overscroll-behavior:none}
-body:has(.question-modal:not([hidden])),body:has(.paper-session:not([hidden])),body:has(.relax-question-modal:not([hidden])),body:has(.relax-reset-overlay:not([hidden])){overflow:hidden!important;overscroll-behavior:none}
+body.evera-modal-open{overflow:hidden!important;overscroll-behavior:none}
+body:has(.question-modal:not([hidden])),body:has(.paper-session:not([hidden])),body:has(.relax-reset-overlay:not([hidden])){overflow:hidden!important;overscroll-behavior:none}
 body.evera-modal-open .mobile-panel,body.evera-immersive-open .mobile-panel,body.relax-reset-open .mobile-panel,body:has(.question-modal:not([hidden])) .mobile-panel,body:has(.paper-session:not([hidden])) .mobile-panel{pointer-events:none}
 .question-modal,.paper-session,.relax-question-modal{z-index:var(--z-modal)!important;isolation:isolate}
 .question-modal[hidden],.paper-session[hidden],.relax-question-modal[hidden],.relax-reset-overlay[hidden]{display:none!important}
