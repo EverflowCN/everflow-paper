@@ -14,6 +14,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
+      - name: Relax reader syntax
+        run: node --check site/assets/js/relax1000-reader.js
+      - name: Graph answer syntax
+        run: node --check site/assets/js/graph-answer-enhancements.js
       - name: Existing v2 architecture audit
         run: node site/tools/audit-bank-features.mjs
       - name: Subject index audit
@@ -27,11 +31,9 @@ jobs:
           grep -q 'chapterOrder' site/assets/js/relax1000-reader.js
           grep -q "event.key==='1'" site/assets/js/relax1000-reader.js
           grep -q 'relax1000-reader-nav-v2.css' site/zhenti/relax-reader/index.html
-          node --check site/assets/js/relax1000-reader.js
       - name: New graph answer contract
         run: |
           set -euo pipefail
           grep -q 'data-graph-submit' site/assets/js/graph-answer-enhancements.js
           grep -q 'if(q>40)return null' site/assets/js/graph-answer-enhancements.js
           grep -q 'graph-answer-enhancements.js' site/graph/index.html
-          node --check site/assets/js/graph-answer-enhancements.js
