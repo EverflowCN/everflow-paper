@@ -20,7 +20,7 @@ function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value)
 async function relaxCore(){return relaxCorePromise||(relaxCorePromise=import(RELAX_CORE_URL))}
 async function relaxData(){return relaxDataPromise||(relaxDataPromise=relaxCore().then(core=>core.loadRelaxData()))}
 async function loadZhenti(year){if(zhentiCache.has(year))return zhentiCache.get(year);const promise=fetch(`/data/zhenti/${year}.json?v=20260825-bank1`,{cache:'default'}).then(r=>r.ok?r.json():null).catch(()=>null);zhentiCache.set(year,promise);return promise}
-function zhentiPatch(year,q,patch,{emit=true}={}){const records=readJson(ZHENTI_KEY),key=`${year}-${q}`,prev=records[key]||{},next={...prev,...patch,updatedAt:new Date().toISOString()};Object.keys(next).forEach(k=>next[k]===undefined&&delete next[k]);records[key]=next;writeJson(ZHENTI_KEY,records);if(emit)document.dispatchEvent(new CustomEvent('everflow:zhenti-records-change',{detail:{year,q,source:'graph-answer'}}));return next}
+function zhentiPatch(year,q,patch){const records=readJson(ZHENTI_KEY),key=`${year}-${q}`,prev=records[key]||{},next={...prev,...patch,updatedAt:new Date().toISOString()};Object.keys(next).forEach(k=>next[k]===undefined&&delete next[k]);records[key]=next;writeJson(ZHENTI_KEY,records);document.dispatchEvent(new CustomEvent('everflow:zhenti-records-change',{detail:{year,q,source:'graph-answer'}}));return next}
 async function context(){
   const cell=activeCell();if(!cell)return null;
   if(source()==='relax1000'){
@@ -52,7 +52,7 @@ async function enhance(){
   if(!drawerBody.querySelector('[data-graph-answer-result]'))actions.insertAdjacentHTML('afterend','<div data-graph-answer-result class="graph-answer-result" hidden></div>');
   syncOptions(ctx);
 }
-async function choose(key){const ctx=await context();if(!ctx||submitted(ctx)||!ctx.entries.some(item=>item.key===key))return;if(ctx.source==='relax1000'){ctx.core.patchRecord(ctx.question.id,{draftAnswer:key});ctx.record=ctx.core.questionState(ctx.question).rec||{}}else ctx.record=zhentiPatch(ctx.year,ctx.q,{draftAnswer:key},{emit:false});await enhance()}
+async function choose(key){const ctx=await context();if(!ctx||submitted(ctx)||!ctx.entries.some(item=>item.key===key))return;if(ctx.source==='relax1000'){ctx.core.patchRecord(ctx.question.id,{draftAnswer:key});ctx.record=ctx.core.questionState(ctx.question).rec||{}}else ctx.record=zhentiPatch(ctx.year,ctx.q,{draftAnswer:key});await enhance()}
 async function submit(){const ctx=await context();if(!ctx||submitted(ctx))return;const answer=String(ctx.record.draftAnswer||'');if(!answer)return;const correct=answer===ctx.answer;if(ctx.source==='relax1000'){ctx.core.patchRecord(ctx.question.id,{answer,draftAnswer:answer,correct,reviewed:true,attempts:(Number(ctx.record.attempts)||0)+1});ctx.core.syncAnswerCompatibility(ctx.question,correct);ctx.record=ctx.core.questionState(ctx.question).rec||{}}else ctx.record=zhentiPatch(ctx.year,ctx.q,{answer,draftAnswer:answer,correct,reviewed:true,attempts:(Number(ctx.record.attempts)||0)+1});await enhance()}
 
 drawerBody.addEventListener('click',event=>{const option=event.target.closest('[data-graph-choice]');if(option){event.preventDefault();choose(option.dataset.graphChoice);return}if(event.target.closest('[data-graph-submit]')){event.preventDefault();submit()}});
