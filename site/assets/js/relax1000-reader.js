@@ -2,7 +2,7 @@ import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,toggleBookm
 
 const CONTEXT_KEY='everflow-relax-reader-context-v1';
 const root=document.querySelector('[data-relax-reader]');
-let data=null,queue=[],selectedIndex=0,analysisVisible=false,noteTimer=0,pendingNote=null;
+let data=null,queue=[],selectedIndex=0,analysisVisible=false,noteTimer=0,pendingNote=null,nav=null,stage=null;
 
 function readContext(){try{const value=JSON.parse(sessionStorage.getItem(CONTEXT_KEY)||'null');return value&&typeof value==='object'?value:null}catch{return null}}
 function targetId(){return String(new URLSearchParams(location.search).get('id')||'')}
@@ -28,32 +28,66 @@ function optionButtons(question,rec){
   if(questionImages(question).length)return `<div class="relax-reader-options compact">${'ABCD'.split('').map(key=>`<button type="button" data-reader-option="${key}" class="${String(rec.draftAnswer||rec.answer||'')===key?'selected':''} ${rec.reviewed&&key===String(question.answer)?'is-correct':''} ${rec.correct===false&&String(rec.answer)===key?'is-wrong':''}" ${rec.answer?'disabled':''}><b>${key}</b></button>`).join('')}</div>`;
   return'';
 }
-function render(){
-  const question=currentQuestion();if(!question){root.innerHTML='<section class="relax-reader-error"><strong>没有找到这道题</strong><p>题目可能已更新，请返回题库墙重新打开。</p><button type="button" data-reader-back>返回题库墙</button></section>';bind();return}
-  setUrl(question);document.title=`Relax1000 · 第 ${currentNumber(question)} 题 · Everflow`;
+function navClass(question,index,records=loadRecords()){
+  const state=questionState(question,records),classes=['relax-reader-nav-item'];
+  if(state.rec.status==='mastered')classes.push('is-mastered');
+  else if(state.rec.status==='fuzzy')classes.push('is-fuzzy');
+  else if(state.rec.status==='weak')classes.push('is-weak');
+  else if(state.wrong)classes.push('is-wrong');
+  else if(state.seen)classes.push('is-seen');
+  else classes.push('is-unseen');
+  if(index===selectedIndex)classes.push('current');
+  return classes.join(' ');
+}
+function navButtonHtml(question,index,records){
+  const state=questionState(question,records),number=questionNumber(question,index);
+  return `<button type="button" class="${navClass(question,index,records)}" data-reader-jump="${index}" aria-label="第 ${esc(number)} 题${index===selectedIndex?'，当前题':''}" ${index===selectedIndex?'aria-current="true"':''}><span>${esc(number)}</span>${state.favorite?'<i>★</i>':''}</button>`;
+}
+function ensureShell(){
+  if(nav&&stage)return;
+  root.innerHTML='<div class="relax-reader-layout"><aside class="relax-reader-nav" data-reader-nav></aside><section class="relax-reader-stage" data-reader-stage></section></div>';
+  nav=root.querySelector('[data-reader-nav]');stage=root.querySelector('[data-reader-stage]');
+  renderNav();
+}
+function renderNav(){
+  if(!nav)return;const records=loadRecords();
+  nav.innerHTML=`<div class="relax-reader-nav-head"><strong>题目导航</strong><span data-reader-nav-progress>${selectedIndex+1} / ${queue.length}</span></div><div class="relax-reader-nav-grid">${queue.map((question,index)=>navButtonHtml(question,index,records)).join('')}</div><div class="relax-reader-nav-legend"><span><i></i>未标记</span><span class="mastered"><i></i>熟悉</span><span class="fuzzy"><i></i>模糊</span><span class="weak"><i></i>不会</span></div>`;
+  nav.querySelectorAll('[data-reader-jump]').forEach(button=>button.onclick=()=>jumpTo(Number(button.dataset.readerJump)));
+}
+function refreshNavButton(index){
+  if(!nav||index<0||index>=queue.length)return;const button=nav.querySelector(`[data-reader-jump="${index}"]`);if(!button)return;const question=queue[index],records=loadRecords(),state=questionState(question,records),number=questionNumber(question,index);button.className=navClass(question,index,records);button.setAttribute('aria-label',`第 ${number} 题${index===selectedIndex?'，当前题':''}`);if(index===selectedIndex)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');button.innerHTML=`<span>${esc(number)}</span>${state.favorite?'<i>★</i>':''}`;
+}
+function refreshNavSelection(previousIndex){
+  refreshNavButton(previousIndex);refreshNavButton(selectedIndex);const progress=nav?.querySelector('[data-reader-nav-progress]');if(progress)progress.textContent=`${selectedIndex+1} / ${queue.length}`;nav?.querySelector(`[data-reader-jump="${selectedIndex}"]`)?.scrollIntoView?.({block:'nearest',inline:'nearest'});
+}
+function renderQuestion(){
+  const question=currentQuestion();if(!question){root.innerHTML='<section class="relax-reader-error"><strong>没有找到这道题</strong><p>题目可能已更新，请返回题库墙重新打开。</p><button type="button" data-reader-back>返回题库墙</button></section>';nav=null;stage=null;bindBack();return}
+  ensureShell();setUrl(question);document.title=`Relax1000 · 第 ${currentNumber(question)} 题 · Everflow`;
   const state=questionState(question,loadRecords()),rec=state.rec,images=questionImages(question),analysisImages=explanationImages(question),fallback=usesQuestionImageFallback(question);
   const imageHtml=images.length?`<div class="relax-reader-images">${images.map((src,index)=>imageMarkup(src,`原题截图 ${index+1}`)).join('')}</div>${fallback?'<p class="relax-image-fallback-note">这道题含公式或图表，文字识别不完整时请以原题图为准；仍可使用 A–D 正常作答。</p>':''}`:'';
   const result=rec.answer?`<div class="relax-reader-result ${rec.correct?'correct':'wrong'}"><strong>${rec.correct?'✓ 回答正确':'✕ 回答错误'}</strong><span>你的答案 ${esc(rec.answer)} · 正确答案 ${esc(question.answer)}</span></div>`:'';
   const showAnalysis=analysisVisible||rec.reviewed;
   const analysis=showAnalysis?`<section class="relax-reader-analysis"><header><strong>解析</strong><span>正确答案 ${esc(question.answer||'')}</span></header>${analysisImages.length?`<div class="relax-reader-images">${analysisImages.map((src,index)=>imageMarkup(src,`解析截图 ${index+1}`)).join('')}</div>`:`<p>${esc(question.explanation||'暂无文字解析。')}</p>`}</section>`:'';
-  root.innerHTML=`<article class="relax-reader-card"><header class="relax-reader-head"><div class="relax-reader-meta"><span>${esc(subjectName(question.subjectId,question.subject))}</span><strong>Relax1000 · 第 ${esc(currentNumber(question))} 题</strong><small>${esc(question.chapter||'')}</small></div><div class="relax-reader-head-actions"><button type="button" data-reader-favorite class="${state.favorite?'active':''}">${state.favorite?'★ 已收藏':'☆ 收藏'}</button></div></header><div class="relax-reader-body"><div class="relax-reader-status"><span>掌握状态</span><button data-reader-status="mastered" class="${rec.status==='mastered'?'active':''}">熟练</button><button data-reader-status="fuzzy" class="${rec.status==='fuzzy'?'active':''}">模糊</button><button data-reader-status="weak" class="${rec.status==='weak'?'active':''}">不会</button><button data-reader-status="" class="${!rec.status?'active':''}">清除</button></div>${imageHtml}<h1 class="relax-reader-question">${esc(question.stem||'题干以原题截图为准')}</h1>${optionButtons(question,rec)}${result}<div class="relax-reader-actions"><button type="button" data-reader-submit ${rec.answer||!rec.draftAnswer?'disabled':''}>${rec.answer?'已提交':'提交答案'}</button><button type="button" data-reader-analysis>${showAnalysis?'收起解析':'查看解析'}</button></div>${analysis}<label class="relax-reader-note"><span>复盘笔记</span><textarea data-reader-note rows="4" placeholder="记录本题易错点或二刷提醒…">${esc(rec.note||'')}</textarea></label></div><footer class="relax-reader-footer"><button type="button" data-reader-prev ${selectedIndex<=0?'disabled':''}>← 上一题</button><span>${selectedIndex+1} / ${queue.length}</span><button type="button" data-reader-next ${selectedIndex>=queue.length-1?'disabled':''}>下一题 →</button></footer></article>`;
-  bind();
+  stage.innerHTML=`<article class="relax-reader-card"><header class="relax-reader-head"><div class="relax-reader-meta"><span>${esc(subjectName(question.subjectId,question.subject))}</span><strong>Relax1000 · 第 ${esc(currentNumber(question))} 题</strong><small>${esc(question.chapter||'')}</small></div><div class="relax-reader-head-actions"><button type="button" data-reader-favorite class="${state.favorite?'active':''}">${state.favorite?'★ 已收藏':'☆ 收藏'}</button></div></header><div class="relax-reader-body"><div class="relax-reader-status"><span>掌握状态</span><button data-reader-status="mastered" class="${rec.status==='mastered'?'active':''}">熟悉</button><button data-reader-status="fuzzy" class="${rec.status==='fuzzy'?'active':''}">模糊</button><button data-reader-status="weak" class="${rec.status==='weak'?'active':''}">不会</button><button data-reader-status="" class="${!rec.status?'active':''}">清除</button></div>${imageHtml}<h1 class="relax-reader-question">${esc(question.stem||'题干以原题截图为准')}</h1>${optionButtons(question,rec)}${result}<div class="relax-reader-actions"><button type="button" data-reader-submit ${rec.answer||!rec.draftAnswer?'disabled':''}>${rec.answer?'已提交':'提交答案'}</button><button type="button" data-reader-analysis>${showAnalysis?'收起解析':'查看解析'}</button></div>${analysis}<label class="relax-reader-note"><span>复盘笔记</span><textarea data-reader-note rows="4" placeholder="记录本题易错点或二刷提醒…">${esc(rec.note||'')}</textarea></label></div><footer class="relax-reader-footer"><button type="button" data-reader-prev ${selectedIndex<=0?'disabled':''}>← 上一题</button><span>${selectedIndex+1} / ${queue.length}</span><button type="button" data-reader-next ${selectedIndex>=queue.length-1?'disabled':''}>下一题 →</button></footer></article>`;
+  bindQuestion();
 }
-function choose(key){const question=currentQuestion();if(!question)return;const rec=questionState(question).rec;if(rec.answer)return;patchRecord(question.id,{draftAnswer:key});render()}
-function submit(){const question=currentQuestion();if(!question)return;flushNote();const rec=questionState(question).rec,answer=String(rec.draftAnswer||'');if(!answer||rec.answer)return;const correct=answer===String(question.answer);patchRecord(question.id,{answer,draftAnswer:answer,correct,reviewed:true,attempts:(Number(rec.attempts)||0)+1});syncAnswerCompatibility(question,correct);analysisVisible=true;render()}
-function setStatus(status){const question=currentQuestion();if(!question)return;flushNote();patchRecord(question.id,{status:status||undefined});render()}
-function favorite(){const question=currentQuestion();if(!question)return;flushNote();toggleBookmark(question);render()}
-function move(delta){const next=selectedIndex+delta;if(next<0||next>=queue.length)return;flushNote();selectedIndex=next;analysisVisible=false;render();window.scrollTo({top:0,behavior:'auto'})}
-function bind(){
-  document.querySelectorAll('[data-reader-back]').forEach(button=>button.onclick=goBack);
-  root.querySelectorAll('[data-reader-option]').forEach(button=>button.onclick=()=>choose(button.dataset.readerOption));
-  root.querySelector('[data-reader-submit]')?.addEventListener('click',submit);
-  root.querySelector('[data-reader-analysis]')?.addEventListener('click',()=>{analysisVisible=!analysisVisible;render()});
-  root.querySelectorAll('[data-reader-status]').forEach(button=>button.onclick=()=>setStatus(button.dataset.readerStatus));
-  root.querySelector('[data-reader-favorite]')?.addEventListener('click',favorite);
-  root.querySelector('[data-reader-prev]')?.addEventListener('click',()=>move(-1));
-  root.querySelector('[data-reader-next]')?.addEventListener('click',()=>move(1));
-  root.querySelector('[data-reader-note]')?.addEventListener('input',event=>{const question=currentQuestion();if(question)queueNote(question,event.target.value)});
+function choose(key){const question=currentQuestion();if(!question)return;const rec=questionState(question).rec;if(rec.answer)return;patchRecord(question.id,{draftAnswer:key});renderQuestion()}
+function submit(){const question=currentQuestion();if(!question)return;flushNote();const rec=questionState(question).rec,answer=String(rec.draftAnswer||'');if(!answer||rec.answer)return;const correct=answer===String(question.answer);patchRecord(question.id,{answer,draftAnswer:answer,correct,reviewed:true,attempts:(Number(rec.attempts)||0)+1});syncAnswerCompatibility(question,correct);analysisVisible=true;refreshNavButton(selectedIndex);renderQuestion()}
+function setStatus(status){const question=currentQuestion();if(!question)return;flushNote();patchRecord(question.id,{status:status||undefined});refreshNavButton(selectedIndex);renderQuestion()}
+function favorite(){const question=currentQuestion();if(!question)return;flushNote();toggleBookmark(question);refreshNavButton(selectedIndex);renderQuestion()}
+function move(delta){jumpTo(selectedIndex+delta)}
+function jumpTo(next){if(!Number.isInteger(next)||next<0||next>=queue.length||next===selectedIndex)return;flushNote();const previous=selectedIndex;selectedIndex=next;analysisVisible=false;refreshNavSelection(previous);renderQuestion();window.scrollTo({top:0,behavior:'auto'})}
+function bindBack(){document.querySelectorAll('[data-reader-back]').forEach(button=>button.onclick=goBack)}
+function bindQuestion(){
+  bindBack();
+  stage.querySelectorAll('[data-reader-option]').forEach(button=>button.onclick=()=>choose(button.dataset.readerOption));
+  stage.querySelector('[data-reader-submit]')?.addEventListener('click',submit);
+  stage.querySelector('[data-reader-analysis]')?.addEventListener('click',()=>{analysisVisible=!analysisVisible;renderQuestion()});
+  stage.querySelectorAll('[data-reader-status]').forEach(button=>button.onclick=()=>setStatus(button.dataset.readerStatus));
+  stage.querySelector('[data-reader-favorite]')?.addEventListener('click',favorite);
+  stage.querySelector('[data-reader-prev]')?.addEventListener('click',()=>move(-1));
+  stage.querySelector('[data-reader-next]')?.addEventListener('click',()=>move(1));
+  stage.querySelector('[data-reader-note]')?.addEventListener('input',event=>{const question=currentQuestion();if(question)queueNote(question,event.target.value)});
 }
 
 document.addEventListener('keydown',event=>{
@@ -66,5 +100,5 @@ document.addEventListener('keydown',event=>{
 });
 window.addEventListener('pagehide',flushNote);
 
-document.querySelectorAll('[data-reader-back]').forEach(button=>button.onclick=goBack);
-loadRelaxData().then(value=>{data=value;buildQueue();render()}).catch(error=>{console.error('Relax1000 standalone reader failed',error);root.innerHTML=`<section class="relax-reader-error"><strong>题目载入失败</strong><p>${esc(error.message||error)}</p><button type="button" data-reader-back>返回题库墙</button></section>`;bind()});
+bindBack();
+loadRelaxData().then(value=>{data=value;buildQueue();ensureShell();renderQuestion()}).catch(error=>{console.error('Relax1000 standalone reader failed',error);root.innerHTML=`<section class="relax-reader-error"><strong>题目载入失败</strong><p>${esc(error.message||error)}</p><button type="button" data-reader-back>返回题库墙</button></section>`;nav=null;stage=null;bindBack()});
