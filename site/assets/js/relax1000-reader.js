@@ -19,7 +19,7 @@ function buildQueue(){
   const target=byId.get(wanted);
   if(!queue.length&&target)queue=data.questions.filter(question=>question.subjectId===target.subjectId);
   if(!queue.length&&data.questions.length)queue=data.questions;
-  selectedIndex=Math.max(0,queue.findIndex(question=>idKey(question)===wanted));
+  selectedIndex=queue.findIndex(question=>idKey(question)===wanted);
   if(selectedIndex<0)selectedIndex=0;
 }
 function optionButtons(question,rec){
@@ -66,5 +66,5 @@ document.addEventListener('keydown',event=>{
 });
 window.addEventListener('pagehide',flushNote);
 
-document.querySelectorAll('[data-reader-back]').forEach(button=>button.addEventListener('click',goBack));
+document.querySelectorAll('[data-reader-back]').forEach(button=>button.onclick=goBack);
 loadRelaxData().then(value=>{data=value;buildQueue();render()}).catch(error=>{console.error('Relax1000 standalone reader failed',error);root.innerHTML=`<section class="relax-reader-error"><strong>题目载入失败</strong><p>${esc(error.message||error)}</p><button type="button" data-reader-back>返回题库墙</button></section>`;bind()});
