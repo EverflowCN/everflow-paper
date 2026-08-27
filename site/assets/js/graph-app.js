@@ -1,7 +1,8 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-const APP_VERSION='20260828-relaxfix1';
+const APP_VERSION='20260825-bank1';
+const RELAX_VERSION='20260828-relaxfix1';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');
 const sourceHost=shell?.querySelector('[data-graph-source-host]');
@@ -20,7 +21,7 @@ const SOURCES={
   relax1000:{
     label:'Relax1000',kind:'relax1000',cols:45,rows:1,
     fitKey:'everflow-408-relax-graph-fit-v2',caption:'章节 × 题序 · 每行最多 45 题',
-    load:async()=>import(`/assets/js/relax1000-graph.js?v=${APP_VERSION}`)
+    load:async()=>import(`/assets/js/relax1000-graph.js?v=${RELAX_VERSION}`)
   }
 };
 
@@ -88,7 +89,7 @@ try{
   await SOURCES[source].load();
   await import(`/assets/js/graph-controls.js?v=${APP_VERSION}`);
   body.dataset.graphReady='true';
-  document.dispatchEvent(new CustomEvent('everflow:graph-ready',{detail:{source,version:APP_VERSION}}));
+  document.dispatchEvent(new CustomEvent('everflow:graph-ready',{detail:{source,version:source==='relax1000'?RELAX_VERSION:APP_VERSION}}));
 }catch(error){
   body.dataset.graphReady='false';
   showFatal(error);
