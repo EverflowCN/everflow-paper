@@ -1,0 +1,7 @@
+/* Relax1000 reader safety layer.
+   Keep the fixed reader cheap on iPad/Safari: no full-screen backdrop blur,
+   no painting of the large question wall while the reader is open. */
+body.evera-modal-open .relax-wall-root{visibility:hidden}
+body.evera-modal-open .relax-modal-backdrop{background:rgba(10,10,15,.62)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.relax-question-modal{overscroll-behavior:contain}
+@media (pointer:coarse){.relax-modal-card{box-shadow:0 12px 34px rgba(0,0,0,.18)!important}}
