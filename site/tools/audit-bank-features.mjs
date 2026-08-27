@@ -57,7 +57,7 @@ assert(graphControls.includes('Math.max(2')&&graphControls.includes('moveRelax')
 assert(graphControls.includes("event.key==='Enter'")&&graphControls.includes("event.key==='Escape'")&&graphControls.includes('keyboard-active'),'keyboard open/close/current feedback missing');
 assert(graphAnswer.includes('data-graph-submit')&&graphAnswer.includes("if(q>40)return null")&&graphAnswer.includes('/^[A-D]$/.test(answer)'),'graph choice-only answer layer missing');
 assert(graphAnswer.includes("'ABCD'.includes(key)")&&graphAnswer.includes("event.key==='1'")&&graphAnswer.includes("key==='E'"),'graph answer desktop shortcuts missing');
-assert(graphAnswerCss.includes('.drawer-option[data-graph-choice]')&&graphAnswerCss.includes('background:#24945d')&&graphAnswerCss.includes('background:#e0a51d')&&graphAnswerCss.includes('background:#d84b5f'),'graph answer/deep status CSS missing');
+assert(graphAnswerCss.includes('.drawer-option[data-graph-choice]')&&graphAnswerCss.includes('--mastered:#24945d')&&graphAnswerCss.includes('--fuzzy:#e0a51d')&&graphAnswerCss.includes('--weak:#d84b5f'),'graph answer/deep status CSS missing');
 assert(graphCss.includes('.graph-toolbar-primary')&&graphCss.includes('.graph-toolbar-secondary')&&graphCss.includes('.graph-view-segmented'),'graph toolbar CSS missing');
 assert(graphCss.includes('.question-drawer{position:absolute')&&!graphCss.includes('.overview-stage.drawer-open{grid-template-columns'),'drawer must overlay without old two-column layout');
 assert(graphCss.includes('.overview-cell.current')&&graphCss.includes('graph-fit-dense'),'current-cell/dense fit styling missing');
