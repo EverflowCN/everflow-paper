@@ -6,9 +6,76 @@
 
 ---
 
+## 2026-08-28 · Relax1000 iPad 点题后整页卡死 · 第 3 轮
+
+**状态：结构性修复已提交；自动检查/部署进行中；等待真实 iPad 复测。**
+
+### 用户现象
+
+第 2 轮部署后真实 iPad 复测结果仍为 **B：点击题号后仍然整页卡死，什么都点不动，刷新也很困难**。
+
+因此第 2 轮的“移除 `:has()` + 关闭 backdrop blur + 暂停题号墙绘制”并未解决实际设备问题。本轮不再继续叠加同页面 modal 性能补丁。
+
+### 本轮判断
+
+连续两轮针对同页面弹层的局部优化均未改善真实 iPad 症状，说明继续让“数百题题号墙 + 题目阅读器”处于同一个文档/渲染上下文风险过高。即使单独某个 CSS 或事件并非唯一根因，同页面 modal 架构仍会让 Safari 在点题瞬间同时处理题号墙、状态样式、图片、弹层和页面锁定。
+
+第 3 轮采用结构性隔离：**题库墙只负责选题；题目阅读器进入独立页面。** 点击题号后不再创建 `.relax-question-modal`，原题号墙文档直接离开渲染路径。
+
+### 实际改动
+
+- 新增独立题目页面：`/zhenti/relax-reader/`。
+- 新增 `site/assets/js/relax1000-reader.js`，只加载当前题目以及当前筛选结果中的上一题/下一题上下文。
+- 新增 `site/assets/css/relax1000-reader-page.css`，阅读器为普通文档流，不使用全屏 modal、`backdrop-filter`、`body:has()` 或整页背景模糊。
+- 重构 `site/assets/js/relax1000-wall.js`：删除题号墙中的 modal 创建、渲染、事件绑定和键盘 modal 逻辑；题号点击只保存轻量上下文并导航到独立阅读器。
+- 题库墙使用 `sessionStorage` 保存当前科目、章节、筛选、搜索词和当前可见题目 ID，返回后继续原来的题目范围。
+- 独立阅读器继续复用 `relax1000-core.js` 的 `patchRecord / questionState / syncAnswerCompatibility / toggleBookmark`，因此答题、错题、掌握状态、收藏和笔记仍使用原来的记录格式与题目 ID。
+- 独立阅读器支持：A-D 选择、提交答案、解析、熟练/模糊/不会、收藏、笔记、上一题/下一题、键盘方向键和返回题库墙。
+- 笔记输入增加短延迟写入，并在离开页面前强制 flush，减少连续 localStorage 写入。
+- 修复独立阅读器顶部“返回题库墙”可能重复绑定导致连续返回两次的问题。
+- `question-bank-switch.js` 版本升级为 `20260828-relaxreader3`，不再给题号墙加载第 2 轮的 modal safety CSS。
+- Service Worker 缓存升级为 `everflow-site-v45-course4-relax-reader-route`，并把独立阅读器页面、JS、CSS 加入站点 shell。
+
+### 数据影响
+
+无数据迁移、无题目 ID 改写、无记录清空。
+
+继续使用原有：
+
+- `everflow-408-relax1000-records-v1`
+- `relax-seen`
+- `relax-mistakes`
+- `relax-ever-wrong`
+- `relax-bookmarks`
+- 原 `question.id`
+
+因此已有答题记录、错题、收藏、掌握状态、笔记和 SRS 数据保持兼容。
+
+### 提交
+
+- 独立阅读器页面：`312c255e7dbb778dfebd927d609ca12146241b20`
+- 独立阅读器样式：`b7764372ec21ab89c11e7f23e2c77cc0a83fe465`
+- 独立阅读器逻辑：`d0bddf59f4c54925cf6a97d023e8f1e11b50e08a`
+- 题号墙改为独立路由：`eb735c0b970cde7d4205ef4a043832a43d8d551e`
+- Relax runtime 升级到 reader v3：`16585fa2c38ac4409f9c7811f51c9e09951f1d42`
+- Service Worker 独立阅读器缓存：`e91c84d4fcb97f73c0594b0a77bf3998a3c6d97c`
+- 返回按钮重复绑定修复：`efa262e6098e4c842d51a63174414b5c58746f26`
+
+### 自动验证与部署
+
+- GitHub Pages workflow #173 已触发。
+- Architecture audit 已通过。
+- 最终 deploy 结果待 workflow 完成后补充。
+
+### 真实设备结果
+
+**待复测。** 本轮只有用户在真实 iPad 上确认“点题后能稳定进入独立题目页且页面可正常操作”，才会改为“已解决”。
+
+---
+
 ## 2026-08-28 · Relax1000 iPad 点题后整页卡死 · 第 2 轮
 
-**状态：自动检查与线上部署已成功；等待真实 iPad 复测。**
+**状态：未解决；真实 iPad 复测失败；已被第 3 轮结构性隔离方案取代。**
 
 ### 用户现象
 
@@ -63,7 +130,7 @@
 
 ### 真实设备结果
 
-**待复测。** 自动部署成功不能替代用户 iPad 的真实交互结果。如果仍卡死，本条状态将改为“未解决”，下一轮继续在本文件追加，不删除本轮过程。
+**失败。** 用户复测结果为 **B**：仍然一点题号就整页卡死，什么都点不动，刷新也很困难。因此本轮正式标记为未解决。
 
 ---
 
