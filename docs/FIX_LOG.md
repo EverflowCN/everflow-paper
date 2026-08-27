@@ -8,7 +8,7 @@
 
 ## 2026-08-28 · Relax1000 iPad 点题后整页卡死 · 第 2 轮
 
-**状态：已提交修复，等待真实 iPad 复测。**
+**状态：自动检查与线上部署已成功；等待真实 iPad 复测。**
 
 ### 用户现象
 
@@ -33,15 +33,37 @@
 - Relax modal 打开时，将后方 `.relax-wall-root` 设为 `visibility:hidden`：保留布局和学习状态，但停止绘制几百个题号，关闭弹层后立即恢复。
 - Relax 背景层强制关闭 `backdrop-filter` / `-webkit-backdrop-filter`，只保留普通半透明遮罩。
 - 降低粗指针/iPad 类设备上弹层的大面积阴影开销。
-- Service Worker 缓存版本再次升级，确保旧的交互保护 CSS 不继续留在设备缓存。
+- `question-bank-switch.js` 将 Relax 资源版本升级为 `20260828-relaxreader2`，并在 Relax runtime 前加载专用安全层 `relax1000-reader-safe.css`。
+- Service Worker 缓存从 `everflow-site-v45-course2-relax-v2` 升级为 `everflow-site-v45-course3-relax-reader`，确保旧的交互保护 CSS 不继续留在设备缓存。
 
 ### 数据影响
 
 无。未修改题目 ID、答题记录、错题、收藏、掌握状态、笔记、SRS 或 Supabase 数据。
 
-### 自动验证
+### 提交
 
-等待本次 GitHub Pages workflow 完成后补充。真实 iPad 结果必须由实际设备复测确认，不能用 CI 结果代替。
+- 统一修复记录：`7631bce0308fb99ee13138f7827304dd477a3411`
+- iPad 阅读层安全 CSS：`9de18b1942308aebdaa571b4fbb885b456e951c6`
+- 移除 Relax `body:has(...)` 关系锁：`27846c47e3d5b6925a16c10c76d2a3091faffcae`
+- Relax runtime 加载安全层并升级资源版本：`3faa9d53318b27d80c616cc259733a26ec04f306`
+- Service Worker 缓存刷新：`5bddf3302980886c814b6c639f207895b13d145b`
+
+### 自动验证与部署
+
+- GitHub Pages workflow：**#166**，run `33108940306`。
+- Architecture audit：成功。
+- Account / resource hub / workspace / cache scripts：成功。
+- Course catalogs：成功。
+- Question assets checkout：成功。
+- 408 algorithm visualizer build：成功。
+- Verify site：成功。
+- Privacy-safe static artifact：成功。
+- Upload Pages artifact：成功。
+- Deploy to GitHub Pages：成功。
+
+### 真实设备结果
+
+**待复测。** 自动部署成功不能替代用户 iPad 的真实交互结果。如果仍卡死，本条状态将改为“未解决”，下一轮继续在本文件追加，不删除本轮过程。
 
 ---
 
