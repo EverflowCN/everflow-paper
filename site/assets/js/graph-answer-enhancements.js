@@ -8,13 +8,16 @@ if(!shell||!matrix||!drawer||!drawerBody)throw new Error('graph answer enhanceme
 
 const ZHENTI_KEY='everflow-408-zhenti-wall-v1';
 const RELAX_CORE_URL='/assets/js/relax1000-core.js?v=20260828-relaxfix1';
-let relaxCorePromise=null,relaxDataPromise=null,enhanceToken=0;
+const RETRY_DELAY=140;
+const RETRY_LIMIT=72;
+let relaxCorePromise=null,relaxDataPromise=null,enhanceToken=0,retryTimer=0,retryCount=0,retryKey='';
 const zhentiCache=new Map();
-const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
 const editable=target=>Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));
 const source=()=>document.body.dataset.graphSource==='relax1000'?'relax1000':'zhenti';
 const activeCell=()=>matrix.querySelector('.overview-cell.current');
 const drawerOpen=()=>!drawer.hidden;
+const activeKey=()=>{const cell=activeCell();return cell?`${source()}:${cell.dataset.relaxId||cell.dataset.key||''}`:''};
 function readJson(key){try{const value=JSON.parse(localStorage.getItem(key)||'{}');return value&&typeof value==='object'?value:{}}catch{return{}}}
 function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch{}}
 async function relaxCore(){return relaxCorePromise||(relaxCorePromise=import(RELAX_CORE_URL))}
@@ -38,29 +41,44 @@ function syncOptions(ctx){
   drawerBody.querySelectorAll('[data-graph-choice]').forEach(button=>{
     const key=button.dataset.graphChoice;button.classList.toggle('selected',selected===key);button.classList.toggle('is-answer',show&&key===ctx.answer);button.classList.toggle('is-wrong',done&&ctx.record.correct===false&&ctx.record.answer===key);button.setAttribute('aria-pressed',String(selected===key));button.setAttribute('aria-disabled',String(done));
   });
-  const submit=drawerBody.querySelector('[data-graph-submit]');if(submit){submit.disabled=done||!selected;submit.textContent=done?'已提交':'提交答案'}
+  const submit=drawerBody.querySelector('[data-graph-submit]');if(submit){submit.disabled=done||!selected;const label=done?'已提交':'提交答案';if(submit.textContent!==label)submit.textContent=label}
   const result=drawerBody.querySelector('[data-graph-answer-result]');if(!result)return;
   if(!done){result.hidden=true;result.dataset.state='';return}
   const stateKey=`${ctx.record.correct?'1':'0'}:${ctx.record.answer}:${ctx.answer}`;result.hidden=false;result.className=`graph-answer-result ${ctx.record.correct?'correct':'wrong'}`;
   if(result.dataset.state!==stateKey){result.dataset.state=stateKey;result.innerHTML=`<strong>${ctx.record.correct?'✓ 回答正确':'✕ 回答错误'}</strong><span>你的答案 ${esc(ctx.record.answer)} · 正确答案 ${esc(ctx.answer)}</span>`}
 }
 async function enhance(){
-  if(!drawerOpen())return;const token=++enhanceToken,ctx=await context();if(token!==enhanceToken||!ctx||!drawerOpen())return;
-  const optionNodes=[...drawerBody.querySelectorAll('.drawer-options .drawer-option')];if(!optionNodes.length)return;
+  if(!drawerOpen())return'closed';const token=++enhanceToken,ctx=await context();if(token!==enhanceToken||!drawerOpen())return'closed';if(!ctx)return'unsupported';
+  const optionNodes=[...drawerBody.querySelectorAll('.drawer-options .drawer-option')];if(!optionNodes.length)return'waiting';
   optionNodes.forEach((node,index)=>{const entry=ctx.entries[index],key=String(entry?.key||node.querySelector('b')?.textContent||'').replace(/[^A-D]/gi,'').toUpperCase().slice(0,1);if(!key)return;node.dataset.graphChoice=key;node.setAttribute('role','button');node.setAttribute('tabindex','0');node.setAttribute('aria-label',`选择 ${key}`);if(!node.querySelector('kbd'))node.insertAdjacentHTML('beforeend',`<kbd>${key}</kbd>`)});
   let actions=drawerBody.querySelector('[data-graph-answer-actions]');if(!actions){actions=document.createElement('div');actions.className='graph-answer-actions';actions.dataset.graphAnswerActions='';actions.innerHTML='<button type="button" data-graph-submit>提交答案</button><span>电脑：A–D 选项 · Enter 提交</span>';drawerBody.querySelector('.drawer-options')?.insertAdjacentElement('afterend',actions)}
-  if(!drawerBody.querySelector('[data-graph-answer-result]'))actions.insertAdjacentHTML('afterend','<div data-graph-answer-result class="graph-answer-result" hidden></div>');
-  syncOptions(ctx);
+  if(actions&&!drawerBody.querySelector('[data-graph-answer-result]'))actions.insertAdjacentHTML('afterend','<div data-graph-answer-result class="graph-answer-result" hidden></div>');
+  syncOptions(ctx);return'ready';
+}
+function cancelRetry(){if(retryTimer){clearTimeout(retryTimer);retryTimer=0}retryCount=0;retryKey=''}
+function startRetry(){
+  if(!drawerOpen()){cancelRetry();return}
+  const key=activeKey();if(!key)return;
+  if(key!==retryKey){if(retryTimer)clearTimeout(retryTimer);retryTimer=0;retryCount=0;retryKey=key}
+  const run=async()=>{
+    retryTimer=0;if(!drawerOpen()||activeKey()!==retryKey){cancelRetry();return}
+    const state=await enhance();if(state==='ready'||state==='unsupported'||state==='closed'){cancelRetry();return}
+    if(++retryCount>=RETRY_LIMIT){cancelRetry();return}
+    retryTimer=setTimeout(run,RETRY_DELAY);
+  };
+  if(!retryTimer)retryTimer=setTimeout(run,0);
 }
 async function choose(key){const ctx=await context();if(!ctx||submitted(ctx)||!ctx.entries.some(item=>item.key===key))return;if(ctx.source==='relax1000'){ctx.core.patchRecord(ctx.question.id,{draftAnswer:key});ctx.record=ctx.core.questionState(ctx.question).rec||{}}else ctx.record=zhentiPatch(ctx.year,ctx.q,{draftAnswer:key});await enhance()}
 async function submit(){const ctx=await context();if(!ctx||submitted(ctx))return;const answer=String(ctx.record.draftAnswer||'');if(!answer)return;const correct=answer===ctx.answer;if(ctx.source==='relax1000'){ctx.core.patchRecord(ctx.question.id,{answer,draftAnswer:answer,correct,reviewed:true,attempts:(Number(ctx.record.attempts)||0)+1});ctx.core.syncAnswerCompatibility(ctx.question,correct);ctx.record=ctx.core.questionState(ctx.question).rec||{}}else ctx.record=zhentiPatch(ctx.year,ctx.q,{answer,draftAnswer:answer,correct,reviewed:true,attempts:(Number(ctx.record.attempts)||0)+1});await enhance()}
 
 drawerBody.addEventListener('click',event=>{const option=event.target.closest('[data-graph-choice]');if(option){event.preventDefault();choose(option.dataset.graphChoice);return}if(event.target.closest('[data-graph-submit]')){event.preventDefault();submit()}});
 drawerBody.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.closest('[data-graph-choice]')){event.preventDefault();choose(event.target.closest('[data-graph-choice]').dataset.graphChoice)}});
-new MutationObserver(()=>queueMicrotask(enhance)).observe(drawerBody,{childList:true,subtree:true});
-new MutationObserver(()=>queueMicrotask(enhance)).observe(drawer,{attributes:true,attributeFilter:['hidden']});
-document.addEventListener('everflow:relax-records-change',()=>queueMicrotask(enhance));
-document.addEventListener('everflow:zhenti-records-change',()=>queueMicrotask(enhance));
+matrix.addEventListener('click',()=>startRetry(),true);
+new MutationObserver(()=>{if(drawerOpen())startRetry();else cancelRetry()}).observe(drawer,{attributes:true,attributeFilter:['hidden']});
+drawerAnswer?.addEventListener('click',()=>setTimeout(()=>enhance().catch(()=>{}),0));
+document.addEventListener('everflow:relax-records-change',()=>enhance().catch(()=>{}));
+document.addEventListener('everflow:zhenti-records-change',()=>enhance().catch(()=>{}));
+window.addEventListener('pagehide',cancelRetry);
 window.addEventListener('keydown',event=>{
   if(!drawerOpen()||editable(event.target)||event.altKey||event.ctrlKey||event.metaKey)return;const key=event.key.toUpperCase();
   if('ABCD'.includes(key)){event.preventDefault();event.stopPropagation();choose(key);return}
@@ -69,4 +87,4 @@ window.addEventListener('keydown',event=>{
   if(key==='E'&&drawerAnswer&&!drawerAnswer.hidden){event.preventDefault();event.stopPropagation();drawerAnswer.click()}
 },true);
 if(shortcutTip)shortcutTip.textContent='方向键移动 · Enter 打开/提交 · A–D 选项 · 1/2/3 状态 · E 解析 · Esc 关闭';
-queueMicrotask(enhance);
+if(drawerOpen())startRetry();
