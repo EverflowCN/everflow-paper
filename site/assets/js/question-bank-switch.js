@@ -3,7 +3,7 @@ if(body.dataset.view!=='zhenti')throw new Error('question-bank-switch loaded out
 
 document.title='题库 · Everflow';
 const KEY='everflow-408-bank-source-v1';
-const RELAX_VERSION='20260828-relaxfix1';
+const RELAX_VERSION='20260828-relaxreader2';
 const RELAX_DATA_VERSION='20260825-bank2';
 const current=(()=>{try{return localStorage.getItem(KEY)==='relax1000'?'relax1000':'zhenti'}catch{return'zhenti'}})();
 body.dataset.questionBank=current;
@@ -30,6 +30,7 @@ if(current!=='relax1000'){
 
 if(current==='relax1000'){
   const controls=document.createElement('link');controls.rel='stylesheet';controls.href=`/assets/css/relax1000-controls.css?v=${RELAX_VERSION}`;document.head.appendChild(controls);
+  const readerSafe=document.createElement('link');readerSafe.rel='stylesheet';readerSafe.href=`/assets/css/relax1000-reader-safe.css?v=${RELAX_VERSION}`;document.head.appendChild(readerSafe);
   import(`/assets/js/relax1000-wall.js?v=${RELAX_VERSION}`)
     .then(()=>import(`/assets/js/relax1000-cards.js?v=${RELAX_VERSION}`))
     .then(()=>import(`/assets/js/relax1000-reset.js?v=${RELAX_VERSION}`))
