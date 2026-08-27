@@ -1,4 +1,4 @@
-import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questionImages,explanationImages,optionEntries,imageMarkup,usesQuestionImageFallback,esc,subjectName,idKey}from'./relax1000-core.js?v=20260825-bank2';
+import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questionImages,explanationImages,optionEntries,imageMarkup,usesQuestionImageFallback,esc,subjectName,idKey}from'./relax1000-core.js?v=20260828-relaxfix1';
 
 const shell=document.querySelector('[data-graph-shell]');
 const matrix=shell?.querySelector('[data-overview-matrix]');
@@ -15,7 +15,7 @@ if(!shell||!matrix||!drawer||!drawerBody||!drawerTitle||!drawerMeta||!drawerAnsw
 const CURRENT_KEY='everflow-408-relax-graph-current-v4';
 const MAX_COLS=45;
 const SUBJECT_SHORT={ds:'DS',co:'CO',os:'OS',cn:'CN'};
-let data=null,rows=[],selected=null,current='',answerVisible=false;
+let data=null,rows=[],selected=null,current='',answerVisible=false,questionById=new Map(),externalFrame=0;
 try{current=localStorage.getItem(CURRENT_KEY)||''}catch{}
 matrix.setAttribute('aria-label','Relax1000 整体图谱');
 
@@ -38,7 +38,7 @@ function cellClasses(question,state){
   return classes.join(' ');
 }
 function buildRows(){
-  rows=[];
+  rows=[];questionById=new Map((data.questions||[]).map(question=>[idKey(question),question]));
   const grouped=new Map();
   for(const question of data.questions||[]){
     const key=`${question.subjectId}\u0000${question.chapterId}`;
@@ -60,6 +60,17 @@ function buildRows(){
 function indexCell(text,className,title=''){
   const cell=document.createElement('div');cell.className=`overview-index ${className}`;cell.textContent=text;if(title)cell.title=title;cell.setAttribute('aria-hidden','true');return cell;
 }
+function applyCellState(button,question,records=loadRecords()){
+  if(!button||!question)return;
+  const state=recordState(question,records),number=questionNumber(question),row=rows[Number(button.dataset.row)]||{};
+  button.className=cellClasses(question,state);
+  button.setAttribute('aria-label',`${row.subject||subjectName(question.subjectId,question.subject)}，${row.chapter||question.chapter||''}，第${number}题，${statusText(state)}，${answerText(state)}`);
+  button.title=`${row.subject||subjectName(question.subjectId,question.subject)} · ${row.chapter||question.chapter||''} · 第 ${number} 题 · ${statusText(state)} · ${answerText(state)}`;
+}
+function refreshCellById(id,records=loadRecords()){
+  const question=questionById.get(String(id||''));if(!question)return;
+  const button=matrix.querySelector(`[data-relax-id="${CSS.escape(idKey(question))}"]`);applyCellState(button,question,records);
+}
 function renderMatrix({focus=false}={}){
   const records=loadRecords();
   matrix.style.gridTemplateColumns=`var(--year-col) repeat(${MAX_COLS},var(--cell-size))`;
@@ -76,13 +87,14 @@ function renderMatrix({focus=false}={}){
       button.type='button';button.className=cellClasses(question,state);button.dataset.key=`relax:${idKey(question)}`;button.dataset.row=String(rowIndex);button.dataset.col=String(col);button.dataset.relaxId=idKey(question);button.setAttribute('role','gridcell');
       button.setAttribute('aria-label',`${row.subject}，${row.chapter}，第${number}题，${statusText(state)}，${answerText(state)}`);
       button.title=`${row.subject} · ${row.chapter} · 第 ${number} 题 · ${statusText(state)} · ${answerText(state)}`;
-      button.addEventListener('click',()=>openQuestion(question));fragment.appendChild(button);
+      fragment.appendChild(button);
     }
   });
   matrix.replaceChildren(fragment);
   document.dispatchEvent(new CustomEvent('everflow:graph-matrix-ready',{detail:{source:'relax1000',cols:MAX_COLS,rows:rows.length+1}}));
   if(focus&&current)requestAnimationFrame(()=>matrix.querySelector(`[data-relax-id="${CSS.escape(current)}"]`)?.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'}));
 }
+matrix.addEventListener('click',event=>{const button=event.target.closest('[data-relax-id]');if(!button||!matrix.contains(button))return;const question=questionById.get(button.dataset.relaxId);if(question)openQuestion(question)});
 function selectCurrent(question){
   const id=idKey(question);
   if(current&&current!==id)matrix.querySelector(`[data-relax-id="${CSS.escape(current)}"]`)?.classList.remove('current');
@@ -116,10 +128,14 @@ function refreshSelected(){if(!selected)return;drawerBody.innerHTML=drawerMarkup
 
 drawerClose?.addEventListener('click',hideDrawer);
 drawerReopen?.addEventListener('click',()=>{if(selected){showDrawer();refreshSelected()}});
-drawerAnswer.addEventListener('click',()=>{if(!selected)return;answerVisible=!answerVisible;if(answerVisible)patchRecord(selected.id,{reviewed:true});refreshSelected();renderMatrix()});
-drawerStatuses.forEach(button=>button.addEventListener('click',()=>{if(!selected)return;patchRecord(selected.id,{status:button.dataset.drawerStatus||undefined});renderMatrix();refreshSelected()}));
-document.addEventListener('everflow:relax-records-change',()=>{renderMatrix();if(selected)syncDrawer()});
-window.addEventListener('storage',event=>{if([CURRENT_KEY,'everflow-408-relax1000-records-v1','relax-seen','relax-mistakes','relax-bookmarks'].includes(event.key)){renderMatrix();if(selected)refreshSelected()}});
+drawerAnswer.addEventListener('click',()=>{if(!selected)return;answerVisible=!answerVisible;if(answerVisible)patchRecord(selected.id,{reviewed:true});refreshSelected()});
+drawerStatuses.forEach(button=>button.addEventListener('click',()=>{if(!selected)return;patchRecord(selected.id,{status:button.dataset.drawerStatus||undefined});refreshSelected()}));
+document.addEventListener('everflow:relax-records-change',event=>{
+  if(!data)return;const id=String(event.detail?.id||'');
+  if(id){refreshCellById(id);if(selected&&idKey(selected)===id)syncDrawer();return}
+  cancelAnimationFrame(externalFrame);externalFrame=requestAnimationFrame(()=>{renderMatrix();if(selected)syncDrawer()});
+});
+window.addEventListener('storage',event=>{if([CURRENT_KEY,'everflow-408-relax1000-records-v1','relax-seen','relax-mistakes','relax-bookmarks'].includes(event.key)){cancelAnimationFrame(externalFrame);externalFrame=requestAnimationFrame(()=>{renderMatrix();if(selected)refreshSelected()})}});
 
 data=await loadRelaxData();
 buildRows();
