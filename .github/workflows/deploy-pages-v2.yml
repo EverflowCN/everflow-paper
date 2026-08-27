@@ -44,6 +44,7 @@ jobs:
             site/assets/js/cloud.js \
             site/assets/js/links.js \
             site/assets/js/checkin.js \
+            site/assets/js/course-catalog-baseline.js \
             site/assets/js/dashboard.js \
             site/assets/js/graph-next.js \
             site/assets/js/paper-builder.js \
@@ -99,10 +100,16 @@ jobs:
           assert 2009 in years and 2010 in years, f'past-paper years incomplete: {sorted(years)}'
 
           subjects=reinforcement.get('subjects') or {}
-          for key in ('ds','co','os','cn'):
+          minimums={'ds':37,'co':29,'os':29,'cn':28}
+          total=0
+          for key,minimum in minimums.items():
               rows=(subjects.get(key) or {}).get('items') or []
-              assert rows, f'reinforcement subject missing/empty: {key}'
-          print('Course catalogs OK: past papers + four-subject reinforcement')
+              assert len(rows)>=minimum, f'reinforcement subject truncated: {key} {len(rows)}/{minimum}'
+              total+=len(rows)
+          assert total>=123, f'reinforcement catalog unexpectedly small: {total}/123'
+          cn_titles={str(item.get('title') or '') for item in (subjects.get('cn') or {}).get('items') or []}
+          assert '应用层选择题专题' in cn_titles, 'CN tail lesson missing: 应用层选择题专题'
+          print(f'Course catalogs OK: past papers + reinforcement baseline {total} (DS>=37 CO>=29 OS>=29 CN>=28)')
           PY
 
       - name: Checkout question assets
@@ -209,6 +216,7 @@ jobs:
           test -s site/visual/subject/computer-networks/index.html
           test -n "$(find site/visual/assets -type f -print -quit)"
           test -s site/assets/js/checkin.js
+          test -s site/assets/js/course-catalog-baseline.js
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
           test -s site/assets/js/zhenti-graph.js
