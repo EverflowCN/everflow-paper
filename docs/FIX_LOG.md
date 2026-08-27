@@ -6,6 +6,150 @@
 
 ---
 
+## 2026-08-28 · Relax 导航章节分组、深色状态、桌面快捷键与整体图谱选择题作答
+
+**状态：代码与 GitHub Pages 已部署成功；等待真实 iPad/电脑交互复测。**
+
+### 用户需求
+
+上一轮 Relax 独立阅读器左侧已经有轻量题号导航，但用户反馈：
+
+- 左侧题号仍然像“一坨”，没有清楚区分章节；
+- 熟悉/模糊/不会的题号底色太浅，需要明显加深；
+- 电脑端需要真正可用、页面可见的快捷键；
+- “整体图谱”中选择题只有查看题目/答案，不能像题库一样直接选择 A–D 并提交；综合应用题暂时可以保持只读。
+
+### 数据层级核验
+
+对当前 Relax1000 canonical 题源 `EverflowCN/408-exercise-paper-generator` 的 `站点/data/questions.json` 全量字段进行检查后确认：
+
+- 题目有 `subjectId / subject`；
+- 题目有 `chapterId / chapter`；
+- 当前题源**没有可靠的 `section / sectionId` 字段**。
+
+因此本轮导航使用真实存在的 **科目 → 第 N 章 · 章名 → 题号** 分组，不凭标题猜测或伪造“第几节”。以后题源真正补充 `section/sectionId` 时，可在章下面继续增加节层级；在数据不存在前，禁止前端自行推断节。
+
+### Relax 独立阅读器改动
+
+- `relax1000-reader.js` 新增 `chapterOrder()` 和 `navGroups()`，左侧导航按当前队列中的科目、章节分组。
+- 每组显示科目、`第 N 章 · 章名`、本组题数和对应题号方块。
+- 当前题仍然只在独立 reader 内切换，不把原题库墙重新加载进页面，继续遵守 v2 的“题库墙 / reader 隔离”规则。
+- 新增 `relax1000-reader-nav-v2.css` 作为最终视觉覆盖层，状态色加深为：
+  - 熟悉/mastered：`#24945d`，深绿色；
+  - 模糊/fuzzy：`#e0a51d`，深黄色；
+  - 不会/weak 与未掌握错题：`#d84b5f`，深红色；
+  - 已看未标记：`#8a91a0`；
+  - 当前题：额外紫色高对比描边。
+- 触摸设备仍隐藏键帽提示；桌面端显示快捷键帮助。
+
+### Relax 电脑快捷键
+
+独立 reader 当前支持：
+
+- `A / B / C / D`：选择对应选项；
+- `Enter`：提交当前选择；
+- `← / →`：上一题 / 下一题；
+- `1`：熟悉；
+- `2`：模糊；
+- `3`：不会；
+- `0`：清除掌握状态；
+- `F`：收藏/取消收藏；
+- `E`：展开/收起解析；
+- `Esc`：返回题库墙。
+
+输入笔记、文本框获得焦点或按下 Ctrl/Alt/Meta 时，快捷键不会劫持正常输入。
+
+### 整体图谱选择题作答
+
+新增共享增强层：
+
+- `site/assets/js/graph-answer-enhancements.js`
+- `site/assets/css/graph-answer-enhancements.css`
+
+它不复制或替换 `zhenti-graph.js` / `relax1000-graph.js`，只增强两者共用的右侧题目 drawer，因此仍保持 v2 的“一个图谱 shell + 两个数据适配器”结构。
+
+选择题判定与边界：
+
+- 408 真题：只对第 1–40 题、`verification.status=verified`、存在 options 且正确答案为 A–D 的题启用作答；
+- Relax1000：只对正确答案明确为 A–D 且存在文本选项或原题选项图的题启用作答；
+- 综合应用题/大题继续保持原先只读/查看答案，不强行套 A–D。
+
+可作答选择题现在支持：
+
+- 点击选项；
+- A–D 键选择；
+- `Enter` 提交；
+- 提交后显示回答正确/错误、你的答案和正确答案；
+- `1 / 2 / 3 / 0` 修改熟悉/模糊/不会/清除；
+- `E` 查看/收起解析；
+- 原方向键移动和 Esc 关闭继续由共享 `graph-controls.js` 负责。
+
+图谱选择题继续写回原有学习记录：真题使用 `everflow-408-zhenti-wall-v1`，Relax 使用原 `relax1000-core` 的记录与兼容同步；没有建立新的孤立答题数据库。
+
+### 性能与 Safari 防护
+
+- 图谱增强层的 MutationObserver 只负责在 drawer 内容被原适配器重建后重新挂上可交互属性。
+- 回答结果使用 `data-state` 防重复写 DOM，避免 observer 因为自己写 `innerHTML` 再触发自己形成自循环。
+- Relax 图谱增强层复用与 `relax1000-graph.js` 相同 URL 的 `relax1000-core.js`，避免再产生第二份 core runtime。
+- 选择题增强不改变已经验证稳定的 Relax 独立阅读器路由架构。
+
+### CI / 维护门禁修复
+
+本轮首次提交后，Pages #190 在 `Architecture audit` 被阻止。诊断确认：
+
+1. 新 reader 与 graph answer 两个 JS 单独 `node --check` 均成功；
+2. 失败来自旧 `audit-bank-features.mjs` 把 Pages build 标识硬编码为 `20260825-bank1/2`；本轮正常升级为 `20260828-reader5-graph-answer1` 后被错误判失败；
+3. 第一次更新审计后 #191 仍失败，是新审计错误地寻找图谱 CSS 中不存在的 `background:#24945d` 字面量，而实际深色语义通过 `--mastered / --fuzzy / --weak` 变量定义。
+
+最终修复：
+
+- v2 architecture audit 不再把某一天的 build 版本号当架构契约；
+- 改为检查 build 标识格式、v2 生命周期边界、独立 reader、章节分组、桌面快捷键、choice-only 图谱作答层以及语义状态色变量；
+- 以后正常升级资源版本不会再被旧日期字符串误伤；
+- 为定位问题临时创建的 `debug-bank-audit.yml` 已在确认根因后删除，不留调试 workflow 污染仓库。
+
+### 数据影响
+
+- 无题目 ID 改写；
+- 无历史答题记录清空；
+- 无收藏/错题/掌握状态/笔记/SRS 迁移；
+- 图谱选择题直接复用题库现有记录键，因此同一道题在题库与图谱中继续共享状态。
+
+### 主要提交
+
+- Relax 章节分组与桌面快捷键：`ee6c7be3b69af8077bb4cbb0590431a7afa4a211`
+- Relax 深色分组导航样式：`21d7c3bb3548716e5440a6e1a5d6bf49ff47a21c`
+- Reader5 资源发布：`76d607027688019b062e553d39e81a6ceafb9c61`
+- 图谱可交互选择题样式：`41db1cf0e77407c9b05b0b245225cc912c236bd3`
+- 图谱共享选择题作答入口：最终逻辑提交 `23a402245e0defb0469e6162c17d875269e54d28`
+- 图谱页面加载增强层：`76a8c67ff02ea16eb70992e7d2678dee3849238a`
+- Service Worker reader/graph-answer 新缓存：`bcf3b0f5f9e105e79ac77817a9f76ef203086ec6`
+- Pages 新交互门禁：`232aa63f82d57bd04173e1507ff1ef4a4adae7e6`
+- v2 审计从版本号硬编码改成语义契约：`5eb22af771a8ef40049dd739e006abe5024d856c`
+- 图谱状态色审计修正：`e5e2ac8b30851c828b58adf1499c12922ca9d555`
+- 临时诊断 workflow 删除：`b058e6b6bd329602a3560a47349606672ff8c745`
+
+### 自动验证与部署
+
+最终 GitHub Pages workflow **#192**（run `33113990096`）结论为 **success**：
+
+- Architecture audit：成功；
+- 新 JS 与原站点脚本语法校验：成功；
+- Course catalogs：成功；
+- Question assets checkout：成功；
+- `struct-viz` typecheck / lint / test / build：成功；
+- Verify site：成功；
+- Privacy-safe static artifact：成功；
+- Upload site artifact：成功；
+- Deploy to GitHub Pages：成功；
+- 最终部署完成：2026-08-27 20:35:33 UTC。
+
+### 真实设备结果
+
+**待复测。** 本轮需要分别验证：Relax 左栏章节分组/深色状态/桌面快捷键，以及整体图谱的真题选择题和 Relax 选择题能否正常点击 A–D 并提交。自动部署成功不替代真实设备结果。
+
+---
+
 ## 2026-08-28 · Relax 阅读器左侧题号导航、状态色统一与氧气课程扩展
 
 **状态：代码与课程数据已更新，GitHub Pages 自动部署成功；等待真实 iPad 对新导航 UI 复测。**
