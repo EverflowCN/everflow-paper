@@ -8,7 +8,7 @@
 
 ## 2026-08-28 · Relax1000 iPad 点题后整页卡死 · 第 3 轮
 
-**状态：结构性修复已提交；自动检查/部署进行中；等待真实 iPad 复测。**
+**状态：自动检查与线上部署已成功；等待真实 iPad 复测。**
 
 ### 用户现象
 
@@ -63,9 +63,17 @@
 
 ### 自动验证与部署
 
-- GitHub Pages workflow #173 已触发。
-- Architecture audit 已通过。
-- 最终 deploy 结果待 workflow 完成后补充。
+- GitHub Pages workflow：**#173**，run `33109782790`。
+- Architecture audit：成功。
+- Account / resource hub / workspace / cache scripts：成功。
+- Course catalogs：成功。
+- Question assets checkout：成功。
+- 408 algorithm visualizer build：成功。
+- Verify site：成功。
+- Privacy-safe static artifact：成功。
+- Upload Pages artifact：成功。
+- Deploy to GitHub Pages：成功。
+- 部署完成时间：2026-08-27 19:44:04 UTC。
 
 ### 真实设备结果
 
