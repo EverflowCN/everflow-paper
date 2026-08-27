@@ -8,7 +8,7 @@ if(!shell||!matrix||!drawer||!drawerBody)throw new Error('graph answer enhanceme
 
 const ZHENTI_KEY='everflow-408-zhenti-wall-v1';
 const RELAX_CORE_URL='/assets/js/relax1000-core.js?v=20260828-relaxfix1';
-let relaxCorePromise=null,relaxDataPromise=null,zhentiToken=0,enhanceToken=0;
+let relaxCorePromise=null,relaxDataPromise=null,enhanceToken=0;
 const zhentiCache=new Map();
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const editable=target=>Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));
@@ -36,10 +36,13 @@ function answerShown(){return Boolean(drawerBody.querySelector('.drawer-answer-b
 function syncOptions(ctx){
   const selected=selectedAnswer(ctx),done=submitted(ctx),show=done||answerShown();
   drawerBody.querySelectorAll('[data-graph-choice]').forEach(button=>{
-    const key=button.dataset.graphChoice;button.classList.toggle('selected',selected===key);button.classList.toggle('is-answer',show&&key===ctx.answer);button.classList.toggle('is-wrong',done&&ctx.record.correct===false&&ctx.record.answer===key);button.setAttribute('aria-pressed',String(selected===key));button.toggleAttribute('disabled',done);
+    const key=button.dataset.graphChoice;button.classList.toggle('selected',selected===key);button.classList.toggle('is-answer',show&&key===ctx.answer);button.classList.toggle('is-wrong',done&&ctx.record.correct===false&&ctx.record.answer===key);button.setAttribute('aria-pressed',String(selected===key));button.setAttribute('aria-disabled',String(done));
   });
-  const submit=drawerBody.querySelector('[data-graph-submit]');if(submit){submit.disabled=done||!selected;submit.textContent=done?'已提交':'提交答案';}
-  const result=drawerBody.querySelector('[data-graph-answer-result]');if(result){if(done){result.hidden=false;result.className=`graph-answer-result ${ctx.record.correct?'correct':'wrong'}`;result.innerHTML=`<strong>${ctx.record.correct?'✓ 回答正确':'✕ 回答错误'}</strong><span>你的答案 ${esc(ctx.record.answer)} · 正确答案 ${esc(ctx.answer)}</span>`}else result.hidden=true}
+  const submit=drawerBody.querySelector('[data-graph-submit]');if(submit){submit.disabled=done||!selected;submit.textContent=done?'已提交':'提交答案'}
+  const result=drawerBody.querySelector('[data-graph-answer-result]');if(!result)return;
+  if(!done){result.hidden=true;result.dataset.state='';return}
+  const stateKey=`${ctx.record.correct?'1':'0'}:${ctx.record.answer}:${ctx.answer}`;result.hidden=false;result.className=`graph-answer-result ${ctx.record.correct?'correct':'wrong'}`;
+  if(result.dataset.state!==stateKey){result.dataset.state=stateKey;result.innerHTML=`<strong>${ctx.record.correct?'✓ 回答正确':'✕ 回答错误'}</strong><span>你的答案 ${esc(ctx.record.answer)} · 正确答案 ${esc(ctx.answer)}</span>`}
 }
 async function enhance(){
   if(!drawerOpen())return;const token=++enhanceToken,ctx=await context();if(token!==enhanceToken||!ctx||!drawerOpen())return;
