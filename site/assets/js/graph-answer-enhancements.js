@@ -12,7 +12,7 @@ const RETRY_DELAY=140;
 const RETRY_LIMIT=72;
 let relaxCorePromise=null,relaxDataPromise=null,enhanceToken=0,retryTimer=0,retryCount=0,retryKey='';
 const zhentiCache=new Map();
-const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const editable=target=>Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));
 const source=()=>document.body.dataset.graphSource==='relax1000'?'relax1000':'zhenti';
 const activeCell=()=>matrix.querySelector('.overview-cell.current');
@@ -73,7 +73,7 @@ async function submit(){const ctx=await context();if(!ctx||submitted(ctx))return
 
 drawerBody.addEventListener('click',event=>{const option=event.target.closest('[data-graph-choice]');if(option){event.preventDefault();choose(option.dataset.graphChoice);return}if(event.target.closest('[data-graph-submit]')){event.preventDefault();submit()}});
 drawerBody.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.closest('[data-graph-choice]')){event.preventDefault();choose(event.target.closest('[data-graph-choice]').dataset.graphChoice)}});
-matrix.addEventListener('click',()=>startRetry(),true);
+matrix.addEventListener('click',()=>setTimeout(startRetry,0),true);
 new MutationObserver(()=>{if(drawerOpen())startRetry();else cancelRetry()}).observe(drawer,{attributes:true,attributeFilter:['hidden']});
 drawerAnswer?.addEventListener('click',()=>setTimeout(()=>enhance().catch(()=>{}),0));
 document.addEventListener('everflow:relax-records-change',()=>enhance().catch(()=>{}));
