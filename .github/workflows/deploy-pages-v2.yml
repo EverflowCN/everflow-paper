@@ -33,6 +33,13 @@ jobs:
           node site/tools/audit-bank-features.mjs
           node site/tools/build-zhenti-subject-index.mjs --check
           node site/tools/audit-question-banks.mjs --skip-relax
+          grep -q 'relax-reader-nav-group' site/assets/js/relax1000-reader.js
+          grep -q 'chapterOrder' site/assets/js/relax1000-reader.js
+          grep -q "event.key==='1'" site/assets/js/relax1000-reader.js
+          grep -q 'data-graph-submit' site/assets/js/graph-answer-enhancements.js
+          grep -q "if(q>40)return null" site/assets/js/graph-answer-enhancements.js
+          grep -q 'relax1000-reader-nav-v2.css' site/zhenti/relax-reader/index.html
+          grep -q 'graph-answer-enhancements.js' site/graph/index.html
 
       - name: Validate account, resource hub, workspace, and cache scripts
         shell: bash
@@ -47,8 +54,10 @@ jobs:
             site/assets/js/course-catalog-baseline.js \
             site/assets/js/dashboard.js \
             site/assets/js/graph-next.js \
+            site/assets/js/graph-answer-enhancements.js \
             site/assets/js/paper-builder.js \
             site/assets/js/relax1000-core.js \
+            site/assets/js/relax1000-reader.js \
             site/assets/js/relax1000-graph.js \
             site/assets/js/zhenti-data-overlay.js \
             site/assets/js/zhenti-graph.js \
@@ -201,6 +210,7 @@ jobs:
           set -euo pipefail
           test -s site/index.html
           test -s site/zhenti/index.html
+          test -s site/zhenti/relax-reader/index.html
           test -s site/graph/index.html
           test -s site/graph-next/index.html
           test -s site/relax/index.html
@@ -219,10 +229,14 @@ jobs:
           test -s site/assets/js/course-catalog-baseline.js
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
+          test -s site/assets/js/graph-answer-enhancements.js
           test -s site/assets/js/zhenti-graph.js
           test -s site/assets/js/relax1000-graph.js
+          test -s site/assets/js/relax1000-reader.js
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
+          test -s site/assets/css/graph-answer-enhancements.css
+          test -s site/assets/css/relax1000-reader-nav-v2.css
           test -s site/assets/css/graph-next.css
           test -s site/assets/js/site-runtime-v2.js
           test -s site/assets/js/links.js
@@ -338,11 +352,15 @@ jobs:
           test -s site/data/relax1000/data/questions.json
           test -s site/assets/js/graph-app.js
           test -s site/assets/js/graph-controls.js
+          test -s site/assets/js/graph-answer-enhancements.js
+          test -s site/assets/js/relax1000-reader.js
           test -s site/assets/js/zhenti-graph.js
           test -s site/assets/js/graph-next.js
           test -s site/assets/css/graph.css
+          test -s site/assets/css/graph-answer-enhancements.css
+          test -s site/assets/css/relax1000-reader-nav-v2.css
           test -s site/assets/css/graph-next.css
-          echo '{"build":"20260825-bank2-resource4-countdown3"}' > site/build.json
+          echo '{"build":"20260828-reader5-graph-answer1"}' > site/build.json
           echo "Privacy-safe artifact ready"
 
       - name: Setup Pages
