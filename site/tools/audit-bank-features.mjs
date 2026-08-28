@@ -9,7 +9,7 @@ const exists=p=>fs.existsSync(path.join(root,p));
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',bankSwitcher:'site/assets/js/question-bank-switch.js',
-  graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphAnswer:'site/assets/js/graph-answer-enhancements.js',graphCss:'site/assets/css/graph.css',graphAnswerCss:'site/assets/css/graph-answer-enhancements.css',trueGraph:'site/assets/js/zhenti-graph.js',
+  graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphAnswer:'site/assets/js/graph-answer-enhancements.js',graphCss:'site/assets/css/graph.css',graphAnswerCss:'site/assets/css/graph-answer-enhancements.css',zhentiStatusCss:'site/assets/css/zhenti-status.css',trueGraph:'site/assets/js/zhenti-graph.js',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
   relaxReader:'site/assets/js/relax1000-reader.js',relaxReaderPage:'site/zhenti/relax-reader/index.html',relaxReaderNavCss:'site/assets/css/relax1000-reader-nav.css',relaxReaderNavV2Css:'site/assets/css/relax1000-reader-nav-v2.css',
   builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',
@@ -23,7 +23,7 @@ for(const p of [
 ])assert(!exists(p),`obsolete file must stay deleted: ${p}`);
 
 const text=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,trueGraph,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(entry.includes("source==='zhenti'")&&entry.includes('zhenti-wall.js'),'true-paper selected-only boot missing');
@@ -43,6 +43,8 @@ assert(relaxReader.includes("event.key==='1'")&&relaxReader.includes("event.key=
 assert(!relaxReader.includes('relax-question-modal')&&!relaxReader.includes('backdrop-filter'),'Relax reader must remain independent document flow');
 assert(relaxReaderNavCss.includes('.relax-reader-nav-item.is-mastered')&&relaxReaderNavCss.includes('.relax-reader-nav-item.is-fuzzy')&&relaxReaderNavCss.includes('.relax-reader-nav-item.is-weak'),'Relax reader base heatmap CSS missing');
 assert(relaxReaderNavV2Css.includes('.relax-reader-nav-group')&&relaxReaderNavV2Css.includes('background:#24945d')&&relaxReaderNavV2Css.includes('background:#e0a51d')&&relaxReaderNavV2Css.includes('background:#d84b5f'),'Relax reader grouped/deep status CSS missing');
+assert(zhentiStatusCss.includes('--status-mastered:#24945d')&&zhentiStatusCss.includes('--status-mastered-border:#147845')&&zhentiStatusCss.includes('--status-fuzzy:#f2c45d')&&zhentiStatusCss.includes('--status-weak:#ec6b7e'),'global question-state palette must keep mastered green, fuzzy yellow, weak red');
+assert(!zhentiStatusCss.includes('--status-mastered:#a9d9f7'),'legacy blue mastered palette must stay retired');
 
 assert(/name="everflow-build" content="[^"]+"/.test(graph)&&graph.includes('data-graph-source-host')&&graph.includes('data-graph-view-host'),'graph shell/build marker missing');
 assert(graph.includes('graph-toolbar-primary')&&graph.includes('graph-toolbar-secondary')&&graph.includes('graph-status-legend'),'graph toolbar hierarchy missing');
@@ -97,4 +99,4 @@ for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphCont
   fs.rmSync(tmp,{force:true});
   assert(result.status===0,`syntax check failed: ${file}\n${result.stderr||result.stdout}`);
 }
-console.log(`architecture audit OK: isolated grouped Relax reader + deep status nav; graph shared controls + choice answering; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
+console.log(`architecture audit OK: isolated grouped Relax reader + global green mastered palette; graph shared controls + choice answering; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
