@@ -10,6 +10,7 @@ const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',bankSwitcher:'site/assets/js/question-bank-switch.js',
   graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphAnswer:'site/assets/js/graph-answer-enhancements.js',graphCss:'site/assets/css/graph.css',graphAnswerCss:'site/assets/css/graph-answer-enhancements.css',zhentiStatusCss:'site/assets/css/zhenti-status.css',trueGraph:'site/assets/js/zhenti-graph.js',
+  qwer:'site/assets/js/question-choice-qwer.js',qwerCss:'site/assets/css/question-choice-qwer.css',relaxWallStrongCss:'site/assets/css/relax1000-wall-strong.css',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
   relaxReader:'site/assets/js/relax1000-reader.js',relaxReaderPage:'site/zhenti/relax-reader/index.html',relaxReaderNavCss:'site/assets/css/relax1000-reader-nav.css',relaxReaderNavV2Css:'site/assets/css/relax1000-reader-nav-v2.css',
   builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',
@@ -23,11 +24,12 @@ for(const p of [
 ])assert(!exists(p),`obsolete file must stay deleted: ${p}`);
 
 const text=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,qwer,qwerCss,relaxWallStrongCss,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(entry.includes("source==='zhenti'")&&entry.includes('zhenti-wall.js'),'true-paper selected-only boot missing');
 assert(bankSwitcher.includes('408 真题')&&bankSwitcher.includes('Relax1000')&&!bankSwitcher.includes('relax1000-graph.js'),'bank switch architecture invalid');
+assert(bankSwitcher.includes('relax1000-wall-strong.css'),'Relax wall strong-status override missing');
 assert(!bankSwitcher.includes('relax1000-cards-experience.js'),'broken Relax fullscreen module must stay retired');
 assert(cards.includes('题库墙')&&cards.includes('速刷卡片'),'Relax cards subview missing');
 for(const choice of ['answers','status','favorites','today','srs','all'])assert(reset.includes(`data-relax-reset-choice="${choice}"`),`Relax reset missing ${choice}`);
@@ -36,19 +38,28 @@ assert(!/EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/i.t
 assert(relaxWall.includes('relax-wall-workspace')&&relaxWall.includes('relax-sidebar'),'Relax wall layout missing');
 assert(relaxWall.includes('/zhenti/relax-reader/')&&!relaxWall.includes('relax-question-modal'),'Relax wall must route to isolated reader and must not recreate modal reader');
 assert(relaxReaderPage.includes('relax1000-reader-nav.css')&&relaxReaderPage.includes('relax1000-reader-nav-v2.css')&&relaxReaderPage.includes('relax1000-reader.js'),'Relax standalone reader assets missing');
+assert(relaxReaderPage.includes('question-choice-qwer.css')&&relaxReaderPage.includes('question-choice-qwer.js'),'Relax reader shared QWER assets missing');
+assert(relaxReaderPage.indexOf('question-choice-qwer.js')<relaxReaderPage.indexOf('relax1000-reader.js'),'Relax QWER capture must load before legacy reader shortcuts');
 assert(relaxReader.includes('relax-reader-layout')&&relaxReader.includes('data-reader-jump')&&relaxReader.includes('refreshNavSelection'),'Relax reader lightweight navigation contract missing');
 assert(relaxReader.includes('relax-reader-nav-group')&&relaxReader.includes('chapterOrder')&&relaxReader.includes('按科目 / 章节分组'),'Relax reader chapter grouping missing');
 assert(relaxReader.includes("status==='mastered'")&&relaxReader.includes("status==='fuzzy'")&&relaxReader.includes("status==='weak'"),'Relax reader state mapping missing');
-assert(relaxReader.includes("event.key==='1'")&&relaxReader.includes("event.key==='2'")&&relaxReader.includes("event.key==='3'")&&relaxReader.includes("key==='F'")&&relaxReader.includes("key==='E'"),'Relax desktop shortcut contract missing');
+assert(relaxReader.includes("event.key==='1'")&&relaxReader.includes("event.key==='2'")&&relaxReader.includes("event.key==='3'")&&relaxReader.includes("key==='F'")&&relaxReader.includes("key==='E'"),'Relax legacy desktop shortcut fallback contract missing');
 assert(!relaxReader.includes('relax-question-modal')&&!relaxReader.includes('backdrop-filter'),'Relax reader must remain independent document flow');
 assert(relaxReaderNavCss.includes('.relax-reader-nav-item.is-mastered')&&relaxReaderNavCss.includes('.relax-reader-nav-item.is-fuzzy')&&relaxReaderNavCss.includes('.relax-reader-nav-item.is-weak'),'Relax reader base heatmap CSS missing');
 assert(relaxReaderNavV2Css.includes('.relax-reader-nav-group')&&relaxReaderNavV2Css.includes('background:#24945d')&&relaxReaderNavV2Css.includes('background:#e0a51d')&&relaxReaderNavV2Css.includes('background:#d84b5f'),'Relax reader grouped/deep status CSS missing');
+assert(relaxWallStrongCss.includes('.relax-q-chip')&&relaxWallStrongCss.includes('border:2px solid')&&relaxWallStrongCss.includes('background:#24945d')&&relaxWallStrongCss.includes('background:#e0a51d')&&relaxWallStrongCss.includes('background:#d84b5f'),'Relax wall question squares must keep strong green/yellow/red states');
 assert(zhentiStatusCss.includes('--status-mastered:#24945d')&&zhentiStatusCss.includes('--status-mastered-border:#147845')&&zhentiStatusCss.includes('--status-fuzzy:#f2c45d')&&zhentiStatusCss.includes('--status-weak:#ec6b7e'),'global question-state palette must keep mastered green, fuzzy yellow, weak red');
 assert(!zhentiStatusCss.includes('--status-mastered:#a9d9f7'),'legacy blue mastered palette must stay retired');
+
+assert(qwer.includes("Q:'A'")&&qwer.includes("W:'B'")&&qwer.includes("E:'C'")&&qwer.includes("R:'D'")&&qwer.includes("key==='X'"),'shared QWER -> ABCD / X-analysis mapping missing');
+assert(!qwer.includes('MutationObserver'),'QWER compatibility layer must not observe/rewrite question DOM');
+assert(qwerCss.includes('data-reader-option="A"')&&qwerCss.includes('data-graph-choice="A"')&&qwerCss.includes('content:"Q"')&&qwerCss.includes('content:"W"')&&qwerCss.includes('content:"E"')&&qwerCss.includes('content:"R"'),'shared QWER visible labels incomplete');
 
 assert(/name="everflow-build" content="[^"]+"/.test(graph)&&graph.includes('data-graph-source-host')&&graph.includes('data-graph-view-host'),'graph shell/build marker missing');
 assert(graph.includes('graph-toolbar-primary')&&graph.includes('graph-toolbar-secondary')&&graph.includes('graph-status-legend'),'graph toolbar hierarchy missing');
 assert(graph.includes('graph-app.js')&&graph.includes('graph.css')&&graph.includes('graph-answer-enhancements.css')&&graph.includes('graph-answer-enhancements.js')&&!graph.includes('overall-graph.css')&&!graph.includes('graph-controls.css'),'graph page asset architecture invalid');
+assert(graph.includes('question-choice-qwer.css')&&graph.includes('question-choice-qwer.js'),'graph shared QWER assets missing');
+assert(graph.indexOf('question-choice-qwer.js')<graph.indexOf('graph-answer-enhancements.js'),'graph QWER capture must load before legacy answer shortcuts');
 assert(graphApp.includes('const APP_VERSION=')&&graphApp.includes('const SOURCES=')&&graphApp.includes('zhenti:')&&graphApp.includes('relax1000:'),'graph source registry/version missing');
 assert(graphApp.includes('zhenti-graph.js')&&!graphApp.includes('overall-graph.js'),'true graph adapter still uses obsolete name');
 assert(graphApp.includes('data-graph-source-host')&&graphApp.includes("url.searchParams.set('source',next)")&&graphApp.includes('location.assign'),'graph source switch lifecycle incomplete');
@@ -58,7 +69,7 @@ assert(graphControls.includes('matrixFits()')&&graphControls.includes('verifyFit
 assert(graphControls.includes('Math.max(2')&&graphControls.includes('moveRelax')&&graphControls.includes('moveTruePaper'),'shared dense fit/keyboard navigation missing');
 assert(graphControls.includes("event.key==='Enter'")&&graphControls.includes("event.key==='Escape'")&&graphControls.includes('keyboard-active'),'keyboard open/close/current feedback missing');
 assert(graphAnswer.includes('data-graph-submit')&&graphAnswer.includes("if(q>40)return null")&&graphAnswer.includes('/^[A-D]$/.test(answer)'),'graph choice-only answer layer missing');
-assert(graphAnswer.includes("'ABCD'.includes(key)")&&graphAnswer.includes("event.key==='1'")&&graphAnswer.includes("key==='E'"),'graph answer desktop shortcuts missing');
+assert(graphAnswer.includes("'ABCD'.includes(key)")&&graphAnswer.includes("event.key==='1'")&&graphAnswer.includes("key==='E'"),'graph legacy answer shortcut fallback missing');
 assert(graphAnswerCss.includes('.drawer-option[data-graph-choice]')&&graphAnswerCss.includes('--mastered:#24945d')&&graphAnswerCss.includes('--fuzzy:#e0a51d')&&graphAnswerCss.includes('--weak:#d84b5f'),'graph answer/deep status CSS missing');
 assert(graphCss.includes('.graph-toolbar-primary')&&graphCss.includes('.graph-toolbar-secondary')&&graphCss.includes('.graph-view-segmented'),'graph toolbar CSS missing');
 assert(graphCss.includes('.question-drawer{position:absolute')&&!graphCss.includes('.overview-stage.drawer-open{grid-template-columns'),'drawer must overlay without old two-column layout');
@@ -92,11 +103,11 @@ for(const year of years){const data=JSON.parse(read(`site/data/zhenti/${year}.js
 assert(verified>=846,`verified corpus unexpectedly small: ${verified}`);
 const autoFloor=Math.floor(verified*.70);
 assert(autoChoice>=autoFloor,`auto-gradable corpus unexpectedly small: ${autoChoice}/${verified} (<70%)`);
-for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.graphAnswer,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxReader,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
+for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.graphAnswer,files.qwer,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxReader,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
   const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);
   fs.writeFileSync(tmp,read(file));
   const result=spawnSync(process.execPath,['--check',tmp],{encoding:'utf8'});
   fs.rmSync(tmp,{force:true});
   assert(result.status===0,`syntax check failed: ${file}\n${result.stderr||result.stdout}`);
 }
-console.log(`architecture audit OK: isolated grouped Relax reader + global green mastered palette; graph shared controls + choice answering; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
+console.log(`architecture audit OK: isolated grouped Relax reader + QWER choice controls + strong wall states; graph Safari-safe shared controls + choice answering; ${years.length} years, ${verified} verified, ${autoChoice} auto-gradable`);
