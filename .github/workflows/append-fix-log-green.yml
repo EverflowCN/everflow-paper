@@ -27,54 +27,54 @@ jobs:
             exit 0
           fi
           cat >> docs/FIX_LOG.md <<'EOF'
-
----
-
-## 2026-08-28 · 全局“熟悉”状态色统一为绿色
-
-**状态：代码与 GitHub Pages 已部署成功；等待用户对全站颜色进行真实设备复测。**
-
-### 用户现象
-
-用户反馈：新 Relax 阅读器和新图谱中的“熟悉”已经显示为绿色，但题库墙、整套真题、整体图谱旧状态块等其他位置仍然不是绿色；“模糊”和“不会”颜色保持现状即可。
-
-### 根因
-
-全站真题/图谱共用的 canonical 状态样式 `site/assets/css/zhenti-status.css` 仍把 `mastered` 定义为旧蓝色：`#a9d9f7 / #75bde8 / #67add6`。此前只在新增的 Relax reader / graph enhancement 局部使用绿色，导致同一个 `mastered` 状态出现两套视觉语义。
-
-### 实际改动
-
-- 全局 `--status-mastered` 改为深绿色 `#24945d`；
-- 全局 `--status-mastered-border` 改为 `#147845`；
-- mastered 文字改为白色；
-- 深色模式同样使用绿色，不再回退到蓝色；
-- 真题题目弹层、整套答题状态按钮、整体图谱状态块和图例均通过公共变量继承绿色；
-- `fuzzy` 黄色和 `weak` 红色保持原有全局值不变；
-- Service Worker 缓存升级为 `everflow-site-v45-course8-status-green-global`，并把 `zhenti-status.css` 纳入 shell，避免设备继续命中旧蓝色缓存；
-- Architecture audit 新增约束：`mastered` 必须保持 `#24945d` 绿色，旧 `#a9d9f7` 蓝色不得重新出现。
-
-### 数据影响
-
-无。仅修改展示层状态颜色，不修改题目 ID、答题记录、掌握状态值、错题、收藏、笔记或云端数据。内部状态仍为 `mastered`。
-
-### 提交
-
-- 全局 mastered 绿色：`49905d2b63e4db73d2ffa67cf0677f320e2838ee`
-- Service Worker 缓存刷新：`2cd8bc239da59d0e65457244e807b4c702114605`
-- Architecture audit 全局绿色门禁：`e0a9e8849e739a8d61481d859afbcbcd4ed18473`
-
-### 自动验证与部署
-
-GitHub Pages workflow **#199**（run `33128689288`）结论为 **success**。Architecture audit、站点脚本检查、课程目录、题库资源、`struct-viz` typecheck/lint/test/build、Verify site、隐私构建、Upload Pages artifact 和 Deploy Pages 全部成功。Deploy Pages 完成于 2026-08-28 00:08:44 UTC。
-
-### 真实设备结果
-
-**待复测本轮全局颜色。** CI 成功只说明公共状态样式和门禁通过，仍需用户确认题库墙、整套真题、整体图谱等实际页面中的“熟悉”均已显示为绿色。
-
-### 补记：整体图谱 Safari 卡死热修
-
-上一轮整体图谱选择题增强层曾因观察 `drawerBody` 子树并同时修改该子树，形成 MutationObserver 自触发循环，导致 iOS Safari 出现“正在读取题目…”、整页卡死和难以刷新。该循环已在 `5d88778056770480f6d634a7ef986aa5f237bfd3` 中移除，Pages #196 成功部署；用户随后真实设备复测回复“可以了”，因此该 Safari 卡死热修的真实设备结果正式记为 **成功**。
-EOF
+          
+          ---
+          
+          ## 2026-08-28 · 全局“熟悉”状态色统一为绿色
+          
+          **状态：代码与 GitHub Pages 已部署成功；等待用户对全站颜色进行真实设备复测。**
+          
+          ### 用户现象
+          
+          用户反馈：新 Relax 阅读器和新图谱中的“熟悉”已经显示为绿色，但题库墙、整套真题、整体图谱旧状态块等其他位置仍然不是绿色；“模糊”和“不会”颜色保持现状即可。
+          
+          ### 根因
+          
+          全站真题/图谱共用的 canonical 状态样式 `site/assets/css/zhenti-status.css` 仍把 `mastered` 定义为旧蓝色：`#a9d9f7 / #75bde8 / #67add6`。此前只在新增的 Relax reader / graph enhancement 局部使用绿色，导致同一个 `mastered` 状态出现两套视觉语义。
+          
+          ### 实际改动
+          
+          - 全局 `--status-mastered` 改为深绿色 `#24945d`；
+          - 全局 `--status-mastered-border` 改为 `#147845`；
+          - mastered 文字改为白色；
+          - 深色模式同样使用绿色，不再回退到蓝色；
+          - 真题题目弹层、整套答题状态按钮、整体图谱状态块和图例均通过公共变量继承绿色；
+          - `fuzzy` 黄色和 `weak` 红色保持原有全局值不变；
+          - Service Worker 缓存升级为 `everflow-site-v45-course8-status-green-global`，并把 `zhenti-status.css` 纳入 shell，避免设备继续命中旧蓝色缓存；
+          - Architecture audit 新增约束：`mastered` 必须保持 `#24945d` 绿色，旧 `#a9d9f7` 蓝色不得重新出现。
+          
+          ### 数据影响
+          
+          无。仅修改展示层状态颜色，不修改题目 ID、答题记录、掌握状态值、错题、收藏、笔记或云端数据。内部状态仍为 `mastered`。
+          
+          ### 提交
+          
+          - 全局 mastered 绿色：`49905d2b63e4db73d2ffa67cf0677f320e2838ee`
+          - Service Worker 缓存刷新：`2cd8bc239da59d0e65457244e807b4c702114605`
+          - Architecture audit 全局绿色门禁：`e0a9e8849e739a8d61481d859afbcbcd4ed18473`
+          
+          ### 自动验证与部署
+          
+          GitHub Pages workflow **#199**（run `33128689288`）结论为 **success**。Architecture audit、站点脚本检查、课程目录、题库资源、`struct-viz` typecheck/lint/test/build、Verify site、隐私构建、Upload Pages artifact 和 Deploy Pages 全部成功。Deploy Pages 完成于 2026-08-28 00:08:44 UTC。
+          
+          ### 真实设备结果
+          
+          **待复测本轮全局颜色。** CI 成功只说明公共状态样式和门禁通过，仍需用户确认题库墙、整套真题、整体图谱等实际页面中的“熟悉”均已显示为绿色。
+          
+          ### 补记：整体图谱 Safari 卡死热修
+          
+          上一轮整体图谱选择题增强层曾因观察 `drawerBody` 子树并同时修改该子树，形成 MutationObserver 自触发循环，导致 iOS Safari 出现“正在读取题目…”、整页卡死和难以刷新。该循环已在 `5d88778056770480f6d634a7ef986aa5f237bfd3` 中移除，Pages #196 成功部署；用户随后真实设备复测回复“可以了”，因此该 Safari 卡死热修的真实设备结果正式记为 **成功**。
+          EOF
           git config user.name 'Everflow'
           git config user.email '54564601+EverflowCN@users.noreply.github.com'
           git add docs/FIX_LOG.md
