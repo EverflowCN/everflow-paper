@@ -1,12 +1,12 @@
 /* Canonical 408 question-state palette shared by 真题墙 and 整体图谱. */
 :root{
   --status-unmarked:#d9dde5;
-  --status-mastered:#a9d9f7;
-  --status-mastered-strong:#75bde8;
-  --status-mastered-ink:#174f70;
+  --status-mastered:#24945d;
+  --status-mastered-strong:#24945d;
+  --status-mastered-ink:#fff;
   --status-fuzzy:#f2c45d;
   --status-weak:#ec6b7e;
-  --status-mastered-border:#67add6;
+  --status-mastered-border:#147845;
   --status-fuzzy-border:#c38d18;
   --status-weak-border:#b9344b;
   --result-correct:#24a77a;
@@ -23,12 +23,12 @@
 }
 body.dark{
   --status-unmarked:#414650;
-  --status-mastered:#5fa7d3;
-  --status-mastered-strong:#79bce5;
-  --status-mastered-ink:#081f2d;
+  --status-mastered:#24945d;
+  --status-mastered-strong:#24945d;
+  --status-mastered-ink:#fff;
   --status-fuzzy:#c99732;
   --status-weak:#c95b6b;
-  --status-mastered-border:#7bc2e9;
+  --status-mastered-border:#147845;
   --status-fuzzy-border:#d7ab53;
   --status-weak-border:#df7b89;
 }
@@ -66,7 +66,7 @@ body.dark .matrix-q:not(.status-mastered):not(.status-fuzzy):not(.status-weak),b
 .overview-legend .weak{border-color:var(--status-weak-border)!important}
 .overview-legend .unmarked{border-color:color-mix(in srgb,var(--status-unmarked) 62%,#6d7480)!important}
 
-.modal-status-actions button[data-modal-status="mastered"].active{border-color:var(--status-mastered-strong)!important;color:#3386b8!important;background:color-mix(in srgb,var(--status-mastered) 18%,var(--card))!important}
+.modal-status-actions button[data-modal-status="mastered"].active{border-color:var(--status-mastered-border)!important;color:var(--status-mastered-ink)!important;background:var(--status-mastered)!important}
 .modal-status-actions button[data-modal-status="fuzzy"].active{border-color:var(--status-fuzzy)!important;color:#a66b00!important;background:color-mix(in srgb,var(--status-fuzzy) 14%,var(--card))!important}
 .modal-status-actions button[data-modal-status="weak"].active{border-color:var(--status-weak)!important;color:var(--status-weak)!important;background:color-mix(in srgb,var(--status-weak) 12%,var(--card))!important}
 .paper-status-actions button[data-paper-status="mastered"].active,.drawer-status button[data-drawer-status="mastered"].active{background:var(--status-mastered)!important;border-color:var(--status-mastered-border)!important;color:var(--status-mastered-ink)!important}
