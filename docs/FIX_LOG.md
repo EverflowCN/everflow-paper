@@ -465,3 +465,72 @@ GitHub Pages workflow **#199**（run `33128689288`）结论为 **success**。Arc
 ### 补记：整体图谱 Safari 卡死热修
 
 上一轮整体图谱选择题增强层曾因观察 `drawerBody` 子树并同时修改该子树，形成 MutationObserver 自触发循环，导致 iOS Safari 出现“正在读取题目…”、整页卡死和难以刷新。该循环已在 `5d88778056770480f6d634a7ef986aa5f237bfd3` 中移除，Pages #196 成功部署；用户随后真实设备复测回复“可以了”，因此该 Safari 卡死热修的真实设备结果正式记为 **成功**。
+
+
+---
+
+## 2026-08-28 · QWER 快捷键统一与 Relax 题号方块加深
+
+**状态：代砹与 GitHub Pages 已部署成功；等待电脑端真实交互与视觉复测。**
+
+### 用户现象 / 需求
+
+用户在电脑端 `/zhenti/` 的 Relax1000 题库墙实拍中指出：
+
+- 不同答题页面的电脑选择题快捷键不统一，要求统一使用 `Q / W / E / R` 对应 `A / B / C / D`；
+- Relax1000 题库墙外层题号方块仍使用偏浅的粉彩背景与细边框，熟悉/模糊/不会状态不够醒目，需要明显加重。
+
+### 诊断与统一规则
+
+核查后确认：
+
+- 408 真题原有 `zhenti-qwer.js` 已采用 `Q/W/E/R → A/B/C/D`；
+- Relax1000 速刷卡片也已经采用同一套 QWER；
+- 不一致来自 Relax 独立阅读器和整体图谱，它们仍保留 `A/B/C/D` 直接选项，并占用 `E` 作为解析快捷键；
+- 照片中偏浅的方块来自题库墙 `.relax-q-chip`，不是已经加深过的独立阅读器左侧章节导航。
+
+本轮因此把桌面选择题主快捷键统一为：`Q→A`、`W→B`、`E→C`、`R→D`；由于 `E` 现在必须用于 C 选项，解析统一改用 `X`。`Enter` 提交、方向键切题、`1/2/3/0` 掌握状态、`F` 收藏和 `Esc` 返回/关闭继续保持原逻辑。
+
+### 实际改动
+
+- 新增 `site/assets/js/question-choice-qwer.js`，作为 Relax 独立阅读器与整体图谱的轻量键盘兼容层：
+  - `Q/W/E/R` 映射 `A/B/C/D`；
+  - `X` 打开/收起解析；
+  - 输入框、文本域、select、contenteditable 或 Ctrl/Alt/Meta 场景不劫持按键；
+  - 使用捕获阶段优先于旧快捷键执行，避免 `E` 继续被旧“解析”逻辑占用；
+  - **不使用 MutationObserver，也不观察/重写题目子树**，保持上一轮 Safari 卡死热修建立的安全边界。
+- 新增 `site/assets/css/question-choice-qwer.css`，把 Relax reader 与整体图谱选项旁的可见键帽统一显示为 Q/W/E/R，并把解析键帽显示为 X；触摸设备继续隐藏电脑键帽提示。
+- Relax reader 与整体图谱都在原模块脚本之前加载共享 QWER 层；整体图谱 build 标识升级为 `20260828-graph-answer3-qwer`。
+- 新增 `site/assets/css/relax1000-wall-strong.css`，专门覆盖照片中的 Relax 题库墙题号：
+  - 默认未做题：2px 深灰边框与更明确灰底；
+  - 已看未标记：深灰实底；
+  - 熟悉/mastered：`#24945d` 深绿色 + `#147845` 边框；
+  - 模糊/fuzzy：`#e0a51d` 深黄色 + `#b77a08` 边框；
+  - 不会/weak：`#d84b5f` 深红色 + `#b52d43` 边框；
+  - 答对/答错继续保留底部正确/错误提示，不把“答对”错误等价成“熟悉”。
+- `question-bank-switch.js` 资源版本升级到 `20260828-qwer-strong1`，Relax 模式加载强状态覆盖层。
+- Service Worker 缓存升级为 `everflow-site-v45-course9-qwer-strong-status`，并把 QWER JS/CSS 与强状态 CSS 纳入 shell，避免电脑继续命中旧浅色资源。
+- `audit-bank-features.mjs` 增加永久门禁：QWER 映射、X 解析、加载顺序、禁止 QWER 层使用 MutationObserver，以及 Relax 墙 2px 深色绿/黄/红状态均成为架构契约。
+
+### 数据影响
+
+无数据迁移、无题目 ID 改写、无答题记录清空。收藏、错题、掌握状态、笔记、SRS、本地记录与云端课程数据均未改动；本轮只改变键盘入口、可见快捷键提示和题号视觉样式。
+
+### 主要提交
+
+- QWER 共享键盘层：`72329bd029034afbb8ae977f63f99bd44e0b898c`
+- QWER 可见键帽样式：`1d650d838229c72ef0d94f11b171f83a97aaaf39`
+- Relax 墙深色题号样式：`0c1feeeca2a3617b9e028bdc3e3b0973e226d21d`
+- Relax 墙加载强状态覆盖：`1f3c112928419d0b6f1de08c1ed4519b15d09cf0`
+- Relax reader 接入 QWER：`51aff06fd22f77b0353227d3b9bc18f41cf9719f`
+- 整体图谱接入 QWER：`d55fc9015d4425b4b4672e0cb5f574c33ace3683`
+- Service Worker 新缓存：`d8c68ba875c9650153413e4e64dea884be89b74e`
+- Architecture audit QWER/深色门禁：`930fdcac0d6745ff90db1440ea612643b207f0e3`
+
+### 自动验证与部署
+
+最终 GitHub Pages workflow **#207**（run `33131238586`）结论为 **success**：Architecture audit（含新增 QWER、加载顺序、无 MutationObserver、深色墙门禁）、站点脚本检查、课程目录、题库资源、`struct-viz` typecheck/lint/test/build、Verify site、隐私构建、Upload Pages artifact 与 Deploy Pages 全部成功。Deploy Pages 完成于 2026-08-28 00:56:18 UTC。
+
+### 真实设备结果
+
+**待复测。** 用户当前实拍为修复前状态。需要在电脑端确认：Relax 独立阅读器与整体图谱使用 Q/W/E/R 能分别选择 A/B/C/D，X 能查看解析；并确认 `/zhenti/` Relax1000 题库墙的默认/已看/熟悉/模糊/不会题号方块已经明显加深。CI 成功不替代真实设备确认。
