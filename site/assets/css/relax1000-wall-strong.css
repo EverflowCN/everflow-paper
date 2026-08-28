@@ -1,0 +1,18 @@
+/* Relax1000 wall: deliberately stronger question-number squares for quick state scanning. */
+.relax-q-chip{border:2px solid #7f8795!important;background:#eef1f5!important;color:#252a31!important;box-shadow:0 1px 3px rgba(28,34,43,.13)!important}
+.relax-q-chip:hover{border-color:#59616e!important;box-shadow:0 3px 8px rgba(28,34,43,.18)!important}
+.relax-q-chip.is-seen{background:#7f8795!important;border-color:#626a77!important;color:#fff!important}
+.relax-q-chip.is-correct{box-shadow:inset 0 -4px #16865b,0 1px 3px rgba(28,34,43,.14)!important}
+.relax-q-chip.is-wrong{background:#d84b5f!important;border-color:#b52d43!important;color:#fff!important;box-shadow:inset 0 -4px #8f1f35,0 1px 4px rgba(181,45,67,.25)!important}
+.relax-q-chip.status-mastered{background:#24945d!important;border-color:#147845!important;color:#fff!important;box-shadow:0 2px 5px rgba(20,120,69,.28)!important}
+.relax-q-chip.status-fuzzy{background:#e0a51d!important;border-color:#b77a08!important;color:#2d2100!important;box-shadow:0 2px 5px rgba(183,122,8,.28)!important}
+.relax-q-chip.status-weak{background:#d84b5f!important;border-color:#b52d43!important;color:#fff!important;box-shadow:0 2px 5px rgba(181,45,67,.27)!important}
+.relax-q-chip.status-mastered.is-wrong{box-shadow:inset 0 -4px #8f1f35,0 2px 5px rgba(20,120,69,.28)!important}
+.relax-q-chip.status-fuzzy.is-wrong{box-shadow:inset 0 -4px #8f1f35,0 2px 5px rgba(183,122,8,.28)!important}
+.relax-q-chip.status-weak.is-wrong{box-shadow:inset 0 -4px #8f1f35,0 2px 5px rgba(181,45,67,.27)!important}
+.relax-q-chip:focus-visible{outline:3px solid rgba(115,85,228,.34)!important;outline-offset:2px}
+body.dark .relax-q-chip{background:#2a3039!important;border-color:#697382!important;color:#edf0f4!important}
+body.dark .relax-q-chip.is-seen{background:#697382!important;border-color:#87919f!important;color:#fff!important}
+body.dark .relax-q-chip.status-mastered{background:#207f50!important;border-color:#35ad73!important}
+body.dark .relax-q-chip.status-fuzzy{background:#b98413!important;border-color:#e0a51d!important;color:#fff4d0!important}
+body.dark .relax-q-chip.status-weak,body.dark .relax-q-chip.is-wrong{background:#b83d50!important;border-color:#e05a6d!important;color:#fff!important}
