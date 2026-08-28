@@ -1,0 +1,17 @@
+/* Shared desktop choice labels: Q/W/E/R -> A/B/C/D. Touch devices keep shortcut badges hidden by the page styles. */
+.relax-reader-options [data-reader-option]>kbd,.drawer-option[data-graph-choice] kbd{font-size:0!important}
+.relax-reader-options [data-reader-option]>kbd::after,.drawer-option[data-graph-choice] kbd::after{font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+.relax-reader-options [data-reader-option="A"]>kbd::after,.drawer-option[data-graph-choice="A"] kbd::after{content:"Q"}
+.relax-reader-options [data-reader-option="B"]>kbd::after,.drawer-option[data-graph-choice="B"] kbd::after{content:"W"}
+.relax-reader-options [data-reader-option="C"]>kbd::after,.drawer-option[data-graph-choice="C"] kbd::after{content:"E"}
+.relax-reader-options [data-reader-option="D"]>kbd::after,.drawer-option[data-graph-choice="D"] kbd::after{content:"R"}
+.relax-reader-shortcuts span:first-child{font-size:0}
+.relax-reader-shortcuts span:first-child>kbd{display:none!important}
+.relax-reader-shortcuts span:first-child::after{content:"Q/W/E/R 选项";font-size:10px}
+[data-reader-analysis] kbd,.relax-reader-shortcuts span:nth-child(8)>kbd{font-size:0!important}
+[data-reader-analysis] kbd::after,.relax-reader-shortcuts span:nth-child(8)>kbd::after{content:"X";font:800 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+.graph-shortcuts{font-size:0!important}
+.graph-shortcuts::after{content:"方向键移动 · Enter 打开/提交 · Q/W/E/R→A/B/C/D · 1/2/3 状态 · X 解析 · Esc 关闭";font-size:10px}
+.graph-answer-actions span{font-size:0!important}
+.graph-answer-actions span::after{content:"电脑：Q/W/E/R 对应 A/B/C/D · Enter 提交";font-size:10px}
+@media(hover:none),(pointer:coarse){.graph-shortcuts::after{display:none}}
