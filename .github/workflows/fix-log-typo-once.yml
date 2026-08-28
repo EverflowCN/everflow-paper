@@ -1,0 +1,29 @@
+name: Fix QWER log typo once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-log-typo-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Fix log typo
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i 's/状态：代砹与 GitHub Pages/状态：代码与 GitHub Pages/' docs/FIX_LOG.md
+          git config user.name 'Everflow Fix Log Bot'
+          git config user.email '54564601+EverflowCN@users.noreply.github.com'
+          git add docs/FIX_LOG.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'docs: fix QWER rollout log typo'
+            git push origin HEAD:main
+          fi
