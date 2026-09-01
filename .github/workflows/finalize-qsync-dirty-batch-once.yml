@@ -1,0 +1,44 @@
+name: Finalize qsync dirty batch once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/finalize-qsync-dirty-batch-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Apply final dirty-batch sync patch
+        run: python .github/scripts/finalize_qsync_dirty_batch.py
+      - name: Validate final sync policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/assets/js/question-cloud-sync-v2.js
+          node site/tools/audit-bank-features.mjs
+          grep -q 'PERIODIC_FLUSH_MS=2\*60\*1000' site/assets/js/question-cloud-sync-v2.js
+          grep -q 'function markDirty()' site/assets/js/question-cloud-sync-v2.js
+          grep -q 'function flushDirty(' site/assets/js/question-cloud-sync-v2.js
+          ! grep -q 'CHANGE_DEBOUNCE_MS' site/assets/js/question-cloud-sync-v2.js
+          ! grep -q 'location.reload' site/assets/js/question-cloud-sync-v2.js
+          grep -q '20260902-qsync4' site/assets/js/zhenti-entry.js
+          grep -q '20260902-qsync4' site/assets/js/question-choice-qwer.js
+          grep -q '20260902-qsync4' site/assets/js/account-auth-sync-v2.js
+          grep -q 'course14-qsync-dirty-batch' site/sw.js
+          git diff --check
+      - name: Commit final site files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Everflow Maintenance'
+          git config user.email '54564601+EverflowCN@users.noreply.github.com'
+          git add site
+          git commit -m 'fix(sync): queue answer changes and batch cloud flushes'
+          git push origin HEAD:main
