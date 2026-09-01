@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Everflow 账户、密码登录、验证码登录、密码重置与云同步">
+  <meta name="description" content="Everflow 账户、密码注册登录、验证码登录、密码重置与课程/题库云同步">
   <link rel="manifest" href="../manifest.webmanifest">
   <title>账户 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../assets/css/responsive.css?v=20260824-ui4">
   <link rel="stylesheet" href="../assets/css/study.css">
   <link rel="stylesheet" href="../assets/css/account-membership.css">
-  <link rel="stylesheet" href="../assets/css/auth-loading.css?v=20260825-auth1">
+  <link rel="stylesheet" href="../assets/css/auth-loading.css?v=20260902-auth2">
 </head>
 <body>
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
@@ -22,7 +22,7 @@
     <div class="page-head compact-head">
       <div class="eyebrow">ACCOUNT</div>
       <h1>账户</h1>
-      <p>默认使用邮箱 + 密码登录；首次注册或无密码账号可以使用邮箱验证码，忘记密码可通过 6 位邮箱验证码重新设置。学习数据仍优先保存在本机，登录后同步到对应账号。</p>
+      <p>新账号统一使用“邮箱 + 密码”注册；验证码只用于已有账号登录，忘记密码可通过邮箱验证码重新设置。登录后会同时同步课程打卡、408 真题和 Relax1000 做题记录。</p>
     </div>
 
     <nav class="account-switcher" aria-label="账户与会员"><a class="active" href="./" aria-current="page">账户</a><a href="../membership/">会员</a></nav>
@@ -46,12 +46,26 @@
         <button class="timer-btn" type="button" data-forgot-password>忘记密码 / 重置密码</button>
       </div>
 
+      <div style="margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--soft)">
+        <div class="eyebrow">NEW ACCOUNT</div>
+        <h3 style="margin:5px 0 8px">注册新账号</h3>
+        <p class="muted">注册时必须设置登录密码，不再通过验证码自动创建无密码账号。</p>
+        <div class="study-form">
+          <label>注册邮箱<input type="email" autocomplete="email" inputmode="email" data-register-email placeholder="you@example.com"></label>
+          <label>设置密码<input type="password" autocomplete="new-password" data-register-password placeholder="至少 8 位"></label>
+          <label>确认密码<input type="password" autocomplete="new-password" data-register-password-confirm placeholder="再次输入密码"></label>
+          <p class="muted">密码强度：<strong data-register-password-strength>请输入至少 8 位</strong>。建议同时包含字母与数字。</p>
+          <button class="timer-btn primary" type="button" data-register-password-submit>注册并设置密码</button>
+        </div>
+        <div class="auth-feedback" data-register-feedback role="status" aria-live="polite"></div>
+      </div>
+
       <details class="password-fallback otp-fallback">
-        <summary>验证码登录 / 注册 / 无密码账号</summary>
+        <summary>验证码登录（仅已有账号）</summary>
         <div class="study-form otp-form">
-          <p class="muted">验证码会发送到上方填写的邮箱。新邮箱验证成功后会自动创建账号；邮件服务限流时可以继续使用密码登录。</p>
-          <div class="auth-contact-help"><strong>注册不了怎么办？</strong><span>如果验证码收不到、邮件服务限流或暂时无法注册，可联系 QQ <b>1504615378</b>，免费人工增加账号。管理员创建后会提供登录邮箱和临时密码，可直接使用上方“密码登录”。</span></div>
-          <button class="timer-btn" type="button" data-otp-send>发送验证码</button>
+          <p class="muted">验证码仅用于已有账号登录，不会再自动创建无密码账号。新用户请使用上方“注册新账号”并设置密码。</p>
+          <div class="auth-contact-help"><strong>注册不了怎么办？</strong><span>如果邮件服务限流或暂时无法注册，可联系 QQ <b>1504615378</b>，免费人工增加账号。管理员创建后会提供登录邮箱和临时密码，可直接使用上方“密码登录”。</span></div>
+          <button class="timer-btn" type="button" data-otp-send>发送登录验证码</button>
           <div class="otp-stage" data-otp-stage hidden>
             <div class="field-label">6 位验证码</div>
             <div class="otp-boxes" data-otp-boxes>
@@ -113,7 +127,21 @@
       <p><strong data-user-email></strong> · <span data-user-role>User</span></p>
       <div class="metric-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="metric-card"><span>最近云同步</span><strong style="font-size:14px" data-last-sync>尚未同步</strong></div><div class="metric-card"><span>当前会员</span><strong style="font-size:14px" data-account-membership>普通用户</strong></div></div>
       <p class="muted" data-account-membership-detail>正在读取会员状态</p>
-      <div class="auth-actions centered"><button class="timer-btn primary" type="button" data-sync-now>立即同步</button><button class="timer-btn" type="button" data-logout>退出登录</button></div>
+
+      <div style="margin:16px 0;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--soft)">
+        <div class="eyebrow">SECURITY</div>
+        <h3 style="margin:5px 0 8px">登录密码</h3>
+        <p class="muted">可在这里为验证码/临时密码账号设置正式密码，或直接修改当前密码。</p>
+        <div class="study-form">
+          <label>新密码<input type="password" autocomplete="new-password" data-account-new-password placeholder="至少 8 位"></label>
+          <label>确认新密码<input type="password" autocomplete="new-password" data-account-new-password-confirm placeholder="再次输入新密码"></label>
+          <p class="muted">密码强度：<strong data-account-password-strength>请输入至少 8 位</strong></p>
+          <button class="timer-btn" type="button" data-account-password-save>设置 / 更新密码</button>
+        </div>
+        <div class="auth-feedback" data-account-password-feedback role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="auth-actions centered"><button class="timer-btn primary" type="button" data-sync-now>立即同步（课程 + 题库）</button><button class="timer-btn" type="button" data-logout>退出登录</button></div>
       <div class="auth-feedback" data-auth-feedback-signed role="status" aria-live="polite"></div>
     </section>
 
@@ -125,7 +153,8 @@
 <footer class="footer"><div class="wrap footer-inner"><span>Everflow Account</span><span><a class="ui-iconized" href="../study/"><span>学习中心</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></span></div></footer>
 <script src="../assets/js/site-runtime-v2.js?v=20260825-perf2"></script>
 <script src="../assets/js/study-store.js"></script>
-<script src="../assets/js/cloud-config.js"></script>
+<script src="../assets/js/cloud-config.js?v=20260902-auth2"></script>
 <script type="module" src="../assets/js/account.js?v=20260825-auth1"></script>
+<script type="module" src="../assets/js/account-auth-sync-v2.js?v=20260902-auth2"></script>
 </body>
 </html>
