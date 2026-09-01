@@ -9,29 +9,19 @@ def replace_one(path: str, old: str, new: str) -> None:
     p.write_text(text.replace(old, new), encoding='utf-8')
 
 
-def insert_before_line(path: str, target: str, additions: list[str]) -> None:
-    p = Path(path)
-    lines = p.read_text(encoding='utf-8').splitlines()
-    matches = [i for i, line in enumerate(lines) if line == target]
-    assert len(matches) == 1, f'{path}: expected one line {target!r}, got {len(matches)}'
-    i = matches[0]
-    lines[i:i] = additions
-    p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-
-
-# 1. Underlying OTP API is login-only. Even if UI interception regresses, OTP cannot create a new user.
+# 1. OTP is login-only at the underlying API too. No hidden passwordless signup path.
 replace_one('site/assets/js/cloud.js', 'shouldCreateUser:true', 'shouldCreateUser:false')
 
-# 2. Force a fresh question-cloud boot instead of stale cached entry/QWER files.
+# 2. Force fresh question-cloud boot scripts on bank/reader/graph.
 replace_one('site/zhenti/index.html', 'zhenti-entry.js?v=20260828-relaxfix1', 'zhenti-entry.js?v=20260902-qsync2')
 replace_one('site/zhenti/relax-reader/index.html', 'question-choice-qwer.js?v=20260828-qwer-strong1', 'question-choice-qwer.js?v=20260902-qsync2')
 replace_one('site/graph/index.html', 'question-choice-qwer.js?v=20260828-qwer-strong1', 'question-choice-qwer.js?v=20260902-qsync2')
 
-# 3. New SW generation; explicitly precache auth/question sync modules.
+# 3. New service-worker generation evicts stale auth/bank scripts and precaches new sync modules.
 replace_one('site/sw.js', "const CACHE='everflow-site-v45-course9-qwer-strong-status';", "const CACHE='everflow-site-v45-course10-auth-question-cloud';")
 replace_one('site/sw.js', "'/assets/js/cloud-config.js',", "'/assets/js/cloud-config.js','/assets/js/question-cloud-sync-v2.js','/assets/js/account-auth-sync-v2.js',")
 
-# 4. Permanent bank architecture checks.
+# 4. Permanent architecture checks run inside the existing Pages quality job.
 audit = Path('site/tools/audit-bank-features.mjs')
 text = audit.read_text(encoding='utf-8')
 old = "  qwer:'site/assets/js/question-choice-qwer.js',qwerCss:'site/assets/css/question-choice-qwer.css',relaxWallStrongCss:'site/assets/css/relax1000-wall-strong.css',"
@@ -63,36 +53,5 @@ assert text.count(old) == 1
 text = text.replace(old, new)
 audit.write_text(text, encoding='utf-8')
 
-# 5. Make the main Pages pipeline syntax-check and verify both new modules.
-deploy = Path('.github/workflows/deploy-pages-v2.yml')
-lines = deploy.read_text(encoding='utf-8').splitlines()
-target = '            site/assets/js/cloud.js \\'
-assert lines.count(target) == 1, f'cloud.js validation line missing: {lines.count(target)}'
-i = lines.index(target) + 1
-lines[i:i] = [
-    '            site/assets/js/account-auth-sync-v2.js \\',
-    '            site/assets/js/question-cloud-sync-v2.js \\',
-]
-target = '          test -s site/assets/js/graph-app.js'
-assert lines.count(target) == 1
-i = lines.index(target)
-lines[i:i] = [
-    '          test -s site/assets/js/account-auth-sync-v2.js',
-    '          test -s site/assets/js/question-cloud-sync-v2.js',
-]
-# Privacy-safe artifact verification has a separate graph-answer check later.
-target = '          test -s site/assets/js/graph-answer-enhancements.js'
-indices = [i for i, line in enumerate(lines) if line == target]
-assert len(indices) >= 1
-# Insert only after the final occurrence to avoid duplicate tests in Verify site.
-i = indices[-1] + 1
-lines[i:i] = [
-    '          test -s site/assets/js/account-auth-sync-v2.js',
-    '          test -s site/assets/js/question-cloud-sync-v2.js',
-]
-text = '\n'.join(lines) + '\n'
-text = text.replace("echo '{\"build\":\"20260828-reader5-graph-answer1\"}' > site/build.json", "echo '{\"build\":\"20260902-auth-question-cloud1\"}' > site/build.json")
-deploy.write_text(text, encoding='utf-8')
-
-# Never publish the superseded draft.
+# Superseded draft is intentionally not shipped.
 Path('site/assets/js/question-cloud-sync-v1.js').unlink(missing_ok=True)
