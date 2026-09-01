@@ -1,0 +1,28 @@
+name: Account backup spacing check once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/account-backup-spacing-check-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Validate account backup and spacing
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check site/assets/js/local-backup-question-v2.js
+          node site/tools/test-account-local-backup.mjs
+          grep -q 'account-spacing-v2.css' site/account/index.html
+          grep -q 'local-backup-question-v2.js' site/account/index.html
+          grep -q '408 真题与 Relax1000 做题记录' site/account/index.html
+          grep -q 'course12-account-backup-spacing' site/sw.js
+          git diff --check
