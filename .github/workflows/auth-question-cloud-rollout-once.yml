@@ -15,18 +15,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
-      - name: Repair one-time locator
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('.github/scripts/finalize_auth_cloud.py')
-          t=p.read_text(encoding='utf-8')
-          old="target = '          test -s site/assets/js/graph-app.js'\nassert lines.count(target) == 1\ni = lines.index(target)"
-          new="target = '          test -s site/assets/js/graph-app.js'\nassert lines.count(target) >= 1\ni = lines.index(target)"
-          assert t.count(old)==1
-          p.write_text(t.replace(old,new),encoding='utf-8')
-          PY
       - name: Apply guarded rollout patches
         run: python .github/scripts/finalize_auth_cloud.py
       - name: Validate auth and question cloud modules
@@ -41,14 +29,12 @@ jobs:
           node --check site/sw.js
           node site/tools/audit-bank-features.mjs
           git diff --check
-      - name: Commit finalized rollout
+      - name: Commit source rollout
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .github/workflows/auth-question-cloud-rollout-once.yml
-          rm -f .github/scripts/finalize_auth_cloud.py
           git config user.name 'Everflow Maintenance'
           git config user.email '54564601+EverflowCN@users.noreply.github.com'
-          git add -A
+          git add site
           git commit -m 'fix(auth): password registration and unified question cloud sync'
           git push origin HEAD:main
