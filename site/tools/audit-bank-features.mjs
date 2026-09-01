@@ -10,7 +10,7 @@ const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',bankSwitcher:'site/assets/js/question-bank-switch.js',
   graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphAnswer:'site/assets/js/graph-answer-enhancements.js',graphCss:'site/assets/css/graph.css',graphAnswerCss:'site/assets/css/graph-answer-enhancements.css',zhentiStatusCss:'site/assets/css/zhenti-status.css',trueGraph:'site/assets/js/zhenti-graph.js',
-  qwer:'site/assets/js/question-choice-qwer.js',qwerCss:'site/assets/css/question-choice-qwer.css',relaxWallStrongCss:'site/assets/css/relax1000-wall-strong.css',
+  qwer:'site/assets/js/question-choice-qwer.js',qwerCss:'site/assets/css/question-choice-qwer.css',accountPage:'site/account/index.html',accountEnh:'site/assets/js/account-auth-sync-v2.js',questionCloud:'site/assets/js/question-cloud-sync-v2.js',relaxWallStrongCss:'site/assets/css/relax1000-wall-strong.css',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
   relaxReader:'site/assets/js/relax1000-reader.js',relaxReaderPage:'site/zhenti/relax-reader/index.html',relaxReaderNavCss:'site/assets/css/relax1000-reader-nav.css',relaxReaderNavV2Css:'site/assets/css/relax1000-reader-nav-v2.css',
   builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',
@@ -24,7 +24,7 @@ for(const p of [
 ])assert(!exists(p),`obsolete file must stay deleted: ${p}`);
 
 const text=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,qwer,qwerCss,relaxWallStrongCss,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,qwer,qwerCss,accountPage,accountEnh,questionCloud,relaxWallStrongCss,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(entry.includes("source==='zhenti'")&&entry.includes('zhenti-wall.js'),'true-paper selected-only boot missing');
@@ -53,6 +53,17 @@ assert(!zhentiStatusCss.includes('--status-mastered:#a9d9f7'),'legacy blue maste
 
 assert(qwer.includes("Q:'A'")&&qwer.includes("W:'B'")&&qwer.includes("E:'C'")&&qwer.includes("R:'D'")&&qwer.includes("key==='X'"),'shared QWER -> ABCD / X-analysis mapping missing');
 assert(!qwer.includes('MutationObserver'),'QWER compatibility layer must not observe/rewrite question DOM');
+assert(entry.includes('question-cloud-sync-v2.js'),'bank entry question-cloud boot missing');
+assert(qwer.includes('question-cloud-sync-v2.js'),'reader/graph question-cloud boot missing');
+assert(accountPage.includes('data-register-password')&&accountPage.includes('data-register-password-confirm')&&accountPage.includes('account-auth-sync-v2.js'),'password registration/account hardening UI missing');
+assert(accountPage.includes('立即同步（课程 + 题库）'),'account manual sync must visibly include question bank');
+assert(accountEnh.includes('cloud.signUp(email,password)')&&accountEnh.includes('cloud.updatePassword(password)'),'password signup/change flow missing');
+assert(accountEnh.includes('shouldCreateUser:false'),'OTP login must never auto-create users');
+assert(accountEnh.includes('408 真题')&&accountEnh.includes('Relax1000'),'account combined-sync result must report both question banks');
+assert(questionCloud.includes("const TABLE='zhenti_sync_states'")&&questionCloud.includes("const TRUE_SCOPE='snapshot:v1'")&&questionCloud.includes("const RELAX_SCOPE='relax1000:v2'"),'question cloud scopes/table contract missing');
+assert(questionCloud.includes('everflow:zhenti-records-change')&&questionCloud.includes('everflow:relax-records-change'),'question auto-sync event hooks missing');
+assert(questionCloud.includes('LAST_USER_KEY')&&questionCloud.includes('accountChanged'),'question cloud account-isolation guard missing');
+assert(questionCloud.includes('cloud.syncAll=async function combinedSync'),'account syncAll question-bank upgrade missing');
 assert(qwerCss.includes('data-reader-option="A"')&&qwerCss.includes('data-graph-choice="A"')&&qwerCss.includes('content:"Q"')&&qwerCss.includes('content:"W"')&&qwerCss.includes('content:"E"')&&qwerCss.includes('content:"R"'),'shared QWER visible labels incomplete');
 
 assert(/name="everflow-build" content="[^"]+"/.test(graph)&&graph.includes('data-graph-source-host')&&graph.includes('data-graph-view-host'),'graph shell/build marker missing');
@@ -103,7 +114,7 @@ for(const year of years){const data=JSON.parse(read(`site/data/zhenti/${year}.js
 assert(verified>=846,`verified corpus unexpectedly small: ${verified}`);
 const autoFloor=Math.floor(verified*.70);
 assert(autoChoice>=autoFloor,`auto-gradable corpus unexpectedly small: ${autoChoice}/${verified} (<70%)`);
-for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.graphAnswer,files.qwer,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxReader,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
+for(const file of [files.entry,files.bankSwitcher,files.graphApp,files.graphControls,files.graphAnswer,files.qwer,files.accountEnh,files.questionCloud,files.trueGraph,files.relaxCore,files.relaxWall,files.relaxReader,files.relaxGraph,files.builder,files.cards,files.reset,files.zhentiMedia,files.runtime,files.nav]){
   const tmp=path.join(os.tmpdir(),`everflow-audit-${path.basename(file,'.js')}.mjs`);
   fs.writeFileSync(tmp,read(file));
   const result=spawnSync(process.execPath,['--check',tmp],{encoding:'utf8'});
