@@ -55,11 +55,11 @@ assert(qwer.includes("Q:'A'")&&qwer.includes("W:'B'")&&qwer.includes("E:'C'")&&q
 assert(!qwer.includes('MutationObserver'),'QWER compatibility layer must not observe/rewrite question DOM');
 assert(entry.includes('question-cloud-sync-v2.js'),'bank entry question-cloud boot missing');
 assert(qwer.includes('question-cloud-sync-v2.js'),'reader/graph question-cloud boot missing');
-assert(accountPage.includes('data-register-password')&&accountPage.includes('data-register-password-confirm')&&accountPage.includes('account-auth-sync-v2.js'),'password registration/account hardening UI missing');
-assert(accountPage.includes('立即同步（课程 + 题库）'),'account manual sync must visibly include question bank');
-assert(accountEnh.includes('cloud.signUp(email,password)')&&accountEnh.includes('cloud.updatePassword(password)'),'password signup/change flow missing');
-assert(accountEnh.includes('shouldCreateUser:false'),'OTP login must never auto-create users');
-assert(accountEnh.includes('408 真题')&&accountEnh.includes('Relax1000'),'account combined-sync result must report both question banks');
+assert(accountPage.includes('data-register-send')&&accountPage.includes('data-register-verify')&&accountPage.includes('data-register-otp-boxes')&&accountPage.includes('data-account-old-password')&&accountPage.includes('account-auth-sync-v2.js'),'verified signup / old-password change UI missing');
+assert(accountPage.includes('data-sync-now>立即同步</button>'),'account manual sync button must keep the original compact label');
+assert(accountEnh.includes('cloud.signUp(values.email,values.password)')&&accountEnh.includes("verifyOtp({email:pendingEmail,token,type:'signup'})"),'signup must require password plus signup OTP verification');
+assert(accountEnh.includes('cloud.signIn(user.email,oldPassword)')&&accountEnh.includes('cloud.updatePassword(newPassword)'),'signed-in password change must verify the old password first');
+assert(!accountEnh.includes('stopImmediatePropagation')&&!accountEnh.includes('data-sync-now')&&!accountEnh.includes('data-otp-send'),'account enhancement must not replace original login/OTP/sync button interactions');
 assert(questionCloud.includes("const TABLE='zhenti_sync_states'")&&questionCloud.includes("const TRUE_SCOPE='snapshot:v1'")&&questionCloud.includes("const RELAX_SCOPE='relax1000:v2'"),'question cloud scopes/table contract missing');
 assert(questionCloud.includes('everflow:zhenti-records-change')&&questionCloud.includes('everflow:relax-records-change'),'question auto-sync event hooks missing');
 assert(questionCloud.includes('LAST_USER_KEY')&&questionCloud.includes('accountChanged'),'question cloud account-isolation guard missing');
