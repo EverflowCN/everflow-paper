@@ -1,5 +1,5 @@
 // Everflow account auth corrective release: verified signup + old-password change; original account.js owns primary button interactions.
-import './question-cloud-sync-v2.js?v=20260902-qsync2';
+import './question-cloud-sync-v2.js?v=20260902-qsync3';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm';
 
 const cloud=window.EveraCloud;

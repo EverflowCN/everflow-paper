@@ -62,6 +62,9 @@ assert(accountEnh.includes('cloud.signIn(user.email,oldPassword)')&&accountEnh.i
 assert(!accountEnh.includes('stopImmediatePropagation')&&!accountEnh.includes('data-sync-now')&&!accountEnh.includes('data-otp-send'),'account enhancement must not replace original login/OTP/sync button interactions');
 assert(questionCloud.includes("const TABLE='zhenti_sync_states'")&&questionCloud.includes("const TRUE_SCOPE='snapshot:v1'")&&questionCloud.includes("const RELAX_SCOPE='relax1000:v2'"),'question cloud scopes/table contract missing');
 assert(questionCloud.includes('everflow:zhenti-records-change')&&questionCloud.includes('everflow:relax-records-change'),'question auto-sync event hooks missing');
+assert(questionCloud.includes('CHANGE_DEBOUNCE_MS=15000')&&questionCloud.includes("schedule(CHANGE_DEBOUNCE_MS,'zhenti-change')")&&questionCloud.includes("schedule(CHANGE_DEBOUNCE_MS,'relax-change')"),'question cloud writes must stay batched instead of per-answer');
+assert(!questionCloud.includes('location.reload')&&!questionCloud.includes('question-cloud-toast'),'question cloud sync must never force-refresh active question pages');
+assert(questionCloud.includes("visibilityState==='hidden'")&&questionCloud.includes('hidden-flush'),'question cloud hidden-page flush missing');
 assert(questionCloud.includes('LAST_USER_KEY')&&questionCloud.includes('accountChanged'),'question cloud account-isolation guard missing');
 assert(questionCloud.includes('cloud.syncAll=async function combinedSync'),'account syncAll question-bank upgrade missing');
 assert(qwerCss.includes('data-reader-option="A"')&&qwerCss.includes('data-graph-choice="A"')&&qwerCss.includes('content:"Q"')&&qwerCss.includes('content:"W"')&&qwerCss.includes('content:"E"')&&qwerCss.includes('content:"R"'),'shared QWER visible labels incomplete');
