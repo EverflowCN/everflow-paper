@@ -18,9 +18,8 @@ const emptySrs=()=>({version:1,settings:{dailyNew:20,targetRetention:.9},cards:{
 const emptyError=()=>({version:1,cards:{},daily:{}});
 const enabled=Boolean(cfg.url&&cfg.publishableKey&&cloud?.enabled!==false);
 const client=enabled?createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}):null;
-const CHANGE_DEBOUNCE_MS=15000;
-const CROSS_TAB_DEBOUNCE_MS=5000;
-let syncPromise=null,scheduleTimer=0,applying=false,patched=false;
+const PERIODIC_FLUSH_MS=2*60*1000;
+let syncPromise=null,flushTimer=0,applying=false,patched=false,dirtySeq=0,syncedSeq=0;
 
 const readJson=(key,fallback)=>{try{const value=JSON.parse(localStorage.getItem(key)||'null');return value??fallback}catch{return fallback}};
 const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
@@ -60,18 +59,21 @@ async function writeRemote(userId,scope,payload){const row={user_id:userId,scope
 function maxIso(...values){const ms=Math.max(...values.map(isoTime),0);return ms?new Date(ms).toISOString():nowIso()}
 
 async function runSync({manual=false,reason='auto'}={}){if(!enabled)return{ok:false,reason:'disabled',questionRecords:0};if(navigator.onLine===false)return{ok:false,reason:'offline',questionRecords:0};const user=await currentUser();if(!user)return{ok:false,reason:'guest',questionRecords:0};await ensureSession();const [remoteTrueRow,remoteRelaxRow]=await Promise.all([readRemote(user.id,TRUE_SCOPE),readRemote(user.id,RELAX_SCOPE)]);const previousUser=readText(LAST_USER_KEY),accountChanged=Boolean(previousUser&&previousUser!==user.id),localTrue=trueSnapshot(),localRelax=relaxSnapshot(),trueBefore=trueFingerprint(localTrue),relaxBefore=relaxFingerprint(localRelax);const mergedTrue=accountChanged?(remoteTrueRow?.payload||emptyTrue()):mergeTrue(localTrue,remoteTrueRow?.payload||null),mergedRelax=accountChanged?(remoteRelaxRow?.payload||emptyRelax()):mergeRelax(localRelax,remoteRelaxRow?.payload||null);applyTrue(mergedTrue);applyRelax(mergedRelax);const [trueAt,relaxAt]=await Promise.all([writeRemote(user.id,TRUE_SCOPE,mergedTrue),writeRemote(user.id,RELAX_SCOPE,mergedRelax)]);writeText(LAST_USER_KEY,user.id);const trueRecords=Object.keys(object(mergedTrue.wall)).length,relaxRecords=Object.keys(object(mergedRelax.records)).length,questionRecords=trueRecords+relaxRecords,pulledRemote=trueBefore!==trueFingerprint(mergedTrue)||relaxBefore!==relaxFingerprint(mergedRelax),result={ok:true,at:maxIso(trueAt,relaxAt),userId:user.id,questionScopes:2,trueRecords,relaxRecords,questionRecords,accountChanged,pulledRemote,manual,reason};writeJson(META_KEY,result);try{localStorage.setItem('everflow-last-question-cloud-sync',JSON.stringify(result))}catch{}document.dispatchEvent(new CustomEvent('everflow:question-cloud-sync',{detail:result}));if(pulledRemote&&!manual){document.dispatchEvent(new CustomEvent('everflow:question-cloud-merged',{detail:{accountChanged,reason}}))}return result}
-async function syncAll(options={}){if(syncPromise)return syncPromise;syncPromise=runSync(options).catch(error=>{console.error('Everflow question cloud sync failed',error);document.dispatchEvent(new CustomEvent('everflow:question-cloud-error',{detail:{message:error?.message||String(error)}}));throw error}).finally(()=>{syncPromise=null});return syncPromise}
-function schedule(delay=CHANGE_DEBOUNCE_MS,reason='change'){clearTimeout(scheduleTimer);scheduleTimer=setTimeout(()=>syncAll({reason}).catch(()=>{}),delay)}
+async function syncAll(options={}){if(syncPromise)return syncPromise;const targetSeq=dirtySeq;syncPromise=runSync(options).then(result=>{if(result?.ok)syncedSeq=Math.max(syncedSeq,targetSeq);return result}).catch(error=>{console.error('Everflow question cloud sync failed',error);document.dispatchEvent(new CustomEvent('everflow:question-cloud-error',{detail:{message:error?.message||String(error)}}));throw error}).finally(()=>{syncPromise=null});return syncPromise}
+function markDirty(){dirtySeq+=1}
+function hasDirty(){return dirtySeq>syncedSeq}
+async function flushDirty(reason='batch'){if(!hasDirty())return{ok:true,skipped:true,reason};return syncAll({reason})}
+function scheduleFlush(delay=0,reason='batch'){clearTimeout(flushTimer);flushTimer=setTimeout(()=>flushDirty(reason).catch(()=>{}),delay)}
 async function patchMainCloud(){if(patched||!cloud?.syncAll)return;patched=true;const baseSync=cloud.syncAll.bind(cloud);cloud.syncAll=async function combinedSync(...args){const base=await baseSync(...args);if(!base?.ok)return base;const questions=await syncAll({manual:true,reason:'account-sync'});return{...base,...questions,ok:true,at:questions.at||base.at,courses:Number(base.courses||0),questionRecords:Number(questions.questionRecords||0),trueRecords:Number(questions.trueRecords||0),relaxRecords:Number(questions.relaxRecords||0),questionScopes:Number(questions.questionScopes||0)}};window.dispatchEvent(new CustomEvent('everflow:cloud-sync-upgraded',{detail:{questions:true}}))}
 
-window.EveraQuestionCloud={enabled,syncAll,trueSnapshot,relaxSnapshot};
+window.EveraQuestionCloud={enabled,syncAll,flushDirty,trueSnapshot,relaxSnapshot};
 patchMainCloud();
-document.addEventListener('everflow:zhenti-records-change',()=>{if(!applying)schedule(CHANGE_DEBOUNCE_MS,'zhenti-change')});
-document.addEventListener('everflow:relax-records-change',event=>{if(applying)return;const id=idKey(event.detail?.id);if(id){const clocks=object(readJson(RELAX_CLOCK_KEY,{}));clocks[id]=nowIso();writeJson(RELAX_CLOCK_KEY,clocks)}if(event.detail?.reset)writeText(RELAX_RESET_KEY,nowIso());schedule(CHANGE_DEBOUNCE_MS,'relax-change')});
-document.addEventListener('everflow:zhenti-reset-all',()=>schedule(1200,'zhenti-reset'));
-addEventListener('online',()=>schedule(3000,'online'));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')schedule(0,'hidden-flush')});
-addEventListener('pagehide',()=>schedule(0,'pagehide-flush'));
-addEventListener('storage',event=>{if([...Object.values(ZHENTI_KEYS),...Object.values(RELAX_KEYS),RELAX_RESET_KEY,RELAX_CLOCK_KEY].includes(event.key))schedule(CROSS_TAB_DEBOUNCE_MS,'cross-tab')});
-setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)syncAll({reason:'interval'}).catch(()=>{})},5*60*1000);
+document.addEventListener('everflow:zhenti-records-change',()=>{if(!applying)markDirty()});
+document.addEventListener('everflow:relax-records-change',event=>{if(applying)return;const id=idKey(event.detail?.id);if(id){const clocks=object(readJson(RELAX_CLOCK_KEY,{}));clocks[id]=nowIso();writeJson(RELAX_CLOCK_KEY,clocks)}if(event.detail?.reset)writeText(RELAX_RESET_KEY,nowIso());markDirty()});
+document.addEventListener('everflow:zhenti-reset-all',()=>markDirty());
+addEventListener('online',()=>{if(hasDirty())scheduleFlush(3000,'online-flush');else setTimeout(()=>syncAll({reason:'online-pull'}).catch(()=>{}),3000)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&hasDirty())scheduleFlush(0,'hidden-flush')});
+addEventListener('pagehide',()=>{if(hasDirty())flushDirty('pagehide-flush').catch(()=>{})});
+addEventListener('storage',event=>{if([...Object.values(ZHENTI_KEYS),...Object.values(RELAX_KEYS),RELAX_RESET_KEY,RELAX_CLOCK_KEY].includes(event.key))markDirty()});
+setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false&&hasDirty())flushDirty('batch-interval').catch(()=>{})},PERIODIC_FLUSH_MS);
 setTimeout(()=>syncAll({reason:'boot'}).catch(()=>{}),1500);

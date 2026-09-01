@@ -6,6 +6,6 @@ if(source==='zhenti'){
 }
 
 await import('/assets/js/site-runtime-v2.js?v=20260828-relaxfix1');
-await import('/assets/js/question-cloud-sync-v2.js?v=20260902-qsync3');
+await import('/assets/js/question-cloud-sync-v2.js?v=20260902-qsync4');
 
 if(source==='zhenti')await import('/assets/js/zhenti-deeplink.js?v=20260828-relaxfix1');
