@@ -1,3 +1,5 @@
+import('/assets/js/question-cloud-sync-v2.js?v=20260902-qsync2').catch(error=>console.warn('Question cloud sync unavailable',error));
+
 (()=>{
   const ANSWER_BY_KEY={Q:'A',W:'B',E:'C',R:'D'};
   const editable=target=>Boolean(target?.closest?.('input,textarea,select,[contenteditable="true"]'));
