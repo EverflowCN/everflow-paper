@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T20:35:32.108Z",
+  "generatedAt": "2026-09-02T20:22:24.448Z",
   "range": "2009-2026",
   "expectedQuestions": 846,
   "checkedQuestions": 846,
@@ -189,6 +189,7 @@
   "failures": [],
   "figureFailures": [],
   "manifestFailures": [],
+  "accuracyFailures": [],
   "externalFigures": [],
   "summary": {
     "allHealthy": true,
@@ -197,6 +198,7 @@
     "failureEntries": 0,
     "localFigureFailures": 0,
     "manifestFailures": 0,
+    "accuracyFailures": 0,
     "externalFigureRefs": 0
   }
 }

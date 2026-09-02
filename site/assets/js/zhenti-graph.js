@@ -18,7 +18,7 @@
   const PAPER_CACHE=new Map();
   const SUBJECT_INDEX=new Map();
   const SUBJECT_LABEL={ds:'数据结构',co:'计算机组成原理',os:'操作系统',cn:'计算机网络'};
-  const DATA_VERSION='20260825-bank1';
+  const DATA_VERSION='20260902-accuracy1';
 
   function parseKey(key){
     const match=String(key||'').match(/^(\d{4})-(\d{1,2})$/);

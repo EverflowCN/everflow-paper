@@ -22,7 +22,7 @@ function readJson(key){try{const value=JSON.parse(localStorage.getItem(key)||'{}
 function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch{}}
 async function relaxCore(){return relaxCorePromise||(relaxCorePromise=import(RELAX_CORE_URL))}
 async function relaxData(){return relaxDataPromise||(relaxDataPromise=relaxCore().then(core=>core.loadRelaxData()))}
-async function loadZhenti(year){if(zhentiCache.has(year))return zhentiCache.get(year);const promise=fetch(`/data/zhenti/${year}.json?v=20260825-bank1`,{cache:'default'}).then(r=>r.ok?r.json():null).catch(()=>null);zhentiCache.set(year,promise);return promise}
+async function loadZhenti(year){if(zhentiCache.has(year))return zhentiCache.get(year);const promise=fetch(`/data/zhenti/${year}.json?v=20260902-accuracy1`,{cache:'default'}).then(r=>r.ok?r.json():null).catch(()=>null);zhentiCache.set(year,promise);return promise}
 function zhentiPatch(year,q,patch){const records=readJson(ZHENTI_KEY),key=`${year}-${q}`,prev=records[key]||{},next={...prev,...patch,updatedAt:new Date().toISOString()};Object.keys(next).forEach(k=>next[k]===undefined&&delete next[k]);records[key]=next;writeJson(ZHENTI_KEY,records);document.dispatchEvent(new CustomEvent('everflow:zhenti-records-change',{detail:{year,q,source:'graph-answer'}}));return next}
 async function context(){
   const cell=activeCell();if(!cell)return null;

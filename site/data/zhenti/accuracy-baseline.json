@@ -1,0 +1,65 @@
+{
+  "schema": "everflow-408-accuracy-baseline-v1",
+  "description": "Fields checked against the rebuilt original paper scans. The audit fails if a corrected transcription regresses.",
+  "source": {
+    "name": "neville-studio/408-exam-paper",
+    "url": "https://github.com/neville-studio/408-exam-paper/tree/main/papers-rebuild"
+  },
+  "questions": {
+    "2010-30": {
+      "answer": "C",
+      "options": {
+        "D": "16513KB"
+      }
+    },
+    "2014-3": {
+      "answer": "A",
+      "options": {
+        "C": "队空：end2=(end1+1) mod M；队满：end1=(end2+1) mod M"
+      }
+    },
+    "2015-24": {
+      "answer": "C",
+      "options": {
+        "A": "DIV R0,R1；(R0)/(R1)→R0",
+        "B": "INT n；产生软中断",
+        "C": "NOT R0；寄存器 R0 的内容取非",
+        "D": "MOV R0,addr；把地址 addr 处的数据放入寄存器 R0 中"
+      }
+    },
+    "2016-14": {
+      "answer": "A",
+      "options": {
+        "C": "77H",
+        "D": "66H"
+      }
+    },
+    "2020-9": {
+      "answer": "C",
+      "options": {
+        "A": "仅 I、II",
+        "B": "仅 II、III",
+        "C": "仅 I、II、IV",
+        "D": "仅 I、III、IV"
+      }
+    },
+    "2024-5": {
+      "answer": "D",
+      "options": {
+        "A": "仅 I、III",
+        "B": "仅 II、IV",
+        "C": "仅 II、III、IV",
+        "D": "I、II、III、IV"
+      }
+    },
+    "2024-24": {
+      "answer": "A",
+      "options": {
+        "A": "终止子进程",
+        "B": "回收进程占用的设备",
+        "C": "撤销进程控制块",
+        "D": "回收为进程分配的内存"
+      }
+    }
+  }
+}
