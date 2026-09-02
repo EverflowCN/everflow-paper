@@ -42,10 +42,12 @@ jobs:
         shell: pwsh
         run: |
           npm install
+          npm run tauri icon app-icon.svg
           node --version
           npm --version
           rustc --version
           cargo --version
+          if (-not (Test-Path 'src-tauri/icons/icon.ico')) { throw 'Tauri icon generation did not create icon.ico' }
 
       - name: Build real Tauri EXE and NSIS installer
         working-directory: exe-smoke
