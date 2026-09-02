@@ -132,8 +132,8 @@ jobs:
           if (-not $setup) { throw 'NSIS setup.exe was not produced.' }
 
           $customInstall = Join-Path $env:RUNNER_TEMP 'Everflow-Custom-Install'
-          & $setup.FullName /S "/D=$customInstall"
-          if ($LASTEXITCODE -ne 0) { throw "NSIS custom-directory install returned exit code $LASTEXITCODE" }
+          $installProcess = Start-Process -FilePath $setup.FullName -ArgumentList @('/S', "/D=$customInstall") -Wait -PassThru
+          if ($installProcess.ExitCode -ne 0) { throw "NSIS custom-directory install returned exit code $($installProcess.ExitCode)" }
           $installedExe = Join-Path $customInstall 'Everflow.exe'
           if (-not (Test-Path $installedExe)) { throw "NSIS did not install Everflow.exe into custom directory: $customInstall" }
           @(
