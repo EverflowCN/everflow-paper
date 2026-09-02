@@ -84,6 +84,7 @@ jobs:
           }
 
           initexmf '--set-config-value=[MPM]AutoInstall=yes'
+          mpm --update-db
           initexmf --update-fndb
           xelatex --version
 
@@ -92,6 +93,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $compileStartedAt = Get-Date
 
           $preferred = 'src-tauri/target/release/Everflow.exe'
           if (Test-Path $preferred) {
@@ -111,12 +113,37 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Everflow.exe self-test returned exit code $LASTEXITCODE" }
           if (-not (Test-Path $pdf)) { throw 'Everflow.exe did not create the expected PDF.' }
 
+          $selfTestLog = Get-Content 'artifacts/exe-self-test.log' -Raw
+          if ($selfTestLog -notmatch 'EVERFLOW_XELATEX_RESOLVED=') { throw 'EXE log lacks the resolved XeLaTeX path marker.' }
+          if ($selfTestLog -notmatch 'EVERFLOW_XELATEX_START=pass=1;') { throw 'EXE log lacks the first XeLaTeX invocation marker.' }
+          if ($selfTestLog -notmatch 'EVERFLOW_XELATEX_EXIT=pass=2;code=0') { throw 'EXE log lacks a successful second XeLaTeX pass marker.' }
+          if ($selfTestLog -notmatch 'EVERFLOW_EXE_COMPILE_OK=') { throw 'EXE log lacks its PDF success marker.' }
+
+          $pdfInfo = Get-Item $pdf
+          if ($pdfInfo.Length -lt 1000) { throw "EXE-created PDF is unexpectedly small: $($pdfInfo.Length) bytes" }
+          if ($pdfInfo.LastWriteTime -lt $compileStartedAt) { throw 'PDF predates the Everflow.exe invocation.' }
+          $pdfMagic = [System.IO.File]::ReadAllBytes($pdf)[0..4]
+          if ([System.Text.Encoding]::ASCII.GetString($pdfMagic) -ne '%PDF-') { throw 'EXE-created output does not have a PDF header.' }
+          $pdfHash = (Get-FileHash $pdf -Algorithm SHA256).Hash
+          Write-Host "EXE_GENERATED_PDF_SHA256=$pdfHash"
+
           Copy-Item $exe.FullName 'artifacts/Everflow.exe'
           $setup = Get-ChildItem 'src-tauri/target/release/bundle/nsis' -Filter '*setup.exe' | Select-Object -First 1
           if (-not $setup) { throw 'NSIS setup.exe was not produced.' }
+
+          $customInstall = Join-Path $env:RUNNER_TEMP 'Everflow-Custom-Install'
+          & $setup.FullName /S "/D=$customInstall"
+          if ($LASTEXITCODE -ne 0) { throw "NSIS custom-directory install returned exit code $LASTEXITCODE" }
+          $installedExe = Join-Path $customInstall 'Everflow.exe'
+          if (-not (Test-Path $installedExe)) { throw "NSIS did not install Everflow.exe into custom directory: $customInstall" }
+          @(
+            "NSIS_CUSTOM_INSTALL_OK=$customInstall"
+            "INSTALLED_EXE_SHA256=$((Get-FileHash $installedExe -Algorithm SHA256).Hash)"
+          ) | Set-Content 'artifacts/nsis-custom-install-proof.txt' -Encoding utf8
+
           Copy-Item $setup.FullName 'artifacts/Everflow-1.3.0-x64-setup.exe'
 
-          Get-Item 'artifacts/Everflow.exe','artifacts/Everflow-1.3.0-x64-setup.exe',$pdf |
+          Get-Item 'artifacts/Everflow.exe','artifacts/Everflow-1.3.0-x64-setup.exe',$pdf,'artifacts/nsis-custom-install-proof.txt' |
             Select-Object Name, Length, LastWriteTime
 
       - name: Upload EXE + setup + EXE-generated PDF

@@ -1,6 +1,10 @@
-use std::{env, fs, path::{Path, PathBuf}, process::{Command, Stdio}};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+};
 
-const TEST_TEX: &str = r#"\documentclass[UTF8,a4paper]{ctexart}
+const TEST_TEX: &str = r#"\documentclass[UTF8,a4paper,fontset=fandol]{ctexart}
 \usepackage{amsmath,amssymb,booktabs,multirow,geometry,xcolor}
 \geometry{margin=22mm}
 \definecolor{everflow}{HTML}{345995}
@@ -47,32 +51,93 @@ P2 & 0 & 1 & 可继续执行\\
 \end{document}
 "#;
 
-fn run_xelatex(dir: &Path, tex_name: &str) -> Result<(), String> {
-    let out = Command::new("xelatex")
+fn find_xelatex() -> Result<PathBuf, String> {
+    #[cfg(windows)]
+    let mut lookup = Command::new("where.exe");
+    #[cfg(not(windows))]
+    let mut lookup = Command::new("which");
+
+    let output = lookup
+        .arg("xelatex")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .map_err(|e| format!("无法查询 XeLaTeX 路径: {e}"))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "PATH 中未找到 XeLaTeX\nstdout:\n{}\nstderr:\n{}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .map(str::trim)
+        .find(|line| !line.is_empty())
+        .map(PathBuf::from)
+        .ok_or_else(|| "XeLaTeX 路径查询成功但结果为空".to_string())
+}
+
+fn run_xelatex(xelatex: &Path, dir: &Path, tex_name: &str, pass: u8) -> Result<(), String> {
+    println!(
+        "EVERFLOW_XELATEX_START=pass={pass};exe={}",
+        xelatex.display()
+    );
+
+    let out = Command::new(xelatex)
         .current_dir(dir)
-        .args(["--enable-installer", "-interaction=nonstopmode", "-halt-on-error", "-file-line-error", tex_name])
+        .args([
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            "-file-line-error",
+            tex_name,
+        ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()
         .map_err(|e| format!("无法启动 XeLaTeX: {e}"))?;
+
+    println!(
+        "EVERFLOW_XELATEX_EXIT=pass={pass};code={}",
+        out.status.code().unwrap_or(-1)
+    );
+
     if !out.status.success() {
-        return Err(format!("XeLaTeX 失败\nstdout:\n{}\nstderr:\n{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr)));
+        return Err(format!(
+            "XeLaTeX 第 {pass} 遍编译失败\nstdout:\n{}\nstderr:\n{}",
+            String::from_utf8_lossy(&out.stdout),
+            String::from_utf8_lossy(&out.stderr)
+        ));
     }
     Ok(())
 }
 
 fn self_test(output: Option<String>) -> Result<PathBuf, String> {
     let root = env::temp_dir().join("everflow-exe-smoke");
-    if root.exists() { let _ = fs::remove_dir_all(&root); }
+    if root.exists() {
+        fs::remove_dir_all(&root).map_err(|e| format!("清理旧自检目录失败: {e}"))?;
+    }
     fs::create_dir_all(&root).map_err(|e| e.to_string())?;
     let tex = root.join("everflow-exe-self-test.tex");
     fs::write(&tex, TEST_TEX.as_bytes()).map_err(|e| e.to_string())?;
-    run_xelatex(&root, "everflow-exe-self-test.tex")?;
-    run_xelatex(&root, "everflow-exe-self-test.tex")?;
+    let xelatex = find_xelatex()?;
+    println!("EVERFLOW_XELATEX_RESOLVED={}", xelatex.display());
+    run_xelatex(&xelatex, &root, "everflow-exe-self-test.tex", 1)?;
+    run_xelatex(&xelatex, &root, "everflow-exe-self-test.tex", 2)?;
     let pdf = root.join("everflow-exe-self-test.pdf");
-    if !pdf.is_file() { return Err("XeLaTeX 返回成功但 PDF 不存在".into()); }
-    let target = output.map(PathBuf::from).unwrap_or_else(|| env::current_dir().unwrap_or_else(|_| PathBuf::from(".")).join("Everflow-EXE-self-test.pdf"));
-    if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(|e|e.to_string())?; }
+    if !pdf.is_file() {
+        return Err("XeLaTeX 返回成功但 PDF 不存在".into());
+    }
+    let target = output.map(PathBuf::from).unwrap_or_else(|| {
+        env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join("Everflow-EXE-self-test.pdf")
+    });
+    if let Some(parent) = target.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
     fs::copy(&pdf, &target).map_err(|e| format!("复制 PDF 失败: {e}"))?;
     Ok(target)
 }
@@ -80,10 +145,20 @@ fn self_test(output: Option<String>) -> Result<PathBuf, String> {
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.iter().any(|a| a == "--self-test-compile") {
-        let output = args.iter().position(|a| a == "--output").and_then(|i| args.get(i + 1)).cloned();
+        let output = args
+            .iter()
+            .position(|a| a == "--output")
+            .and_then(|i| args.get(i + 1))
+            .cloned();
         match self_test(output) {
-            Ok(path) => { println!("EVERFLOW_EXE_COMPILE_OK={}", path.display()); std::process::exit(0); }
-            Err(err) => { eprintln!("EVERFLOW_EXE_COMPILE_FAILED={err}"); std::process::exit(2); }
+            Ok(path) => {
+                println!("EVERFLOW_EXE_COMPILE_OK={}", path.display());
+                std::process::exit(0);
+            }
+            Err(err) => {
+                eprintln!("EVERFLOW_EXE_COMPILE_FAILED={err}");
+                std::process::exit(2);
+            }
         }
     }
 
