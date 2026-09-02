@@ -1,7 +1,7 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-const APP_VERSION='20260825-bank1';
+const APP_VERSION='20260902-accuracy1';
 const RELAX_VERSION='20260828-relaxfix1';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');

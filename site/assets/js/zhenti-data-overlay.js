@@ -1,7 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const years=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const DATA_VERSION='20260825-bank1';
+  const DATA_VERSION='20260902-accuracy1';
   const mergedCache=new Map();
   const layerCache={base:new Map(),supplement:new Map(),extra:new Map()};
   const MAX_CONCURRENT=4;

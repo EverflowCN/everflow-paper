@@ -54,6 +54,7 @@ function localFigurePath(src) {
 }
 
 const manifest = readJson(path.join(DATA, 'manifest.json'));
+const accuracyBaseline = readJson(path.join(DATA, 'accuracy-baseline.json'));
 const report = {
   generatedAt: new Date().toISOString(),
   range: '2009-2026',
@@ -64,6 +65,7 @@ const report = {
   failures: [],
   figureFailures: [],
   manifestFailures: [],
+  accuracyFailures: [],
   externalFigures: []
 };
 
@@ -116,6 +118,22 @@ for (const year of YEARS) {
         }
       } else if (!String(item.answer || '').trim()) {
         problems.push(issue(year, q, 'empty-answer', '综合题参考答案为空'));
+      }
+
+      const expected = accuracyBaseline?.questions?.[`${year}-${q}`];
+      if (expected) {
+        if (String(item.answer || '') !== String(expected.answer || '')) {
+          const failure = issue(year, q, 'accuracy-answer-mismatch', `实际=${item.answer}，原卷=${expected.answer}`);
+          problems.push(failure);
+          report.accuracyFailures.push(failure);
+        }
+        for (const [key, value] of Object.entries(expected.options || {})) {
+          if (String(item.options?.[key] || '') !== String(value)) {
+            const failure = issue(year, q, 'accuracy-option-mismatch', `${key}: 实际=${item.options?.[key] ?? 'missing'}，原卷=${value}`);
+            problems.push(failure);
+            report.accuracyFailures.push(failure);
+          }
+        }
       }
 
       const figs = Array.isArray(item.figures) ? item.figures : [];
@@ -188,12 +206,14 @@ report.summary = {
   allHealthy:
     report.healthyQuestions === report.expectedQuestions &&
     report.figureFailures.length === 0 &&
-    report.manifestFailures.length === 0,
+    report.manifestFailures.length === 0 &&
+    report.accuracyFailures.length === 0,
   healthy: report.healthyQuestions,
   unhealthy: report.expectedQuestions - report.healthyQuestions,
   failureEntries: report.failures.length,
   localFigureFailures: report.figureFailures.length,
   manifestFailures: report.manifestFailures.length,
+  accuracyFailures: report.accuracyFailures.length,
   externalFigureRefs: report.externalFigures.length
 };
 
@@ -208,6 +228,7 @@ for (const [year, info] of Object.entries(report.years)) {
 }
 console.log(`figure failures: ${report.figureFailures.length}`);
 console.log(`manifest failures: ${report.manifestFailures.length}`);
+console.log(`accuracy failures: ${report.accuracyFailures.length}`);
 console.log(`report: ${path.relative(ROOT, out)}`);
 
 if (!report.summary.allHealthy) process.exitCode = 1;

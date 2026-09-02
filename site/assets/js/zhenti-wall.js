@@ -7,7 +7,7 @@
   const STORAGE_KEY='everflow-408-zhenti-wall-v1';
   const SHORTCUT_TIP_KEY='everflow-408-shortcut-tip-seen';
   const DATA_BASE='/data/zhenti';
-  const DATA_VERSION='20260825-bank1';
+  const DATA_VERSION='20260902-accuracy1';
   const STATUS_LABEL={mastered:'熟练',fuzzy:'模糊',weak:'不会'};
   const SOURCE_LABEL={tommy408:'TommyTay0712/408',neville408:'408-exam-paper',csgraduates:'计算机考研杂货铺',foreverlink:'408 ForeverLink',hermes408:'Hermes 408',noobdream:'N诺',csyanku:'CSYanKu',xit:'厦门工学院原卷'};
   const SUBJECTS={
@@ -160,7 +160,12 @@
 
     const choice=isChoice(item,q),submitted=hasSubmitted(r),showAnswer=submitted||Boolean(r.reviewed);
     const fav=`<button class="question-favorite${r.favorite?' active':''}" type="button" data-answer-favorite title="收藏 / 取消收藏（F）">${r.favorite?'★ 已收藏':'☆ 收藏'}</button>`;
-    const verify=`<div class="question-verify-row"><span class="verify-badge">已核验</span><span class="verify-note">${esc(item.verification?.mode==='cross-checked-paraphrase'?'题干转述版':'已核验题干')}</span>${fav}</div>`;
+    const verificationNote=item.verification?.mode==='cross-checked-paraphrase'
+      ?'题干转述版'
+      :item.verification?.mode==='original-paper-corrected-transcription'
+        ?'原卷校正版'
+        :'已核验题干';
+    const verify=`<div class="question-verify-row"><span class="verify-badge">已核验</span><span class="verify-note">${esc(verificationNote)}</span>${fav}</div>`;
     const stem=`<div class="question-stem"><span class="question-number">（${q}）</span><p>${esc(item.stem)}</p></div>`;
 
     let options='';
