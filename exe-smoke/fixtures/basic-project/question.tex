@@ -1,0 +1,19 @@
+\documentclass[UTF8,a4paper,fontset=fandol]{ctexart}
+\usepackage{amsmath,booktabs,geometry,xcolor}
+\geometry{margin=24mm}
+\definecolor{everflow}{HTML}{4F7468}
+\title{\textcolor{everflow}{Everflow question.tex 工程编译验证}}
+\author{由 Everflow.exe 的正式工程编译接口生成}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section*{真实工程入口}
+本文件名为 \texttt{question.tex}。Windows Actions 并不直接运行 XeLaTeX，而是启动本次构建出的
+\texttt{Everflow.exe}，由 EXE 扫描工程、选择入口并完成两遍编译。
+
+\input{sections/questions.tex}
+
+\section*{结论}
+若本页中文、公式、表格与子文件内容均正常，说明桌面界面所使用的正式编译底层已经跑通。
+\end{document}
