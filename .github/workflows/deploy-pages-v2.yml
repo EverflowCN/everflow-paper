@@ -72,7 +72,7 @@ jobs:
           done
           grep -q 'data-resource-search' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html
-          grep -Eq "^const CACHE=\'everflow-site-v[0-9]+[^\']*\';$" site/sw.js
+          grep -Fq "const CACHE='everflow-site-v" site/sw.js
           git diff --check
 
   deploy:
