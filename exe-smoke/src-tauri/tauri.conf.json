@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Everflow",
+  "version": "1.3.0",
+  "identifier": "top.evera.everflow.smoke",
+  "mainBinaryName": "Everflow",
+  "build": {
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Everflow EXE Smoke",
+        "width": 900,
+        "height": 600,
+        "center": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "startMenuFolder": "Everflow",
+        "displayLanguageSelector": false,
+        "languages": ["SimpChinese", "English"]
+      }
+    }
+  }
+}
