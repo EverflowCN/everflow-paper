@@ -30,7 +30,7 @@
     button.className='ws-btn primary';
     button.dataset.userCreateOpen='';
     button.textContent='新增账号';
-    intro.appendChild(button);
+    (intro.querySelector('.ws-intro-actions')||intro).appendChild(button);
   }
 
   function closeDrawer(){
