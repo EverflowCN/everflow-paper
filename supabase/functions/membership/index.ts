@@ -17,7 +17,7 @@ Deno.serve(async req=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'not_found'},404);if(!SUPABASE_URL||!SERVICE_KEY)return json({error:'service_unavailable'},503)
   const authHeader=req.headers.get('Authorization')||'';const token=authHeader.startsWith('Bearer ')?authHeader.slice(7):'';if(!token)return json({error:'login_required'},401)
   const admin=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});const {data:{user},error:userError}=await admin.auth.getUser(token);if(userError||!user)return json({error:'login_required'},401)
-  let body:{action?:string;code?:string;plan?:string;maxUses?:number;redeemExpiresAt?:string|null;grantExpiresAt?:string|null;note?:string;codeId?:string}={};try{body=await req.json()}catch{return json({error:'bad_request'},400)};const action=String(body.action||'status')
+  let body:{action?:string;code?:string;plan?:string;maxUses?:number;redeemExpiresAt?:string|null;grantExpiresAt?:string|null;note?:string;codeId?:string;targetUserId?:string;expiresAt?:string|null}={};try{body=await req.json()}catch{return json({error:'bad_request'},400)};const action=String(body.action||'status')
   try{
     const {data:cfg,error:cfgError}=await admin.from('membership_config').select('*').eq('id','default').single();if(cfgError)throw cfgError
     if(action==='status'){const {data:membership,error}=await admin.from('memberships').select('*').eq('user_id',user.id).maybeSingle();if(error)throw error;const effectiveExpiresAt=membership?.expires_at||(membership?.source==='promo_exam_2027'?cfg.pro_free_until:null);const active=Boolean(membership&&membership.status==='active'&&(!effectiveExpiresAt||new Date(effectiveExpiresAt)>new Date()));return json({plan:active?membership.plan:'free',active,membership:membership?{...membership,effective_expires_at:effectiveExpiresAt}:null,promo:{enabled:Boolean(cfg.pro_free_claim_enabled),freeUntil:cfg.pro_free_until,title:cfg.promo_title,copy:cfg.promo_copy}})}
@@ -40,6 +40,21 @@ Deno.serve(async req=>{
     }
     if(action==='code-redemptions'){
       const codeId=String(body.codeId||'');if(!codeId)return json({error:'missing_code'},400);const {data,error}=await admin.from('membership_code_redemptions').select('id,user_id,redeemed_at').eq('code_id',codeId).order('redeemed_at',{ascending:false});if(error)throw error;return json({redemptions:data||[]})
+    }
+    if(action==='set-membership'||action==='revoke-membership'){
+      const targetUserId=String(body.targetUserId||'');if(!targetUserId)return json({error:'missing_user'},400)
+      const {data:target,error:targetError}=await admin.auth.admin.getUserById(targetUserId);if(targetError||!target.user)return json({error:'user_not_found'},404)
+      if(action==='revoke-membership'){
+        const {data,error}=await admin.from('memberships').upsert({user_id:targetUserId,plan:'member',status:'revoked',source:'owner_manual',expires_at:null,updated_at:new Date().toISOString(),metadata:{managed_by:user.id}},{onConflict:'user_id'}).select().single();if(error)throw error
+        await admin.from('admin_audit').insert({actor_user_id:user.id,action:'membership_revoke',target_user_id:targetUserId,detail:{email:target.user.email||null}})
+        return json({ok:true,membership:data})
+      }
+      const plan=body.plan==='pro'?'pro':body.plan==='member'?'member':null;if(!plan)return json({error:'invalid_plan'},400)
+      const expiresAt=body.expiresAt?new Date(body.expiresAt):null;if(expiresAt&&Number.isNaN(expiresAt.getTime()))return json({error:'invalid_expiry'},400)
+      const row={user_id:targetUserId,plan,status:'active',source:'owner_manual',starts_at:new Date().toISOString(),expires_at:expiresAt?.toISOString()||null,updated_at:new Date().toISOString(),metadata:{managed_by:user.id}}
+      const {data,error}=await admin.from('memberships').upsert(row,{onConflict:'user_id'}).select().single();if(error)throw error
+      await admin.from('admin_audit').insert({actor_user_id:user.id,action:'membership_set',target_user_id:targetUserId,detail:{email:target.user.email||null,plan,expires_at:row.expires_at}})
+      return json({ok:true,membership:data})
     }
     return json({error:'not_found'},404)
   }catch(error){console.error(error);return json({error:'operation_failed'},500)}
