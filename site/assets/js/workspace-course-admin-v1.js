@@ -1,8 +1,8 @@
 (async()=>{
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),cfg=window.EVERFLOW_CLOUD||{};
   if(!cfg.url||!cfg.publishableKey)return;
-  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm');
-  const client=createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});let catalogs=[],items=[],selectedCatalogId='',selectedItemId='';
+  let cloud=null;for(let count=0;count<100&&!cloud;count+=1){cloud=window.EveraAdminCloud||null;if(!cloud)await new Promise(resolve=>setTimeout(resolve,50))}
+  const client=await cloud?.ready?.();if(!client)return;let catalogs=[],items=[],selectedCatalogId='',selectedItemId='';
   function toast(text,bad=false){const stack=$('[data-ws-toasts]');if(!stack)return;const el=document.createElement('div');el.className=`ws-toast ${bad?'error':'success'}`;el.innerHTML=`<strong>${bad?'操作失败':'课程管理'}</strong><span>${esc(text)}</span>`;stack.appendChild(el);setTimeout(()=>el.remove(),3800)}
   async function requireOwner(){const {data,error}=await client.auth.getUser();if(error||!data?.user||data.user.app_metadata?.role!=='owner')throw new Error('owner_required');return data.user}
   async function rpc(name,args={}){await requireOwner();const {data,error}=await client.rpc(name,args);if(error)throw error;return data}
