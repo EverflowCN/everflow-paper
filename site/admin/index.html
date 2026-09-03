@@ -18,9 +18,9 @@
   </style>
 </head>
 <body>
-<header class="bar"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>博客管理后台</small></span></a><div class="right"><a class="btn" href="../">查看博客</a><button class="btn" id="logout" style="display:none">退出</button></div></header>
+<header class="bar"><a class="brand" href="../workspace/"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>文章发布</small></span></a><div class="right"><a class="btn" href="../workspace/">总后台</a><a class="btn" href="../">查看网站</a><button class="btn" id="logout" style="display:none">退出</button></div></header>
 <main class="shell">
-  <section class="login" id="login"><img src="../assets/everflow-icon.svg" alt=""><h1>博客管理后台</h1><p>仅允许已授权的管理员账号登录。每台设备必须单独完成一次登录授权。</p><button class="btn red" id="loginBtn">管理员登录</button><div class="status" id="setupStatus">正在检查后台服务…</div></section>
+  <section class="login" id="login"><img src="../assets/everflow-icon.svg" alt=""><h1>文章发布</h1><p>仅允许已授权的管理员账号登录。每台设备必须单独完成一次登录授权。</p><button class="btn red" id="loginBtn">管理员登录</button><div class="status" id="setupStatus">正在检查后台服务…</div></section>
   <section class="dashboard" id="dashboard">
     <aside class="panel"><div class="topline"><h2>文章</h2><span id="count"></span></div><button class="btn red" id="newBtn" style="width:100%;margin-bottom:12px">＋ 新建文章</button><div class="post-list" id="postList"></div></aside>
     <section class="panel"><div class="topline"><h1 id="editorTitle">新建文章</h1><span id="identity"></span></div><div class="notice" id="notice"></div><div class="row"><div><label>标题</label><input id="title" placeholder="文章标题"></div><div><label>Slug</label><input id="slug" placeholder="example-post"></div></div><div class="row"><div><label>日期</label><input id="date" type="date"></div><div><label>标签</label><input id="tags" placeholder="随笔, 技术"></div></div><label>摘要</label><input id="excerpt" placeholder="首页显示的一句话摘要"><label>正文</label><textarea id="content" placeholder="支持简单 Markdown：## 标题、**加粗**、`代码`、> 引用"></textarea><div class="actions"><button class="btn red" id="publishBtn">发布 / 更新</button><button class="btn" id="clearBtn">清空</button><button class="btn danger" id="deleteBtn">删除当前文章</button></div></section>
