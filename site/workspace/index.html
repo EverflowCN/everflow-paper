@@ -8,7 +8,7 @@
 <title>管理工作台 · Everflow</title>
 <link rel="icon" href="../assets/everflow-icon.svg">
 <link rel="stylesheet" href="../assets/css/app-ui.css">
-<link rel="stylesheet" href="../assets/css/workspace-v3.css">
+<link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260903-admin4">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -37,6 +37,12 @@
 <button class="active" data-ws-nav="overview">
 <span>概览</span>
 </button>
+<button data-ws-nav="analytics">
+<span>数据分析</span>
+</button>
+ </nav>
+<div class="ws-label">USERS & ACCESS</div>
+<nav class="ws-nav">
 <button data-ws-nav="users">
 <span>用户</span>
 </button>
@@ -46,12 +52,18 @@
 <button data-ws-nav="codes">
 <span>兑换码</span>
 </button>
+ </nav>
+<div class="ws-label">CONTENT</div>
+<nav class="ws-nav">
 <button data-ws-nav="notices">
 <span>通知</span>
 </button>
 <button data-ws-nav="resources">
 <span>资源页面</span>
 </button>
+ </nav>
+<div class="ws-label">OPERATIONS</div>
+<nav class="ws-nav">
 <button data-ws-nav="oxygen">
 <span>408 更新</span>
 </button>
@@ -73,6 +85,9 @@
 <a href="../account/">
 <span>账户页</span>
 </a>
+<a href="../admin/">
+<span>文章发布</span>
+</a>
 </nav>
 <div class="ws-owner">
 <strong>Owner</strong>
@@ -92,6 +107,7 @@
 </i>
 <span>连接中</span>
 </span>
+<span class="ws-updated" data-ws-updated>尚未同步</span>
 <button class="ws-btn" type="button" data-ws-refresh>刷新</button>
 </div>
 </header>
@@ -100,74 +116,81 @@
 <div class="ws-intro">
 <div>
 <span class="eyebrow">OVERVIEW</span>
-<h2>今天的 Everflow</h2>
-<p>只展示需要管理的核心状态。</p>
+<h2 data-overview-greeting>Everflow 运营总览</h2>
+<p>把用户、学习、内容和自动化异常集中到一张工作台。</p>
 </div>
-<button class="ws-btn primary" data-jump="notices">发布通知</button>
+<div class="ws-intro-actions"><button class="ws-btn" data-jump="analytics">查看数据分析</button><button class="ws-btn primary" data-jump="notices">发布通知</button></div>
 </div>
 <div class="ws-kpis">
 <article class="ws-kpi">
-<span>用户</span>
+<span>总用户</span>
 <strong data-kpi-users>--</strong>
-<small>Auth 账户</small>
-</article>
-<article class="ws-kpi">
-<span>活跃会员</span>
-<strong data-kpi-members>--</strong>
-<small>Member + Pro</small>
+<small data-kpi-users-detail>近 7 日新增 --</small>
 </article>
 <article class="ws-kpi">
 <span>近 7 日活跃</span>
 <strong data-kpi-active>--</strong>
-<small>最近访问</small>
+<small data-kpi-active-detail>近 30 日 --</small>
 </article>
 <article class="ws-kpi">
-<span>通知</span>
-<strong data-kpi-notices>--</strong>
-<small>已发布</small>
+<span>活跃会员</span>
+<strong data-kpi-members>--</strong>
+<small data-kpi-members-detail>Pro -- · Member --</small>
 </article>
 <article class="ws-kpi">
-<span>资源</span>
-<strong data-kpi-resources>--</strong>
-<small>已启用</small>
+<span>7 日学习完成</span>
+<strong data-kpi-completions>--</strong>
+<small>课程与练习完成事件</small>
 </article>
+<article class="ws-kpi">
+<span>7 日专注</span>
+<strong data-kpi-focus>--</strong>
+<small>小时</small>
+</article>
+<article class="ws-kpi ws-kpi-accent"><span>内容上线</span><strong data-kpi-content>--</strong><small data-kpi-content-detail>通知与资源</small></article>
 </div>
-<div class="ws-grid two">
-<section class="ws-card">
+<div class="ws-grid overview-main">
+<section class="ws-card ws-chart-card">
 <div class="ws-card-head">
 <div>
-<span class="eyebrow">RECENT</span>
-<h3>最近管理操作</h3>
+<span class="eyebrow">30 DAY TREND</span>
+<h3>增长与学习趋势</h3>
 </div>
-<button class="ws-btn" data-jump="audit">全部</button>
+<div class="chart-legend"><span><i class="line users"></i>新增用户</span><span><i class="line learning"></i>完成量</span></div>
 </div>
-<div class="ws-list" data-overview-audit>
-</div>
+<div class="chart-stage" data-overview-chart><div class="chart-empty">正在整理趋势…</div></div>
 </section>
-<section class="ws-card">
+<section class="ws-card ws-alert-card">
 <div class="ws-card-head">
 <div>
-<span class="eyebrow">QUICK ACTIONS</span>
-<h3>常用操作</h3>
+<span class="eyebrow">ACTION CENTER</span>
+<h3>需要关注</h3>
 </div>
+<span class="pill" data-alert-count>--</span>
 </div>
-<div class="ws-actions">
-<button data-jump="users">用户管理</button>
-<button data-jump="codes">生成兑换码</button>
-<button data-jump="resources">资源页面</button>
-<button data-jump="oxygen">检查 408 更新</button>
-</div>
+<div class="ws-list" data-overview-alerts><div class="ws-row"><strong>正在检查…</strong></div></div>
 </section>
 </div>
+<div class="ws-grid overview-secondary">
+<section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">AUDIT</span><h3>最近管理操作</h3></div><button class="ws-btn" data-jump="audit">查看全部</button></div><div class="ws-list" data-overview-audit></div></section>
+<section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">QUICK ACTIONS</span><h3>快捷操作</h3></div></div><div class="quick-grid"><button data-jump="users"><strong>管理用户</strong><small>账户、会员与状态</small></button><button data-jump="codes"><strong>生成兑换码</strong><small>Member / Pro</small></button><button data-jump="resources"><strong>维护资源</strong><small>入口、链接与预览</small></button><button data-jump="oxygen"><strong>检查更新</strong><small>408 自动同步</small></button></div></section>
+</div>
+</section>
+<section class="ws-panel" data-ws-panel="analytics">
+<div class="ws-intro"><div><span class="eyebrow">ANALYTICS</span><h2>数据分析</h2><p>观察最近一段时间的用户增长、学习活跃和内容使用结构。</p></div><div class="range-switch" data-analytics-range><button data-range="7">7 天</button><button class="active" data-range="30">30 天</button><button data-range="90">90 天</button></div></div>
+<div class="analytics-summary"><article><span>新增用户</span><strong data-analytics-new>--</strong><small data-analytics-new-rate>当前周期</small></article><article><span>最后活跃用户</span><strong data-analytics-active>--</strong><small>按最近访问日期统计</small></article><article><span>学习完成</span><strong data-analytics-completions>--</strong><small>课程 + 练习</small></article><article><span>专注时长</span><strong data-analytics-focus>--</strong><small>小时</small></article></div>
+<div class="ws-grid analytics-grid"><section class="ws-card ws-chart-card wide-chart"><div class="ws-card-head"><div><span class="eyebrow">ACTIVITY</span><h3>每日学习完成量</h3></div></div><div class="chart-stage" data-analytics-activity></div></section><section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">MEMBERSHIP</span><h3>会员结构</h3></div></div><div class="donut-wrap" data-membership-chart></div></section><section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">SUBJECTS</span><h3>科目活跃分布</h3></div></div><div class="subject-bars" data-subject-bars></div></section><section class="ws-card wide-chart"><div class="ws-card-head"><div><span class="eyebrow">TOP CONTENT</span><h3>完成次数最高的课时</h3></div></div><div class="ws-list" data-top-courses></div></section></div>
 </section>
 <section class="ws-panel" data-ws-panel="users">
 <div class="ws-intro">
 <div>
 <span class="eyebrow">USERS</span>
 <h2>用户与权限</h2>
-<p>点击详情打开右侧用户抽屉；临时密码只从云端按需解密。</p>
+<p>搜索、筛选并查看账户、会员、学习数据与安全状态。</p>
 </div>
+<div class="ws-intro-actions"><button class="ws-btn" type="button" data-user-export>导出 CSV</button></div>
 </div>
+<div class="user-summary"><article><span>全部账户</span><strong data-users-total>--</strong></article><article><span>正常使用</span><strong data-users-normal>--</strong></article><article><span>Pro</span><strong data-users-pro>--</strong></article><article><span>已停用</span><strong data-users-banned>--</strong></article></div>
 <div class="ws-filter">
 <input class="ws-btn" style="text-align:left" data-user-search placeholder="搜索邮箱">
 <select class="ws-btn" data-user-filter>
@@ -177,6 +200,7 @@
 <option value="pro">Pro</option>
 <option value="banned">已停用</option>
 </select>
+<select class="ws-btn" data-user-sort><option value="recent">最近登录</option><option value="created">最近注册</option><option value="progress">完成课程最多</option><option value="email">邮箱 A–Z</option></select>
 </div>
 <div class="ws-table">
 <table>
@@ -198,15 +222,17 @@
 </tbody>
 </table>
 </div>
+<div class="table-footer"><span data-user-result-count>--</span><div class="pager"><button class="ws-btn" data-user-prev>上一页</button><span data-user-page>1 / 1</span><button class="ws-btn" data-user-next>下一页</button></div></div>
 </section>
 <section class="ws-panel" data-ws-panel="membership">
 <div class="ws-intro">
 <div>
 <span class="eyebrow">MEMBERSHIP</span>
 <h2>会员配置</h2>
-<p>管理 Pro 限免。时间使用 Everflow 文本时间框，不调用 iPad 原生日历。</p>
+<p>统一管理会员活动、当前结构和即将到期账户；单个用户可在用户详情中直接调整等级。</p>
 </div>
 </div>
+<div class="membership-summary"><article><span>Pro</span><strong data-membership-pro>--</strong></article><article><span>Member</span><strong data-membership-member>--</strong></article><article><span>普通用户</span><strong data-membership-free>--</strong></article><article><span>7 天内到期</span><strong data-membership-expiring>--</strong></article></div>
 <section class="ws-card">
 <div class="ws-form">
 <label class="ws-check wide">
@@ -223,6 +249,7 @@
 <button class="ws-btn primary" data-promo-save>保存配置</button>
 </div>
 </section>
+<section class="ws-card" style="margin-top:12px"><div class="ws-card-head"><div><span class="eyebrow">ACTIVE MEMBERS</span><h3>当前会员</h3></div><button class="ws-btn" data-jump="users">前往用户管理</button></div><div class="ws-table embedded"><table><thead><tr><th>用户</th><th>等级</th><th>来源</th><th>到期时间</th><th>状态</th></tr></thead><tbody data-membership-table></tbody></table></div></section>
 </section>
 <section class="ws-panel" data-ws-panel="codes">
 <div class="ws-intro">
@@ -523,6 +550,7 @@
 <p>高权限操作都会记录。</p>
 </div>
 </div>
+<div class="ws-filter audit-filter"><input class="ws-btn" data-audit-search placeholder="搜索动作、目标或详情"><select class="ws-btn" data-audit-filter><option value="all">全部操作</option><option value="user">用户</option><option value="membership">会员 / 兑换码</option><option value="content">内容</option><option value="oxygen">408 更新</option></select><button class="ws-btn" data-audit-export>导出日志</button></div>
 <div class="ws-table">
 <table>
 <thead>
@@ -604,6 +632,9 @@
 <strong>课程状态记录</strong>
 <span data-system-courses>--</span>
 </div>
+<div class="ws-row"><strong>课程目录 / 课时</strong><span data-system-catalog>--</span></div>
+<div class="ws-row"><strong>统计服务</strong><span data-system-analytics>--</span></div>
+<div class="ws-row"><strong>最近同步时间</strong><span data-system-sync>--</span></div>
 </div>
 </section>
 <section class="ws-card">
@@ -621,13 +652,13 @@
 </aside>
 <div class="ws-toast-stack" data-ws-toasts>
 </div>
-<script src="../assets/js/cloud-config.js?v=20260825-admin3">
+<script src="../assets/js/cloud-config.js?v=20260903-admin4">
 </script>
-<script type="module" src="../assets/js/admin-cloud.js?v=20260825-resource3">
+<script type="module" src="../assets/js/admin-cloud.js?v=20260903-admin4">
 </script>
-<script type="module" src="../assets/js/workspace-v3.js?v=20260825-resource3">
+<script type="module" src="../assets/js/workspace-v3.js?v=20260903-admin4">
 </script>
-<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260825-admin3">
+<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260903-admin4">
 </script>
 </body>
 </html>
