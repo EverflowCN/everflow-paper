@@ -1,4 +1,5 @@
 import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questionImages,explanationImages,optionEntries,imageMarkup,usesQuestionImageFallback,esc,subjectName,idKey}from'./relax1000-core.js?v=20260828-relaxfix1';
+import{richText,inlineText}from'./question-content-v1.js?v=20260904-question1';
 
 const shell=document.querySelector('[data-graph-shell]');
 const matrix=shell?.querySelector('[data-overview-matrix]');
@@ -105,9 +106,9 @@ function figureMarkup(src,index,label){const markup=imageMarkup(src,`${label} ${
 function drawerMarkup(question){
   const images=questionImages(question),analysisImages=explanationImages(question),entries=optionEntries(question),state=recordState(question),fallback=usesQuestionImageFallback(question);
   const figures=images.length?`<div class="drawer-figures">${images.map((src,i)=>figureMarkup(src,i,'原题截图')).join('')}</div>`:'';
-  const options=entries.length?`<div class="drawer-options">${entries.map(item=>`<div class="drawer-option ${answerVisible&&String(item.key)===String(question.answer)?'is-answer':''}"><b>${esc(item.key)}.</b><div>${esc(item.text||'见原题图中的选项')}</div></div>`).join('')}</div>`:(images.length?`<div class="drawer-options">${'ABCD'.split('').map(key=>`<div class="drawer-option ${answerVisible&&key===String(question.answer)?'is-answer':''}"><b>${key}.</b><div>以原题截图中的选项为准</div></div>`).join('')}</div>`:'');
-  const answer=answerVisible?`<div class="drawer-answer-box"><strong>参考答案：${esc(question.answer||'')}</strong>${analysisImages.length?`<div class="drawer-figures">${analysisImages.map((src,i)=>figureMarkup(src,i,'解析截图')).join('')}</div>`:`<p>${esc(question.explanation||'暂无文字解析')}</p>`}</div>`:'';
-  return `<p class="drawer-stem">${esc(question.stem||'题干以原题截图为准')}</p>${figures}${fallback?'<p class="relax-image-fallback-note">公式、图表或损坏文本请以原题图为准。</p>':''}${options}${answer}${state.favorite?'<p class="drawer-subnote">★ 已收藏</p>':''}`;
+  const options=entries.length?`<div class="drawer-options">${entries.map(item=>`<div class="drawer-option ${answerVisible&&String(item.key)===String(question.answer)?'is-answer':''}"><b>${esc(item.key)}.</b><div class="question-rich-text">${inlineText(item.text,{fallback:'见原题图中的选项'})}</div></div>`).join('')}</div>`:(images.length?`<div class="drawer-options">${'ABCD'.split('').map(key=>`<div class="drawer-option ${answerVisible&&key===String(question.answer)?'is-answer':''}"><b>${key}.</b><div>以原题截图中的选项为准</div></div>`).join('')}</div>`:'');
+  const answer=answerVisible?`<div class="drawer-answer-box"><strong>参考答案：${esc(question.answer||'')}</strong>${analysisImages.length?`<div class="drawer-figures">${analysisImages.map((src,i)=>figureMarkup(src,i,'解析截图')).join('')}</div>`:`<div class="question-rich-text">${richText(question.explanation,{fallback:'暂无文字解析'})}</div>`}</div>`:'';
+  return `<div class="drawer-stem question-rich-text">${richText(question.stem,{fallback:'题干以原题截图为准'})}</div>${figures}${fallback?'<p class="relax-image-fallback-note">公式、图表或损坏文本请以原题图为准。</p>':''}${options}${answer}${state.favorite?'<p class="drawer-subnote">★ 已收藏</p>':''}`;
 }
 function syncDrawer(){
   if(!selected)return;

@@ -88,11 +88,12 @@
   function questionHtml(item,year,q){
     if(!item)return`<div class="drawer-unverified"><strong>题目加载失败</strong><p>题库数据暂时没有完整载入。</p><button type="button" class="small-btn" data-graph-question-retry="${year}-${q}">重新载入本题</button></div>`;
     if(item.verification?.status!=='verified')return'<div class="drawer-unverified">该题尚未完成核验，暂不展示题干。</div>';
+    const content=window.EveraQuestionContent,trust=content.verification(item.verification);
     const figures=Array.isArray(item.figures)?item.figures:[],general=figures.filter(fig=>!fig?.option).map(fig=>figureHtml(fig,year,q)).join(''),optionFigures=new Map();
     figures.filter(fig=>fig?.option).forEach(fig=>{const key=String(fig.option);optionFigures.set(key,(optionFigures.get(key)||'')+figureHtml(fig,year,q))});
-    const options=item.options?`<div class="drawer-options">${Object.entries(item.options).map(([key,value])=>`<div class="drawer-option"><b>${esc(key)}.</b><div>${esc(value)}${optionFigures.get(String(key))||''}</div></div>`).join('')}</div>`:'';
-    const answer=answerVisible?`<div class="drawer-answer-box"><strong>参考答案：${esc(item.answer)}</strong><p>${esc(item.analysis||'暂无解析')}</p></div>`:'';
-    return `<p class="drawer-stem">${esc(item.stem||'')}</p>${general?`<div class="drawer-figures">${general}</div>`:''}${options}${answer}`;
+    const options=item.options?`<div class="drawer-options">${Object.entries(item.options).map(([key,value])=>`<div class="drawer-option"><b>${esc(key)}.</b><div class="question-rich-text">${content.inlineText(value)}${optionFigures.get(String(key))||''}</div></div>`).join('')}</div>`:'';
+    const answer=answerVisible?`<div class="drawer-answer-box"><strong>参考答案：${esc(item.answer)}</strong><div class="question-rich-text">${content.richText(item.analysis,{fallback:'暂无解析'})}</div></div>`:'';
+    return `<div class="question-verify-row"><span class="verify-badge ${trust.tier}">${esc(trust.label)}</span><span class="verify-note">${esc(trust.note)}</span></div><div class="drawer-stem question-rich-text">${content.richText(item.stem)}</div>${trust.tier==='paraphrase'?`<p class="verification-hint">${esc(trust.note)}。</p>`:''}${general?`<div class="drawer-figures">${general}</div>`:''}${options}${answer}`;
   }
   function syncDrawerControls(){if(!selected)return;const record=records[`${selected.year}-${selected.q}`]||{};drawerStatuses.forEach(btn=>btn.classList.toggle('active',btn.dataset.drawerStatus===(record.status||'')));drawerAnswer.textContent=answerVisible?'收起答案':'查看答案'}
   function showDrawer(){drawer.hidden=false;drawerReopen.hidden=true}
