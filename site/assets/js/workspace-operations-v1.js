@@ -14,3 +14,4 @@
   $('[data-operations-check]')?.addEventListener('click',event=>checkAll(event.currentTarget));$('[data-operations-cache-update]')?.addEventListener('click',event=>updateCache(event.currentTarget));$('[data-operations-export]')?.addEventListener('click',event=>exportConfiguration(event.currentTarget));inspectLocalState();
 })();
 import('./workspace-course-admin-v1.js?v=20260903-admin6').catch(console.error);
+import('./workspace-quality-v1.js?v=20260903-quality1').catch(console.error);

@@ -1,6 +1,6 @@
 (()=>{
   const body=document.body;
-  const ASSET_VERSION='20260828-relaxfix1';
+  const ASSET_VERSION='20260903-quality1';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
 
@@ -69,6 +69,7 @@
   if(document.readyState==='complete')registerServiceWorker();else window.addEventListener('load',registerServiceWorker,{once:true});
 
   import(asset('/assets/js/site-nav-v2.js')).then(()=>upgradeScope(document)).catch(err=>console.error('Everflow navigation failed',err));
+  if(['zhenti','relax-reader','relax','graph'].includes(body.dataset.view))import(asset('/assets/js/content-feedback-v1.js')).catch(err=>console.error('Everflow content feedback failed',err));
   if(body.dataset.view==='zhenti')import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));
   if(body.dataset.view!=='zhenti'||storage.get('everflow-408-bank-source-v1')==='relax1000')return;
   const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss);

@@ -1,5 +1,5 @@
 import './cloud-config.js?v=20260902-qsync2';
-import './cloud.js?v=20260825-auth1';
+import './cloud.js?v=20260903-quality1';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm';
 
 const cfg=window.EVERFLOW_CLOUD||{};

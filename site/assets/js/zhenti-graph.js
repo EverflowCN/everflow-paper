@@ -99,7 +99,7 @@
   function hideDrawer(){drawer.hidden=true;drawerReopen.hidden=!selected}
   async function openQuestion(year,q){
     const key=`${year}-${q}`;
-    selectCurrent(key);selected={year,q,item:null};answerVisible=false;showDrawer();
+    selectCurrent(key);selected={year,q,item:null};answerVisible=false;drawer.dataset.feedbackEntity=key;showDrawer();
     drawerTitle.textContent=`${year} · 第 ${q} 题`;
     drawerMeta.textContent=`${SUBJECT_LABEL[subjectFor(year,q)]} · ${q<=40?'选择题':'综合应用题'}`;
     drawerBody.innerHTML='<div class="drawer-loading">正在读取题目…</div>';
