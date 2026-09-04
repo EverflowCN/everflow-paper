@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v54-editor1';
+const CACHE='everflow-site-v55-tabler1';
 const CORE=[
   '/',
   '/study/',
@@ -13,9 +13,9 @@ const CORE=[
 const WARM=[
   '/408/','/relax/','/graph/','/zhenti/relax-reader/','/links/','/account/','/workspace/',
   '/assets/css/interaction-guard.css','/assets/css/question-content-v1.css','/assets/css/zhenti-status.css',
-  '/assets/css/resource-hub-v2.css','/assets/css/relax1000-practice.css','/assets/css/workspace-v3.css',
+  '/assets/css/resource-hub-v2.css','/assets/css/relax1000-practice.css','/assets/css/workspace-v3.css','/assets/css/workspace-tabler-v1.css',
   '/assets/js/question-content-v1.js','/assets/js/question-bank-switch.js','/assets/js/content-feedback-v1.js','/assets/js/feedback-notifications-v1.js',
-  '/assets/js/relax1000-core.js','/assets/js/question-overrides-v1.js','/assets/js/relax1000-reader.js','/assets/js/graph-app.js','/assets/js/workspace-v3.js','/assets/js/workspace-questions-v1.js'
+  '/assets/js/relax1000-core.js','/assets/js/question-overrides-v1.js','/assets/js/relax1000-reader.js','/assets/js/graph-app.js','/assets/js/workspace-v3.js','/assets/js/workspace-shell-v1.js','/assets/js/workspace-questions-v1.js'
 ];
 
 const cacheKey=request=>{

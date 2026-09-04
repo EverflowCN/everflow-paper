@@ -9,6 +9,7 @@
 <link rel="icon" href="../assets/everflow-icon.svg">
 <link rel="stylesheet" href="../assets/css/app-ui.css">
 <link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260904-editor1">
+<link rel="stylesheet" href="../assets/css/workspace-tabler-v1.css?v=20260904-tabler1">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -31,6 +32,7 @@
 <strong>Everflow</strong>
 <small>Owner Workspace</small>
 </span>
+<button class="ws-side-toggle" type="button" data-ws-sidebar-toggle aria-label="收起侧边栏" title="收起侧边栏"></button>
 </div>
 <div class="ws-label">WORKSPACE</div>
 <nav class="ws-nav">
@@ -111,12 +113,16 @@
 </aside>
 <main class="ws-main">
 <header class="ws-top">
+<div class="ws-page-head">
+<button class="ws-menu-toggle" type="button" data-ws-menu aria-label="打开导航" title="导航"></button>
 <div>
 <div class="ws-crumb">Everflow / <span data-ws-title>概览</span>
 </div>
 <h1 data-ws-heading>管理概览</h1>
 </div>
+</div>
 <div class="ws-tools">
+<button class="ws-command-trigger" type="button" data-ws-command><span data-ws-command-icon></span><span>搜索功能</span><kbd>⌘ K</kbd></button>
 <span class="ws-health" data-ws-health>
 <i>
 </i>
@@ -780,19 +786,29 @@
 </div>
 </main>
 </div>
+<div class="ws-nav-backdrop" data-ws-nav-backdrop hidden></div>
 <div class="ws-drawer-backdrop" data-user-drawer-backdrop hidden>
 </div>
 <aside class="ws-drawer" data-user-drawer hidden>
 </aside>
 <div class="ws-toast-stack" data-ws-toasts>
 </div>
+<div class="ws-command-backdrop" data-ws-command-backdrop hidden>
+<section class="ws-command" data-ws-command-dialog role="dialog" aria-modal="true" aria-label="搜索后台功能">
+<header><span data-ws-command-search-icon></span><input data-ws-command-input placeholder="搜索页面或操作…" autocomplete="off"><kbd>ESC</kbd></header>
+<div class="ws-command-results" data-ws-command-results></div>
+<footer><span>↑↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span></footer>
+</section>
+</div>
 <script src="../assets/js/cloud-config.js?v=20260904-editor1">
 </script>
 <script type="module" src="../assets/js/admin-cloud.js?v=20260904-editor1">
 </script>
-<script type="module" src="../assets/js/workspace-v3.js?v=20260904-editor1">
+<script type="module" src="../assets/js/workspace-v3.js?v=20260904-tabler1">
 </script>
 <script type="module" src="../assets/js/workspace-operations-v1.js?v=20260904-editor1">
+</script>
+<script type="module" src="../assets/js/workspace-shell-v1.js?v=20260904-tabler1">
 </script>
 </body>
 </html>
