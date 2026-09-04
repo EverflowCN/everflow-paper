@@ -68,6 +68,7 @@ jobs:
             site/assets/js/site-runtime-v2.js \
             site/assets/js/feedback-notifications-v1.js \
             site/assets/js/workspace-v3.js \
+            site/assets/js/workspace-shell-v1.js \
             site/assets/js/workspace-operations-v1.js \
             site/assets/js/workspace-questions-v1.js \
             site/sw.js
