@@ -8,7 +8,7 @@
 <title>管理工作台 · Everflow</title>
 <link rel="icon" href="../assets/everflow-icon.svg">
 <link rel="stylesheet" href="../assets/css/app-ui.css">
-<link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260903-admin4">
+<link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260903-quality1">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -62,6 +62,18 @@
 <span>资源页面</span>
 </button>
  </nav>
+<div class="ws-label">QUALITY & CARE</div>
+<nav class="ws-nav">
+<button data-ws-nav="quality">
+<span>数据质检</span>
+</button>
+<button data-ws-nav="risks">
+<span>学习预警</span>
+</button>
+<button data-ws-nav="feedback">
+<span>反馈工单</span>
+</button>
+</nav>
 <div class="ws-label">OPERATIONS</div>
 <nav class="ws-nav">
 <button data-ws-nav="oxygen">
@@ -173,7 +185,7 @@
 </div>
 <div class="ws-grid overview-secondary">
 <section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">AUDIT</span><h3>最近管理操作</h3></div><button class="ws-btn" data-jump="audit">查看全部</button></div><div class="ws-list" data-overview-audit></div></section>
-<section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">QUICK ACTIONS</span><h3>快捷操作</h3></div></div><div class="quick-grid"><button data-jump="users"><strong>管理用户</strong><small>账户、会员与状态</small></button><button data-jump="codes"><strong>生成兑换码</strong><small>Member / Pro</small></button><button data-jump="resources"><strong>维护资源</strong><small>入口、链接与预览</small></button><button data-jump="oxygen"><strong>检查更新</strong><small>408 自动同步</small></button></div></section>
+<section class="ws-card"><div class="ws-card-head"><div><span class="eyebrow">QUICK ACTIONS</span><h3>快捷操作</h3></div></div><div class="quick-grid"><button data-jump="users"><strong>管理用户</strong><small>账户、会员与状态</small></button><button data-jump="codes"><strong>生成兑换码</strong><small>Member / Pro</small></button><button data-jump="resources"><strong>维护资源</strong><small>入口、链接与预览</small></button><button data-jump="quality"><strong>运行数据质检</strong><small>账号、课程与题库</small></button><button data-jump="risks"><strong>查看学习预警</strong><small>未开始与长期未活跃</small></button><button data-jump="feedback"><strong>处理反馈工单</strong><small>纠错、分级与结论</small></button></div></section>
 </div>
 </section>
 <section class="ws-panel" data-ws-panel="analytics">
@@ -498,6 +510,81 @@
 </section>
 </div>
 </section>
+<section class="ws-panel" data-ws-panel="quality">
+<div class="ws-intro">
+<div>
+<span class="eyebrow">DATA QUALITY</span>
+<h2>数据质检中心</h2>
+<p>把账号、学习状态、课程资源和题库审计放在同一张健康面板中。</p>
+</div>
+<div class="ws-intro-actions"><button class="ws-btn" type="button" data-quality-repair-profiles hidden>补齐缺失档案</button><button class="ws-btn primary" type="button" data-quality-refresh>重新扫描</button></div>
+</div>
+<div class="quality-summary">
+<article><span>数据异常</span><strong data-quality-issue-count>--</strong><small>需要人工确认</small></article>
+<article><span>题库审计</span><strong data-quality-bank-status>--</strong><small data-quality-bank-note>等待报告</small></article>
+<article><span>有效课时</span><strong data-quality-lessons>--</strong><small>标题与链接完整</small></article>
+<article><span>开放工单</span><strong data-quality-open-feedback>--</strong><small>含处理中</small></article>
+</div>
+<div class="ws-grid quality-grid">
+<section class="ws-card">
+<div class="ws-card-head"><div><h3>数据覆盖率</h3><p>不同业务数据覆盖到的账号比例</p></div></div>
+<div class="coverage-list" data-quality-coverage><div class="quality-empty">正在加载覆盖率…</div></div>
+</section>
+<section class="ws-card">
+<div class="ws-card-head"><div><h3>异常队列</h3><p>先处理红色阻断项，再检查黄色提醒</p></div></div>
+<div class="ws-list" data-quality-issues><div class="quality-empty">正在读取异常…</div></div>
+</section>
+</div>
+<section class="ws-card quality-bank-card">
+<div class="ws-card-head"><div><h3>题库与内容审计</h3><p>部署前自动检查题干、选项、答案、图片和结构完整性</p></div><span class="pill" data-quality-generated>--</span></div>
+<div class="quality-bank-grid" data-quality-banks><div class="quality-empty">等待构建审计报告…</div></div>
+</section>
+</section>
+
+<section class="ws-panel" data-ws-panel="risks">
+<div class="ws-intro">
+<div>
+<span class="eyebrow">LEARNING CARE</span>
+<h2>学习预警中心</h2>
+<p>识别注册后未开始、长期未活跃和错题积压的用户，按风险分数排序。</p>
+</div>
+</div>
+<div class="risk-summary">
+<article class="danger"><span>高风险</span><strong data-risk-high>--</strong><small>建议优先跟进</small></article>
+<article><span>中风险</span><strong data-risk-medium>--</strong><small>持续观察</small></article>
+<article><span>14 天未活跃</span><strong data-risk-inactive>--</strong><small>按最近有效行为</small></article>
+<article><span>未开始学习</span><strong data-risk-never>--</strong><small>注册超过 48 小时</small></article>
+</div>
+<div class="ws-filter risk-filter"><input class="ws-btn" data-risk-search placeholder="搜索邮箱或预警原因"><select class="ws-btn" data-risk-filter><option value="all">全部风险</option><option value="high">仅高风险</option><option value="medium">仅中风险</option></select></div>
+<div class="ws-table">
+<table>
+<thead><tr><th>用户</th><th>风险</th><th>最近活跃</th><th>学习进度</th><th>触发原因</th><th>操作</th></tr></thead>
+<tbody data-risk-table><tr><td colspan="6">正在计算学习预警…</td></tr></tbody>
+</table>
+</div>
+</section>
+
+<section class="ws-panel" data-ws-panel="feedback">
+<div class="ws-intro">
+<div>
+<span class="eyebrow">CONTENT FEEDBACK</span>
+<h2>反馈工单</h2>
+<p>接收前台题目纠错，分配优先级并记录处理结论。</p>
+</div>
+</div>
+<div class="feedback-summary">
+<article><span>待处理</span><strong data-feedback-open>--</strong><small>尚未认领</small></article>
+<article><span>处理中</span><strong data-feedback-progress>--</strong><small>已有负责人</small></article>
+<article><span>紧急</span><strong data-feedback-urgent>--</strong><small>未关闭工单</small></article>
+<article><span>已解决</span><strong data-feedback-resolved>--</strong><small>保留处理记录</small></article>
+</div>
+<div class="ws-filter feedback-filter"><input class="ws-btn" data-feedback-search placeholder="搜索题号、描述或提交人"><select class="ws-btn" data-feedback-status><option value="active">待处理 + 处理中</option><option value="all">全部状态</option><option value="open">仅待处理</option><option value="in_progress">仅处理中</option><option value="resolved">仅已解决</option><option value="dismissed">仅已忽略</option></select><select class="ws-btn" data-feedback-category><option value="all">全部类型</option><option value="stem">题干</option><option value="options">选项</option><option value="answer">答案</option><option value="image">图片</option><option value="explanation">解析</option><option value="link">链接</option><option value="other">其他</option></select></div>
+<div class="feedback-board" data-feedback-list><div class="quality-empty">正在读取工单…</div></div>
+</section>
+
+<div class="feedback-editor-backdrop" data-feedback-editor-backdrop hidden></div>
+<aside class="feedback-editor" data-feedback-editor hidden aria-label="处理反馈工单"></aside>
+
 <section class="ws-panel" data-ws-panel="oxygen">
 <div class="ws-intro">
 <div>
@@ -652,13 +739,13 @@
 </aside>
 <div class="ws-toast-stack" data-ws-toasts>
 </div>
-<script src="../assets/js/cloud-config.js?v=20260903-admin4">
+<script src="../assets/js/cloud-config.js?v=20260903-quality1">
 </script>
-<script type="module" src="../assets/js/admin-cloud.js?v=20260903-admin4">
+<script type="module" src="../assets/js/admin-cloud.js?v=20260903-quality1">
 </script>
-<script type="module" src="../assets/js/workspace-v3.js?v=20260903-admin4">
+<script type="module" src="../assets/js/workspace-v3.js?v=20260903-quality1">
 </script>
-<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260903-admin6">
+<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260903-quality1">
 </script>
 </body>
 </html>

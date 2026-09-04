@@ -1,0 +1,33 @@
+{
+  "schema": "everflow-admin-quality-v1",
+  "generatedAt": "2026-09-04T01:04:45.277Z",
+  "status": "warning",
+  "banks": [
+    {
+      "id": "zhenti",
+      "label": "408 历年真题",
+      "status": "pass",
+      "note": "846 道题、119 张配图结构完整",
+      "checks": [
+        "题干",
+        "选项",
+        "答案",
+        "图片",
+        "核验状态"
+      ],
+      "issues": []
+    },
+    {
+      "id": "relax1000",
+      "label": "Relax1000",
+      "status": "warning",
+      "note": "本地源码不包含私有语料，部署构建时自动复核",
+      "checks": [
+        "结构",
+        "重复 ID",
+        "答案",
+        "图片"
+      ]
+    }
+  ]
+}

@@ -336,6 +336,8 @@ jobs:
               wall.write_text(text,encoding='utf-8')
           PY
 
+          node site/tools/build-admin-quality-report.mjs --site-root=site
+
           rm -rf site/tools
 
           if grep -RInEi --include='*.html' --include='*.js' --include='*.css' --include='*.json' 'EverflowCN|408-exercise-paper-generator|raw\.githubusercontent\.com/EverflowCN|TommyTay0712|408-exam-paper|CSYanKu|ForeverLink|Hermes 408' site; then
