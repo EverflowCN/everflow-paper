@@ -9,19 +9,17 @@ const current=(()=>{try{return localStorage.getItem(KEY)==='relax1000'?'relax100
 body.dataset.questionBank=current;
 body.classList.toggle('relax1000-active',current==='relax1000');
 
-const css=document.createElement('link');
-css.rel='stylesheet';css.href=`/assets/css/question-bank-switch.css?v=${RELAX_VERSION}`;document.head.appendChild(css);
+if(!document.querySelector('link[href*="question-bank-switch.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href=`/assets/css/question-bank-switch.css?v=${RELAX_VERSION}`;document.head.appendChild(css)}
 
-const shell=document.createElement('section');
-shell.className='bank-source-shell';shell.setAttribute('aria-label','题库切换');
-shell.innerHTML=`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-segmented" role="tablist"><button type="button" data-bank-source="zhenti" class="${current==='zhenti'?'active':''}">408 真题</button><button type="button" data-bank-source="relax1000" class="${current==='relax1000'?'active':''}">Relax1000</button></div><span class="bank-source-note">${current==='relax1000'?'章节题库 · 题库墙 / 独立阅读器 / 速刷卡片':'历年真题 · 真题墙 / 整套真题 / 速刷卡片'}</span></div>`;
+let shell=document.querySelector('[data-bank-source-shell]');
+if(!shell){shell=document.createElement('section');shell.className='bank-source-shell';shell.dataset.bankSourceShell='';shell.setAttribute('aria-label','题库切换');shell.innerHTML=`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-segmented" role="tablist"><button type="button" data-bank-source="zhenti" class="${current==='zhenti'?'active':''}">408 真题</button><button type="button" data-bank-source="relax1000" class="${current==='relax1000'?'active':''}">Relax1000</button></div><span class="bank-source-note">${current==='relax1000'?'章节题库 · 题库墙 / 独立阅读器 / 速刷卡片':'历年真题 · 真题墙 / 整套真题 / 速刷卡片'}</span></div>`}
 const main=document.querySelector('main');
-if(main)main.before(shell);else document.body.appendChild(shell);
-shell.querySelectorAll('[data-bank-source]').forEach(button=>button.addEventListener('click',()=>{
+if(!shell.isConnected){if(main)main.before(shell);else document.body.appendChild(shell)}
+shell.querySelectorAll('[data-bank-source]').forEach(button=>{if(button.dataset.bankSourceBound==='1')return;button.dataset.bankSourceBound='1';button.addEventListener('click',()=>{
   const next=button.dataset.bankSource;if(next===current)return;
   try{localStorage.setItem(KEY,next)}catch{}
   location.reload();
-}));
+})});
 
 if(current!=='relax1000'){
   const warmRelax=()=>fetch(`/data/relax1000/data/questions.json?v=${RELAX_DATA_VERSION}`,{cache:'force-cache'}).catch(()=>null);
@@ -29,8 +27,8 @@ if(current!=='relax1000'){
 }
 
 if(current==='relax1000'){
-  const controls=document.createElement('link');controls.rel='stylesheet';controls.href=`/assets/css/relax1000-controls.css?v=${RELAX_VERSION}`;document.head.appendChild(controls);
-  const strongWall=document.createElement('link');strongWall.rel='stylesheet';strongWall.href=`/assets/css/relax1000-wall-strong.css?v=${RELAX_VERSION}`;document.head.appendChild(strongWall);
+  if(!document.querySelector('link[href*="relax1000-controls.css"]')){const controls=document.createElement('link');controls.rel='stylesheet';controls.href=`/assets/css/relax1000-controls.css?v=${RELAX_VERSION}`;document.head.appendChild(controls)}
+  if(!document.querySelector('link[href*="relax1000-wall-strong.css"]')){const strongWall=document.createElement('link');strongWall.rel='stylesheet';strongWall.href=`/assets/css/relax1000-wall-strong.css?v=${RELAX_VERSION}`;document.head.appendChild(strongWall)}
   import(`/assets/js/relax1000-wall.js?v=${RELAX_VERSION}`)
     .then(()=>import(`/assets/js/relax1000-cards.js?v=${RELAX_VERSION}`))
     .then(()=>import(`/assets/js/relax1000-reset.js?v=${RELAX_VERSION}`))

@@ -1,5 +1,6 @@
 (()=>{
   const body=document.body;
+  const root=document.documentElement;
   const ASSET_VERSION='20260904-editor1';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
@@ -13,7 +14,8 @@
   function iconOnly(el,name){if(!el)return;const key=`only:${name}`;if(el.dataset.uiIconKey===key&&el.querySelector(':scope > .ui-icon'))return;el.innerHTML=iconMarkup(name);el.dataset.uiIconKey=key;el.classList.add('ui-icon-only');el.classList.remove('ui-iconized')}
   function iconText(el,name,label,position='start'){if(!el)return;const key=`text:${name}:${position}:${label}`;if(el.dataset.uiIconKey===key&&el.querySelector(':scope > .ui-icon'))return;const text=`<span>${escapeHtml(label)}</span>`;el.innerHTML=position==='end'?`${text}${iconMarkup(name)}`:`${iconMarkup(name)}${text}`;el.dataset.uiIconKey=key;el.classList.add('ui-iconized');el.classList.remove('ui-icon-only')}
   function preserveLiveLabelIcon(el,name,labelSelector){if(!el)return;const label=el.querySelector(labelSelector);if(!label)return;[...el.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>node.remove());if(!el.querySelector(':scope > .ui-icon'))el.insertAdjacentHTML('afterbegin',iconMarkup(name));el.dataset.uiIconKey=`live:${name}`;el.classList.add('ui-iconized');el.classList.remove('ui-icon-only')}
-  function syncThemeIcons(){const name=body.classList.contains('dark')?'sun':'moon';document.querySelectorAll('[data-theme]').forEach(btn=>{iconOnly(btn,name);btn.setAttribute('aria-label',body.classList.contains('dark')?'切换浅色主题':'切换深色主题');btn.title=btn.getAttribute('aria-label')})}
+  function isDark(){return root.classList.contains('dark')||body.classList.contains('dark')}
+  function syncThemeIcons(){const name=isDark()?'sun':'moon';document.querySelectorAll('[data-theme]').forEach(btn=>{iconOnly(btn,name);btn.setAttribute('aria-label',isDark()?'切换浅色主题':'切换深色主题');btn.title=btn.getAttribute('aria-label')})}
   function upgradeControl(el){
     if(!(el instanceof Element))return;
     if(el.matches('[data-theme]'))return syncThemeIcons();
@@ -37,8 +39,8 @@
   function upgradeResult(el){if(!(el instanceof Element))return;const raw=(el.textContent||'').trim();if(raw.startsWith('✓ '))iconText(el,'check',raw.slice(2));else if(raw.startsWith('✕ '))iconText(el,'close',raw.slice(2))}
   function upgradeScope(scope=document){const controls=[];if(scope instanceof Element&&scope.matches('button,a'))controls.push(scope);if(scope.querySelectorAll)controls.push(...scope.querySelectorAll('button,a'));controls.forEach(upgradeControl);const results=[];if(scope instanceof Element&&scope.matches('.answer-result strong'))results.push(scope);if(scope.querySelectorAll)results.push(...scope.querySelectorAll('.answer-result strong'));results.forEach(upgradeResult)}
 
-  if(storage.get('everflow-theme')==='dark')body.classList.add('dark');upgradeScope(document);
-  document.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>{body.classList.toggle('dark');storage.set('everflow-theme',body.classList.contains('dark')?'dark':'light');syncThemeIcons()}));
+  const savedDark=storage.get('everflow-theme')==='dark';root.classList.toggle('dark',savedDark);body.classList.toggle('dark',savedDark);root.style.colorScheme=savedDark?'dark':'light';upgradeScope(document);
+  document.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>{const next=!isDark();root.classList.toggle('dark',next);body.classList.toggle('dark',next);root.style.colorScheme=next?'dark':'light';storage.set('everflow-theme',next?'dark':'light');syncThemeIcons()}));
   const observer=new MutationObserver(mutations=>{for(const mutation of mutations)mutation.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)upgradeScope(node);else if(node.nodeType===Node.TEXT_NODE&&node.parentElement?.matches('button,a,.answer-result strong')){upgradeControl(node.parentElement);upgradeResult(node.parentElement)}})});observer.observe(body,{childList:true,subtree:true});
 
   const toast=(message,options={})=>{const type=options.type||'info',title=options.title||({success:'操作成功',error:'操作失败',info:'提示'}[type]||'提示');let stack=document.querySelector('.evera-toast-stack');if(!stack){stack=document.createElement('div');stack.className='evera-toast-stack';stack.setAttribute('aria-live','polite');document.body.appendChild(stack)}const el=document.createElement('div');el.className=`evera-toast ${type}`;const statusIcon=type==='success'?'check':type==='error'?'alert':'info';el.innerHTML=`<span class="evera-toast-icon">${iconMarkup(statusIcon)}</span><div><strong></strong><p></p></div><button class="evera-toast-x" type="button" aria-label="关闭提示">${iconMarkup('close')}</button>`;el.querySelector('strong').textContent=title;el.querySelector('p').textContent=String(message||'');const remove=()=>el.remove();el.querySelector('button').addEventListener('click',remove);stack.appendChild(el);setTimeout(remove,Number(options.duration)||3600);return el};
@@ -74,7 +76,7 @@
   if(['zhenti','relax-reader','relax','graph'].includes(body.dataset.view))import(asset('/assets/js/content-feedback-v1.js')).catch(err=>console.error('Everflow content feedback failed',err));
   if(body.dataset.view==='zhenti')import(asset('/assets/js/question-bank-switch.js')).catch(err=>console.error('Everflow question bank switch failed',err));
   if(body.dataset.view!=='zhenti'||storage.get('everflow-408-bank-source-v1')==='relax1000')return;
-  const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss);
+  if(!document.querySelector('link[href*="zhenti-nav-layout-v5.css"]')){const navCss=document.createElement('link');navCss.rel='stylesheet';navCss.href=asset('/assets/css/zhenti-nav-layout-v5.css');document.head.appendChild(navCss)}
   import(asset('/assets/js/zhenti-qwer.js')).catch(err=>console.error('Everflow 408 shortcuts failed',err));
   const srsFlow=import(asset('/assets/js/zhenti-srs-v2.js')).then(()=>import(asset('/assets/js/zhenti-srs-error-v2.js'))).then(()=>import(asset('/assets/js/zhenti-srs-reset.js'))).catch(err=>console.error('Everflow 408 SRS failed',err));
   srsFlow.finally(async()=>{try{await import(asset('/assets/js/zhenti-favorites.js'))}catch(err){console.error('Everflow 408 favorites failed',err)}try{await import(asset('/assets/js/zhenti-srs-experience.js'))}catch(err){console.error('Everflow 408 immersive SRS failed',err)}try{await import(asset('/assets/js/zhenti-srs-mobile-immersive.js'))}catch(err){console.error('Everflow 408 mobile SRS failed',err)}});

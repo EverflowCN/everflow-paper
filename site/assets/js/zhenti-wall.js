@@ -348,5 +348,5 @@
   window.addEventListener('storage',e=>{if(e.key!==STORAGE_KEY)return;records=load();renderMode();if(!els.modal.hidden)renderModal();if(!els.paperSession.hidden)renderPaperSession()});
   window.EveraZhentiWall={openQuestion,subjectForQuestion,questionsForSubject,loadPaper};
 
-  setupRangeSelects();installShortcutHelp();renderMode();buildSubjectIndex().catch(err=>console.warn('Everflow subject index fallback enabled',err));
+  setupRangeSelects();installShortcutHelp();renderMode();document.querySelector('[data-wall-root]')?.setAttribute('aria-busy','false');buildSubjectIndex().catch(err=>console.warn('Everflow subject index fallback enabled',err));
 })();

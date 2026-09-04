@@ -2,7 +2,7 @@
   if(document.body?.dataset?.view!=='zhenti')return;
   const ERROR_KEY='everflow-408-srs-error-v1';
   const WALL_KEY='everflow-408-zhenti-wall-v1';
-  const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/zhenti-srs-error.css?v=20260823b';document.head.appendChild(css);
+  if(!document.querySelector('link[href*="zhenti-srs-error.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/zhenti-srs-error.css?v=20260823b';document.head.appendChild(css)}
   const home=document.querySelector('[data-srs-home]');if(!home)return;
   const cardRoot=home.querySelector('[data-srs-card]'),stats=home.querySelector('.srs-stats'),queueList=home.querySelector('.srs-side-list');if(!cardRoot||!stats||!queueList)return;
   const load=(key,fallback={})=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v&&typeof v==='object'?v:fallback}catch{return fallback}};

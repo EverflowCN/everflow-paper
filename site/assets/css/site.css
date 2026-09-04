@@ -6,9 +6,10 @@
   --subject-ds:#43b7ad;--subject-co:#8670d8;--subject-os:#c49a42;--subject-cn:#d5768b;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;background:var(--paper)}
 body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);line-height:1.75}
-body.dark{--ink:#f5f5f7;--muted:#a7aab2;--paper:#0f1013;--soft:#17181c;--line:#292b31;--card:#15161a;--shadow:0 20px 60px rgba(0,0,0,.28)}
+:root.dark,body.dark{--ink:#f5f5f7;--muted:#a7aab2;--paper:#0f1013;--soft:#17181c;--line:#292b31;--card:#15161a;--shadow:0 20px 60px rgba(0,0,0,.28)}
+:root.dark{color-scheme:dark}
 a{color:inherit;text-decoration:none}img{max-width:100%}
 button,input,textarea,select{font:inherit}
 button{font-synthesis:none}
@@ -115,9 +116,19 @@ button{font-synthesis:none}
 .sync-line{font-size:12px;color:var(--muted);margin-top:12px}
 .footer{border-top:1px solid var(--line);padding:28px 0 42px;color:var(--muted);font-size:13px}.footer-inner{display:flex;justify-content:space-between;gap:20px}
 
+/* Keep data-backed regions at their final geometry while content is loading. */
+[aria-busy="true"]{cursor:progress}
+.post-list[aria-busy="true"],.notice-list[aria-busy="true"]{min-height:210px;overflow:hidden}
+.post-list[aria-busy="true"]>*:first-child,.notice-list[aria-busy="true"]>*:first-child{min-height:82px;display:flex;align-items:center;padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(100deg,var(--soft) 20%,color-mix(in srgb,var(--card) 72%,var(--soft)) 38%,var(--soft) 56%);background-size:240% 100%;animation:everaSkeleton 1.25s ease-in-out infinite;color:var(--muted)}
+@keyframes everaSkeleton{to{background-position-x:-160%}}
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.12s;animation-timing-function:ease-out}
+
 /* Shared navigation/runtime UI */
 .membership-nav-entry{display:inline-flex;align-items:center;gap:6px}.membership-nav-entry>a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border-radius:999px;background:var(--ink);color:var(--paper)!important;font-weight:800;white-space:nowrap}.membership-nav-close{width:30px;height:30px;padding:0;display:grid;place-items:center;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;cursor:pointer;line-height:0}.membership-nav-entry.is-hidden{display:none!important}.mobile-panel .membership-nav-entry{display:grid;grid-template-columns:1fr 44px;gap:8px;width:100%;padding:7px 0;border-bottom:1px solid var(--line)}.mobile-panel .membership-nav-entry>a{min-height:44px;width:100%;border-radius:12px}.mobile-panel .membership-nav-close{width:44px;height:44px}
 .evera-toast-stack{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:9999;width:min(430px,calc(100% - 28px));transform:translateX(-50%);display:grid;gap:9px;pointer-events:none}.evera-toast{display:grid;grid-template-columns:28px 1fr auto;gap:10px;padding:13px 14px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:0 16px 48px rgba(0,0,0,.16);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:var(--ink);pointer-events:auto}.evera-toast-icon{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:var(--soft);font-weight:900}.evera-toast-icon .ui-icon{width:16px;height:16px}.evera-toast.success .evera-toast-icon{color:var(--green)}.evera-toast.error .evera-toast-icon{color:var(--red)}.evera-toast strong{display:block;font-size:14px}.evera-toast p{margin:3px 0 0;color:var(--muted);font-size:12px}.evera-toast-x{border:0;background:transparent;color:var(--muted);width:28px;height:28px;padding:0;border-radius:999px;cursor:pointer;display:grid;place-items:center;line-height:0}.is-busy{cursor:wait!important}.is-busy:before{content:"";width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:-2px;animation:everaSpin .7s linear infinite}@keyframes everaSpin{to{transform:rotate(360deg)}}
+
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.post-list[aria-busy="true"]>*:first-child,.notice-list[aria-busy="true"]>*:first-child{animation:none}::view-transition-old(root),::view-transition-new(root){animation:none}}
 
 /* Shared question-bank media: never make a failed image disappear silently. */
 .relax-image-link{position:relative;display:block;overflow:hidden;max-width:100%;min-height:44px;border:1px solid var(--line);border-radius:13px;background:var(--soft);color:var(--muted);text-decoration:none}

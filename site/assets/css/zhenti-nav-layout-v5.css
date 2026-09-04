@@ -13,6 +13,14 @@
 .wall-subject-bar.has-srs-groups .srs-mode-group{grid-area:modes!important;justify-self:start!important}
 .wall-subject-bar.has-srs-groups .srs-subject-group{grid-area:subjects!important;justify-self:center!important}
 .wall-subject-bar.has-srs-groups>.zhenti-cloud-status{grid-area:sync!important;justify-self:end!important}
+.zhenti-cloud-status{margin-left:auto;display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--muted);font:800 10px/1 system-ui;white-space:nowrap;cursor:pointer}
+.zhenti-cloud-status i{width:7px;height:7px;border-radius:50%;background:#a8adb8}
+.zhenti-cloud-status.synced{color:#2d83b2}.zhenti-cloud-status.synced i{background:var(--status-mastered-strong,#75bde8)}
+.zhenti-cloud-status.syncing{color:#8a6800}.zhenti-cloud-status.syncing i{background:var(--status-fuzzy,#f2c45d);animation:zhentiCloudPulse 1s ease-in-out infinite}
+.zhenti-cloud-status.error{color:var(--red)}.zhenti-cloud-status.error i{background:var(--red)}
+@keyframes zhentiCloudPulse{50%{opacity:.35}}
+.wall-app[aria-busy="true"] .matrix-scroll{min-height:810px;background:linear-gradient(100deg,var(--card) 20%,var(--soft) 38%,var(--card) 56%);background-size:240% 100%;animation:zhentiFirstPaint 1.25s ease-in-out infinite}
+@keyframes zhentiFirstPaint{to{background-position-x:-160%}}
 
 .wall-subject-bar.has-srs-groups .srs-mode-group,
 .wall-subject-bar.has-srs-groups .srs-subject-group{
@@ -145,4 +153,6 @@
     backdrop-filter:blur(16px)!important;
   }
   .wall-subject-bar.has-srs-groups>.zhenti-cloud-status span{display:none!important}
+  .wall-app[aria-busy="true"] .matrix-scroll{min-height:640px}
 }
+@media(prefers-reduced-motion:reduce){.wall-app[aria-busy="true"] .matrix-scroll{animation:none}}

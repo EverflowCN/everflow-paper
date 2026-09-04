@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <script src="/assets/js/site-boot-v1.js?v=20260904-stable1"></script>
   <meta name="description" content="Everflow 408 题库：历年真题、Relax1000 与速刷卡片">
   <title>题库 · Everflow</title>
   <link rel="icon" href="../assets/everflow-icon.svg">
@@ -14,6 +15,13 @@
   <link rel="stylesheet" href="../assets/css/zhenti-answer.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/zhenti-status.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/question-content-v1.css?v=20260904-question2">
+  <link rel="stylesheet" href="../assets/css/question-bank-switch.css?v=20260904-stable1">
+  <link rel="stylesheet" href="../assets/css/zhenti-srs.css?v=20260904-stable1">
+  <link rel="stylesheet" href="../assets/css/zhenti-favorites.css?v=20260904-stable1">
+  <link rel="stylesheet" href="../assets/css/zhenti-srs-error.css?v=20260904-stable1">
+  <link rel="stylesheet" href="../assets/css/zhenti-srs-experience.css?v=20260904-stable1">
+  <link rel="stylesheet" href="../assets/css/zhenti-ui-polish.css?v=20260904-stable1">
+  <link rel="stylesheet" href="../assets/css/zhenti-nav-layout-v5.css?v=20260904-stable1">
 </head>
 <body data-view="zhenti">
 <header class="topbar">
@@ -25,7 +33,7 @@
 </header>
 <div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
 
-<main class="wall-app" data-wall-root>
+<main class="wall-app" data-wall-root aria-busy="true">
   <section class="wall-subject-bar" aria-label="408 真题模式">
     <button class="subject-tab whole-tab" type="button" data-main-subject="all">整套真题</button>
     <span class="subject-divider" aria-hidden="true"></span>

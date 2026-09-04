@@ -13,8 +13,7 @@
     cn:{name:'计算机网络',short:'CN'}
   };
 
-  const css=document.createElement('link');
-  css.rel='stylesheet';css.href='/assets/css/zhenti-favorites.css?v=20260823a';document.head.appendChild(css);
+  if(!document.querySelector('link[href*="zhenti-favorites.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/zhenti-favorites.css?v=20260823a';document.head.appendChild(css)}
 
   const bar=document.querySelector('.wall-subject-bar');
   const wholeHome=document.querySelector('[data-full-paper-home]');
@@ -36,10 +35,8 @@
   function answerText(r){if(r.correct===true)return'答对';if(r.correct===false)return'答错';if(r.draftAnswer)return'未提交';if(r.reviewed)return'已查看';return'未作答'}
   function meaningful(r){return Boolean(r.status||r.note||r.answer||r.draftAnswer||r.reviewed||r.favorite||r.attempts||r.correctCount||r.timeSpent)}
 
-  const tab=document.createElement('button');
-  tab.type='button';tab.className='subject-tab favorites-tab';tab.dataset.favoritesTab='';tab.dataset.count='0';tab.textContent='收藏夹';
-  const divider=bar.querySelector('.subject-divider');
-  if(divider)bar.insertBefore(tab,divider);else bar.appendChild(tab);
+  let tab=bar.querySelector('[data-favorites-tab]');
+  if(!tab){tab=document.createElement('button');tab.type='button';tab.className='subject-tab favorites-tab';tab.dataset.favoritesTab='';tab.dataset.count='0';tab.textContent='收藏夹';const divider=bar.querySelector('.subject-divider');if(divider)bar.insertBefore(tab,divider);else bar.appendChild(tab)}
 
   const home=document.createElement('section');
   home.className='favorites-home';home.dataset.favoritesHome='';home.hidden=true;

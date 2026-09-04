@@ -4,8 +4,7 @@
   const bar=document.querySelector('.wall-subject-bar');
   if(!home||!bar)return;
 
-  const css=document.createElement('link');
-  css.rel='stylesheet';css.href='/assets/css/zhenti-srs-experience.css?v=20260823a';document.head.appendChild(css);
+  if(!document.querySelector('link[href*="zhenti-srs-experience.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/zhenti-srs-experience.css?v=20260823a';document.head.appendChild(css)}
 
   // Final top-navigation layout: modes / subjects / cloud status are different levels.
   // Desktop keeps a single balanced row; tablet becomes two rows; phone keeps two compact scrollable rows.
@@ -138,7 +137,7 @@
       .wall-subject-bar.has-srs-groups>.zhenti-cloud-status span{display:none!important}
     }
   `;
-  document.head.appendChild(navStyle);
+  if(!document.querySelector('link[href*="zhenti-nav-layout-v5.css"]'))document.head.appendChild(navStyle);
 
   // Separate page modes from subject filters for clearer hierarchy.
   if(!bar.classList.contains('has-srs-groups')){

@@ -19,23 +19,23 @@ import './cloud.js';
   async function renderHome(){
     const el=$('[data-recent-notices]');if(!el)return;
     try{const rows=await EveraCloud.listNotices({limit:4});el.innerHTML=rows.length?rows.map(card).join(''):'<div class="content-empty">暂时没有新通知。</div>'}
-    catch(e){el.innerHTML='<div class="content-empty">通知暂时加载失败，请稍后刷新。</div>';console.error(e)}
+    catch(e){el.innerHTML='<div class="content-empty">通知暂时加载失败，请稍后刷新。</div>';console.error(e)}finally{el.setAttribute('aria-busy','false')}
   }
   async function renderArchive(){
     const el=$('[data-notice-list]');if(!el)return;
     try{const rows=await EveraCloud.listNotices({limit:100});el.innerHTML=rows.length?rows.map(card).join(''):'<div class="content-empty">暂时没有已发布通知。</div>'}
-    catch(e){el.innerHTML='<div class="content-empty">通知暂时加载失败，请稍后刷新。</div>';console.error(e)}
+    catch(e){el.innerHTML='<div class="content-empty">通知暂时加载失败，请稍后刷新。</div>';console.error(e)}finally{el.setAttribute('aria-busy','false')}
   }
   async function renderDetail(){
     const el=$('[data-notice-detail]');if(!el)return;
     const id=new URLSearchParams(location.search).get('id');
-    if(!id){el.innerHTML='<div class="page-head"><h1>通知不存在</h1><p>没有找到对应通知。</p></div>';return}
+    if(!id){el.innerHTML='<div class="page-head"><h1>通知不存在</h1><p>没有找到对应通知。</p></div>';el.setAttribute('aria-busy','false');return}
     try{
       const n=await EveraCloud.getNotice(id);
       if(!n){el.innerHTML='<div class="page-head"><h1>通知不存在</h1><p>这条通知可能尚未发布或已经删除。</p></div>';return}
       document.title=n.title+' · Everflow';
       el.innerHTML=`<div class="page-head"><div class="eyebrow">${esc(label[n.level]||'通知')} · ${fmt(n.published_at||n.created_at)}${n.pinned?' · 置顶':''}</div><h1>${esc(n.title)}</h1><p>${esc(n.summary||'')}</p></div><div class="notice-content">${md(n.content||n.summary||'')}</div>`;
-    }catch(e){el.innerHTML='<div class="page-head"><h1>加载失败</h1><p>请稍后重新打开这条通知。</p></div>';console.error(e)}
+    }catch(e){el.innerHTML='<div class="page-head"><h1>加载失败</h1><p>请稍后重新打开这条通知。</p></div>';console.error(e)}finally{el.setAttribute('aria-busy','false')}
   }
 
   Promise.resolve(EveraCloud.ready).then(()=>{const view=document.body.dataset.view;if(view==='home')renderHome();else if(view==='notices')renderArchive();else if(view==='notice')renderDetail()});

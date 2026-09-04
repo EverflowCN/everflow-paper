@@ -11,18 +11,15 @@
   const KEYMAP={Q:'A',W:'B',E:'C',R:'D'};
   const DISPLAY_KEY={A:'Q',B:'W',C:'E',D:'R'};
 
-  const css=document.createElement('link');
-  css.rel='stylesheet';css.href='/assets/css/zhenti-srs.css?v=20260823b';document.head.appendChild(css);
+  if(!document.querySelector('link[href*="zhenti-srs.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/css/zhenti-srs.css?v=20260823b';document.head.appendChild(css)}
 
   const bar=document.querySelector('.wall-subject-bar');
   const wholeHome=document.querySelector('[data-full-paper-home]');
   const workspace=document.querySelector('[data-subject-workspace]');
   if(!bar||!wholeHome||!workspace)return;
 
-  const srsTab=document.createElement('button');
-  srsTab.type='button';srsTab.className='subject-tab srs-tab';srsTab.dataset.srsTab='';srsTab.textContent='速刷卡片';
-  const divider=bar.querySelector('.subject-divider');
-  if(divider)bar.insertBefore(srsTab,divider);else bar.appendChild(srsTab);
+  let srsTab=bar.querySelector('[data-srs-tab]');
+  if(!srsTab){srsTab=document.createElement('button');srsTab.type='button';srsTab.className='subject-tab srs-tab';srsTab.dataset.srsTab='';srsTab.textContent='速刷卡片';const divider=bar.querySelector('.subject-divider');if(divider)bar.insertBefore(srsTab,divider);else bar.appendChild(srsTab)}
 
   const home=document.createElement('section');
   home.className='srs-home';home.dataset.srsHome='';home.hidden=true;

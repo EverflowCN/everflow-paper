@@ -161,7 +161,7 @@
     $('[data-resource-list]').innerHTML=rows.map(renderCard).join('');
     $('[data-resource-count]').textContent=String(rows.length);
     $('[data-resource-empty]').hidden=rows.length>0;
-    const stateText=state.source==='cloud'?(rows.length?'已读取最新资料':'暂无已发布资料'):state.source==='cache'?'已显示最近缓存，正在后台更新':'正在读取资料…';
+    const stateText=state.source==='cloud'?(rows.length?'已读取最新资料':'暂无已发布资料'):state.source==='cache'?'已显示最近缓存，正在后台更新':state.source==='error'?'资料读取失败，请稍后刷新':'正在读取资料…';
     $('[data-resource-state]').textContent=stateText;
     $('[data-resource-root]').setAttribute('aria-busy','false');
   }
@@ -193,14 +193,15 @@
       state.source='cloud';
       render();
     }catch(error){
-      $('[data-resource-state]').textContent=state.source==='cache'?'云端更新稍慢，当前为最近缓存':'资料读取失败，请稍后刷新';
+      if(state.source==='cache')$('[data-resource-state]').textContent='云端更新稍慢，当前为最近缓存';
+      else{state.source='error';render()}
       if(error?.name!=='AbortError')console.warn('Everflow resource hub refresh failed',error);
     }finally{clearTimeout(timeout)}
   }
 
   const cached=readCache();
   if(cached){state.settings=cached.settings;state.items=cached.items;state.source='cache'}
-  render();
+  if(cached)render();
   refreshFromCloud();
 
   $('[data-resource-search]')?.addEventListener('input',event=>{state.query=event.currentTarget.value.trim();render()});
