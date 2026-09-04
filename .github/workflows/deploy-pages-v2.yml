@@ -77,6 +77,10 @@ jobs:
           done
           grep -q 'data-resource-search' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html
+          grep -q 'data-question-pane="preview"' site/workspace/index.html
+          grep -q 'data-question-status-filter' site/workspace/index.html
+          grep -q 'workspace-questions-v2.css' site/workspace/index.html
+          grep -q 'restore-version' supabase/functions/owner-questions/index.ts
           grep -Fq "const CACHE='everflow-site-v" site/sw.js
           git diff --check
 

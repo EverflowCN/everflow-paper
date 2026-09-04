@@ -58,6 +58,7 @@
   });
   document.addEventListener('everflow:workspace-section',event=>{closeMobileNav();const id=event.detail?.id;$$('[data-ws-nav]').forEach(node=>node.toggleAttribute('aria-current',node.dataset.wsNav===id));document.title=`${event.detail?.title||'管理工作台'} · Everflow`});
   document.addEventListener('everflow:workspace-data',event=>{const data=event.detail||{},quality=data.quality||{};setBadge('feedback',quality.summary?.openFeedback);setBadge('risks',quality.summary?.highRisks);setBadge('quality',quality.summary?.qualityIssues)});
+  document.addEventListener('everflow:question-workbench-summary',event=>{const detail=event.detail||{};setBadge('questions',(Number(detail.drafts)||0)+(Number(detail.issues)||0))});
   addEventListener('resize',()=>{if(!isMobile())closeMobileNav()},{passive:true});
   const initial=location.hash.slice(1)||'overview';$$('[data-ws-nav]').forEach(node=>node.toggleAttribute('aria-current',node.dataset.wsNav===initial));
 })();

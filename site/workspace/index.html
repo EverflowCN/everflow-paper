@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="../assets/css/app-ui.css">
 <link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260904-editor1">
 <link rel="stylesheet" href="../assets/css/workspace-tabler-v1.css?v=20260904-tabler1">
+<link rel="stylesheet" href="../assets/css/workspace-questions-v2.css?v=20260904-qwb2">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -523,42 +524,48 @@
 <div class="ws-intro">
 <div>
 <span class="eyebrow">QUESTION EDITOR</span>
-<h2>题目管理</h2>
-<p>检索并修改真题与 Relax1000；保存后前台立即读取最新内容。</p>
+<h2>题目工作台</h2>
+<p>检索、校验、预览和发布题目修正；草稿与线上版本相互隔离。</p>
 </div>
-<div class="ws-intro-actions"><span class="pill" data-question-count>--</span><button class="ws-btn" type="button" data-question-reload>刷新题库</button></div>
+<div class="ws-intro-actions"><button class="ws-btn" type="button" data-question-export>导出当前结果</button><button class="ws-btn" type="button" data-question-reload>刷新题库</button></div>
+</div>
+<div class="question-workbench-summary">
+<article><span>当前题库</span><strong data-question-total>--</strong><small>道题</small></article>
+<article><span>已发布修正</span><strong data-question-published>--</strong><small>线上生效</small></article>
+<article><span>本机草稿</span><strong data-question-drafts>--</strong><small>尚未发布</small></article>
+<article><span>结构待检查</span><strong data-question-issues>--</strong><small>缺少必要字段</small></article>
+<article><span>关联工单</span><strong data-question-feedback-count>--</strong><small>未解决</small></article>
 </div>
 <div class="question-admin-filter">
 <label><span>题库</span><select data-question-bank><option value="zhenti">408 真题</option><option value="relax1000">Relax1000</option></select></label>
 <label data-question-year-wrap><span>年份</span><select data-question-year></select></label>
+<label><span>科目</span><select data-question-subject-filter><option value="all">全部科目</option><option value="ds">数据结构</option><option value="co">计算机组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option></select></label>
+<label><span>状态</span><select data-question-status-filter><option value="all">全部状态</option><option value="published">已发布修正</option><option value="draft">本机草稿</option><option value="issues">结构待检查</option><option value="feedback">有关联工单</option><option value="original">仅原始版本</option></select></label>
 <label class="search"><span>搜索</span><input data-question-search placeholder="输入题号、题干、科目或章节"></label>
 </div>
 <div class="question-admin-layout">
 <section class="ws-card question-admin-list-card">
-<div class="ws-card-head"><div><h3>题目列表</h3><p data-question-list-note>正在读取题库…</p></div></div>
+<div class="ws-card-head"><div><h3>题目列表</h3><p data-question-list-note>正在读取题库…</p></div><span class="pill" data-question-count>--</span></div>
 <div class="question-admin-list" data-question-list><div class="quality-empty">正在读取题目…</div></div>
 </section>
 <section class="ws-card question-admin-editor-card">
-<div class="question-admin-empty" data-question-editor-empty><span>✎</span><strong>选择一道题开始修改</strong><small>支持题干、选项、答案、解析与题图；每次保存均保留版本记录。</small></div>
+<div class="question-admin-empty" data-question-editor-empty><span>✎</span><strong>选择一道题开始修改</strong><small>支持校验、实时预览、原文对比和历史版本恢复；只有“发布修改”才会影响前台。</small></div>
 <form data-question-editor hidden>
-<div class="question-admin-heading"><div><span class="eyebrow" data-question-editor-bank>QUESTION</span><h3 data-question-editor-title>题目</h3><small data-question-editor-meta></small></div><a class="ws-btn" data-question-front target="_blank" rel="noopener">查看前台</a></div>
+<div class="question-admin-heading"><div><span class="eyebrow" data-question-editor-bank>QUESTION</span><div class="question-title-line"><h3 data-question-editor-title>题目</h3><span class="question-workflow-pill" data-question-workflow>原始版本</span></div><small data-question-editor-meta></small></div><div class="question-heading-actions"><button class="ws-btn" type="button" data-question-previous aria-label="上一题">← 上一题</button><button class="ws-btn" type="button" data-question-next aria-label="下一题">下一题 →</button><a class="ws-btn" data-question-front target="_blank" rel="noopener">查看前台</a></div></div>
 <aside class="question-feedback-link" data-question-feedback hidden><strong>来自反馈工单</strong><p data-question-feedback-description></p><small data-question-feedback-user></small></aside>
-<div class="question-admin-form">
-<label class="wide"><span>题干</span><textarea rows="7" data-question-stem placeholder="输入完整题干"></textarea></label>
-<label><span>选项 A</span><textarea rows="3" data-question-option="A"></textarea></label>
-<label><span>选项 B</span><textarea rows="3" data-question-option="B"></textarea></label>
-<label><span>选项 C</span><textarea rows="3" data-question-option="C"></textarea></label>
-<label><span>选项 D</span><textarea rows="3" data-question-option="D"></textarea></label>
-<label><span>答案</span><input data-question-answer placeholder="例如 A 或完整答案"></label>
-<label data-question-subject-wrap><span>科目</span><select data-question-subject><option value="ds">数据结构</option><option value="co">计算机组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option></select></label>
-<label class="wide"><span data-question-analysis-label>解析</span><textarea rows="10" data-question-analysis placeholder="输入解析或参考答案说明"></textarea></label>
-<label class="wide" data-question-figure-wrap><span>真题题图（每行：图片地址｜说明｜选项 A-D，可省略后两项）</span><textarea rows="5" data-question-figures placeholder="/data/zhenti/assets/...png｜题图"></textarea></label>
-<label class="wide" data-question-relax-images hidden><span>Relax1000 图片地址（每行一个）</span><textarea rows="4" data-question-images placeholder="题目图片"></textarea><textarea rows="4" data-question-explanation-images placeholder="解析图片"></textarea></label>
+<nav class="question-editor-tabs" aria-label="题目编辑视图"><button class="active" type="button" data-question-tab="edit">编辑</button><button type="button" data-question-tab="preview">实时预览</button><button type="button" data-question-tab="compare">修改对比 <b data-question-change-count>0</b></button><button type="button" data-question-tab="history">版本记录</button></nav>
+<div class="question-editor-pane active" data-question-pane="edit">
+<section class="question-editor-section"><header><div><strong>题目内容</strong><small>保持题干层次清楚，I、II 与（1）、（2）会在前台自动分行。</small></div><span data-question-stem-count>0 字</span></header><label class="question-wide-field"><span>题干 <i>必填</i></span><textarea rows="8" data-question-stem placeholder="输入完整题干"></textarea></label></section>
+<section class="question-editor-section"><header><div><strong>选项与答案</strong><small>选择题至少保留两个选项，答案必须与已有选项对应。</small></div></header><div class="question-options-grid"><label><span class="question-option-key">A</span><textarea rows="3" data-question-option="A" placeholder="选项 A"></textarea></label><label><span class="question-option-key">B</span><textarea rows="3" data-question-option="B" placeholder="选项 B"></textarea></label><label><span class="question-option-key">C</span><textarea rows="3" data-question-option="C" placeholder="选项 C"></textarea></label><label><span class="question-option-key">D</span><textarea rows="3" data-question-option="D" placeholder="选项 D"></textarea></label></div><div class="question-meta-grid"><label><span>正确答案 <i>必填</i></span><input data-question-answer placeholder="例如 A；综合题可填写完整答案"></label><label data-question-subject-wrap><span>科目</span><select data-question-subject><option value="ds">数据结构</option><option value="co">计算机组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option></select></label></div></section>
+<section class="question-editor-section"><header><div><strong data-question-analysis-label>解析</strong><small>建议写明结论、推导过程和易错点。</small></div><span data-question-analysis-count>0 字</span></header><label class="question-wide-field"><textarea rows="12" data-question-analysis placeholder="输入解析或参考答案说明"></textarea></label></section>
+<section class="question-editor-section"><header><div><strong>图片与附件</strong><small>上传后先进入编辑区，发布题目时才会在前台生效。</small></div></header><label class="question-wide-field" data-question-figure-wrap><span>真题题图：每行“图片地址｜说明｜选项 A-D”</span><textarea rows="5" data-question-figures placeholder="/data/zhenti/assets/...png｜题图"></textarea></label><label class="question-wide-field" data-question-relax-images hidden><span>Relax1000 图片地址（每行一个）</span><textarea rows="4" data-question-images placeholder="题目图片"></textarea><textarea rows="4" data-question-explanation-images placeholder="解析图片"></textarea></label><div class="question-upload-row"><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-question-upload-file><select data-question-upload-target><option value="question">添加到题目图片</option><option value="explanation">添加到解析图片</option></select><button class="ws-btn" type="button" data-question-upload>上传图片</button><small>PNG、JPG、WebP 或 GIF，单张不超过 4 MB</small></div></section>
 </div>
-<div class="question-upload-row"><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-question-upload-file><select data-question-upload-target><option value="question">添加到题目图片</option><option value="explanation">添加到解析图片</option></select><button class="ws-btn" type="button" data-question-upload>上传图片</button><small>单张不超过 4 MB</small></div>
+<div class="question-editor-pane" data-question-pane="preview"><div class="question-preview-shell" data-question-preview></div></div>
+<div class="question-editor-pane" data-question-pane="compare"><div class="question-compare" data-question-compare></div></div>
+<div class="question-editor-pane" data-question-pane="history"><div data-question-history><div class="quality-empty">选择题目后读取记录</div></div></div>
+<div class="question-validation" data-question-validation hidden></div>
 <label class="question-resolution" data-question-resolution-wrap hidden><span>工单处理结论（用户只提示一次）</span><textarea rows="3" data-question-resolution-note placeholder="例如：已修正题干并更新解析。"></textarea></label>
-<div class="question-admin-actions"><button class="ws-btn primary" type="submit" data-question-save>保存题目</button><button class="ws-btn primary question-save-resolve" type="button" data-question-save-resolve hidden>保存并解决工单</button><button class="ws-btn" type="button" data-question-restore>恢复原版</button><span data-question-save-state></span></div>
-<details class="question-history"><summary>版本记录</summary><div data-question-history><div class="quality-empty">选择题目后读取记录</div></div></details>
+<div class="question-admin-actions"><div class="question-action-state"><strong data-question-save-state>当前为原始版本</strong><small data-question-shortcuts>⌘/Ctrl+S 保存草稿 · ⌘/Ctrl+Enter 发布</small></div><button class="ws-btn" type="button" data-question-clear-draft hidden>丢弃草稿</button><button class="ws-btn" type="button" data-question-save-draft>保存本机草稿</button><button class="ws-btn" type="button" data-question-validate>检查题目</button><button class="ws-btn primary" type="submit" data-question-save>发布修改</button><button class="ws-btn primary question-save-resolve" type="button" data-question-save-resolve hidden>发布并解决工单</button><button class="ws-btn danger" type="button" data-question-restore>恢复原版</button></div>
 </form>
 </section>
 </div>
@@ -806,9 +813,9 @@
 </script>
 <script type="module" src="../assets/js/workspace-v3.js?v=20260904-tabler1">
 </script>
-<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260904-editor1">
+<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260904-qwb2">
 </script>
-<script type="module" src="../assets/js/workspace-shell-v1.js?v=20260904-tabler1">
+<script type="module" src="../assets/js/workspace-shell-v1.js?v=20260904-qwb2">
 </script>
 </body>
 </html>
