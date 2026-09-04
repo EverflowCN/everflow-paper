@@ -21,6 +21,7 @@
 
   function build(container,mobile=false){
     if(!container)return;
+    if(container.dataset.everaBootNav==='1')return;
     const theme=container.querySelector('[data-theme]');
     const frag=document.createDocumentFragment();
     for(const item of items){
@@ -39,6 +40,7 @@
 
   build(document.querySelector('.links'));
   build(document.querySelector('.mobile-panel'),true);
+  document.querySelectorAll('.membership-nav-close').forEach(close=>{if(close.dataset.everaNavBound==='1')return;close.dataset.everaNavBound='1';close.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();write('everflow-membership-nav-hidden-v1','1');document.querySelectorAll('.membership-nav-entry').forEach(node=>node.classList.add('is-hidden'))})});
 
   const panel=document.querySelector('.mobile-panel');
   const dismissMenu=()=>{

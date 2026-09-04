@@ -1,10 +1,11 @@
-const CACHE='everflow-site-v56-qwb2';
+const CACHE='everflow-site-v57-stable-first-paint';
 const CORE=[
   '/',
   '/study/',
   '/zhenti/',
   '/assets/css/site.css',
   '/assets/css/responsive.css',
+  '/assets/js/site-boot-v1.js',
   '/assets/js/site-runtime-v2.js',
   '/assets/js/site-nav-v2.js',
   '/assets/everflow-icon.svg',
@@ -12,7 +13,7 @@ const CORE=[
 ];
 const WARM=[
   '/408/','/relax/','/graph/','/zhenti/relax-reader/','/links/','/account/','/workspace/',
-  '/assets/css/interaction-guard.css','/assets/css/question-content-v1.css','/assets/css/zhenti-status.css',
+  '/assets/css/interaction-guard.css','/assets/css/question-content-v1.css','/assets/css/question-bank-switch.css','/assets/css/zhenti-status.css','/assets/css/zhenti-srs.css','/assets/css/zhenti-favorites.css','/assets/css/zhenti-srs-experience.css','/assets/css/zhenti-nav-layout-v5.css',
   '/assets/css/resource-hub-v2.css','/assets/css/relax1000-practice.css','/assets/css/workspace-v3.css','/assets/css/workspace-tabler-v1.css','/assets/css/workspace-questions-v2.css',
   '/assets/js/question-content-v1.js','/assets/js/question-bank-switch.js','/assets/js/content-feedback-v1.js','/assets/js/feedback-notifications-v1.js',
   '/assets/js/relax1000-core.js','/assets/js/question-overrides-v1.js','/assets/js/relax1000-reader.js','/assets/js/graph-app.js','/assets/js/workspace-v3.js','/assets/js/workspace-shell-v1.js','/assets/js/workspace-questions-v1.js'

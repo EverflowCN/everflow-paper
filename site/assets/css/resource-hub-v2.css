@@ -48,6 +48,7 @@
 .resource-filter b { margin-left: 4px; color: inherit; opacity: .65; }
 .resource-filter.active { border-color: var(--resource-ink); background: var(--resource-ink); color: #fff; }
 .resource-filter.cohort.active { border-color: var(--resource-red); background: var(--resource-red); }
+.resource-filter-skeleton { width: 78px; height: 36px; flex: 0 0 78px; border-radius: 999px; background: linear-gradient(100deg, var(--soft) 20%, var(--card) 38%, var(--soft) 56%); background-size: 240% 100%; animation: resourceSkeleton 1.25s ease-in-out infinite; }
 
 .resource-v2-summary { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-top: 25px; padding: 0 3px; }
 .resource-v2-summary div { display: flex; align-items: baseline; gap: 7px; }
@@ -57,6 +58,8 @@
 .resource-v2-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
 .resource-v2-card { position: relative; min-height: 230px; display: flex; flex-direction: column; overflow: hidden; padding: 21px; border: 1px solid var(--line); border-radius: 22px; background: var(--card); box-shadow: 0 10px 36px rgba(17, 18, 23, .045); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .resource-v2-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--resource-red) 28%, var(--line)); box-shadow: 0 18px 44px rgba(17, 18, 23, .08); }
+.resource-card-skeleton { min-height: 230px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(100deg, var(--card) 20%, var(--soft) 38%, var(--card) 56%); background-size: 240% 100%; animation: resourceSkeleton 1.25s ease-in-out infinite; }
+@keyframes resourceSkeleton { to { background-position-x: -160%; } }
 .resource-v2-card.featured { grid-column: span 2; min-height: 250px; background: linear-gradient(135deg, var(--resource-ink), #292a30); color: #fff; }
 .resource-v2-card.featured::after { content: "EF"; position: absolute; right: -20px; bottom: -42px; font-size: 150px; font-weight: 950; letter-spacing: -.08em; color: rgba(255,255,255,.045); pointer-events: none; }
 .resource-card-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -122,4 +125,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .resource-v2-card, .resource-v2-errata, .resource-card-button { transition: none; }
+  .resource-filter-skeleton, .resource-card-skeleton { animation: none; }
 }
