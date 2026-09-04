@@ -1,7 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const years=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const DATA_VERSION='20260902-accuracy1';
+  const DATA_VERSION='20260904-question1';
   const mergedCache=new Map();
   const layerCache={base:new Map(),supplement:new Map(),extra:new Map()};
   const MAX_CONCURRENT=4;
@@ -72,13 +72,19 @@
     return question?.verification?.status==='verified';
   }
 
-  // Base-year JSON is authoritative. Supplements are question-level fallbacks only:
-  // they may fill a question that is not yet verified in base, but never patch/override
-  // an already verified base question field-by-field.
+  function evidenceRank(question){
+    if(!isVerified(question))return 0;
+    const mode=String(question?.verification?.mode||'').toLowerCase();
+    if(/original-paper|original-scan|original-question-screenshot|public-paper-transcription|table-transcription|instruction-transcription/.test(mode))return 3;
+    if(/paraphrase/.test(mode))return 1;
+    return 2;
+  }
+
+  // Pick one complete question object. A clearly original-backed candidate may replace a
+  // paraphrase, while source order remains the tie-breaker and fields are never mixed.
   function resolveQuestion(baseQuestion,supplementQuestion,extraQuestion){
-    if(isVerified(baseQuestion))return baseQuestion;
-    if(isVerified(supplementQuestion))return supplementQuestion;
-    if(isVerified(extraQuestion))return extraQuestion;
+    const candidates=[baseQuestion,supplementQuestion,extraQuestion].filter(isVerified);
+    if(candidates.length)return candidates.reduce((best,item)=>evidenceRank(item)>evidenceRank(best)?item:best);
     return baseQuestion||supplementQuestion||extraQuestion||null;
   }
 
@@ -127,14 +133,9 @@
       if(force)clearYearLayers(year);
       let base=await loadBase(year),supplement=null,extra=null;
       if(!base)return null;
-      let paper=base;
+      [supplement,extra]=await Promise.all([loadSupplement(year),loadExtra(year)]);
+      let paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
       let health=auditPaper(paper);
-
-      if(unhealthy(health)){
-        [supplement,extra]=await Promise.all([loadSupplement(year),loadExtra(year)]);
-        if(base)paper={...base,questions:mergeQuestionSets(base?.questions,supplement?.questions,extra?.questions)};
-        health=auditPaper(paper);
-      }
 
       if(unhealthy(health)){
         clearYearLayers(year);

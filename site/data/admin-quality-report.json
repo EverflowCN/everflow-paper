@@ -1,21 +1,30 @@
 {
-  "schema": "everflow-admin-quality-v1",
-  "generatedAt": "2026-09-04T01:04:45.277Z",
+  "schema": "everflow-admin-quality-v2",
+  "generatedAt": "2026-09-04T01:42:37.184Z",
   "status": "warning",
   "banks": [
     {
       "id": "zhenti",
       "label": "408 历年真题",
       "status": "pass",
-      "note": "846 道题、119 张配图结构完整",
+      "note": "846 道题结构完整；原卷核验 107，转述待逐字复核 719",
       "checks": [
         "题干",
         "选项",
         "答案",
         "图片",
-        "核验状态"
+        "可信度分级"
       ],
-      "issues": []
+      "issues": [],
+      "content": {
+        "questions": 846,
+        "original": 107,
+        "paraphrase": 719,
+        "structural": 20,
+        "shortAnalysis": 74,
+        "longStem": 69,
+        "withFigures": 115
+      }
     },
     {
       "id": "relax1000",
@@ -29,5 +38,14 @@
         "图片"
       ]
     }
-  ]
+  ],
+  "content": {
+    "questions": 846,
+    "original": 107,
+    "paraphrase": 719,
+    "structural": 20,
+    "shortAnalysis": 74,
+    "longStem": 69,
+    "withFigures": 115
+  }
 }

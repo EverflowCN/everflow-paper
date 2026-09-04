@@ -23,7 +23,8 @@ function auditZhenti(){
   const root=path.join(SITE,'data','zhenti');
   const verified=question=>question?.verification?.status==='verified';
   const optional=file=>fs.existsSync(file)?read(file):null;
-  const resolve=(base,supplement,extra)=>verified(base)?base:verified(supplement)?supplement:verified(extra)?extra:base||supplement||extra||null;
+  const rank=question=>{const mode=String(question?.verification?.mode||'').toLowerCase();if(!verified(question))return 0;if(/original-paper|original-scan|original-question-screenshot|public-paper-transcription|table-transcription|instruction-transcription/.test(mode))return 3;if(/paraphrase/.test(mode))return 1;return 2};
+  const resolve=(base,supplement,extra)=>[base,supplement,extra].filter(verified).reduce((best,item)=>rank(item)>rank(best)?item:best,null)||base||supplement||extra||null;
   let questions=0,figures=0;
   for(let year=2009;year<=2026;year++){
     const base=read(path.join(root,`${year}.json`));

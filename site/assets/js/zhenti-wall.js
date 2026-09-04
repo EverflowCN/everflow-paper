@@ -158,15 +158,11 @@
       return `<div class="question-live question-unverified"><div class="question-verify-row"><span class="verify-badge pending">待核验</span></div><div class="question-stem"><span class="question-number">（${q}）</span><p>该题尚未完成年份与题号的来源核验，暂不展示题干。核验通过后才会进入正式题库。</p></div><div class="shortcut-inline">快捷键：←/J 上一题 · →/K 下一题 · 1/2/3 掌握状态 · ? 帮助</div></div>`;
     }
 
-    const choice=isChoice(item,q),submitted=hasSubmitted(r),showAnswer=submitted||Boolean(r.reviewed);
+    const content=window.EveraQuestionContent;
+    const choice=isChoice(item,q),submitted=hasSubmitted(r),showAnswer=submitted||Boolean(r.reviewed),trust=content.verification(item.verification);
     const fav=`<button class="question-favorite${r.favorite?' active':''}" type="button" data-answer-favorite title="收藏 / 取消收藏（F）">${r.favorite?'★ 已收藏':'☆ 收藏'}</button>`;
-    const verificationNote=item.verification?.mode==='cross-checked-paraphrase'
-      ?'题干转述版'
-      :item.verification?.mode==='original-paper-corrected-transcription'
-        ?'原卷校正版'
-        :'已核验题干';
-    const verify=`<div class="question-verify-row"><span class="verify-badge">已核验</span><span class="verify-note">${esc(verificationNote)}</span>${fav}</div>`;
-    const stem=`<div class="question-stem"><span class="question-number">（${q}）</span><p>${esc(item.stem)}</p></div>`;
+    const verify=`<div class="question-verify-row"><span class="verify-badge ${trust.tier}">${esc(trust.label)}</span><span class="verify-note">${esc(trust.note)}</span>${fav}</div>`;
+    const stem=`<div class="question-stem"><span class="question-number">（${q}）</span><div class="question-rich-text">${content.richText(item.stem)}</div></div>${trust.tier==='paraphrase'?`<p class="verification-hint">${esc(trust.note)}。练习时请把它视为同考点转述题。</p>`:''}`;
 
     let options='';
     if(item.options){
@@ -176,7 +172,7 @@
         if(selected)cls+=' selected';
         if(showAnswer&&k===String(item.answer))cls+=' is-correct';
         if(submitted&&r.answer===k&&r.correct===false)cls+=' is-wrong';
-        return `<button type="button" class="${cls}" data-answer-option="${esc(k)}" ${submitted?'disabled':''}><b>${esc(k)}.</b><span>${esc(v)}</span><kbd>${esc(k)}</kbd></button>`;
+        return `<button type="button" class="${cls}" data-answer-option="${esc(k)}" ${submitted?'disabled':''}><b>${esc(k)}.</b><span class="question-rich-text">${content.inlineText(v)}</span><kbd>${esc(k)}</kbd></button>`;
       }).join('')}</div>`;
     }
 
@@ -188,7 +184,7 @@
       result+=`<div class="answer-actions"><button type="button" class="answer-submit" data-answer-submit ${disabled?'disabled':''}>${primaryLabel}<kbd>Enter</kbd></button>${reviewButton}</div>`;
     }else result=`<div class="answer-actions comprehensive-actions"><button type="button" class="answer-submit" data-answer-reveal>${showAnswer?'收起参考答案':'查看参考答案'}<kbd>Enter</kbd></button></div>`;
 
-    const answer=showAnswer?`<div class="live-answer"><strong>参考答案：${esc(item.answer)}</strong><p>${esc(item.analysis||'暂无解析')}</p></div>`:'';
+    const answer=showAnswer?`<div class="live-answer"><strong>参考答案：${esc(item.answer)}</strong><div class="question-rich-text">${content.richText(item.analysis,{fallback:'暂无解析'})}</div></div>`:'';
     const shortcut=choice?`<div class="shortcut-inline">A/B/C/D 选项 · Enter 提交/下一题 · ←/→ 或 J/K 切题 · 1/2/3 熟练度 · R 解析 · N 笔记 · T 计时 · F 收藏</div>`:`<div class="shortcut-inline">Enter 查看答案 · ←/→ 或 J/K 切题 · 1/2/3 自评 · N 笔记 · F 收藏</div>`;
     return `<div class="question-live" data-answer-context="${context}">${verify}${stem}${options}${result}${answer}<div class="question-source-note">交叉核验：${esc(sourceText(item))}</div>${shortcut}</div>`;
   }
@@ -208,7 +204,7 @@
     }
     box.innerHTML=renderQuestionHtml(item,q,record(year,q),{context});attachQuestionInteractions(box,year,q,context,item);
     if(context==='modal'){
-      if(item?.verification?.status==='verified')els.analysis.innerHTML=`<strong>参考答案：${esc(item.answer)}</strong><p>${esc(item.analysis||'暂无解析')}</p><div class="question-source-note">来源核验：${esc(sourceText(item))}</div>`;
+      if(item?.verification?.status==='verified')els.analysis.innerHTML=`<strong>参考答案：${esc(item.answer)}</strong><div class="question-rich-text">${window.EveraQuestionContent.richText(item.analysis,{fallback:'暂无解析'})}</div><div class="question-source-note">来源核验：${esc(sourceText(item))}</div>`;
       else els.analysis.innerHTML='<strong>解析</strong><p>该题尚未核验，因此不展示答案和解析。</p>';
     }
   }
