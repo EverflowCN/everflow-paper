@@ -1,6 +1,9 @@
 .question-rich-text{min-width:0;overflow-wrap:anywhere;word-break:normal;line-break:auto}
 .question-rich-text p{margin:0 0 .72em}.question-rich-text p:last-child{margin-bottom:0}
-.question-rich-text br{content:"";display:block;margin-top:.24em}
+.question-text-line{display:block}.question-text-line+.question-text-line{margin-top:.38em}
+.question-item-line{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:.55em;align-items:start;margin-top:.48em}
+.question-item-line:first-child{margin-top:0}.question-item-marker{font:inherit;font-weight:700;white-space:nowrap;color:color-mix(in srgb,currentColor 82%,var(--muted,#6f7480))}
+.question-item-line>span{min-width:0}.question-text-line:has(+.question-item-line){margin-bottom:.18em}
 .question-rich-text code,.question-code-inline{max-width:100%;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:.9em;overflow-wrap:anywhere}
 .question-rich-text sup,.question-rich-text sub{font-size:.72em;line-height:0}
 .question-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -21,6 +24,7 @@
   .live-option span,.relax-reader-options button span{font-size:16px;line-height:1.7}
   .question-verify-row{align-items:flex-start}.verify-note{flex:1;min-width:150px;line-height:1.55}
   .drawer-stem.question-rich-text{font-size:16px;line-height:1.82}
+  .question-item-line{column-gap:.48em;margin-top:.56em}
   .drawer-status button,.drawer-answer,.paper-status-actions button,.paper-nav button{min-height:44px}
   .paper-answer-sheet{padding:12px;position:sticky;top:0;z-index:8;background:var(--card,#fff)}
   .paper-answer-sheet .answer-sheet-head{margin-bottom:8px}

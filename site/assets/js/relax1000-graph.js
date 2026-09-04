@@ -1,5 +1,5 @@
 import{loadRelaxData,loadRecords,patchRecord,questionState,questionNumber,questionImages,explanationImages,optionEntries,imageMarkup,usesQuestionImageFallback,esc,subjectName,idKey}from'./relax1000-core.js?v=20260828-relaxfix1';
-import{richText,inlineText}from'./question-content-v1.js?v=20260904-question1';
+import{richText,inlineText}from'./question-content-v1.js?v=20260904-question2';
 
 const shell=document.querySelector('[data-graph-shell]');
 const matrix=shell?.querySelector('[data-overview-matrix]');

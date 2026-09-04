@@ -37,5 +37,6 @@ for(let year=2009;year<=2026;year++){
 
 const renderer=fs.readFileSync(path.join(SITE,'assets','js','question-content-v1.js'),'utf8');
 if(!renderer.includes("'&':'&amp;'")||!renderer.includes("'<':'&lt;'"))problems.push('共享题目渲染器缺少 HTML 转义');
+for(const token of ['question-item-line','fullNumbers.length>=2','romans.length>=2','circles.length>=2'])if(!renderer.includes(token))problems.push(`共享题目渲染器缺少分项规则: ${token}`);
 if(problems.length){console.error(JSON.stringify({problems},null,2));process.exitCode=1}
 else console.log(`question content audit OK: ${JSON.stringify(counters)}`);
