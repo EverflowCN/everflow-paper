@@ -1,6 +1,6 @@
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm';
+import './cloud.js?v=20260904-stable2';
 
-(()=>{
+;(async()=>{
   if(document.body?.dataset?.view!=='zhenti')return;
 
   const cfg=window.EVERFLOW_CLOUD||{};
@@ -47,8 +47,8 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
   let status=document.querySelector('[data-cloud-status]');if(!status){status=document.createElement('button');status.type='button';status.className='zhenti-cloud-status';status.dataset.cloudStatus='';status.innerHTML='<i></i><span>检查云同步…</span>';status.title='真题墙云同步';const bar=document.querySelector('.wall-subject-bar');(bar||document.body).appendChild(status)}
   function setStatus(kind,text,title=text){status.className=`zhenti-cloud-status ${kind||''}`.trim();status.querySelector('span').textContent=text;status.title=title}
 
-  if(!cfg.url||!cfg.publishableKey){setStatus('','本地模式','未配置云同步');return}
-  const client=createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  if(!cfg.url||!cfg.publishableKey||typeof window.EveraCloud?.getClient!=='function'){setStatus('','本地模式','未配置云同步');return}
+  const client=await window.EveraCloud.getClient();if(!client){setStatus('','本地模式','云同步暂不可用');return}
   let syncing=false,scheduled=null,lastSeenFingerprint=fingerprint();
 
   async function currentUser(){const {data,error}=await client.auth.getUser();if(error)return null;return data?.user||null}

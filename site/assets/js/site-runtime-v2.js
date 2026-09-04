@@ -1,7 +1,7 @@
 (()=>{
   const body=document.body;
   const root=document.documentElement;
-  const ASSET_VERSION='20260904-editor1';
+  const ASSET_VERSION='20260904-stable2';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
   const runIdle=(task,timeout=2500)=>'requestIdleCallback' in window?requestIdleCallback(task,{timeout}):setTimeout(task,Math.min(timeout,1200));
