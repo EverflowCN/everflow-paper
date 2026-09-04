@@ -4,6 +4,7 @@
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const labels={stem:'题干',options:'选项',answer:'答案',image:'图片',explanation:'解析',link:'链接',other:'其他',zhenti:'408 真题',relax1000:'Relax1000',course:'课程',resource:'资源',site:'站点'};
   const statusLabels={open:'待处理',in_progress:'处理中',resolved:'已解决',dismissed:'已忽略'};
+  const statusOptionLabels={...statusLabels,resolved:'已解决（通知用户一次）'};
   const priorityLabels={low:'低',normal:'普通',high:'高',urgent:'紧急'};
   let quality=null,staticReport=null,selectedTicket=null;
   const toast=(message,type='success')=>window.EveraUI?.toast?.(message,{type})||console.log(message);
@@ -91,12 +92,16 @@
     selectedTicket=(quality?.tickets||[]).find(row=>row.id===id);if(!selectedTicket)return;
     const editor=$('[data-feedback-editor]'),backdrop=$('[data-feedback-editor-backdrop]');
     editor.innerHTML=`<div class="ws-drawer-head"><div><span class="eyebrow">FEEDBACK TICKET</span><h3>${esc(labels[selectedTicket.bank]||selectedTicket.bank)} · ${esc(selectedTicket.entity_id||'页面反馈')}</h3><small>${esc(selectedTicket.reporterEmail||'用户已删除')} · ${fmt(selectedTicket.created_at)}</small></div><button class="ws-drawer-close" type="button" data-feedback-editor-close>×</button></div><section class="ws-drawer-section"><h4>反馈内容</h4><p>${esc(selectedTicket.description)}</p><code>${esc(selectedTicket.page_path)}</code></section><section class="ws-drawer-section"><div class="ws-form"><label class="ws-field"><span>处理状态</span><select data-feedback-edit-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${selectedTicket.status===value?'selected':''}>${label}</option>`).join('')}</select></label><label class="ws-field"><span>优先级</span><select data-feedback-edit-priority>${Object.entries(priorityLabels).map(([value,label])=>`<option value="${value}" ${selectedTicket.priority===value?'selected':''}>${label}</option>`).join('')}</select></label><label class="ws-field wide"><span>处理结论</span><textarea rows="7" data-feedback-edit-note placeholder="记录核查、修正或忽略原因">${esc(selectedTicket.resolution_note||'')}</textarea></label></div><div class="ws-form-actions"><button class="ws-btn primary" type="button" data-feedback-save>保存处理结果</button></div></section>`;
+    editor.querySelector('.ws-form')?.insertAdjacentHTML('afterend','<p class="feedback-notify-hint">选择“已解决”后，反馈用户下次登录访问时会收到一次修正提示；提示成功领取后不会重复出现。</p>');
     editor.hidden=false;backdrop.hidden=false;requestAnimationFrame(()=>editor.classList.add('open'));
   }
   function closeTicket(){const editor=$('[data-feedback-editor]'),backdrop=$('[data-feedback-editor-backdrop]');editor?.classList.remove('open');if(editor)editor.hidden=true;if(backdrop)backdrop.hidden=true;selectedTicket=null}
   async function saveTicket(button){
-    if(!selectedTicket)return;button.disabled=true;button.textContent='保存中…';
-    try{await window.EveraAdminCloud.feedback('update',{id:selectedTicket.id,status:$('[data-feedback-edit-status]').value,priority:$('[data-feedback-edit-priority]').value,resolutionNote:$('[data-feedback-edit-note]').value});closeTicket();await refresh();toast('工单处理结果已保存。')}catch(error){toast(error.message||'保存失败','error')}finally{button.disabled=false;button.textContent='保存处理结果'}
+    if(!selectedTicket)return;
+    const status=$('[data-feedback-edit-status]').value,resolutionNote=$('[data-feedback-edit-note]').value.trim();
+    if(status==='resolved'&&!resolutionNote){toast('标记已解决前请填写处理结论，用户将看到这段说明。','error');return}
+    button.disabled=true;button.textContent='保存中…';
+    try{await window.EveraAdminCloud.feedback('update',{id:selectedTicket.id,status,priority:$('[data-feedback-edit-priority]').value,resolutionNote});closeTicket();await refresh();toast(status==='resolved'?'工单已解决，将向反馈用户提示一次。':'工单处理结果已保存。')}catch(error){toast(error.message||'保存失败','error')}finally{button.disabled=false;button.textContent='保存处理结果'}
   }
 
   document.addEventListener('everflow:workspace-data',event=>{quality=event.detail?.quality||null;render()});

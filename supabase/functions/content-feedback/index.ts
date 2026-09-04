@@ -77,6 +77,31 @@ Deno.serve(async req => {
       return json({ ok: true, feedback: data })
     }
 
+    if (action === 'notifications') {
+      const { data: pending, error: pendingError } = await admin
+        .from('content_feedback')
+        .select('id,bank,entity_id,page_path,category,resolution_note,resolved_at')
+        .eq('reporter_user_id', user.id)
+        .eq('status', 'resolved')
+        .is('reporter_notified_at', null)
+        .order('resolved_at', { ascending: true })
+        .limit(20)
+      if (pendingError) throw pendingError
+      const ids = (pending || []).map(row => row.id)
+      if (!ids.length) return json({ ok: true, notifications: [] })
+      const notifiedAt = new Date().toISOString()
+      const { data, error } = await admin
+        .from('content_feedback')
+        .update({ reporter_notified_at: notifiedAt })
+        .eq('reporter_user_id', user.id)
+        .eq('status', 'resolved')
+        .is('reporter_notified_at', null)
+        .in('id', ids)
+        .select('id,bank,entity_id,page_path,category,resolution_note,resolved_at')
+      if (error) throw error
+      return json({ ok: true, notifications: data || [] })
+    }
+
     if (user.app_metadata?.role !== 'owner') return json({ error: 'not_found' }, 404)
     if (action === 'update') {
       const id = text(body?.id, 80)
@@ -84,7 +109,7 @@ Deno.serve(async req => {
       const status = allowedStatuses.has(body?.status) ? body.status : 'open'
       const priority = allowedPriorities.has(body?.priority) ? body.priority : 'normal'
       const resolutionNote = text(body?.resolutionNote, 2000)
-      const row = {
+      const row: Record<string, unknown> = {
         status,
         priority,
         resolution_note: resolutionNote,
@@ -92,6 +117,7 @@ Deno.serve(async req => {
         resolved_at: ['resolved', 'dismissed'].includes(status) ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
       }
+      if (status !== 'resolved') row.reporter_notified_at = null
       const { data, error } = await admin.from('content_feedback').update(row).eq('id', id).select('*').single()
       if (error) throw error
       await admin.from('admin_audit').insert({ actor_user_id: user.id, action: 'content_feedback_update', detail: { feedback_id: id, status, priority } })

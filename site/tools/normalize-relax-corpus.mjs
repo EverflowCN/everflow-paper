@@ -4,12 +4,22 @@ import path from 'node:path';
 const rootArg=process.argv.find(arg=>arg.startsWith('--site-root='));
 const SITE=path.resolve(rootArg?rootArg.slice('--site-root='.length):'site');
 const FILE=path.join(SITE,'data','relax1000','data','questions.json');
+const FIX_ASSETS=path.join(SITE,'tools','relax-feedback-assets');
 if(!fs.existsSync(FILE))throw new Error(`missing Relax corpus: ${FILE}`);
 
 const data=JSON.parse(fs.readFileSync(FILE,'utf8'));
 const byId=new Map((data.questions||[]).map(question=>[question.id,question]));
 const option=(key,text)=>({key,text});
 const patches={
+  'ds-4-9':{
+    stem:'设有 n(n≥1)个结点的二叉树采用三叉链表表示，其中每个结点包含三个指针，分别指向其左孩子、右孩子及双亲（若不存在，则置为空），则下列说法中正确的是（ ）。\nI．树中空指针的数量为 n+2\nII．所有度为 2 的结点均被三个指针指向\nIII．每个叶结点均被一个指针所指向'
+  },
+  'ds-4-24':{
+    questionImages:['/question-images/ds-4-24-1.webp']
+  },
+  'ds-4-47':{
+    questionImages:['/question-images/ds-4-47-1.webp']
+  },
   'ds-6-48':{
     options:[option('A','n+1'),option('B','n-1'),option('C','n × m'),option('D','见原题图中的表达式')]
   },
@@ -54,6 +64,14 @@ for(const [id,patch] of Object.entries(patches)){
   const question=byId.get(id);
   if(!question)throw new Error(`Relax normalization target missing: ${id}`);
   Object.assign(question,patch,{integrityFix:'everflow-20260825-bank1'});
+  for(const src of patch.questionImages||[]){
+    const filename=path.basename(src);
+    const source=path.join(FIX_ASSETS,filename);
+    if(!fs.existsSync(source))throw new Error(`Relax normalization asset missing: ${source}`);
+    const destination=path.join(SITE,'data','relax1000','question-images',filename);
+    fs.mkdirSync(path.dirname(destination),{recursive:true});
+    fs.copyFileSync(source,destination);
+  }
 }
 
 for(const question of data.questions||[]){
