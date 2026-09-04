@@ -14,6 +14,8 @@
     if(!value)return'';
     if(value.startsWith('/data/zhenti/assets/'))return value;
     if(/^data:image\/(?:png|jpeg|webp|svg\+xml);/i.test(value))return value;
+    const cloudBase=String(window.EVERFLOW_CLOUD?.url||'').replace(/\/$/,'');
+    if(cloudBase&&value.startsWith(`${cloudBase}/storage/v1/object/public/question-assets/`))return value;
     return'';
   }
 

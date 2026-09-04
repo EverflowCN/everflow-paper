@@ -90,6 +90,11 @@
   }
   function openTicket(id){
     selectedTicket=(quality?.tickets||[]).find(row=>row.id===id);if(!selectedTicket)return;
+    if(['zhenti','relax1000'].includes(selectedTicket.bank)&&selectedTicket.entity_id){
+      document.dispatchEvent(new CustomEvent('everflow:open-question-editor',{detail:{ticket:selectedTicket}}));
+      selectedTicket=null;
+      return;
+    }
     const editor=$('[data-feedback-editor]'),backdrop=$('[data-feedback-editor-backdrop]');
     editor.innerHTML=`<div class="ws-drawer-head"><div><span class="eyebrow">FEEDBACK TICKET</span><h3>${esc(labels[selectedTicket.bank]||selectedTicket.bank)} · ${esc(selectedTicket.entity_id||'页面反馈')}</h3><small>${esc(selectedTicket.reporterEmail||'用户已删除')} · ${fmt(selectedTicket.created_at)}</small></div><button class="ws-drawer-close" type="button" data-feedback-editor-close>×</button></div><section class="ws-drawer-section"><h4>反馈内容</h4><p>${esc(selectedTicket.description)}</p><code>${esc(selectedTicket.page_path)}</code></section><section class="ws-drawer-section"><div class="ws-form"><label class="ws-field"><span>处理状态</span><select data-feedback-edit-status>${Object.entries(statusLabels).map(([value,label])=>`<option value="${value}" ${selectedTicket.status===value?'selected':''}>${label}</option>`).join('')}</select></label><label class="ws-field"><span>优先级</span><select data-feedback-edit-priority>${Object.entries(priorityLabels).map(([value,label])=>`<option value="${value}" ${selectedTicket.priority===value?'selected':''}>${label}</option>`).join('')}</select></label><label class="ws-field wide"><span>处理结论</span><textarea rows="7" data-feedback-edit-note placeholder="记录核查、修正或忽略原因">${esc(selectedTicket.resolution_note||'')}</textarea></label></div><div class="ws-form-actions"><button class="ws-btn primary" type="button" data-feedback-save>保存处理结果</button></div></section>`;
     editor.querySelector('.ws-form')?.insertAdjacentHTML('afterend','<p class="feedback-notify-hint">选择“已解决”后，反馈用户下次登录访问时会收到一次修正提示；提示成功领取后不会重复出现。</p>');
@@ -105,6 +110,7 @@
   }
 
   document.addEventListener('everflow:workspace-data',event=>{quality=event.detail?.quality||null;render()});
+  document.addEventListener('everflow:feedback-changed',()=>refresh());
   $('[data-quality-refresh]')?.addEventListener('click',event=>refresh(event.currentTarget));
   $('[data-quality-repair-profiles]')?.addEventListener('click',event=>repairProfiles(event.currentTarget));
   $('[data-risk-search]')?.addEventListener('input',renderRisks);$('[data-risk-filter]')?.addEventListener('change',renderRisks);

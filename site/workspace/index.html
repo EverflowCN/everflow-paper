@@ -8,7 +8,7 @@
 <title>管理工作台 · Everflow</title>
 <link rel="icon" href="../assets/everflow-icon.svg">
 <link rel="stylesheet" href="../assets/css/app-ui.css">
-<link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260903-quality1">
+<link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260904-editor1">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -60,6 +60,9 @@
 </button>
 <button data-ws-nav="resources">
 <span>资源页面</span>
+</button>
+<button data-ws-nav="questions">
+<span>题目管理</span>
 </button>
  </nav>
 <div class="ws-label">QUALITY & CARE</div>
@@ -510,6 +513,50 @@
 </section>
 </div>
 </section>
+<section class="ws-panel" data-ws-panel="questions">
+<div class="ws-intro">
+<div>
+<span class="eyebrow">QUESTION EDITOR</span>
+<h2>题目管理</h2>
+<p>检索并修改真题与 Relax1000；保存后前台立即读取最新内容。</p>
+</div>
+<div class="ws-intro-actions"><span class="pill" data-question-count>--</span><button class="ws-btn" type="button" data-question-reload>刷新题库</button></div>
+</div>
+<div class="question-admin-filter">
+<label><span>题库</span><select data-question-bank><option value="zhenti">408 真题</option><option value="relax1000">Relax1000</option></select></label>
+<label data-question-year-wrap><span>年份</span><select data-question-year></select></label>
+<label class="search"><span>搜索</span><input data-question-search placeholder="输入题号、题干、科目或章节"></label>
+</div>
+<div class="question-admin-layout">
+<section class="ws-card question-admin-list-card">
+<div class="ws-card-head"><div><h3>题目列表</h3><p data-question-list-note>正在读取题库…</p></div></div>
+<div class="question-admin-list" data-question-list><div class="quality-empty">正在读取题目…</div></div>
+</section>
+<section class="ws-card question-admin-editor-card">
+<div class="question-admin-empty" data-question-editor-empty><span>✎</span><strong>选择一道题开始修改</strong><small>支持题干、选项、答案、解析与题图；每次保存均保留版本记录。</small></div>
+<form data-question-editor hidden>
+<div class="question-admin-heading"><div><span class="eyebrow" data-question-editor-bank>QUESTION</span><h3 data-question-editor-title>题目</h3><small data-question-editor-meta></small></div><a class="ws-btn" data-question-front target="_blank" rel="noopener">查看前台</a></div>
+<aside class="question-feedback-link" data-question-feedback hidden><strong>来自反馈工单</strong><p data-question-feedback-description></p><small data-question-feedback-user></small></aside>
+<div class="question-admin-form">
+<label class="wide"><span>题干</span><textarea rows="7" data-question-stem placeholder="输入完整题干"></textarea></label>
+<label><span>选项 A</span><textarea rows="3" data-question-option="A"></textarea></label>
+<label><span>选项 B</span><textarea rows="3" data-question-option="B"></textarea></label>
+<label><span>选项 C</span><textarea rows="3" data-question-option="C"></textarea></label>
+<label><span>选项 D</span><textarea rows="3" data-question-option="D"></textarea></label>
+<label><span>答案</span><input data-question-answer placeholder="例如 A 或完整答案"></label>
+<label data-question-subject-wrap><span>科目</span><select data-question-subject><option value="ds">数据结构</option><option value="co">计算机组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option></select></label>
+<label class="wide"><span data-question-analysis-label>解析</span><textarea rows="10" data-question-analysis placeholder="输入解析或参考答案说明"></textarea></label>
+<label class="wide" data-question-figure-wrap><span>真题题图（每行：图片地址｜说明｜选项 A-D，可省略后两项）</span><textarea rows="5" data-question-figures placeholder="/data/zhenti/assets/...png｜题图"></textarea></label>
+<label class="wide" data-question-relax-images hidden><span>Relax1000 图片地址（每行一个）</span><textarea rows="4" data-question-images placeholder="题目图片"></textarea><textarea rows="4" data-question-explanation-images placeholder="解析图片"></textarea></label>
+</div>
+<div class="question-upload-row"><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-question-upload-file><select data-question-upload-target><option value="question">添加到题目图片</option><option value="explanation">添加到解析图片</option></select><button class="ws-btn" type="button" data-question-upload>上传图片</button><small>单张不超过 4 MB</small></div>
+<label class="question-resolution" data-question-resolution-wrap hidden><span>工单处理结论（用户只提示一次）</span><textarea rows="3" data-question-resolution-note placeholder="例如：已修正题干并更新解析。"></textarea></label>
+<div class="question-admin-actions"><button class="ws-btn primary" type="submit" data-question-save>保存题目</button><button class="ws-btn primary question-save-resolve" type="button" data-question-save-resolve hidden>保存并解决工单</button><button class="ws-btn" type="button" data-question-restore>恢复原版</button><span data-question-save-state></span></div>
+<details class="question-history"><summary>版本记录</summary><div data-question-history><div class="quality-empty">选择题目后读取记录</div></div></details>
+</form>
+</section>
+</div>
+</section>
 <section class="ws-panel" data-ws-panel="quality">
 <div class="ws-intro">
 <div>
@@ -739,13 +786,13 @@
 </aside>
 <div class="ws-toast-stack" data-ws-toasts>
 </div>
-<script src="../assets/js/cloud-config.js?v=20260903-quality1">
+<script src="../assets/js/cloud-config.js?v=20260904-editor1">
 </script>
-<script type="module" src="../assets/js/admin-cloud.js?v=20260903-quality1">
+<script type="module" src="../assets/js/admin-cloud.js?v=20260904-editor1">
 </script>
-<script type="module" src="../assets/js/workspace-v3.js?v=20260903-quality1">
+<script type="module" src="../assets/js/workspace-v3.js?v=20260904-editor1">
 </script>
-<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260903-quality1">
+<script type="module" src="../assets/js/workspace-operations-v1.js?v=20260904-editor1">
 </script>
 </body>
 </html>

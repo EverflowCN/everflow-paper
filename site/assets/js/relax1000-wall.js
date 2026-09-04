@@ -1,4 +1,4 @@
-import{loadRelaxData,loadRecords,questionState,questionNumber,esc,subjectName,idKey}from'./relax1000-core.js?v=20260825-bank1';
+import{loadRelaxData,loadRecords,questionState,questionNumber,esc,subjectName,idKey}from'./relax1000-core.js?v=20260904-editor1';
 
 const CONTEXT_KEY='everflow-relax-reader-context-v1';
 const sourceBar=document.querySelector('.bank-source-shell');

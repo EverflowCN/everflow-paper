@@ -1,10 +1,10 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-await import('/assets/js/question-content-v1.js?v=20260904-question2');
+await import('/assets/js/question-content-v1.js?v=20260904-editor1');
 
-const APP_VERSION='20260904-question1';
-const RELAX_VERSION='20260828-relaxfix1';
+const APP_VERSION='20260904-editor1';
+const RELAX_VERSION='20260904-editor1';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');
 const sourceHost=shell?.querySelector('[data-graph-source-host]');

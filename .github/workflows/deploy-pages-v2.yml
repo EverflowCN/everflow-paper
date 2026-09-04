@@ -57,6 +57,7 @@ jobs:
             site/assets/js/graph-next.js \
             site/assets/js/graph-answer-enhancements.js \
             site/assets/js/paper-builder.js \
+            site/assets/js/question-overrides-v1.js \
             site/assets/js/relax1000-core.js \
             site/assets/js/relax1000-reader.js \
             site/assets/js/relax1000-graph.js \
@@ -68,6 +69,7 @@ jobs:
             site/assets/js/feedback-notifications-v1.js \
             site/assets/js/workspace-v3.js \
             site/assets/js/workspace-operations-v1.js \
+            site/assets/js/workspace-questions-v1.js \
             site/sw.js
           do
             node --check "$file"

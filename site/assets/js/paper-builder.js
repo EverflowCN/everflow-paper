@@ -1,5 +1,6 @@
-import{loadRelaxData,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20260825-bank2';
+import{loadRelaxData,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20260904-editor1';
 import{richText,inlineText,verification}from'./question-content-v1.js?v=20260904-question2';
+import{applyZhentiOverrides}from'./question-overrides-v1.js?v=20260904-editor1';
 
 const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
@@ -31,8 +32,9 @@ async function loadZhenti(){
   const manifest=await fetch('/data/zhenti/manifest.json?v=20260825-paper9',{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error(`真题目录 HTTP ${r.status}`);return r.json()});
   const entries=Object.entries(manifest?.years||{}).filter(([,meta])=>Array.isArray(meta.verifiedQuestions)&&meta.verifiedQuestions.length);
   const groups=await Promise.all(entries.map(async([year,meta])=>{
-    const data=await fetch(`/data/zhenti/${year}.json?v=20260825-paper9`,{cache:'force-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
+    let data=await fetch(`/data/zhenti/${year}.json?v=20260904-editor1`,{cache:'force-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
     if(!data)return[];
+    data=await applyZhentiOverrides(data,year);
     return meta.verifiedQuestions.map(n=>data.questions?.[String(n)]).filter(item=>item?.verification?.status==='verified'&&item?.options&&/^[A-D]$/.test(String(item.answer||''))).map(item=>normalizeZhenti(year,item));
   }));
   return groups.flat();

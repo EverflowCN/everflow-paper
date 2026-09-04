@@ -49,7 +49,7 @@
   function statusClass(record){return ['mastered','fuzzy','weak'].includes(record?.status)?`status-${record.status}`:''}
   function answerText(record){if(record?.correct===true)return'答对';if(record?.correct===false)return'答错';if(record?.reviewed)return'已查看';if(record?.draftAnswer)return'作答中';return'未作答'}
   function statusText(record){if(record?.status==='mastered')return'熟悉';if(record?.status==='fuzzy')return'模糊';if(record?.status==='weak')return'不会';return'未标记'}
-  function safeSrc(src){const value=String(src||'').trim();if(!value)return'';if(value.startsWith('/data/zhenti/assets/'))return value;if(/^data:image\/(?:png|jpeg|webp|svg\+xml);/i.test(value))return value;return''}
+  function safeSrc(src){const value=String(src||'').trim();if(!value)return'';if(value.startsWith('/data/zhenti/assets/'))return value;if(/^data:image\/(?:png|jpeg|webp|svg\+xml);/i.test(value))return value;const cloudBase=String(window.EVERFLOW_CLOUD?.url||'').replace(/\/$/,'');if(cloudBase&&value.startsWith(`${cloudBase}/storage/v1/object/public/question-assets/`))return value;return''}
   function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
   async function loadPaper(year,{force=false}={}){

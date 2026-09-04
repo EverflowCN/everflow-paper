@@ -7,7 +7,7 @@ const shortcutTip=shell?.querySelector('.graph-shortcuts');
 if(!shell||!matrix||!drawer||!drawerBody)throw new Error('graph answer enhancement shell missing');
 
 const ZHENTI_KEY='everflow-408-zhenti-wall-v1';
-const RELAX_CORE_URL='/assets/js/relax1000-core.js?v=20260828-relaxfix1';
+const RELAX_CORE_URL='/assets/js/relax1000-core.js?v=20260904-editor1';
 const RETRY_DELAY=140;
 const RETRY_LIMIT=72;
 let relaxCorePromise=null,relaxDataPromise=null,enhanceToken=0,retryTimer=0,retryCount=0,retryKey='';
