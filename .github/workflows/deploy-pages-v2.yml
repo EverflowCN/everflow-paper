@@ -77,7 +77,7 @@ jobs:
             node --check "$file"
           done
           grep -q 'data-resource-search' site/links/index.html
-          grep -q 'site-boot-v1.js?v=20260904-stable1' site/index.html
+          grep -q 'site-boot-v1.js?v=20260904-stable2' site/index.html
           grep -q 'has-srs-groups' site/assets/js/site-boot-v1.js
           grep -q 'resource-card-skeleton' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html

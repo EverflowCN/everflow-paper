@@ -5,6 +5,7 @@
   const path=location.pathname.replace(/\/{2,}/g,'/');
   const dark=read('everflow-theme')==='dark';
   html.classList.toggle('dark',dark);
+  html.dataset.everaBoot='stable2';
   html.style.colorScheme=dark?'dark':'light';
 
   const icons={
@@ -82,5 +83,5 @@
   const observer=new MutationObserver(scan);observer.observe(html,{childList:true,subtree:true});
   document.addEventListener('DOMContentLoaded',()=>{scan();observer.disconnect()},{once:true});
   scan();
-  window.EveraBoot={version:'20260904-stable1',dark,scan};
+  window.EveraBoot={version:'20260904-stable2',dark,scan};
 })();

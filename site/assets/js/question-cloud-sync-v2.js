@@ -1,6 +1,5 @@
 import './cloud-config.js?v=20260902-qsync2';
-import './cloud.js?v=20260903-quality1';
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0/+esm';
+import './cloud.js?v=20260904-stable2';
 
 const cfg=window.EVERFLOW_CLOUD||{};
 const cloud=window.EveraCloud;
@@ -16,8 +15,8 @@ const ZHENTI_KEYS={wall:'everflow-408-zhenti-wall-v1',srs:'everflow-408-srs-v1',
 const RELAX_KEYS={records:'everflow-408-relax1000-records-v1',srs:'everflow-408-relax-srs-v1',seen:'relax-seen',mistakes:'relax-mistakes',everWrong:'relax-ever-wrong',bookmarks:'relax-bookmarks'};
 const emptySrs=()=>({version:1,settings:{dailyNew:20,targetRetention:.9},cards:{},daily:{}});
 const emptyError=()=>({version:1,cards:{},daily:{}});
-const enabled=Boolean(cfg.url&&cfg.publishableKey&&cloud?.enabled!==false);
-const client=enabled?createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}):null;
+const enabled=Boolean(cfg.url&&cfg.publishableKey&&cloud?.enabled!==false&&typeof cloud?.getClient==='function');
+const client=enabled?await cloud.getClient():null;
 const PERIODIC_FLUSH_MS=2*60*1000;
 let syncPromise=null,flushTimer=0,applying=false,patched=false,dirtySeq=0,syncedSeq=0;
 
