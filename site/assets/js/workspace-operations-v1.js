@@ -15,4 +15,4 @@
 })();
 import('./workspace-course-admin-v1.js?v=20260903-admin6').catch(console.error);
 import('./workspace-quality-v1.js?v=20260904-editor1').catch(console.error);
-import('./workspace-questions-v1.js?v=20260904-editor1').catch(console.error);
+import('./workspace-questions-v1.js?v=20260904-qwb2').catch(console.error);
