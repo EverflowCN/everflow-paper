@@ -1,7 +1,7 @@
 (()=>{
   const nativeFetch=window.fetch.bind(window);
   const years=new Set(['2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']);
-  const DATA_VERSION='20260904-question1';
+  const DATA_VERSION='20260904-editor1';
   const mergedCache=new Map();
   const layerCache={base:new Map(),supplement:new Map(),extra:new Map()};
   const MAX_CONCURRENT=4;
@@ -148,6 +148,10 @@
         }
       }
 
+      try{
+        const {applyZhentiOverrides}=await import('./question-overrides-v1.js?v=20260904-editor1');
+        paper=await applyZhentiOverrides(paper,year,{force});
+      }catch(error){console.warn(`[Everflow] ${year} 题目修正加载失败，继续使用静态题库。`,error)}
       if(unhealthy(health))console.warn(`[Everflow] ${year} 题库加载不完整`,health);
       return paper;
     });

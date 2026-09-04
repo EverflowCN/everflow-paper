@@ -2,7 +2,8 @@ import{
   loadRelaxData,loadRecords as loadRelaxRecords,patchRecord as patchRelaxRecord,
   questionState,questionNumber,questionImages,explanationImages,optionEntries,
   imageMarkup,usesQuestionImageFallback,esc as coreEsc,subjectName,idKey
-}from'./relax1000-core.js?v=20260825-bank1';
+}from'./relax1000-core.js?v=20260904-editor1';
+import{applyZhentiOverrides,safeQuestionImageUrl}from'./question-overrides-v1.js?v=20260904-editor1';
 
 const root=document.querySelector('[data-atlas-root]');
 const frame=root?.querySelector('.atlas-frame');
@@ -47,7 +48,7 @@ function readJson(key,fallback={}){try{const value=JSON.parse(localStorage.getIt
 function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch{}}
 function esc(value){return coreEsc(value)}
 function fallbackSubject(q){if((q>=1&&q<=10)||q===41||q===42)return'ds';if((q>=11&&q<=22)||q===43||q===44)return'co';if((q>=23&&q<=32)||q===45||q===46)return'os';return'cn'}
-function safeZhentiSrc(value){const src=String(value||'').trim();return src.startsWith('/data/zhenti/assets/')||/^data:image\/(?:png|jpeg|webp|svg\+xml);/i.test(src)?src:''}
+function safeZhentiSrc(value){return safeQuestionImageUrl(value)}
 function currentStorageKey(){return CURRENT_KEY[source]}
 function setLoading(text='正在载入数据…'){loading.hidden=false;loading.textContent=text}
 function clearLoading(){loading.hidden=true}
@@ -223,7 +224,7 @@ function ensureCurrentVisible(scroll=true){
 
 async function loadPaper(year,{force=false}={}){
   const key=String(year);if(force)paperCache.delete(key);if(paperCache.has(key))return paperCache.get(key);
-  const promise=fetch(`/data/zhenti/${key}.json`,{cache:force?'no-store':'default'}).then(response=>response.ok?response.json():null).catch(()=>null);
+  const promise=fetch(`/data/zhenti/${key}.json?v=20260904-editor1`,{cache:force?'no-store':'default'}).then(response=>response.ok?response.json():null).then(paper=>paper?applyZhentiOverrides(paper,key,{force}):null).catch(()=>null);
   paperCache.set(key,promise);return promise;
 }
 function figureHtml(src,alt){const safe=safeZhentiSrc(src),markup=safe?imageMarkup(safe,alt):'';return markup?`<figure class="atlas-figure">${markup}</figure>`:''}

@@ -1,7 +1,7 @@
 (()=>{
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],C=()=>window.EveraAdminCloud;
 const state={data:null,users:[],filteredUsers:[],current:'overview',selected:null,userPage:1,userPageSize:20,analyticsRange:30};
-const titles={overview:'管理概览',analytics:'数据分析',users:'用户与权限',membership:'会员配置',codes:'兑换码',notices:'通知通告',resources:'资源页面 CMS',quality:'数据质检中心',risks:'学习预警中心',feedback:'反馈工单',oxygen:'408 更新中心',audit:'审计日志',operations:'站点运营',system:'系统状态'};
+const titles={overview:'管理概览',analytics:'数据分析',users:'用户与权限',membership:'会员配置',codes:'兑换码',notices:'通知通告',resources:'资源页面 CMS',questions:'题目管理',quality:'数据质检中心',risks:'学习预警中心',feedback:'反馈工单',oxygen:'408 更新中心',audit:'审计日志',operations:'站点运营',system:'系统状态'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 const fmt=v=>v?new Date(v).toLocaleString('zh-CN',{hour12:false}):'--';

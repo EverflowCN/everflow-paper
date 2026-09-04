@@ -1,5 +1,5 @@
 const RELAX_ASSET_BASE='/data/relax1000';
-const DATA_VERSION='20260825-bank2';
+const DATA_VERSION='20260904-editor1';
 export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json?v=${DATA_VERSION}`;
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
@@ -38,6 +38,8 @@ export function assetUrl(value){
   if(src.startsWith('data:image/'))return src;
   if(src.startsWith('/data/'))return src;
   if(src.startsWith(`${RELAX_ASSET_BASE}/`))return src;
+  const cloudBase=String(window.EVERFLOW_CLOUD?.url||'').replace(/\/$/,'');
+  if(cloudBase&&src.startsWith(`${cloudBase}/storage/v1/object/public/question-assets/`))return src;
   if(/^https?:\/\//i.test(src))return'';
   const clean=src.replace(/^\.\//,'').replace(/^\//,'');
   return `${RELAX_ASSET_BASE}/${clean}`;
@@ -106,8 +108,12 @@ export async function loadRelaxData({force=false}={}){
   if(dataPromise)return dataPromise;
   dataPromise=fetch(DATA_URL,{cache:force?'reload':'force-cache'})
     .then(response=>{if(!response.ok)throw new Error(`Relax1000 data HTTP ${response.status}`);return response.json()})
-    .then(data=>{
+    .then(async data=>{
       if(!data||!Array.isArray(data.questions)||!Array.isArray(data.subjects))throw new Error('Relax1000 data schema invalid');
+      try{
+        const {applyRelaxOverrides}=await import('./question-overrides-v1.js?v=20260904-editor1');
+        await applyRelaxOverrides(data,{force});
+      }catch(error){console.warn('[Everflow] Relax1000 题目修正加载失败，继续使用静态题库。',error)}
       return sanitizeDisplayData(data);
     })
     .catch(error=>{dataPromise=null;throw error});
