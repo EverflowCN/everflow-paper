@@ -1,7 +1,7 @@
 const body=document.body;
 if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph page');
 
-await import('/assets/js/question-content-v1.js?v=20260904-question1');
+await import('/assets/js/question-content-v1.js?v=20260904-question2');
 
 const APP_VERSION='20260904-question1';
 const RELAX_VERSION='20260828-relaxfix1';
