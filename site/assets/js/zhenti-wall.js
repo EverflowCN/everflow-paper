@@ -39,6 +39,27 @@
   const paperCache=new Map();
   const subjectIndex=new Map();
   const indexedYears=new Set();
+  const topicIndex=new Map();
+  let topicIndexReady=false,topicIndexFailed=false;
+  async function buildTopicIndex(){
+    try{
+      const response=await fetch(`${DATA_BASE}/topic-index.json?v=20260905-topics1`);
+      if(!response.ok)throw new Error(`topic index HTTP ${response.status}`);
+      const payload=await response.json();
+      for(const [year,questions] of Object.entries(payload.years||{})){
+        for(const [q,chapter] of Object.entries(questions))topicIndex.set(`${year}-${q}`,chapter);
+      }
+      if(topicIndex.size!==YEARS.length*47)throw new Error('Incomplete topic index');
+      topicIndexReady=true;
+    }catch(error){topicIndexFailed=true;console.warn('[Everflow] 考点目录读取失败',error)}
+    renderMode();
+  }
+  function scopedQuestions(year,key=subject){
+    const qs=questionsForSubject(year,key);
+    if(sideMode!=='point'||selectedPoint==='全部考点')return qs;
+    if(!topicIndexReady)return [];
+    return qs.filter(q=>topicIndex.get(`${year}-${q}`)===selectedPoint);
+  }
   let subjectIndexReady=false;
   function indexPaper(year,paper){
     if(!paper?.questions)return;
@@ -238,7 +259,7 @@
   }
   function subjectStats(years=visibleYears()){
     let done=0,weak=0,total=0;
-    years.forEach(year=>{const qs=questionsForSubject(year,subject);total+=qs.length;qs.forEach(q=>{const r=record(year,q);if(isDone(r))done++;if(r.status==='fuzzy'||r.status==='weak')weak++})});
+    years.forEach(year=>{const qs=scopedQuestions(year,subject);total+=qs.length;qs.forEach(q=>{const r=record(year,q);if(isDone(r))done++;if(r.status==='fuzzy'||r.status==='weak')weak++})});
     return{done,weak,total,rate:total?Math.round(done/total*100):0};
   }
   const yearStats=year=>statsForQuestions(year,questionsForSubject(year,subject));
@@ -251,17 +272,19 @@
   function renderSide(){
     els.sideModes.forEach(btn=>btn.classList.toggle('active',btn.dataset.sideMode===sideMode));els.sideTitle.textContent=sideMode==='point'?'考点目录':'年份目录';els.sideList.innerHTML='';
     if(sideMode==='point'){
-      const group=document.createElement('div');group.className='side-group';const title=document.createElement('button');title.type='button';title.className='side-group-title';title.textContent=SUBJECTS[subject].name;title.addEventListener('click',()=>{selectedPoint='全部考点';renderSide();renderScope()});group.appendChild(title);
-      SUBJECTS[subject].chapters.forEach((chapter,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='side-item'+(selectedPoint===chapter?' active':'');btn.textContent=`${i+1}. ${chapter}`;btn.addEventListener('click',()=>{selectedPoint=chapter;renderSide();renderScope()});group.appendChild(btn)});els.sideList.appendChild(group);
+      const group=document.createElement('div');group.className='side-group';const title=document.createElement('button');title.type='button';title.className='side-group-title';title.textContent=`${SUBJECTS[subject].name} · 全部考点`;title.setAttribute('aria-pressed',String(selectedPoint==='全部考点'));title.addEventListener('click',()=>{selectedPoint='全部考点';renderAll()});group.appendChild(title);
+      [...SUBJECTS[subject].chapters,'待归类'].forEach((chapter,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='side-item'+(selectedPoint===chapter?' active':'');const count=visibleYears().reduce((sum,year)=>sum+questionsForSubject(year,subject).filter(q=>topicIndex.get(`${year}-${q}`)===chapter).length,0);btn.textContent=`${i+1}. ${chapter}${topicIndexReady?` · ${count}题`:''}`;btn.setAttribute('aria-pressed',String(selectedPoint===chapter));btn.addEventListener('click',()=>{selectedPoint=chapter;renderAll()});group.appendChild(btn)});els.sideList.appendChild(group);
     }else YEARS.slice().reverse().forEach(year=>{const s=yearStats(year),btn=document.createElement('button');btn.type='button';btn.className='side-item side-year';btn.innerHTML=`<b>${year}</b><span>${s.done}/${s.total}</span>`;btn.addEventListener('click',()=>{range='custom';els.rangeFrom.value=String(year);els.rangeTo.value=String(year);renderAll()});els.sideList.appendChild(btn)});
   }
-  function renderScope(){els.scope.textContent=`${SUBJECTS[subject].name} · ${selectedPoint}`}
+  function renderScope(){const point=sideMode==='point'?selectedPoint:'全部考点';const filtered=point!=='全部考点';const count=visibleYears().reduce((sum,year)=>sum+scopedQuestions(year).length,0);els.scope.textContent=`${SUBJECTS[subject].name} · ${point} · ${filtered&&!topicIndexReady?(topicIndexFailed?'分类加载失败，请刷新重试':'正在加载分类…'):`${count}题`}${filtered&&topicIndexReady?' · 按题干初步归类':''}`}
   function renderSummary(){const s=subjectStats();els.summarySubject.textContent=SUBJECTS[subject].name;els.summaryDone.textContent=String(s.done);els.summaryWeak.textContent=String(s.weak);els.summaryRate.textContent=`${s.rate}%`}
   function renderToolbar(){els.rangeButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.range===range));els.customRange.hidden=range!=='custom';els.displayButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.display===display));els.displayPanels.forEach(panel=>panel.hidden=panel.dataset.displayPanel!==display)}
   function renderMatrix(){
-    const years=visibleYears(),qs=unionQuestions(years,subject);els.matrixHead.innerHTML=`<tr><th class="freq-head">题</th><th class="year-head">年份</th>${qs.map(q=>`<th class="q-head">${q}</th>`).join('')}</tr>`;els.matrixBody.innerHTML='';
+    const years=visibleYears(),qs=[...new Set(years.flatMap(year=>scopedQuestions(year,subject)))].sort((a,b)=>a-b);els.matrixHead.innerHTML=`<tr><th class="freq-head">题</th><th class="year-head">年份</th>${qs.map(q=>`<th class="q-head">${q}</th>`).join('')}</tr>`;els.matrixBody.innerHTML='';
+    if(!qs.length){els.matrixBody.innerHTML=`<tr><td colspan="2">${!topicIndexReady&&selectedPoint!=='全部考点'?(topicIndexFailed?'分类加载失败，请刷新重试。':'正在加载考点分类…'):'当前年份范围暂无该考点题目，请切换考点或年份。'}</td></tr>`;return}
     years.forEach(year=>{
-      const own=new Set(questionsForSubject(year,subject)),tr=document.createElement('tr');
+      const own=new Set(scopedQuestions(year,subject)),tr=document.createElement('tr');
+      if(!own.size)return;
       const qCells=qs.map(q=>{
         if(!own.has(q))return'<td class="question-cell question-cell-na" aria-hidden="true"></td>';
         const r=record(year,q),state=answerState(r);return`<td class="question-cell"><button class="matrix-q ${state}${masteryClass(r)}" type="button" data-year="${year}" data-q="${q}" aria-label="${year} 年第 ${q} 题">${q}</button></td>`;
@@ -271,9 +294,9 @@
     els.matrixBody.querySelectorAll('.matrix-q').forEach(btn=>btn.addEventListener('click',()=>openQuestion(Number(btn.dataset.year),Number(btn.dataset.q))));
   }
   function renderList(){
-    els.yearList.innerHTML='';visibleYears().forEach(year=>{const qs=questionsForSubject(year,subject),s=statsForQuestions(year,qs),card=document.createElement('article');card.className='year-list-card';card.innerHTML=`<div class="year-list-head"><strong>${year}</strong><span>${s.done}/${s.total} · ${s.rate}%</span></div><div class="year-list-progress"><i style="width:${s.rate}%"></i></div><div class="year-list-meta"><span>答对 ${s.correct}</span><span>答错 ${s.wrong}</span><span>模糊 ${s.fuzzy}</span><span>不会 ${s.weak}</span></div><button type="button" ${qs.length?'':'disabled'}>进入 ${year} 真题</button>`;card.querySelector('button').addEventListener('click',()=>{if(qs.length)openQuestion(year,qs[0])});els.yearList.appendChild(card)});
+    els.yearList.innerHTML='';visibleYears().forEach(year=>{const qs=scopedQuestions(year,subject);if(!qs.length)return;const s=statsForQuestions(year,qs),card=document.createElement('article');card.className='year-list-card';card.innerHTML=`<div class="year-list-head"><strong>${year}</strong><span>${s.done}/${s.total} · ${s.rate}%</span></div><div class="year-list-progress"><i style="width:${s.rate}%"></i></div><div class="year-list-meta"><span>答对 ${s.correct}</span><span>答错 ${s.wrong}</span><span>模糊 ${s.fuzzy}</span><span>不会 ${s.weak}</span></div><button type="button" ${qs.length?'':'disabled'}>进入 ${year} 真题</button>`;card.querySelector('button').addEventListener('click',()=>{if(qs.length)openQuestion(year,qs[0])});els.yearList.appendChild(card)});
   }
-  function renderAll(){renderModeTabs();renderSubjectTabs();renderSide();renderScope();renderSummary();renderToolbar();renderMatrix();renderList()}
+  function renderAll(){renderModeTabs();renderSubjectTabs();renderSide();renderScope();renderSummary();renderToolbar();renderMatrix();renderList();if(!els.yearList.children.length){const empty=document.createElement('p');empty.textContent=selectedPoint!=='全部考点'&&!topicIndexReady?(topicIndexFailed?'分类加载失败，请刷新重试。':'正在加载考点分类…'):'当前年份范围暂无该考点题目。';els.yearList.appendChild(empty)}}
 
   function renderWholeHome(){
     let totalDone=0,finished=0;YEARS.forEach(y=>{const s=wholeYearStats(y);totalDone+=s.done;if(s.done===47)finished++});const total=YEARS.length*47;
@@ -286,7 +309,7 @@
     const r=record(selectedYear,selectedQuestion),subKey=subjectForQuestion(selectedQuestion,selectedYear),sub=SUBJECTS[subKey];
     els.modalYear.textContent=String(selectedYear);els.modalQuestion.textContent=String(selectedQuestion);els.modalPoint.textContent=sub.name;els.modalType.textContent=selectedQuestion<=40?'选择题':'综合应用题';
     els.modalStatuses.forEach(btn=>btn.classList.toggle('active',Boolean(btn.dataset.modalStatus)&&btn.dataset.modalStatus===r.status));els.note.value=r.note||'';els.noteState.textContent=r.updatedAt?`已保存 · ${new Date(r.updatedAt).toLocaleString('zh-CN',{hour12:false})}`:'本机自动保存';
-    const qs=questionsForSubject(selectedYear,subKey),i=qs.indexOf(selectedQuestion);els.prev.disabled=i<=0;els.next.disabled=i<0||i>=qs.length-1;renderInto(els.modalQuestionBox,selectedYear,selectedQuestion,'modal');
+    const qs=scopedQuestions(selectedYear,subKey),i=qs.indexOf(selectedQuestion);els.prev.disabled=i<=0;els.next.disabled=i<0||i>=qs.length-1;renderInto(els.modalQuestionBox,selectedYear,selectedQuestion,'modal');
   }
   function openQuestion(year,q){
     const actual=subjectForQuestion(q,year);if(subjectIndexReady&&SUBJECTS[actual]&&mode==='subject'&&subject!==actual){subject=actual;storage.set('everflow-408-wall-subject',subject);renderAll()}
@@ -294,7 +317,7 @@
   }
   function closeQuestion(){els.modal.hidden=true;document.body.style.overflow='';resetTimer()}
   function stepQuestion(delta){
-    const subKey=subjectForQuestion(selectedQuestion,selectedYear),qs=questionsForSubject(selectedYear,subKey),i=qs.indexOf(selectedQuestion),next=qs[i+delta];
+    const subKey=subjectForQuestion(selectedQuestion,selectedYear),qs=scopedQuestions(selectedYear,subKey),i=qs.indexOf(selectedQuestion),next=qs[i+delta];
     if(next!=null){selectedQuestion=next;modalQuestionStartedAt=Date.now();els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal()}
   }
 
@@ -332,7 +355,7 @@
   }
 
   els.modeTabs.forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.mainSubject;if(key==='all')setMode('whole');else{selectedPoint='全部考点';setMode('subject',key)}}));
-  els.sideModes.forEach(btn=>btn.addEventListener('click',()=>{sideMode=btn.dataset.sideMode;renderSide()}));els.rangeButtons.forEach(btn=>btn.addEventListener('click',()=>{range=btn.dataset.range;renderAll()}));els.rangeFrom.addEventListener('change',renderAll);els.rangeTo.addEventListener('change',renderAll);els.displayButtons.forEach(btn=>btn.addEventListener('click',()=>{display=btn.dataset.display;renderToolbar()}));els.modalClose.forEach(el=>el.addEventListener('click',closeQuestion));els.modalStatuses.forEach(btn=>btn.addEventListener('click',()=>setMastery('modal',btn.dataset.modalStatus||'')));
+  els.sideModes.forEach(btn=>btn.addEventListener('click',()=>{sideMode=btn.dataset.sideMode;renderAll()}));els.rangeButtons.forEach(btn=>btn.addEventListener('click',()=>{range=btn.dataset.range;renderAll()}));els.rangeFrom.addEventListener('change',renderAll);els.rangeTo.addEventListener('change',renderAll);els.displayButtons.forEach(btn=>btn.addEventListener('click',()=>{display=btn.dataset.display;renderToolbar()}));els.modalClose.forEach(el=>el.addEventListener('click',closeQuestion));els.modalStatuses.forEach(btn=>btn.addEventListener('click',()=>setMastery('modal',btn.dataset.modalStatus||'')));
   els.note.addEventListener('input',()=>{if(selectedYear==null)return;els.noteState.textContent='正在保存…';clearTimeout(noteTimer);noteTimer=setTimeout(()=>{patchRecord(selectedYear,selectedQuestion,{note:els.note.value});els.noteState.textContent='已保存'},300)});
   els.tools.forEach(btn=>btn.addEventListener('click',()=>{const tool=btn.dataset.tool;if(tool==='analysis')els.analysis.hidden=!els.analysis.hidden;if(tool==='note'){els.noteBox.hidden=!els.noteBox.hidden;if(!els.noteBox.hidden)els.note.focus()}if(tool==='timer')toggleTimer()}));els.prev.addEventListener('click',()=>stepQuestion(-1));els.next.addEventListener('click',()=>stepQuestion(1));els.paperExit.addEventListener('click',closeWholePaper);els.paperPrev.addEventListener('click',()=>stepWhole(-1));els.paperNext.addEventListener('click',()=>stepWhole(1));els.paperStatuses.forEach(btn=>btn.addEventListener('click',()=>setMastery('paper',btn.dataset.paperStatus||'')));
   els.paperNote.addEventListener('input',()=>{if(fullYear==null)return;els.paperNoteState.textContent='正在保存…';clearTimeout(fullNoteTimer);fullNoteTimer=setTimeout(()=>{patchRecord(fullYear,fullQuestion,{note:els.paperNote.value});els.paperNoteState.textContent='已保存'},300)});if(els.paperTimer?.parentElement){els.paperTimer.parentElement.title='点击开始 / 暂停计时（T）';els.paperTimer.parentElement.style.cursor='pointer';els.paperTimer.parentElement.addEventListener('click',toggleWholeTimer)}
@@ -349,4 +372,5 @@
   window.EveraZhentiWall={openQuestion,subjectForQuestion,questionsForSubject,loadPaper};
 
   setupRangeSelects();installShortcutHelp();renderMode();document.querySelector('[data-wall-root]')?.setAttribute('aria-busy','false');buildSubjectIndex().catch(err=>console.warn('Everflow subject index fallback enabled',err));
+  buildTopicIndex();
 })();
