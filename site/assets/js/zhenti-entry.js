@@ -5,7 +5,7 @@ await import('/assets/js/question-content-v1.js?v=20260904-editor1');
 
 if(source==='zhenti'){
   await import('/assets/js/zhenti-data-overlay.js?v=20260904-editor1');
-  await import('/assets/js/zhenti-wall.js?v=20260904-editor1');
+  await import('/assets/js/zhenti-wall.js?v=20260905-topics1');
 }
 
 await runtime;

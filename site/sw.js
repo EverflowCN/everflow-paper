@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v58-stable-first-paint';
+const CACHE='everflow-site-v59-topic-filter';
 const CORE=[
   '/',
   '/study/',
