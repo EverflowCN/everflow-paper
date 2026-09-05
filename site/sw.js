@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v59-topic-filter';
+const CACHE='everflow-site-v60-private-focus';
 const CORE=[
   '/',
   '/study/',
@@ -85,6 +85,7 @@ self.addEventListener('fetch',event=>{
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
   const path=url.pathname;
+  if(path.startsWith('/me/focus/')){event.respondWith(fetch(request,{cache:'no-store'}));return}
   if(request.mode==='navigate'){event.respondWith(staleWhileRevalidate(request,event));return}
   if(path.startsWith('/data/relax1000/')){event.respondWith(staleWhileRevalidate(request,event));return}
   if(path.startsWith('/data/')&&/\.(?:png|jpe?g|webp|gif|svg)$/i.test(path)){event.respondWith(staleWhileRevalidate(request,event));return}

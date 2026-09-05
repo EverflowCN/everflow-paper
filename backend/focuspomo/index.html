@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>我的番茄</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="desktop">
+    <main class="mac-window theme-dark" id="window">
+      <div class="titlebar">
+        <div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="title-center" id="titleCenter"></div>
+        <div class="title-actions">
+          <button class="icon-btn hidden" id="backBtn" aria-label="返回">‹</button>
+          <button class="ghost-pill hidden" id="newTagBtn">新标签</button>
+          <button class="icon-btn" id="menuBtn" aria-label="菜单">•••</button>
+        </div>
+      </div>
+
+      <section class="page page-focus active" data-page="focus">
+        <canvas id="tomatoPhysics" aria-hidden="true"></canvas>
+        <div class="focus-meta" id="focusMeta"></div><div class="focus-stage">
+          <button class="timer-value" id="timerValue">25:00</button>
+          <button class="focus-task" id="focusTask">专注 <span>›</span></button>
+        </div>
+        <button class="start-focus" id="startFocus" aria-label="开始专注">开始专注</button>
+        <div class="focus-controls hidden" id="focusControls">
+          <button id="pauseBtn"><span id="pauseIcon">Ⅱ</span><small id="pauseLabel">暂停</small></button>
+          <button id="finishBtn"><span>■</span><small>结束</small></button>
+        </div>
+      </section>
+
+      <section class="page page-tags" data-page="tags">
+        <div class="tags-grid" id="tagsGrid"></div>
+        <div class="tags-tomato-field" id="tagsTomatoField" aria-hidden="true"></div>
+        <div class="tags-tomato-fade"></div>
+      </section>
+
+      <section class="page page-trend" data-page="trend">
+        <div class="page-header light-header">
+          <button class="back-inline" data-go="focus">‹</button>
+          <strong>专注趋势</strong>
+          <div class="header-mid">
+            <button>‹</button><span>本月</span><button>›</button>
+            <div class="period-tabs"><button>D</button><button>W</button><button class="active">M</button><button>Y</button></div>
+          </div>
+          <button class="plus-round">+</button>
+        </div>
+        <div class="trend-layout">
+          <div class="trend-main card-light">
+            <div class="metric-row"></div>
+<div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+          </div>
+          <aside class="trend-side" id="trendSide"></aside>
+        </div>
+      </section>
+
+      <section class="page page-pomodoro" data-page="pomodoro">
+        <div class="page-header dark-header">
+          <button class="back-inline" data-go="focus">‹</button>
+          <strong>番茄详情</strong>
+          <div class="header-mid dark-mid">
+            <button>‹</button><span>本月</span><button>›</button>
+            <div class="period-tabs dark-tabs"><button>D</button><button>W</button><button class="active">M</button><button>Y</button></div>
+          </div>
+          <button class="plus-round dark-plus">+</button>
+        </div>
+        <div class="pomodoro-layout">
+          <div class="pomodoro-main">
+            <div class="metric-row dark-metrics"></div>
+<div class="tomato-wall" id="tomatoWall"></div>
+          </div>
+          <aside class="pomodoro-side" id="pomodoroSide"></aside>
+        </div>
+      </section>
+
+      <section class="page page-calendar" data-page="calendar">
+        <div class="page-header light-header">
+          <button class="back-inline" data-go="focus">‹</button>
+          <strong>专注日历</strong>
+          <div class="header-mid calendar-mid">
+            <button>‹</button><span>本周</span><button>›</button>
+            <div class="period-tabs"><button>日</button><button class="active">周</button></div>
+          </div>
+          <button class="plus-round">+</button>
+        </div>
+        <div class="calendar-shell">
+          <div class="week-head" id="weekHead"></div>
+          <div class="calendar-body">
+            <div class="hours" id="hours"></div>
+            <div class="week-grid" id="weekGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="menu-popover hidden" id="menuPopover">
+        <button data-go="trend"><b>专注趋势</b><span>⌁</span></button>
+        <button data-go="pomodoro"><b>番茄详情</b><img src="assets/tomato-small.png"/></button>
+        <button data-go="calendar"><b>时间轴</b><span>▦</span></button>
+        <i></i>
+        <button data-go="tags"><b>标签</b><span>●</span></button>
+        <button id="settingsBtn"><b>设置</b><span>⚙</span></button>
+        <button id="soundBtn"><b>白噪声</b><span>♫</span></button>
+        <button id="exitBtn"><b>返回网站</b><span>↗</span></button>
+      </div>
+
+      <div class="duration-popover hidden" id="durationPopover">
+        <div class="duration-title">专注时长</div>
+        <div class="duration-options">
+          <button data-min="0">∞</button><button data-min="5">5</button><button data-min="10">10</button><button data-min="15">15</button><button data-min="25" class="active">25</button><button data-min="40">40</button><button data-min="60">60</button>
+        </div>
+        <div class="mini-ruler"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <label class="custom-minutes">自定义分钟 <input id="customMinutes" type="number" min="1" max="180" inputmode="numeric"></label><button class="duration-done" id="durationDone">完成</button>
+      </div>
+    </main>
+  </div>
+  <dialog id="modal"><div id="modalContent"></div></dialog><div id="toast" role="status"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

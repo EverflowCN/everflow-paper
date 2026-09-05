@@ -26,6 +26,16 @@ jobs:
         with:
           ref: main
 
+      - name: Validate private focus app
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test backend/focuspomo/engine.test.mjs backend/focuspomo/handler.test.mjs
+          node --check site/me/focus/gate.js
+          node --check backend/focuspomo/app.js
+          node backend/focuspomo/build-bundle.mjs
+          git diff --exit-code -- supabase/functions/owner-focus/bundle.ts supabase/functions/owner-focus/engine.mjs
+
       - name: Architecture audit
         shell: bash
         run: |
