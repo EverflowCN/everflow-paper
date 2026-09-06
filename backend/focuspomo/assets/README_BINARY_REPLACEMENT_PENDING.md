@@ -1,0 +1,1 @@
+The private page source now contains the exact Assets.car role/config mapping. Binary original renditions are being migrated from the extraction set into the private bundle; do not reintroduce reconstructed failed-tomato SVGs or generic text-glyph controls.
