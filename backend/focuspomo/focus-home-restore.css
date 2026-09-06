@@ -1,5 +1,8 @@
-/* Restore the phone Focus home exactly to the pre-v3 layout the owner approved.
-   This file intentionally touches ONLY the Focus home surface. */
+/* Restore the Focus home/start surface on ALL device classes to the pre-v3 layout.
+   This file intentionally touches ONLY the Focus home surface; HD fruit, settings,
+   recovered assets and timer-state fixes remain active. */
+
+/* Phone: previously approved composition. */
 @media (max-width:760px){
   body{background:#fff!important}
   .desktop{padding:0!important;background:#fff!important}
@@ -17,7 +20,6 @@
   .ghost-pill{font-size:16px!important;padding:0 18px!important}
   .page-focus:not(.x) #menuBtn{opacity:.42!important}
   #tomatoPhysics{inset:0!important;top:0!important;height:100%!important;z-index:2!important}
-
   .theme-dark.is-running .page-focus,.mac-window.theme-dark.is-running .page-focus{background:linear-gradient(180deg,#FFC9A0 0%,#FFD5B5 55%,#FFE9D4 100%)!important}
   .mac-window.is-running .focus-stage{top:45.1%!important}
   .mac-window.is-running .timer-value{font-size:clamp(74px,19vw,86px)!important;letter-spacing:-4px!important;color:#62564b!important}
@@ -29,4 +31,60 @@
   .focus-controls small{font-size:22px!important;color:#b7a28c!important;font-weight:750!important}
   .focus-meta{display:none!important}
   .desktop-focus-decor,.desktop-menu-dot{display:none!important}
+}
+
+/* Tablet: restore the pre-v3 iPad composition instead of the later full-screen desktop hybrid. */
+@media (min-width:761px) and (max-width:1100px){
+  body{background:#d8d4d0!important}
+  .desktop{padding:20px!important;display:grid!important;place-items:center!important;background:#d8d4d0!important}
+  .mac-window{width:min(780px,calc(100vw - 40px))!important;height:min(1020px,calc(100dvh - 40px))!important;max-width:none!important;max-height:none!important;border-radius:30px!important;box-shadow:0 28px 90px #4e403128!important;background:#fff!important}
+  .traffic,.title-center{display:none!important}
+  .titlebar{height:54px!important;padding:8px 22px!important}
+  .page-focus,.theme-dark .page-focus{background:linear-gradient(180deg,#fff0e2 0%,#fff 48%)!important}
+  .focus-stage{top:31%!important;width:auto!important;transform:translate(-50%,-50%)!important;display:block!important}
+  .timer-value{position:static!important;transform:none!important;color:#62564b!important;font-size:110px!important;line-height:.95!important;font-weight:760!important;letter-spacing:-4px!important;text-shadow:none!important}
+  .focus-task{position:static!important;transform:none!important;margin-top:7px!important;color:#62564b!important;font-size:25px!important;font-weight:700!important;opacity:.94!important}
+  .start-focus{left:50%!important;top:auto!important;bottom:21%!important;transform:translateX(-50%)!important;height:76px!important;min-width:154px!important;padding:0 35px!important;border-radius:42px!important;background:#615549!important;color:#fff!important;font-size:22px!important;font-weight:760!important;opacity:1!important;pointer-events:auto!important;box-shadow:none!important}
+  #tomatoPhysics{inset:0!important;top:0!important;height:100%!important;z-index:2!important}
+  .mac-window.is-running .page-focus,.mac-window.theme-dark.is-running .page-focus{background:linear-gradient(180deg,#ffcaa1 0%,#ffe8d2 100%)!important}
+  .mac-window.is-running .focus-stage{top:45%!important}
+  .mac-window.is-running .focus-task{display:none!important}
+  .mac-window.is-running .timer-value{font-size:100px!important;color:#62564b!important}
+  .focus-controls{bottom:11%!important;gap:100px!important}
+  .focus-controls button{display:flex!important;flex-direction:column-reverse!important;gap:15px!important}
+  .focus-controls button>span{width:92px!important;height:92px!important;border-radius:50%!important;background:#b9a38c2b!important;font-size:32px!important}
+  .focus-controls small{font-size:20px!important;color:#b7a38b!important}
+  .focus-meta{display:none!important}
+  .desktop-focus-decor,.desktop-menu-dot{display:none!important}
+}
+
+/* Desktop: restore the earlier Mac-style Focus composition. Remove the experimental
+   ruler/top fruit/white desktop surface that was introduced in v3. */
+@media (min-width:1101px){
+  body{background:#d7d4d1!important}
+  .desktop{padding:30px!important;display:grid!important;place-items:center!important;background:radial-gradient(circle at 50% 5%,#efedeb 0,#d9d6d3 56%,#cac7c4 100%)!important}
+  .mac-window{width:min(860px,calc(100vw - 64px))!important;height:min(630px,calc(100vh - 64px))!important;max-width:none!important;max-height:none!important;border-radius:12px!important;background:#20232d!important;box-shadow:0 30px 80px rgba(37,28,22,.24),0 1px 0 rgba(255,255,255,.45) inset!important;border:0!important}
+  .titlebar{height:36px!important;padding:0 11px!important;color:#f7f4f2!important}
+  .traffic{display:flex!important;gap:5px!important}.traffic i{width:8px!important;height:8px!important}
+  .title-center{display:none!important}
+  .icon-btn{height:24px!important;min-width:24px!important;border-radius:12px!important;font-size:10px!important}
+  .ghost-pill{height:24px!important;border-radius:12px!important;font-size:8px!important;padding:0 10px!important}
+  .page-focus,.theme-dark .page-focus{background:linear-gradient(180deg,#20232d 0%,#212630 100%)!important}
+  .focus-stage{display:block!important;position:absolute!important;left:50%!important;top:34%!important;transform:translate(-50%,-50%)!important;text-align:center!important;z-index:4!important}
+  .timer-value{display:block!important;position:static!important;transform:none!important;color:#fff!important;font-size:60px!important;line-height:.95!important;font-weight:760!important;letter-spacing:-2.8px!important;text-shadow:0 2px 14px rgba(0,0,0,.12)!important}
+  .focus-task{position:static!important;transform:none!important;margin-top:7px!important;color:#f6f3f0!important;font-size:10px!important;font-weight:700!important;opacity:.94!important}
+  .start-focus{left:50%!important;top:auto!important;bottom:42%!important;transform:translateX(-50%)!important;min-width:0!important;height:26px!important;padding:0 13px!important;border-radius:13px!important;background:#d48a2d!important;color:#fff!important;font-size:7px!important;font-weight:760!important;opacity:1!important;pointer-events:auto!important;box-shadow:0 4px 12px rgba(0,0,0,.14)!important}
+  #tomatoPhysics{inset:0!important;top:0!important;width:100%!important;height:100%!important;z-index:1!important}
+  .focus-controls{bottom:72px!important;gap:46px!important}
+  .focus-controls button{display:grid!important;place-items:center!important;gap:5px!important;color:#e9e2dd!important}
+  .focus-controls button>span{width:46px!important;height:46px!important;border-radius:50%!important;background:rgba(255,255,255,.13)!important;font-size:15px!important}
+  .focus-controls small{font-size:9px!important;color:#b8afa8!important;font-weight:700!important}
+  .mac-window.is-running .focus-stage{top:34%!important}
+  .mac-window.is-running .timer-value{font-size:60px!important;color:#fff!important}
+  .mac-window.is-running .focus-task{display:none!important}
+  .mac-window.is-running .start-focus{display:none!important}
+  .focus-meta{display:none!important}
+  .desktop-focus-decor,.desktop-menu-dot{display:none!important}
+  .focus-mode #menuBtn{display:grid!important}
+  .focus-mode .menu-popover{top:30px!important;right:9px!important;bottom:auto!important}
 }
