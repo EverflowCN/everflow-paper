@@ -37,6 +37,7 @@ jobs:
           node --check backend/focuspomo/fruit-fixes.js
           node --check backend/focuspomo/failed-fruit-addon.js
           node --check backend/focuspomo/original-ui-addon.js
+          node --check backend/focuspomo/focus-v3.js
           node --check backend/focuspomo/original-assets-base.js
           for f in backend/focuspomo/original-asset-*.js; do node --check "$f"; done
           node --check site/me/focus/gate.js
@@ -53,6 +54,9 @@ jobs:
           grep -q 'FP_ORIGINAL_ASSET_DATA.pause' supabase/functions/owner-focus/bundle.ts
           grep -q 'fp-original-background' supabase/functions/owner-focus/bundle.ts
           grep -q 'original-picker-marker' supabase/functions/owner-focus/bundle.ts
+          grep -q 'FP5_HD_TOMATO' supabase/functions/owner-focus/bundle.ts
+          grep -q 'desktop-focus-decor' supabase/functions/owner-focus/bundle.ts
+          grep -q 'pear-hd.svg' backend/focuspomo/build-bundle.mjs
 
       - name: Deploy owner-focus when token is configured
         env:
