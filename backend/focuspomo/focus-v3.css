@@ -1,0 +1,107 @@
+/* FocusPomo v3 — final responsive/HD correction layer. Loaded last on purpose. */
+:root{
+  --fp3-bg:#fffaf5;
+  --fp3-bg-top:#ffe7cf;
+  --fp3-ink:#665a4f;
+  --fp3-muted:#b9b0a8;
+  --fp3-button:#65594e;
+  --fp3-settings:#f0e9e1;
+  --fp3-settings-panel:#e7dfd5;
+  --fp3-accent:#d96d57;
+}
+html,body{width:100%;height:100%;overscroll-behavior:none}
+#tomatoPhysics{image-rendering:auto!important;touch-action:none}
+.timer-value{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"kern" 1}
+.page-settings{background:var(--fp3-settings)!important;color:var(--fp3-ink)!important}
+.settings-scroll{width:min(650px,calc(100% - 40px))!important;margin:0 auto!important;padding:68px 0 54px!important;overflow:visible!important}
+.settings-hero{padding:52px 16px 28px!important}
+.settings-back{left:12px!important;top:4px!important;width:42px!important;height:42px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:rgba(97,85,73,.08)!important;color:#9e958d!important;font-size:28px!important;line-height:1!important}
+.settings-hero h1{font-size:36px!important;line-height:1.05!important;margin:0 0 18px!important;letter-spacing:-1.3px!important}
+.settings-hero p{font-size:17px!important;line-height:1.38!important;overflow-wrap:anywhere}
+.plus-card{min-height:100px!important;height:auto!important;border-radius:30px!important;margin:0 0 30px!important;padding:24px 26px!important}
+.settings-group{border-radius:27px!important;padding:8px 22px!important;overflow:visible!important}
+.settings-row{min-height:70px!important;gap:12px!important}
+.settings-row>span{min-width:0!important}.settings-row b{font-size:18px!important}.settings-row small{font-size:13px!important;overflow-wrap:anywhere}
+.compact-controls .settings-row select{min-width:108px!important;max-width:160px!important;white-space:nowrap!important}
+.fruit-choice-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+.fruit-choice-grid>button{height:112px!important;min-width:0!important;border-radius:22px!important;padding:8px 6px!important;overflow:hidden!important}
+.fruit-choice-grid img{width:46px!important;height:46px!important;object-fit:contain!important;image-rendering:auto!important}
+.fruit-choice-grid .fruit-duo{height:48px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.fruit-choice-grid .fruit-duo img{width:40px!important;height:40px!important;margin:0 -6px!important}
+.fruit-choice-grid>button span{max-width:100%!important}.fruit-choice-grid>button span b{font-size:14px!important}.fruit-choice-grid>button span small{display:block!important;font-size:9px!important;white-space:normal!important;line-height:1.2!important}
+.duration-options button{display:block!important}
+.duration-options{overflow-x:auto!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important}
+.duration-options::-webkit-scrollbar{display:none!important}
+.duration-fruit-preview>img{image-rendering:auto!important;object-fit:contain!important}
+@media (max-width:760px){
+  body,.desktop{background:#fff!important}
+  .desktop{padding:0!important;display:block!important}
+  .mac-window{width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;background:#fff!important}
+  .traffic,.title-center{display:none!important}
+  .titlebar{height:calc(58px + env(safe-area-inset-top))!important;top:0!important;padding:calc(env(safe-area-inset-top) + 8px) 18px 0!important}
+  .title-actions{margin-left:auto!important}
+  .page-focus{background:linear-gradient(180deg,#ffe6cd 0%,#fff4e8 22%,#fffdfb 43%,#fff 100%)!important}
+  .focus-stage{top:35.2%!important;width:100%!important;z-index:5!important}
+  .timer-value{font-size:clamp(78px,22.5vw,102px)!important;line-height:.92!important;font-weight:760!important;letter-spacing:-5px!important;color:var(--fp3-ink)!important;text-shadow:none!important}
+  .focus-task{display:block!important;margin-top:24px!important;font-size:21px!important;line-height:1!important;font-weight:760!important;color:var(--fp3-ink)!important;opacity:1!important}
+  .focus-task span{font-size:27px!important;color:#bdb5ae!important;vertical-align:-1px!important}
+  .start-focus{left:50%!important;bottom:19.5%!important;transform:translateX(-50%)!important;min-width:158px!important;height:70px!important;padding:0 28px!important;border-radius:37px!important;background:var(--fp3-button)!important;color:#fff!important;font-size:21px!important;font-weight:760!important;opacity:1!important;pointer-events:auto!important;z-index:10!important;box-shadow:none!important}
+  .focus-meta{display:none!important}
+  #tomatoPhysics{z-index:3!important}
+  .mac-window.is-running .page-focus{background:linear-gradient(180deg,#ffc99e 0%,#ffd9ba 47%,#ffead5 100%)!important}
+  .mac-window.is-running .focus-stage{top:42.5%!important}
+  .mac-window.is-running .timer-value{font-size:clamp(76px,21vw,96px)!important;color:#6a5c50!important}
+  .mac-window.is-running .focus-task{display:none!important}
+  .focus-controls{bottom:calc(7.5% + env(safe-area-inset-bottom))!important;gap:68px!important;z-index:12!important}
+  .focus-controls button{display:flex!important;flex-direction:column-reverse!important;gap:14px!important}
+  .focus-controls button>span{width:78px!important;height:78px!important;border-radius:50%!important;background:rgba(97,85,73,.10)!important}
+  .focus-controls small{font-size:18px!important;color:#a99480!important}
+  .focus-controls .hidden{display:none!important}
+  .mac-window.settings-mode .titlebar,.mac-window.stats-mode .titlebar{display:none!important}
+  .settings-scroll{width:100%!important;padding:calc(env(safe-area-inset-top) + 12px) 18px calc(env(safe-area-inset-bottom) + 36px)!important}
+  .settings-hero{padding:58px 8px 24px!important}.settings-back{left:4px!important;top:4px!important}
+  .settings-hero h1{font-size:34px!important}.settings-hero p{font-size:16px!important}
+  .settings-section{margin:24px 0!important}.settings-section>h2{margin-left:15px!important;font-size:17px!important}
+  .settings-group{padding:7px 18px!important;border-radius:25px!important}.settings-row{min-height:68px!important}
+  .settings-row b{font-size:17px!important}.settings-row small{font-size:12px!important}
+  .fruit-choice-grid{gap:7px!important}.fruit-choice-grid>button{height:110px!important;border-radius:20px!important}.fruit-choice-grid img{width:44px!important;height:44px!important}
+  .compact-controls .settings-row select{font-size:13px!important;max-width:128px!important}
+  .duration-popover{inset:0!important;width:100%!important;height:100dvh!important;transform:none!important;border-radius:0!important;padding:0 18px calc(env(safe-area-inset-bottom) + 16px)!important;background:var(--fp3-settings)!important;overflow:hidden!important}
+  .duration-fruit-preview{top:22%!important;gap:54px!important}.duration-fruit-preview>img{width:58px!important;height:58px!important}.duration-big-value{font-size:78px!important;color:var(--fp3-accent)!important}
+  .duration-options{position:absolute!important;left:18px!important;right:18px!important;top:47%!important;padding:0 4px!important;gap:22px!important;justify-content:flex-start!important}
+  .duration-options button{flex:0 0 44px!important;min-width:44px!important;font-size:26px!important;text-align:center!important;color:#cfc8c1!important}.duration-options button.active{color:var(--fp3-accent)!important}
+  .mini-ruler{top:57%!important;left:7%!important;right:7%!important;gap:13px!important;justify-content:center!important}
+  .custom-minutes{left:24px!important;right:24px!important;bottom:calc(116px + env(safe-area-inset-bottom))!important}
+  .duration-done{left:24px!important;right:24px!important;bottom:calc(30px + env(safe-area-inset-bottom))!important;height:58px!important;border-radius:29px!important;font-size:17px!important}
+}
+@media (min-width:761px) and (max-width:1100px){
+  body,.desktop{background:#000!important}
+  .desktop{padding:0!important;display:block!important}
+  .mac-window{width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;background:#fff!important}
+  .traffic,.title-center{display:none!important}
+  .titlebar{height:54px!important;padding:8px 22px!important}.page-focus{background:linear-gradient(180deg,#ffe6ce 0%,#fff5ea 24%,#fff 52%)!important}
+  .focus-stage{top:38%!important;width:100%!important;z-index:5!important}.timer-value{font-size:clamp(76px,10vw,118px)!important;color:var(--fp3-ink)!important;font-weight:760!important;letter-spacing:-5px!important;text-shadow:none!important}.focus-task{font-size:22px!important;margin-top:18px!important;color:var(--fp3-ink)!important}
+  .start-focus{bottom:24%!important;height:64px!important;min-width:154px!important;border-radius:34px!important;background:var(--fp3-button)!important;color:white!important;font-size:19px!important;opacity:1!important;pointer-events:auto!important;z-index:10!important}
+  #tomatoPhysics{z-index:3!important}.focus-meta{display:none!important}
+  .mac-window.is-running .focus-stage{top:39%!important}.mac-window.is-running .page-focus{background:linear-gradient(180deg,#ffc99e 0%,#ffe1c8 58%,#fff0df 100%)!important}.mac-window.is-running .focus-task{display:none!important}
+  .focus-controls{bottom:8%!important;gap:78px!important}.focus-controls button>span{width:74px!important;height:74px!important}.focus-controls small{font-size:17px!important}
+  .mac-window.settings-mode .titlebar,.mac-window.stats-mode .titlebar{display:none!important}
+  .settings-scroll{width:min(720px,calc(100% - 64px))!important;padding:44px 0 56px!important}.settings-hero{padding-top:58px!important}
+}
+@media (min-width:1101px){
+  body{background:#ecebea!important}
+  .desktop{padding:36px!important;background:radial-gradient(circle at 50% 5%,#f5f4f3 0,#dfdddb 58%,#cfccca 100%)!important}
+  .mac-window{width:min(1080px,calc(100vw - 72px))!important;height:min(680px,calc(100vh - 72px))!important;max-width:none!important;max-height:none!important;border-radius:22px!important;background:#f3f3f1!important;box-shadow:0 30px 80px rgba(0,0,0,.18),0 2px 10px rgba(0,0,0,.08)!important;border:1px solid rgba(0,0,0,.06)!important}
+  .titlebar{height:52px!important;padding:0 18px!important;color:#8d8d88!important}.traffic{gap:9px!important}.traffic i{width:12px!important;height:12px!important}.title-center{display:block!important;position:absolute!important;left:0!important;right:0!important;text-align:center!important;font-size:13px!important;font-weight:500!important;color:#8d8d88!important;pointer-events:none!important}.title-center:after{content:"我的番茄"}
+  .page-focus{background:#f3f3f1!important}
+  .desktop-focus-decor{display:block!important;position:absolute!important;inset:0!important;pointer-events:none!important;z-index:4!important}.desktop-focus-fruit{position:absolute!important;left:50%!important;top:90px!important;transform:translateX(-50%)!important;width:48px!important;height:48px!important;object-fit:contain!important}.desktop-ruler{position:absolute!important;left:50%!important;top:210px!important;transform:translateX(-50%)!important;width:min(760px,72%)!important;height:86px!important}.desktop-ruler-line{position:absolute!important;left:0!important;right:0!important;top:41px!important;height:1px!important;background:#d6d6d1!important}.desktop-ruler-ticks{position:absolute!important;left:0!important;right:0!important;top:24px!important;height:42px!important;display:grid!important;grid-template-columns:repeat(61,1fr)!important;align-items:start!important}.desktop-ruler-ticks i{width:1px!important;height:10px!important;background:#c8c8c3!important;justify-self:center!important}.desktop-ruler-ticks i.major{height:18px!important;background:#aeadab!important}.desktop-ruler-ticks i.active{height:21px!important;width:2px!important;background:#d65d42!important}.desktop-ruler-labels{position:absolute!important;left:0!important;right:0!important;top:3px!important;display:flex!important;justify-content:space-between!important;padding:0 7px!important;font-size:10px!important;color:#a9aaa5!important;font-weight:500!important}.desktop-ruler-marker{position:absolute!important;left:50%!important;top:64px!important;transform:translateX(-50%)!important;width:0!important;height:0!important;border-left:5px solid transparent!important;border-right:5px solid transparent!important;border-bottom:7px solid #d65d42!important}
+  .focus-stage{display:contents!important}.timer-value{position:absolute!important;left:50%!important;top:155px!important;transform:translateX(-50%)!important;color:#3b3a37!important;font-size:30px!important;font-weight:600!important;letter-spacing:.2px!important;line-height:1!important;text-shadow:none!important;z-index:6!important}.focus-task{position:absolute!important;left:50%!important;top:305px!important;transform:translateX(-50%)!important;margin:0!important;font-size:13px!important;color:#92918c!important;font-weight:500!important;z-index:6!important}.focus-task span{color:#aaa!important;font-size:16px!important}.start-focus{top:342px!important;bottom:auto!important;left:50%!important;transform:translateX(-50%)!important;min-width:86px!important;height:38px!important;border-radius:19px!important;padding:0 22px!important;background:#c94f37!important;color:#fff!important;font-size:12px!important;font-weight:600!important;opacity:1!important;pointer-events:auto!important;box-shadow:0 4px 10px rgba(170,64,42,.18)!important;z-index:8!important}
+  .focus-meta{display:block!important;position:absolute!important;left:30px!important;bottom:25px!important;font-size:11px!important;color:#a0a09c!important;z-index:8!important}.focus-meta:before{content:"本周 ";}
+  #tomatoPhysics{top:350px!important;height:calc(100% - 350px)!important;z-index:3!important}
+  .desktop-menu-dot{display:grid!important;place-items:center!important;position:absolute!important;right:28px!important;bottom:23px!important;width:30px!important;height:30px!important;border-radius:50%!important;background:rgba(255,255,255,.62)!important;border:1px solid rgba(0,0,0,.04)!important;color:#9a9a95!important;font-size:15px!important;z-index:60!important;pointer-events:auto!important}
+  .focus-mode #menuBtn{display:none!important}.focus-mode .menu-popover{top:auto!important;right:28px!important;bottom:60px!important}
+  .mac-window.is-running .timer-value{font-size:34px!important;color:#3b3a37!important}.mac-window.is-running .focus-task{display:none!important}.mac-window.is-running .start-focus{display:none!important}.mac-window.is-running .focus-controls{bottom:34px!important;gap:28px!important}.mac-window.is-running .focus-controls button>span{width:42px!important;height:42px!important;background:rgba(90,85,80,.10)!important}.mac-window.is-running .focus-controls small{font-size:9px!important;color:#8f8b87!important}
+  .page-settings{background:var(--fp3-settings)!important}.settings-scroll{width:min(650px,calc(100% - 64px))!important;padding:54px 0 50px!important}.settings-hero{padding-top:48px!important}.settings-back{top:0!important}
+  .settings-mode .titlebar{display:flex!important}.settings-mode .title-center:after{content:"设置"}.stats-mode .title-center:after{content:"数据统计"}
+}
+@media (prefers-reduced-motion:reduce){#tomatoPhysics{visibility:visible!important}.desktop-focus-decor *{transition:none!important}}
