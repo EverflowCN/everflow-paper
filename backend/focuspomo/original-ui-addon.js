@@ -17,7 +17,9 @@ const FP4_ASSETS={
  addTag:FP4_data('addTag',''),editTag:FP4_data('editTag',''),removeTag:FP4_data('removeTag',''),newSession:FP4_data('newSession','')
 };
 const FP4_img=(src,cls='',alt='')=>src?`<img class="${cls}" src="${src}" alt="${alt}">`:'';
-const FP4_isDark=()=>matchMedia('(prefers-color-scheme: dark)').matches&&innerWidth>1100;
+/* The native rendition follows the page's semantic theme, not the OS theme.
+   Mobile Focus is deliberately rendered as the native light/orange surface. */
+const FP4_isDark=()=>win.classList.contains('theme-dark')&&!(page==='focus'&&innerWidth<=760);
 
 function FP4_applyStaticAssets(){
  const favicon=document.querySelector('link[rel="icon"]')||document.head.appendChild(Object.assign(document.createElement('link'),{rel:'icon'}));favicon.href=FP4_ASSETS.appIcon;
@@ -36,7 +38,7 @@ function FP4_applyTimerAssets(){
  const a=state.active,dark=FP4_isDark(),pauseIcon=$('#pauseIcon'),finish=$('#finishBtn span');
  if(pauseIcon){const src=a?.paused?(dark?FP4_ASSETS.resumeDark:FP4_ASSETS.resume):(dark?FP4_ASSETS.pauseDark:FP4_ASSETS.pause);pauseIcon.classList.add('original-control-icon');pauseIcon.innerHTML=FP4_img(src,'original-icon',a?.paused?'继续':'暂停')}
  if(finish){finish.classList.add('original-control-icon');finish.innerHTML=FP4_img(dark?FP4_ASSETS.stopDark:FP4_ASSETS.stop,'original-icon','结束')}
- const sound=$('#soundBtn .menu-original-icon');if(sound)sound.src=state.settings.sound?FP4_ASSETS.sound:FP4_ASSETS.soundOff;
+ const sound=$('#soundBtn .menu-original-icon');if(sound){const src=state.settings.sound?FP4_ASSETS.sound:FP4_ASSETS.soundOff;if(src)sound.src=src}
 }
 function FP4_applyFruitRoles(){
  FP2_FRUITS.tomato.src=FP4_ASSETS.tomato;FP2_FRUITS.tomato.small=FP4_ASSETS.tomatoSmall;
@@ -48,9 +50,11 @@ function FP4_applyDataCenterFailed(){
  const detail=$('#fp2FruitDetail');if(!detail)return;
  detail.querySelectorAll('[data-fp2-session]').forEach(button=>{const row=state.sessions.find(r=>r.id===button.dataset.fp2Session);if(row?.outcome==='abandoned'&&(row.fruitType||'tomato')==='tomato'){const img=button.querySelector('img');if(img)img.src=FP4_ASSETS.failedData}});
 }
+function FP4_refreshNativeAssets(){FP4_applyStaticAssets();FP4_applyFruitRoles();FP4_applyTimerAssets();FP4_applyDataCenterFailed()}
 const FP4_baseRenderTimer=renderTimer;renderTimer=function(){FP4_baseRenderTimer();FP4_applyTimerAssets();FP4_applyStaticAssets();FP4_applyFruitRoles()};
 const FP4_baseRenderSettings=FP2_renderSettings;FP2_renderSettings=function(){FP4_baseRenderSettings();FP4_applyStaticAssets();FP4_applyFruitRoles()};
 const FP4_baseRenderStats=FP2_renderStats;FP2_renderStats=function(){FP4_baseRenderStats();FP4_applyStaticAssets();FP4_applyFruitRoles();FP4_applyDataCenterFailed()};
 const FP4_baseDurationPreview=FP2_updateDurationPreview;FP2_updateDurationPreview=function(value){FP4_baseDurationPreview(value);const img=$('#fp2DurationFruit img');if(img&&(state.settings.defaultFruit||'tomato')!=='pear')img.src=FP4_ASSETS.tomatoInterval};
-matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>render());
-FP4_applyStaticAssets();FP4_applyFruitRoles();FP4_applyTimerAssets();FP4_applyDataCenterFailed();
+addEventListener('resize',FP4_refreshNativeAssets,{passive:true});
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',FP4_refreshNativeAssets);
+FP4_refreshNativeAssets();
