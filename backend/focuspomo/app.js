@@ -2,7 +2,7 @@ import {makeId,defaults,validateState,start,elapsed,togglePause,stop,advance,nex
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=validateState(window.FOCUS_INITIAL||defaults()),page='focus',period='M',anchor=Date.now(),calendarMode='W',calendarAnchor=Date.now(),readOnly=false;
 const win=$('#window'),modal=$('#modal'),theme={focus:'dark',tags:'dark',pomodoro:'dark',trend:'light',calendar:'light'};
-const send=(type,body={})=>parent.postMessage({type,...body},'*');
+const send=(type,body={})=>{if(type==='focus-notify'){if(state.settings.vibration&&typeof navigator.vibrate==='function')navigator.vibrate([160,80,160]);if(!state.settings.notifications)return}parent.postMessage({type,...body},'*')};
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').classList.remove('visible'),4000)}
 function changed(){if(readOnly)return;send('focus-save',{state:structuredClone(state)});render();syncBodies()}
 function go(name){if(!theme[name])return;page=name;$$('.page').forEach(p=>p.classList.toggle('active',p.dataset.page===name));win.classList.toggle('theme-light',theme[name]==='light');win.classList.toggle('theme-dark',theme[name]!=='light');$('#newTagBtn').classList.toggle('hidden',name!=='tags');$('#backBtn').classList.toggle('hidden',name==='focus');$('#menuPopover').classList.add('hidden');render();resize()}
