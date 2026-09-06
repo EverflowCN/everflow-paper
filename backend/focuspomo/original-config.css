@@ -1,0 +1,59 @@
+/* FocusPomo 5.2.2 Assets.car visual configuration overrides.
+   Values below come from extracted named color assets and are applied only to
+   surfaces that exist in the private web reconstruction. */
+:root{
+  --fp-original-background:#F0E9E1;
+  --fp-original-background-dark:#1C1E28;
+  --fp-original-data-background:#EDE9E6;
+  --fp-original-data-section:#FFFFFF;
+  --fp-original-data-section-dark:#2A2C35;
+  --fp-original-text:#615549;
+  --fp-original-config-title:#4D4D4D;
+  --fp-original-config-message:rgba(77,77,77,.70);
+  --fp-original-tag-title:#4D4844;
+  --fp-original-highlight:#D96D57;
+  --fp-original-focus-button:#615549;
+  --fp-original-focus-button-dark:#393D44;
+  --fp-original-control:rgba(97,85,73,.10);
+  --fp-original-control-dark:rgba(255,255,255,.10);
+  --fp-original-select-button:#D96D57;
+  --fp-original-select-text:#FFFFFF;
+  --fp-original-popup:#F0E4D8;
+  --fp-original-popup-dark:#242833;
+  --fp-original-second-background:#E7DFD5;
+  --fp-original-tag-cell:rgba(255,255,255,.60);
+  --fp-original-timeline-border:rgba(97,85,73,.20);
+  --fp-original-date-selector:rgba(17,0,0,.06);
+  --fp-original-finish-button:#4D4945;
+}
+.page-settings,.duration-popover{background:var(--fp-original-background)!important}
+.settings-hero h1,.settings-row b{color:var(--fp-original-config-title)!important}
+.settings-hero p,.settings-row small{color:var(--fp-original-config-message)!important}
+.plus-card,.duration-done{background:var(--fp-original-highlight)!important}
+.page-trend .stats-mobile{background:var(--fp-original-data-background)!important}
+.stats-total-card,.stats-trend-card,.stats-fruit-detail{background:var(--fp-original-data-section)!important}
+.start-focus{background:var(--fp-original-focus-button)!important}
+.focus-controls button>span{background:var(--fp-original-control)!important}
+.duration-options button.active,.duration-big-value{color:var(--fp-original-highlight)!important}
+.tags-grid .tag-pill:not(.active){background:var(--fp-original-tag-cell)!important;color:var(--fp-original-tag-title)!important}
+.menu-popover{background:var(--fp-original-popup)!important;color:var(--fp-original-text)!important}
+.average-line{border-color:#F3C99E!important}
+.failed-session img,.failed-fruit{opacity:1!important;filter:none!important}
+.original-icon{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.focus-controls button>span.original-control-icon{padding:0;overflow:hidden;background:transparent!important}
+.focus-controls button>span.original-control-icon img{width:100%;height:100%;display:block}
+.focus-task .original-chevron{display:inline-block;width:10px;height:16px;vertical-align:-1px;margin-left:4px;object-fit:contain}
+.stats-head button img,.stats-date-nav button img{width:100%;height:100%;object-fit:contain}
+#menuBtn.has-original-more{font-size:0;background-position:center;background-repeat:no-repeat;background-size:22px 22px}
+#soundBtn .menu-original-icon{width:20px;height:20px;object-fit:contain}
+.duration-popover .original-picker-marker{position:absolute;left:50%;top:58.3%;width:13px;height:19px;transform:translateX(-50%);object-fit:contain;z-index:3}
+.duration-popover:after{display:none!important}
+@media(max-width:760px){
+ .page-focus{background:linear-gradient(180deg,#FFD1AE 0%,#FFF0E2 25%,#FFFFFF 62%,#FFFFFF 100%)!important}
+ .mac-window.is-running .page-focus{background:linear-gradient(180deg,#FFC9A0 0%,#FFD5B5 55%,#FFE9D4 100%)!important}
+}
+@media(min-width:1101px){
+ .theme-dark .page-focus{background:linear-gradient(180deg,#0D0F17 0%,#1C1E28 68%,#252B37 100%)!important}
+ .theme-dark .menu-popover{background:var(--fp-original-popup-dark)!important;color:white!important}
+ .theme-dark .focus-controls button>span{background:var(--fp-original-control-dark)!important}
+}
