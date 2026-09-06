@@ -89,3 +89,4 @@ animate=function(now){
 
 render();
 syncBodies();
+// Keep this file as an explicit build trigger for failed-fruit recovery changes.
