@@ -85,12 +85,14 @@ function vRenderSettings(){
  vGroup('数据同步',vSettingRow('vCloud','云端同步','私人网页记录使用网站账号同步')+vSettingRow('vCalendarSync','同步到日历','导出专注记录为日历文件'))+
  vGroup('日期与时间',vSettingRow('vWeekStart','每周开始于','',s.weekStart===0?'周日':'周一')+vSwitchRow('vHour24','24 小时制',s.hour24!==false))+
  vGroup('番茄工作法',vSettingRow('vCycles','番茄钟循环','完成指定轮数后进入长休息',s.cycles+'')+vSettingRow('vShort','短休息','',s.short+'m')+vSettingRow('vLong','长休息','',s.long+'m'))+
+ vGroup('外观','<div class="settings-row"><span><b>专注背景</b><small>手机、平板、电脑均可调节</small></span><input id="vBackground" type="color" aria-label="专注背景颜色" value="'+(s.focusBackground||'#fff0e2')+'"></div><div class="v-background-presets"><button data-bg="default">默认</button><button data-bg="#20232d">深夜</button><button data-bg="#fff0e2">暖杏</button><button data-bg="#e4ebe1">浅绿</button><button data-bg="#e5e7ef">雾蓝</button></div>')+
  vGroup('通用',vSettingRow('vLanguage','语言','','简体中文')+vSettingRow('vHealth','Apple 健康','','需原生 App'))+
  vGroup('番茄钟设置',vSettingRow('vFruitWindow','展示一周累计的小番茄','首页番茄显示范围',{week:'本周',lastweek:'上周',month:'本月',quarter:'近三个月'}[s.window])+vSwitchRow('vShowFailed','展示放弃的小番茄',s.showFailed)+vSettingRow('vFruitChoice','默认果物','',s.defaultFruit==='pear'?'香梨':s.defaultFruit==='random'?'随机':'番茄'))+
  vGroup('数据管理',vSettingRow('vBackup','导出备份','保存标签、专注记录和设置')+vSettingRow('vRestore','导入备份','从已导出的文件恢复'))+
  vGroup('更多',vSettingRow('vAbout','关于 FocusPomo','私人网页版')+vSettingRow('vVersion','版本信息','根据你提供的录屏持续还原'))+
  `<footer class="v-settings-footer"><img src="${FP5_HD_TOMATO}" alt="番茄"><p>Per aspera ad astra</p></footer>`;
  FP2_renderFruitChoices();
+ $('#vBackground').onchange=e=>{s.focusBackground=e.target.value;vPersist()};root.querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>{s.focusBackground=b.dataset.bg==='default'?null:b.dataset.bg;vPersist()});
  $('#vSettingsBack').onclick=()=>go('focus');$('#vFaq').onclick=()=>vInfo('常见问题','点击计时数字可修改时长；0 为正计时并支持暂停。完成的专注会进入统计，补录记录不会额外奖励番茄。网页关闭时无法保证即时通知。');$('#vWish').onclick=()=>{vSheet('新功能许愿',`<textarea id="vWishText" placeholder="写下你想要的功能">${esc(s.wish||'')}</textarea>`,[['vSaveWish','保存','primary']]);$('#vSaveWish').onclick=()=>{s.wish=$('#vWishText').value.slice(0,2000);modal.close();vPersist()}};
  for(const id of ['vBlock','vBlocked','vLive','vHealth'])$('#'+id).onclick=()=>vNative($('#'+id+' b').textContent);
  $('#vNotify').onclick=()=>{vSheet('提醒',vSwitchRow('vNotifySwitch','番茄钟提醒',s.notifications,'网页打开期间提醒')+'<h3>提醒方式</h3>'+vSwitchRow('vSoundSwitch','声音提醒',s.sound)+vSwitchRow('vVibrateSwitch','震动提醒',s.vibration,'需浏览器支持'));$('#vNotifySwitch').onclick=()=>{s.notifications=!s.notifications;if(s.notifications)send('focus-notification-permission');vPersist();modal.close()};for(const [id,key] of [['vSoundSwitch','sound'],['vVibrateSwitch','vibration']])$('#'+id).onclick=()=>{s[key]=!s[key];$('#'+id).setAttribute('aria-checked',s[key]);$('#'+id+' i').classList.toggle('is-on',s[key]);vPersist()}};
@@ -125,3 +127,25 @@ syncBodies();
 const vControlRenderTimer=renderTimer;
 renderTimer=function(){vControlRenderTimer();$('#pauseIcon').dataset.paused=String(!!state.active?.paused)};
 renderTimer();
+
+/* One authoritative control state; original image renditions on every device. */
+function vApplyFocusAppearance(){
+ const surface=$('.page-focus'),c=state.settings.focusBackground;
+ if(c)surface.style.setProperty('background',c,'important');else surface.style.removeProperty('background');
+ const dark=FP4_isDark(),ink=dark?'#f6f3ed':'#62564b';if(page==='focus')$('#menuBtn').style.filter=dark?'none':'brightness(0) opacity(.55)';else $('#menuBtn').style.filter='none';
+ $('#timerValue').style.setProperty('color',ink,'important');$('#focusTask').style.setProperty('color',ink,'important');
+ const a=state.active,controls=$('#focusControls');controls.style.setProperty('display',a?'flex':'none','important');controls.style.setProperty('z-index','30','important');
+ for(const [id,visible] of [['pauseBtn',!!a&&a.mode==='focus'&&a.kind==='up'],['finishBtn',!!a]]){const b=$('#'+id);b.style.setProperty('display',visible?'flex':'none','important');b.style.setProperty('visibility','visible','important');b.style.setProperty('opacity','1','important');b.querySelector('small').style.setProperty('color',ink,'important')}
+ FP4_applyTimerAssets();
+ for(const el of controls.querySelectorAll('.original-control-icon img'))el.alt='';
+}
+const vAppearanceTimer=renderTimer;renderTimer=function(){vAppearanceTimer();vApplyFocusAppearance()};
+window.addEventListener('resize',vApplyFocusAppearance);vApplyFocusAppearance();
+function vExtractedChrome(){
+ for(const [id,key] of [['vDataBack','backData'],['vSettingsBack','backData'],['vCalBack','backData'],['vPrev','prevData'],['vNext','nextData'],['vWeekPrev','prevData'],['vWeekNext','nextData'],['vDataAdd','newSession'],['vCalAdd','newSession']]){const el=$('#'+id),src=FP4_ASSETS[key];if(el&&src)el.innerHTML=FP4_img(src,'v-extracted-icon','')}
+ for(const el of FP2_settingsPage.querySelectorAll('.settings-row em'))if(FP4_ASSETS.tagArrow)el.innerHTML=FP4_img(FP4_ASSETS.tagArrow,'v-extracted-chevron','');
+}
+const vAssetSettings=vRenderSettings;vRenderSettings=function(){vAssetSettings();vExtractedChrome()};FP2_renderSettings=vRenderSettings;
+const vAssetData=vRenderData;vRenderData=function(){vAssetData();vExtractedChrome()};
+const vAssetCalendar=vRenderCalendar;vRenderCalendar=function(){vAssetCalendar();vExtractedChrome()};
+vExtractedChrome();

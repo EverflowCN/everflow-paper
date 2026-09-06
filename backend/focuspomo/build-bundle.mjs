@@ -15,7 +15,7 @@ const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 const engine=read('engine.mjs').replace(/export /g,'');
 const app=read('app.js').replace(/^import .*?;\n/,'');
 const originalAssetFiles=fs.readdirSync(root).filter(name=>/^original-asset-.*\.js$/.test(name)).sort();
-const originalAssets=[read('original-assets-base.js'),...originalAssetFiles.map(read)].join('\n');
+const originalAssets=[read('original-assets-base.js'),...originalAssetFiles.map(read),`FP_ORIGINAL_ASSET_DATA.tomatoConfig=FP_ORIGINAL_ASSET_DATA.tomatoSmall;FP_ORIGINAL_ASSET_DATA.backData=FP_ORIGINAL_ASSET_DATA.prevData;FP_ORIGINAL_ASSET_DATA.fail1=FP_ORIGINAL_ASSET_DATA.fail2;`].join('\n');
 const fruitAddon=read('fruit-addon.js'),fruitFixes=read('fruit-fixes.js'),failedFruitAddon=read('failed-fruit-addon.js'),originalUiAddon=read('original-ui-addon.js'),focusV3=read('focus-v3.js'),focusV3Hotfix=read('focus-v3-hotfix.js');
 html=html.replace('<link rel="stylesheet" href="style.css" />',()=>`<meta name="robots" content="noindex,nofollow,noarchive"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'"><style>${css}</style>`);
 html=html.replace('<script type="module" src="app.js"></script>',()=>`<script>window.FOCUS_INITIAL=__FOCUS_STATE__;</script><script type="module">${originalAssets}\n${engine}\n${app}\n${fruitAddon}\n${fruitFixes}\n${failedFruitAddon}\n${originalUiAddon}\n${focusV3}\n${focusV3Hotfix}\n${read('video-ui.js')}</script>`);

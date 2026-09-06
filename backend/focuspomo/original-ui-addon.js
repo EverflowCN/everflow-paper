@@ -19,7 +19,7 @@ const FP4_ASSETS={
 const FP4_img=(src,cls='',alt='')=>src?`<img class="${cls}" src="${src}" alt="${alt}">`:'';
 /* The native rendition follows the page's semantic theme, not the OS theme.
    Mobile Focus is deliberately rendered as the native light/orange surface. */
-const FP4_isDark=()=>win.classList.contains('theme-dark')&&!(page==='focus'&&innerWidth<=760);
+const FP4_isDark=()=>{if(page==='focus'){const c=state.settings.focusBackground;if(c){const n=parseInt(c.slice(1),16);return ((n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114)<140}return innerWidth>1100}return win.classList.contains('theme-dark')};
 
 function FP4_applyStaticAssets(){
  const favicon=document.querySelector('link[rel="icon"]')||document.head.appendChild(Object.assign(document.createElement('link'),{rel:'icon'}));favicon.href=FP4_ASSETS.appIcon;
