@@ -1,0 +1,10 @@
+/* FocusPomo v3 hotfix: prevent desktop-only chrome leaking into phone/tablet and finish desktop interaction. */
+.desktop-focus-decor,.desktop-menu-dot{display:none!important}
+.page-settings{overflow-y:auto!important;overscroll-behavior:contain!important}
+@media (min-width:1101px){
+  .page-focus.active .desktop-focus-decor{display:block!important}
+  .focus-mode .desktop-menu-dot{display:grid!important}
+  .desktop-ruler{pointer-events:auto!important;cursor:pointer!important}
+  .desktop-ruler *{pointer-events:none!important}
+  .mac-window.is-running .focus-meta{display:none!important}
+}
