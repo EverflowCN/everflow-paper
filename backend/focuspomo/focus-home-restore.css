@@ -1,0 +1,32 @@
+/* Restore the phone Focus home exactly to the pre-v3 layout the owner approved.
+   This file intentionally touches ONLY the Focus home surface. */
+@media (max-width:760px){
+  body{background:#fff!important}
+  .desktop{padding:0!important;background:#fff!important}
+  .mac-window{width:100vw!important;height:100dvh!important;border-radius:0!important}
+  .theme-dark .page-focus{background:linear-gradient(180deg,#FFD1AE 0%,#FFF0E2 25%,#FFFFFF 62%,#FFFFFF 100%)!important}
+  .focus-stage{top:31.5%!important;width:100%!important;transform:translate(-50%,-50%)!important}
+  .timer-value{font-family:"SF Pro Rounded",ui-rounded,-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif!important;color:#62564b!important;font-size:clamp(78px,21vw,92px)!important;font-weight:820!important;letter-spacing:-5px!important;line-height:.9!important;text-shadow:none!important}
+  .focus-task{font-size:21px!important;font-weight:800!important;color:#62564b!important;margin-top:24px!important;opacity:1!important}
+  .focus-task span{font-size:26px!important;color:#bdb7b1!important}
+  .start-focus{left:50%!important;bottom:20.7%!important;top:auto!important;transform:translateX(-50%)!important;height:72px!important;min-width:156px!important;padding:0 31px!important;border-radius:38px!important;background:#615549!important;color:#fff!important;font-size:21px!important;font-weight:750!important;opacity:1!important;pointer-events:auto!important;box-shadow:none!important}
+  .titlebar{top:env(safe-area-inset-top)!important;height:66px!important;padding:16px 18px!important}
+  .title-actions{margin-left:auto!important}
+  .icon-btn,.ghost-pill{height:45px!important;min-width:45px!important;border-radius:24px!important}
+  .icon-btn{background:rgba(96,84,71,.06)!important;color:#a99d91!important}
+  .ghost-pill{font-size:16px!important;padding:0 18px!important}
+  .page-focus:not(.x) #menuBtn{opacity:.42!important}
+  #tomatoPhysics{inset:0!important;top:0!important;height:100%!important;z-index:2!important}
+
+  .theme-dark.is-running .page-focus,.mac-window.theme-dark.is-running .page-focus{background:linear-gradient(180deg,#FFC9A0 0%,#FFD5B5 55%,#FFE9D4 100%)!important}
+  .mac-window.is-running .focus-stage{top:45.1%!important}
+  .mac-window.is-running .timer-value{font-size:clamp(74px,19vw,86px)!important;letter-spacing:-4px!important;color:#62564b!important}
+  .mac-window.is-running .focus-task{display:none!important}
+  .mac-window.is-running #menuBtn{font-size:24px!important;opacity:.28!important;background:transparent!important}
+  .focus-controls{bottom:calc(9.8% + env(safe-area-inset-bottom))!important;gap:76px!important}
+  .focus-controls button{display:flex!important;flex-direction:column-reverse!important;gap:18px!important;color:#b6a18a!important}
+  .focus-controls button>span{width:86px!important;height:86px!important;border-radius:50%!important;background:rgba(185,163,140,.18)!important;font-size:31px!important;color:#b6a18a!important}
+  .focus-controls small{font-size:22px!important;color:#b7a28c!important;font-weight:750!important}
+  .focus-meta{display:none!important}
+  .desktop-focus-decor,.desktop-menu-dot{display:none!important}
+}
