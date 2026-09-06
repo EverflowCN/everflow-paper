@@ -35,6 +35,7 @@ jobs:
           node --check backend/focuspomo/app.js
           node --check backend/focuspomo/fruit-addon.js
           node --check backend/focuspomo/fruit-fixes.js
+          node --check backend/focuspomo/failed-fruit-addon.js
           node --check site/me/focus/gate.js
 
       - name: Build private bundle
@@ -44,6 +45,8 @@ jobs:
           git diff --check
           grep -q 'defaultFruit' supabase/functions/owner-focus/bundle.ts
           grep -q 'fruitSide' supabase/functions/owner-focus/engine.mjs
+          grep -q 'fail_tomato1' supabase/functions/owner-focus/bundle.ts
+          grep -q 'failed-session' supabase/functions/owner-focus/bundle.ts
 
       - name: Deploy owner-focus when token is configured
         env:

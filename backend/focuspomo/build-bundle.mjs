@@ -10,9 +10,10 @@ const engine=fs.readFileSync(path.join(root,'engine.mjs'),'utf8').replace(/expor
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8').replace(/^import .*?;\n/,'');
 const fruitAddon=fs.readFileSync(path.join(root,'fruit-addon.js'),'utf8');
 const fruitFixes=fs.readFileSync(path.join(root,'fruit-fixes.js'),'utf8');
+const failedFruitAddon=fs.readFileSync(path.join(root,'failed-fruit-addon.js'),'utf8');
 html=html.replace('<link rel="stylesheet" href="style.css" />',()=>`<meta name="robots" content="noindex,nofollow,noarchive"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'"><style>${css}</style>`);
-html=html.replace('<script type="module" src="app.js"></script>',()=>`<script>window.FOCUS_INITIAL=__FOCUS_STATE__;</script><script type="module">${engine}\n${app}\n${fruitAddon}\n${fruitFixes}</script>`);
-for(const file of ['tomato.png','tomato-small.png','pear.svg']){
+html=html.replace('<script type="module" src="app.js"></script>',()=>`<script>window.FOCUS_INITIAL=__FOCUS_STATE__;</script><script type="module">${engine}\n${app}\n${fruitAddon}\n${fruitFixes}\n${failedFruitAddon}</script>`);
+for(const file of ['tomato.png','tomato-small.png','pear.svg','fail_tomato1.svg','fail_tomato2.svg','fail_tomato3.svg']){
  const ext=path.extname(file).slice(1),mime=ext==='svg'?'image/svg+xml':'image/png';
  html=html.replaceAll(`assets/${file}`,`data:${mime};base64,`+fs.readFileSync(path.join(root,'assets',file)).toString('base64'));
 }
