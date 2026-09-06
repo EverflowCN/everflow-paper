@@ -1,0 +1,1 @@
+This migration replaces reconstructed glyphs and failed-tomato SVGs with exact Assets.car renditions. It is intentionally scoped to the private Focus page; native-only Widget/Watch/App Block/iCloud assets stay in the extraction archive unless that corresponding browser surface is implemented.
