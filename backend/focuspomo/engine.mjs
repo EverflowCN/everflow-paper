@@ -59,4 +59,8 @@ export function range(period='M',anchor=Date.now()){
  return {start:d.getTime(),end:end.getTime()};
 }
 export const inRange=(rows,r)=>rows.filter(x=>x.start>=r.start&&x.start<r.end);
-export const reward=r=>!r.manual&&r.seconds>=60&&r.outcome==='finished';
+/* FocusPomo's recovered Home pipeline is task-state driven: a finished,
+   non-manual focus task enters the tomato data stream. There is no recovered
+   one-minute reward threshold; even a finish-early task may render at the
+   minimum 36pt tomato size. */
+export const reward=r=>!!r&&!r.manual&&r.outcome==='finished';
