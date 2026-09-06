@@ -1,0 +1,52 @@
+name: Build private FocusPomo bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/focuspomo/**'
+      - '.github/workflows/build-focus-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: focus-bundle
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate FocusPomo engine and handler
+        run: |
+          set -euo pipefail
+          node --test backend/focuspomo/engine.test.mjs backend/focuspomo/handler.test.mjs
+          node --check backend/focuspomo/app.js
+          node --check backend/focuspomo/fruit-addon.js
+
+      - name: Build private bundle
+        run: |
+          set -euo pipefail
+          node backend/focuspomo/build-bundle.mjs
+          git diff --check
+
+      - name: Commit generated owner-focus bundle
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- supabase/functions/owner-focus/bundle.ts supabase/functions/owner-focus/engine.mjs; then
+            echo 'Generated bundle already up to date.'
+            exit 0
+          fi
+          git config user.name 'Everflow Focus Builder'
+          git config user.email '54564601+EverflowCN@users.noreply.github.com'
+          git add supabase/functions/owner-focus/bundle.ts supabase/functions/owner-focus/engine.mjs
+          git commit -m 'build(focus): refresh private bundle [skip ci]'
+          git push origin HEAD:main
