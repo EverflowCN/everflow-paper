@@ -29,7 +29,7 @@ export function start(s,{rest=false,minutes=s.settings.minutes,now=Date.now(),id
  s.pendingRest=false;s.active={id,tagId:s.selectedTag,start:now,resumedAt:now,elapsedMs:0,targetSeconds:minutes*60,mode:rest?'rest':'focus',kind:minutes===0?'up':'down',paused:false,fruitType};return s.active;
 }
 export function togglePause(s,now=Date.now()){
- const a=s.active;if(!a||a.mode!=='focus')return false;
+ const a=s.active;if(!a||a.mode!=='focus'||a.kind!=='up')return false;
  if(!a.paused)a.elapsedMs=elapsed(a,now)*1000;
  a.resumedAt=now;a.paused=!a.paused;return true;
 }
