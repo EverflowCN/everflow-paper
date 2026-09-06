@@ -1,0 +1,116 @@
+/* FocusPomo v2 — screenshot fidelity + responsive fruit system */
+:root{
+ --fp-paper:#ede9e6;--fp-panel:#e1ddd9;--fp-ink:#62564b;--fp-muted:#c1bbb5;
+ --fp-coral:#df765f;--fp-peach:#ffd1ae;--fp-brown:#5b4d43;--fp-blue:#2f7bc2;
+}
+html{-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+body,.mac-window,button,input,select{
+ font-family:ui-rounded,"SF Pro Rounded","SF Pro Display",-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+ font-synthesis:none;font-feature-settings:"tnum" 1,"kern" 1;
+}
+.timer-value,.duration-big-value,.metric-row b,.stats-mobile b{font-variant-numeric:tabular-nums lining-nums}
+.page-settings{background:var(--fp-paper);color:var(--fp-ink);overflow:auto}
+.settings-scroll{width:min(650px,calc(100% - 36px));margin:0 auto;padding:76px 0 48px}
+.settings-hero{position:relative;padding:0 16px 28px}
+.settings-back{position:absolute;left:-4px;top:-48px;width:38px;height:38px;border-radius:19px;background:#ded9d4;font-size:27px;color:#998f86}
+.settings-hero h1{font-size:38px;line-height:1;margin:0 0 20px;letter-spacing:-1.5px;color:#62564b}
+.settings-hero p{margin:0;color:#c4beb9;font-size:19px;line-height:1.32;font-weight:700}
+.plus-card{height:102px;border-radius:34px;background:#df6d57;color:#fff;padding:26px 26px;display:flex;flex-direction:column;justify-content:center;margin:0 0 30px;box-shadow:0 1px 0 #fff2 inset}
+.plus-card b{font-size:22px}.plus-card span{margin-top:5px;font-size:17px;color:#f0a48f;font-weight:700}
+.settings-section{margin:28px 0}.settings-section>h2{font-size:20px;color:#c0bab4;margin:0 0 10px 18px}
+.settings-group{background:var(--fp-panel);border-radius:30px;padding:8px 22px;overflow:hidden}
+.settings-row{width:100%;min-height:72px;display:flex;align-items:center;gap:12px;text-align:left;padding:10px 0;color:#62564b;position:relative}
+.settings-row+ .settings-row{border-top:1px solid rgba(117,103,92,.05)}
+.settings-row>span{flex:1;min-width:0}.settings-row b{display:block;font-size:19px;line-height:1.15}.settings-row small{display:block;color:#bbb4ae;font-size:14px;line-height:1.3;margin-top:5px;font-weight:650}
+.settings-row>em{font-style:normal;font-size:34px;color:#aaa29b;font-weight:500}.settings-row>strong{font-size:16px;color:#bbb3ac;margin-left:auto}
+.ios-switch{width:52px;height:31px;border-radius:20px;background:#c8c2bc;position:relative;flex:none}.ios-switch:after{content:"";position:absolute;width:27px;height:27px;border-radius:50%;background:white;top:2px;left:2px;box-shadow:0 1px 4px #0002}.ios-switch.is-on{background:#df6c55}.ios-switch.is-on:after{left:23px}
+.fruit-group{padding:12px 16px 18px}.fruit-heading{min-height:58px;padding-left:6px}.fruit-choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.fruit-choice-grid>button{min-width:0;height:104px;border-radius:23px;background:#d8d2cc;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;position:relative;padding:8px}
+.fruit-choice-grid>button.selected{background:#f5eee7;box-shadow:0 0 0 2px #df765f inset}
+.fruit-choice-grid img{width:37px;height:37px;object-fit:contain}.fruit-choice-grid .fruit-duo{height:37px;display:flex;align-items:center}.fruit-choice-grid .fruit-duo img{width:32px;height:32px;margin:0 -5px}
+.fruit-choice-grid>button span b{font-size:14px}.fruit-choice-grid>button span small{font-size:9px;margin-top:2px;color:#a99f97}.fruit-choice-grid>button>i{position:absolute;right:9px;top:7px;font-style:normal;color:#df765f;font-weight:800}
+.compact-controls .settings-row select{border:0;background:transparent;color:#8d8279;font-weight:700;font-size:14px;text-align:right;max-width:125px}.compact-controls input[type=checkbox]{accent-color:#df765f;width:22px;height:22px}
+.phone-only{display:none}
+
+/* Mixed-fruit detail wall. */
+.tomato-wall button{display:grid;place-items:center;min-width:0;min-height:0}
+.tomato-wall button img{width:var(--detail-fruit,100%);height:var(--detail-fruit,100%);object-fit:contain;margin:auto}
+.finish-tomato{object-fit:contain}
+.record-fruit-note{font-weight:700;color:#9b8c80}
+
+/* Mobile/tablet statistics page added over the desktop detail view. */
+.stats-mobile{display:none}
+@media(max-width:1100px){
+ .stats-mobile{display:block;position:absolute;inset:0;overflow:auto;background:var(--fp-paper);padding:calc(26px + env(safe-area-inset-top)) 20px calc(34px + env(safe-area-inset-bottom));z-index:20;color:var(--fp-ink)}
+ .page-trend>.page-header,.page-trend>.trend-layout{display:none}
+ .stats-head{height:64px;display:grid;grid-template-columns:48px 1fr 48px;align-items:start}
+ .stats-back,.stats-add{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#e1ddd9;color:#aaa29b;font-size:25px;font-weight:800}
+ .stats-date-nav{justify-self:center;height:46px;border-radius:26px;background:#e1ddd9;display:flex;align-items:center;padding:0 12px;gap:14px;color:#958b82}
+ .stats-date-nav button{font-size:28px;color:#aaa29b}.stats-date-nav b{font-size:18px}
+ .stats-title{padding:22px 10px 25px}.stats-title h1{font-size:34px;line-height:1;margin:0;color:#65594e;letter-spacing:-1.2px}.stats-title h1 span{display:inline-flex;vertical-align:middle;font-size:13px;line-height:1;padding:8px 9px 6px;border-radius:18px;background:#f5d5c8;color:#ff6b96;letter-spacing:0;margin-left:5px}.stats-title p{font-size:17px;color:#bdb7b1;font-weight:700;margin:13px 0 0}
+ .stats-total-card{height:100px;border-radius:31px;background:#fff;display:grid;grid-template-columns:1fr 1fr;padding:20px 28px;margin-bottom:43px}
+ .stats-total-card>div{display:flex;flex-direction:column;justify-content:center}.stats-total-card>div+div{border-left:1px solid #eeeae6;padding-left:27px}
+ .stats-total-card span{font-size:14px;color:#c5c0bb;font-weight:750}.stats-total-card b{display:flex;align-items:center;font-style:normal;font-size:31px;line-height:1;color:#62564b;margin-top:8px}.stats-total-card b i{font-style:normal}.stats-total-card img{width:28px;height:28px;object-fit:contain;margin-right:4px}.stats-total-card small{font-size:13px;color:#c8c2bd;margin-left:4px}
+ .stats-section-title{font-size:20px;margin:0 0 10px 10px;color:#65594e}.stats-trend-card{height:356px;border-radius:30px;background:#fff;padding:28px 28px 22px;position:relative}
+ .trend-summary{display:grid;grid-template-columns:1fr 1fr}.trend-summary>div+div{border-left:1px solid #eeeae6;padding-left:28px}.trend-summary span{display:block;font-size:15px;color:#c4bfba;font-weight:750}.trend-summary b{display:block;font-size:27px;line-height:1.15;margin-top:9px}.trend-summary b small{font-size:13px;color:#c4bfba;margin-left:3px}.trend-summary em{display:block;font-style:normal;color:#ff6d8d;font-size:13px;font-weight:850;margin-top:8px}
+ .week-chart{position:absolute;left:28px;right:28px;bottom:23px;height:195px}.daily-average{position:absolute;left:0;bottom:48px;width:80px}.daily-average span{display:block;color:#f4bf94;font-size:14px;font-weight:800}.daily-average b{display:block;color:#ef8a37;font-size:22px;margin-top:5px}.daily-average small{font-size:11px;margin-left:2px}
+ .average-line{position:absolute;left:0;right:0;border-top:1px dashed #f3c99e;bottom:36%;z-index:0}
+ .week-bars{position:absolute;left:90px;right:0;bottom:0;top:0;display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end}
+ .week-col{height:100%;display:grid;grid-template-rows:1fr 25px 22px;justify-items:center;align-items:end;position:relative}.week-col .bar-shell{width:22px;min-height:0;border-radius:15px;overflow:hidden;display:flex;flex-direction:column-reverse;justify-content:flex-start;background:#f1eeeb;z-index:1}.week-col .bar-shell i{width:100%;display:block}
+ .week-col>span{width:24px;height:24px;border-radius:50%;background:#f0eeec;display:block}.week-col.today>span{background:#aaa29a}.week-col>b{font-size:13px;color:#d0cbc6}.week-col.today>b{color:#65594e}
+ .stats-show-all{height:64px;border-radius:32px;background:#e1ddd9;width:100%;margin:12px 0 42px;font-size:20px;font-weight:750;color:#aaa29b}
+ .details-title{margin-bottom:13px}.stats-fruit-detail{min-height:110px;border-radius:28px;background:#fff;padding:20px;display:grid;grid-template-columns:repeat(8,1fr);gap:10px;align-items:end}
+ .stats-fruit-detail>button{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end}.stats-fruit-detail img{width:min(var(--fruit-thumb),100%);aspect-ratio:1;object-fit:contain}.stats-fruit-detail small{font-size:8px;color:#c3bdb7;margin-top:3px}.stats-fruit-detail>p{grid-column:1/-1;color:#b8b0aa;text-align:center;font-size:13px}
+}
+
+/* Phone: closely follows the owner's iPhone reference screenshots. */
+@media(max-width:760px){
+ body{background:#fff}
+ .desktop{padding:0;background:#fff}.mac-window{width:100vw;height:100dvh;border-radius:0}
+ .mac-window.settings-mode .titlebar,.mac-window.stats-mode .titlebar{display:none}
+ .page-focus{background:linear-gradient(180deg,#fff0e2 0%,#fff9f3 23%,#fff 46%,#fff 100%)}
+ .focus-stage{top:31.5%;width:100%;transform:translate(-50%,-50%)}.timer-value{font-family:"SF Pro Rounded",ui-rounded,-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#62564b;font-size:clamp(78px,21vw,92px);font-weight:820;letter-spacing:-5px;line-height:.9}
+ .focus-task{font-size:21px;font-weight:800;color:#62564b;margin-top:24px}.focus-task span{font-size:26px;color:#bdb7b1}
+ .start-focus{bottom:20.7%;height:72px;min-width:156px;padding:0 31px;border-radius:38px;background:#62564b;font-size:21px;font-weight:750}
+ .titlebar{top:env(safe-area-inset-top);height:66px;padding:16px 18px}.title-actions{margin-left:auto}.icon-btn,.ghost-pill{height:45px;min-width:45px;border-radius:24px}.icon-btn{background:rgba(96,84,71,.06);color:#a99d91}.ghost-pill{font-size:16px;padding:0 18px}
+ .page-focus:not(.x) #menuBtn{opacity:.42}
+ .mac-window.is-running .page-focus{background:linear-gradient(180deg,#ffcaa1 0%,#ffd5b5 46%,#ffe9d4 100%)}
+ .mac-window.is-running .focus-stage{top:45.1%}.mac-window.is-running .timer-value{font-size:clamp(74px,19vw,86px);letter-spacing:-4px}.mac-window.is-running .focus-task{display:none}
+ .mac-window.is-running #menuBtn{font-size:24px;opacity:.28;background:transparent}
+ .focus-controls{bottom:calc(9.8% + env(safe-area-inset-bottom));gap:76px}.focus-controls button{display:flex;flex-direction:column-reverse;gap:18px;color:#b6a18a}.focus-controls button>span{width:86px;height:86px;border-radius:50%;background:rgba(185,163,140,.18);font-size:31px;color:#b6a18a}.focus-controls small{font-size:22px;color:#b7a28c;font-weight:750}
+ #tomatoPhysics{z-index:2}
+ .page-tags{background:linear-gradient(180deg,#583e29 0%,#53463d 100%);padding:24.3vh 11.5vw 38px}.tags-grid{grid-template-columns:1fr;gap:10px;padding:0;width:100%}.tag-pill{height:72px;border-radius:38px;grid-template-columns:45px 1fr 30px;padding:0 15px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}.tag-pill .dot{width:37px;height:37px}.tag-pill b{font-size:17px}.tag-pill small{font-size:14px;margin-top:5px;color:rgba(255,255,255,.36)}.tag-pill.active{background:var(--tag-color,#2d77bd);border-color:rgba(255,255,255,.22)}.tag-edit{top:21px;right:7px}
+ .theme-dark:has(.page-tags.active) .titlebar{display:flex}.theme-dark:has(.page-tags.active) .icon-btn,.theme-dark:has(.page-tags.active) .ghost-pill{background:rgba(255,255,255,.11);color:white}.theme-dark:has(.page-tags.active) #backBtn{position:fixed;left:20px;display:grid;font-size:30px}.theme-dark:has(.page-tags.active) #newTagBtn{display:block}.tags-tomato-field{position:fixed;height:260px;filter:blur(6px);opacity:.35}
+ .duration-popover{inset:0;width:100%;height:100%;transform:none;border-radius:0;background:#f0e9e1;padding:0 20px;box-shadow:none;color:#d6d0ca}
+ .duration-fruit-preview{position:absolute;top:28.5%;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:64px}.duration-fruit-preview>img{width:42px;height:42px;object-fit:contain}.duration-fruit-preview.is-random>img{filter:saturate(.85)}.duration-big-value{font-size:70px;line-height:.8;color:#df765f;font-weight:850;letter-spacing:-3px}
+ .duration-title{display:none}.duration-options{position:absolute;top:44.5%;left:0;right:0;margin:0;display:flex;justify-content:space-evenly;padding:0 55px;gap:0}.duration-options button{font-size:30px;color:#ded8d2;font-weight:800;min-width:45px}.duration-options button.active{color:#df765f}
+ .duration-options button:nth-child(n+5){display:none}
+ .mini-ruler{position:absolute;top:53%;left:11%;right:0;height:43px;justify-content:flex-start;gap:16px;overflow:hidden}.mini-ruler i{width:6px;height:25px;border-radius:4px;background:#ddd7d1}.mini-ruler i:nth-child(5){height:42px;background:#df765f}
+ .mini-ruler:after{content:"";position:absolute;left:46%;top:58px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:14px solid #df765f;transform:translateX(-50%)}
+ .custom-minutes{display:none}.duration-done{position:absolute;bottom:11.8%;left:50%;transform:translateX(-50%);height:72px;min-width:145px;border-radius:38px;margin:0;background:#df765f;font-size:21px}
+ .settings-scroll{width:100%;padding:calc(87px + env(safe-area-inset-top)) 22px calc(45px + env(safe-area-inset-bottom))}
+ .settings-hero{padding:0 10px 31px}.settings-back{display:none}.settings-hero h1{font-size:34px;margin-bottom:20px;letter-spacing:-1px}.settings-hero p{font-size:17px;line-height:1.28}.phone-only{display:block}
+ .plus-card{height:96px;border-radius:30px;margin:0 0 30px;padding:22px 18px}.plus-card b{font-size:20px}.plus-card span{font-size:16px}
+ .settings-section{margin:28px 0}.settings-section>h2{font-size:20px;margin-left:16px;margin-bottom:9px}.settings-group{border-radius:28px;padding:8px 17px}.settings-row{min-height:70px}.settings-row b{font-size:19px}.settings-row small{font-size:14px}.settings-row>em{font-size:32px}
+ .fruit-choice-grid{gap:6px}.fruit-choice-grid>button{height:101px;border-radius:22px}.fruit-choice-grid>button span small{font-size:8px}.fruit-choice-grid img{width:38px;height:38px}
+ .stats-mobile{padding-left:20px;padding-right:20px}.stats-fruit-detail{grid-template-columns:repeat(6,1fr)}
+}
+
+/* Tablet: iOS composition at a larger readable scale, while desktop keeps the Mac window. */
+@media(min-width:761px) and (max-width:1100px){
+ body{background:#d8d4d0}.desktop{padding:20px}.mac-window{width:min(780px,calc(100vw - 40px));height:min(1020px,calc(100dvh - 40px));border-radius:30px;box-shadow:0 28px 90px #4e403128}
+ .page-focus{background:linear-gradient(180deg,#fff0e2,#fff 48%)}.focus-stage{top:31%}.timer-value{color:#62564b;font-size:110px;text-shadow:none}.focus-task{color:#62564b;font-size:25px}.start-focus{bottom:21%;height:76px;border-radius:42px;background:#62564b;font-size:22px;padding:0 35px}
+ .mac-window.is-running .page-focus{background:linear-gradient(180deg,#ffcaa1,#ffe8d2)}.mac-window.is-running .focus-stage{top:45%}.mac-window.is-running .focus-task{display:none}.mac-window.is-running .timer-value{font-size:100px}
+ .focus-controls{bottom:11%;gap:100px}.focus-controls button{display:flex;flex-direction:column-reverse;gap:15px}.focus-controls button>span{width:92px;height:92px;background:#b9a38c2b;font-size:32px}.focus-controls small{font-size:20px;color:#b7a38b}
+ .page-tags{padding:23vh 10% 40px}.tags-grid{grid-template-columns:1fr;max-width:570px;margin:auto}.tag-pill{height:76px;border-radius:40px;grid-template-columns:52px 1fr 36px}.tag-pill .dot{width:40px;height:40px}.tag-pill b{font-size:19px}.tag-pill small{font-size:14px}.tag-edit{top:23px}
+ .duration-popover{width:min(680px,calc(100% - 70px));border-radius:35px}
+ .stats-mobile{padding:44px 48px}.stats-title h1{font-size:42px}.stats-total-card{height:122px}.stats-trend-card{height:420px}.week-chart{height:245px}.stats-fruit-detail{grid-template-columns:repeat(10,1fr)}
+ .settings-scroll{width:min(690px,calc(100% - 56px));padding-top:95px}
+}
+
+/* Desktop keeps the recovered Mac proportions, adds fruit settings without flattening the window. */
+@media(min-width:1101px){
+ .page-settings{background:#efebe8}.settings-scroll{padding-top:58px;padding-bottom:30px;transform:scale(.88);transform-origin:top center}
+ .settings-hero h1{font-size:30px}.settings-hero p{font-size:14px}.plus-card{height:82px;border-radius:25px}.settings-section{margin:20px 0}.settings-section>h2{font-size:15px}.settings-group{border-radius:21px}.settings-row{min-height:55px}.settings-row b{font-size:14px}.settings-row small{font-size:10px}.fruit-choice-grid>button{height:80px}.fruit-choice-grid img{width:30px;height:30px}
+}
+@media(prefers-reduced-motion:reduce){.fruit-choice-grid *,#tomatoPhysics{scroll-behavior:auto!important;transition:none!important}}
