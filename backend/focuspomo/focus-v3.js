@@ -51,10 +51,24 @@ syncBodies=function(){
   });
 };
 
+function FP7_collideStart(body,wall){
+ if(!wall)return false;
+ const radius=wall.height/2,cy=wall.y+radius;
+ const nearX=Math.max(wall.x+radius,Math.min(wall.x+wall.width-radius,body.x));
+ const dx=body.x-nearX,dy=body.y-cy,dist=Math.hypot(dx,dy),limit=radius+body.r;
+ if(dist>=limit)return false;
+ const nx=dist?dx/dist:0,ny=dist?dy/dist:-1;
+ body.x=nearX+nx*(limit+.2);body.y=cy+ny*(limit+.2);
+ const velocity=body.vx*nx+body.vy*ny;
+ if(velocity<0){body.vx-=1.48*velocity*nx;body.vy-=1.48*velocity*ny;body.spin+=body.vx*.003}
+ return true;
+}
 animate=function(now){
   const dt=Math.min(2,(now-last)/16.7);last=now;
   if(page==='focus'&&!document.hidden){
     ctx.clearRect(0,0,width,height);
+    let startWall=null;
+    if(!state.active){const button=$('#startFocus'),rect=button.getBoundingClientRect(),box=canvas.getBoundingClientRect();if(!button.classList.contains('hidden')&&rect.width&&rect.height)startWall={x:rect.left-box.left,y:rect.top-box.top,width:rect.width,height:rect.height}}
     for(const b of bodies){
       if(drag?.body===b)continue;
       b.vx+=gravity.x*dt;b.vy+=gravity.y*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.a+=b.spin*dt;b.spin*=.995;
@@ -62,6 +76,7 @@ animate=function(now){
       if(b.x>width-b.r){b.x=width-b.r;b.vx=-Math.abs(b.vx)*.5}
       if(b.y>height-b.r){b.y=height-b.r;b.vy=-Math.abs(b.vy)*.25;b.vx*=.96}
       if(b.y< -200)b.y=-200;
+      if(FP7_collideStart(b,startWall))canvas.dataset.lastCollision='start-button';
     }
     const grid=new Map(),cell=120;
     for(const b of bodies){

@@ -27,3 +27,7 @@
 .mac-window.is-running .focus-controls{visibility:visible!important;opacity:1!important;pointer-events:auto!important;bottom:max(32px,8%)!important}
 .mac-window.is-running .focus-controls small{font-size:16px!important}
 .v-extracted-icon{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}.v-extracted-chevron{width:9px;height:16px;object-fit:contain;display:block}
+/* A fixed square footprint prevents flex and native color-input chrome becoming oval. */
+.mac-window #menuBtn{width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important;min-height:40px!important;max-height:40px!important;flex:0 0 40px!important;padding:0!important;border-radius:50%!important;aspect-ratio:1!important;display:grid!important;place-items:center!important}
+#vBackground{appearance:none;-webkit-appearance:none;width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;flex:0 0 36px!important;padding:0!important;border:0!important;border-radius:50%!important;overflow:hidden;cursor:pointer}
+#vBackground::-webkit-color-swatch-wrapper{padding:0;border-radius:50%}#vBackground::-webkit-color-swatch{border:1px solid #62564b22;border-radius:50%}#vBackground::-moz-color-swatch{border:1px solid #62564b22;border-radius:50%}
