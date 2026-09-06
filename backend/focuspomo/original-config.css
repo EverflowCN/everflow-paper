@@ -2,14 +2,17 @@
    All constants below come from named color renditions in the decrypted IPA. */
 :root{
  --fp-original-background:#F0E9E1;--fp-original-background-dark:#1C1E28;
- --fp-original-data-background:#EDE9E6;--fp-original-data-section:#FFFFFF;--fp-original-data-section-dark:#2A2C35;
+ --fp-original-data-background:#EDE9E6;--fp-original-data-background-dark:#1C1E28;--fp-original-data-section:#FFFFFF;--fp-original-data-section-dark:#2A2C35;
  --fp-original-text:#615549;--fp-original-config-title:#4D4D4D;--fp-original-config-message:rgba(77,77,77,.70);--fp-original-tag-title:#4D4844;
  --fp-original-highlight:#D96D57;--fp-original-focus-button:#615549;--fp-original-focus-button-dark:#393D44;
  --fp-original-control:rgba(97,85,73,.10);--fp-original-control-dark:rgba(255,255,255,.10);
- --fp-original-select-button:#D96D57;--fp-original-select-text:#FFFFFF;--fp-original-popup:#F0E4D8;--fp-original-popup-dark:#242833;
- --fp-original-second-background:#E7DFD5;--fp-original-tag-cell:rgba(255,255,255,.60);
- --fp-original-timeline-border:rgba(97,85,73,.20);--fp-original-date-selector:rgba(17,0,0,.06);--fp-original-finish-button:#4D4945;
- --fp-original-add-tag:#D96D57;--fp-original-welcome:#E5D4C3;--fp-original-picker-row:rgba(0,0,0,.04);
+ --fp-original-select-button:#D96D57;--fp-original-select-button-dark:#FFFFFF;--fp-original-select-text:#FFFFFF;--fp-original-select-text-dark:#1C1E28;
+ --fp-original-popup:#F0E4D8;--fp-original-popup-dark:#242833;--fp-original-second-background:#E7DFD5;
+ --fp-original-tag-cell:rgba(255,255,255,.60);--fp-original-tag-cell-dark:rgba(255,255,255,.10);
+ --fp-original-timeline-border:rgba(97,85,73,.20);--fp-original-timeline-border-dark:rgba(255,255,255,.10);
+ --fp-original-date-selector:rgba(17,0,0,.06);--fp-original-date-selector-dark:rgba(255,255,255,.08);
+ --fp-original-finish-button:#4D4945;--fp-original-finish-button-dark:rgba(255,255,255,.15);
+ --fp-original-add-tag:#D96D57;--fp-original-welcome:#E5D4C3;--fp-original-picker-row:rgba(0,0,0,.04);--fp-original-picker-row-dark:rgba(255,255,255,.04);
 }
 .page-settings,.duration-popover{background:var(--fp-original-background)!important}
 .settings-hero h1,.settings-row b{color:var(--fp-original-config-title)!important}.settings-hero p,.settings-row small{color:var(--fp-original-config-message)!important}
@@ -30,16 +33,32 @@
 #menuBtn.has-original-more{font-size:0;background-position:center;background-repeat:no-repeat;background-size:20px 4px}#soundBtn .menu-original-icon{width:20px;height:20px;object-fit:contain}
 .duration-popover .original-picker-marker{position:absolute;left:50%;top:58.3%;width:13px;height:19px;transform:translateX(-50%);object-fit:contain;z-index:3}.duration-popover:after{display:none!important}
 .stats-add.original-new-session{padding:7px;background:transparent!important}.stats-add.original-new-session img{object-fit:contain}
+
+/* Theme is semantic and page-driven. These overrides must work on tablet and
+   mobile too; the previous desktop-only media query caused mixed light/dark UI. */
+.theme-dark .page-focus,.theme-dark .page-tags,.theme-dark .page-pomodoro{background:linear-gradient(180deg,#0D0F17 0%,var(--fp-original-background-dark) 68%,#252B37 100%)!important}
+.theme-dark .stats-mobile{background:var(--fp-original-data-background-dark)!important}
+.theme-dark .stats-total-card,.theme-dark .stats-trend-card,.theme-dark .stats-fruit-detail{background:var(--fp-original-data-section-dark)!important}
+.theme-dark .menu-popover{background:var(--fp-original-popup-dark)!important;color:white!important}
+.theme-dark .focus-controls button>span{background:var(--fp-original-control-dark)!important}
+.theme-dark .start-focus{background:var(--fp-original-focus-button-dark)!important}
+.theme-dark .tags-grid .tag-pill:not(.active){background:var(--fp-original-tag-cell-dark)!important;color:white!important}
+.theme-dark .duration-popover{background:var(--fp-original-background-dark)!important;color:white!important}
+.theme-dark .duration-options button.active{background:var(--fp-original-picker-row-dark)!important}
+.theme-dark .duration-done{background:var(--fp-original-select-button-dark)!important;color:var(--fp-original-select-text-dark)!important}
+.theme-dark .stats-date-nav{background:var(--fp-original-date-selector-dark)!important}
+.theme-dark .week-grid,.theme-dark .week-head,.theme-dark .calendar-body,.theme-dark .hours{border-color:var(--fp-original-timeline-border-dark)!important}
+.theme-dark #modal button.primary,.theme-dark .finish-actions button.primary{background:var(--fp-original-finish-button-dark)!important}
+
+/* The native phone Focus surface is the light/orange rendition even though the
+   desktop/tablet Focus view is dark. Revert only Focus-specific controls here. */
 @media(max-width:760px){
- .page-focus{background:linear-gradient(180deg,#FFD1AE 0%,#FFF0E2 25%,#FFFFFF 62%,#FFFFFF 100%)!important}
- .mac-window.is-running .page-focus{background:linear-gradient(180deg,#FFC9A0 0%,#FFD5B5 55%,#FFE9D4 100%)!important}
+ .theme-dark .page-focus{background:linear-gradient(180deg,#FFD1AE 0%,#FFF0E2 25%,#FFFFFF 62%,#FFFFFF 100%)!important}
+ .theme-dark.is-running .page-focus,.mac-window.theme-dark.is-running .page-focus{background:linear-gradient(180deg,#FFC9A0 0%,#FFD5B5 55%,#FFE9D4 100%)!important}
+ .theme-dark .page-focus .focus-controls button>span{background:var(--fp-original-control)!important}
+ .theme-dark .page-focus .start-focus{background:var(--fp-original-focus-button)!important}
+ .theme-dark .duration-popover{background:var(--fp-original-background)!important;color:var(--fp-original-text)!important}
+ .theme-dark .duration-options button.active{background:var(--fp-original-picker-row)!important}
+ .theme-dark .duration-done{background:var(--fp-original-select-button)!important;color:var(--fp-original-select-text)!important}
  .page-settings{background:var(--fp-original-background)!important}.settings-group{background:var(--fp-original-second-background)!important}
-}
-@media(min-width:1101px){
- .theme-dark .page-focus,.theme-dark .page-settings,.theme-dark .page-calendar{background:var(--fp-original-background-dark)!important}
- .theme-dark .page-trend,.theme-dark .stats-mobile{background:var(--fp-original-background-dark)!important}
- .theme-dark .stats-total-card,.theme-dark .stats-trend-card,.theme-dark .stats-fruit-detail,.theme-dark .calendar-shell{background:var(--fp-original-data-section-dark)!important}
- .theme-dark .menu-popover{background:var(--fp-original-popup-dark)!important;color:white!important}.theme-dark .focus-controls button>span{background:var(--fp-original-control-dark)!important}
- .theme-dark .settings-hero h1,.theme-dark .settings-row b{color:white!important}.theme-dark .settings-hero p,.theme-dark .settings-row small{color:rgba(255,255,255,.70)!important}
- .theme-dark .tags-grid .tag-pill:not(.active){background:rgba(255,255,255,.10)!important;color:white!important}.theme-dark .week-grid,.theme-dark .week-head,.theme-dark .calendar-body,.theme-dark .hours{border-color:rgba(255,255,255,.10)!important}
 }
