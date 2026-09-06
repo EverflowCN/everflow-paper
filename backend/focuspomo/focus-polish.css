@@ -1,0 +1,19 @@
+/* FocusPomo v2.1 — final screenshot-alignment corrections. */
+.mac-window:not(.is-running) #menuBtn{opacity:.42}
+
+@media(max-width:760px){
+ .page-focus #menuBtn{opacity:inherit}
+ .duration-popover .mini-ruler:after{display:none}
+ .duration-popover:after{content:"";position:absolute;left:50%;top:58.8%;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:14px solid var(--fp-coral);transform:translateX(-50%)}
+ .duration-popover.hidden:after{display:none}
+ .duration-fruit-preview[data-fruit="random"]:before{content:"";position:absolute;top:-4px;left:calc(50% + 5px);width:38px;height:38px;background:url("assets/pear.svg") center/contain no-repeat;transform:translateX(-50%) rotate(12deg);opacity:.92}
+ .duration-fruit-preview[data-fruit="random"]>img{transform:translateX(-10px) rotate(-8deg);z-index:1}
+ .duration-fruit-preview[data-fruit="random"]{position:absolute}
+ .stats-back{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","PingFang SC",sans-serif;line-height:1;padding-bottom:8px}
+ .stats-date-nav b,.stats-title h1,.settings-hero h1,.timer-value{font-family:ui-rounded,"SF Pro Rounded","SF Pro Display",-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+ .stats-mobile,.page-settings{-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+}
+
+@media(min-width:761px) and (max-width:1100px){
+ .duration-popover .mini-ruler:after{display:none}
+}
