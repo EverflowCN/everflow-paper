@@ -1,3 +1,4 @@
+export function makeId(){if(typeof crypto.randomUUID==='function')return crypto.randomUUID();const bytes=crypto.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;const hex=[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`}
 export const defaults = () => ({version:1,tags:[{id:'focus',name:'专注',color:'#ef8b24',minutes:25,archived:false}],sessions:[],settings:{minutes:25,short:5,long:15,cycles:4,window:'week',showFailed:false,sound:true,noise:false,gravity:false},selectedTag:'focus',active:null,cycle:0,pendingRest:false});
 export function validateState(s){
  if(!s||s.version!==1||!Array.isArray(s.tags)||!Array.isArray(s.sessions)||s.tags.length<1||s.tags.length>300||s.sessions.length>20000)throw Error('备份格式不正确或记录数量超限');
@@ -12,7 +13,7 @@ export function validateState(s){
  return s;
 }
 export const elapsed=(a,now=Date.now())=>a?Math.max(0,(a.elapsedMs+(a.paused?0:Math.max(0,now-a.resumedAt)))/1000):0;
-export function start(s,{rest=false,minutes=s.settings.minutes,now=Date.now(),id=crypto.randomUUID()}={}){
+export function start(s,{rest=false,minutes=s.settings.minutes,now=Date.now(),id=makeId()}={}){
  if(s.active)throw Error('请先结束当前计时');
  if(!Number.isFinite(minutes)||minutes<0||minutes>180)throw Error('时长不正确');
  s.pendingRest=false;s.active={id,tagId:s.selectedTag,start:now,resumedAt:now,elapsedMs:0,targetSeconds:minutes*60,mode:rest?'rest':'focus',kind:minutes===0?'up':'down',paused:false};return s.active;

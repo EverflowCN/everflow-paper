@@ -1,0 +1,1 @@
+import http from 'node:http';import fs from 'node:fs';const a=process.argv;const p=a.indexOf('--port');http.createServer((req,res)=>{const file=req.url.split('?')[0]==='/broken.html'?'broken.html':'fixed.html';res.setHeader('Content-Type','text/html');res.end(fs.readFileSync(new URL(file,import.meta.url)))}).listen(Number(p<0?4173:a[p+1]),'0.0.0.0');
