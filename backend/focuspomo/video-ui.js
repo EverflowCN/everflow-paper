@@ -80,6 +80,7 @@ function vRenderSettings(){
  root.innerHTML=`<header class="settings-hero"><button class="settings-back" id="vSettingsBack" aria-label="返回首页">‹</button><h1>欢迎^^</h1><p>What I do today is important because I am exchanging a day of my life for it.</p></header><section class="plus-card"><b>FocusPomo</b><span>从泥土，到星辰</span></section>`+
  vGroup('使用指南',vSettingRow('vFaq','常见问题','遇到了问题？你可以在这里找到答案')+vSettingRow('vWish','新功能许愿','记录你想补充的功能'))+
  vGroup('App 屏蔽工具',vSettingRow('vBlock','App 黑名单','屏蔽选中的 App 或类别','需原生 App')+vSettingRow('vBlocked','已屏蔽的 App','','—'))+
+ vGroup('果物','<div class="fruit-group"><div class="fruit-heading"><b>默认果物</b><small>每次专注固定一个果物；切换默认不会改写旧记录</small></div><div class="fruit-choice-grid" id="fp2FruitChoices"></div></div>')+
  vGroup('提醒',vSettingRow('vNotify','番茄钟提醒','完成番茄钟或休息结束时收到提醒',s.notifications?'开启':'关闭')+vSettingRow('vLive','实时活动','','需原生 App'))+
  vGroup('数据同步',vSettingRow('vCloud','云端同步','私人网页记录使用网站账号同步')+vSettingRow('vCalendarSync','同步到日历','导出专注记录为日历文件'))+
  vGroup('日期与时间',vSettingRow('vWeekStart','每周开始于','',s.weekStart===0?'周日':'周一')+vSwitchRow('vHour24','24 小时制',s.hour24!==false))+
@@ -89,6 +90,7 @@ function vRenderSettings(){
  vGroup('数据管理',vSettingRow('vBackup','导出备份','保存标签、专注记录和设置')+vSettingRow('vRestore','导入备份','从已导出的文件恢复'))+
  vGroup('更多',vSettingRow('vAbout','关于 FocusPomo','私人网页版')+vSettingRow('vVersion','版本信息','根据你提供的录屏持续还原'))+
  `<footer class="v-settings-footer"><img src="${FP5_HD_TOMATO}" alt="番茄"><p>Per aspera ad astra</p></footer>`;
+ FP2_renderFruitChoices();
  $('#vSettingsBack').onclick=()=>go('focus');$('#vFaq').onclick=()=>vInfo('常见问题','点击计时数字可修改时长；0 为正计时并支持暂停。完成的专注会进入统计，补录记录不会额外奖励番茄。网页关闭时无法保证即时通知。');$('#vWish').onclick=()=>{vSheet('新功能许愿',`<textarea id="vWishText" placeholder="写下你想要的功能">${esc(s.wish||'')}</textarea>`,[['vSaveWish','保存','primary']]);$('#vSaveWish').onclick=()=>{s.wish=$('#vWishText').value.slice(0,2000);modal.close();vPersist()}};
  for(const id of ['vBlock','vBlocked','vLive','vHealth'])$('#'+id).onclick=()=>vNative($('#'+id+' b').textContent);
  $('#vNotify').onclick=()=>{vSheet('提醒',vSwitchRow('vNotifySwitch','番茄钟提醒',s.notifications,'网页打开期间提醒')+'<h3>提醒方式</h3>'+vSwitchRow('vSoundSwitch','声音提醒',s.sound)+vSwitchRow('vVibrateSwitch','震动提醒',s.vibration,'需浏览器支持'));$('#vNotifySwitch').onclick=()=>{s.notifications=!s.notifications;if(s.notifications)send('focus-notification-permission');vPersist();modal.close()};for(const [id,key] of [['vSoundSwitch','sound'],['vVibrateSwitch','vibration']])$('#'+id).onclick=()=>{s[key]=!s[key];$('#'+id).setAttribute('aria-checked',s[key]);$('#'+id+' i').classList.toggle('is-on',s[key]);vPersist()}};
@@ -103,7 +105,23 @@ const vBaseGo=go;go=function(name){if(!['trend','pomodoro'].includes(name))V.det
 $('#settingsBtn').onclick=()=>go('settings');FP2_renderStats();render();
 /* A fresh account still has interactive fruit; these bodies never become records. */
 const vBaseSyncBodies=syncBodies;
-syncBodies=function(){vBaseSyncBodies();if(!bodies.length)bodies=[100,72,56,64].map((side,i)=>({id:'welcome-'+i,play:true,x:Math.max(side/2,width-side/2-i*67),y:height-side/2-i%2*65,r:side/2,vx:0,vy:0,a:(i-1)*.4,spin:0,failed:false,fruitType:'tomato',bornAt:performance.now()}));canvas.setAttribute('aria-label',visibleTomatoes().length?'专注收获的番茄，可点击跳起和拖动':'初始互动番茄，不计入专注记录')};
+let vFruitEntrancePending=true;
+function vPlaceFruitAtClock(items){
+ const box=canvas.getBoundingClientRect(),clock=$('#timerValue').getBoundingClientRect();
+ if(!box.width||!clock.width)return;
+ const cx=clock.left-box.left+clock.width/2,cy=clock.top-box.top;
+ items.forEach((b,i)=>{b.x=Math.max(b.r,Math.min(width-b.r,cx+(hash(b.id)%1000/1000-.5)*clock.width));b.y=cy-b.r-(i%3)*9;b.vx=(hash(b.id)%101-50)/28;b.vy=0;b.a=(hash(b.id)%80-40)/40;b.bornAt=performance.now()});
+}
+syncBodies=function(){
+ const old=new Map(bodies.map(b=>[b.id,b]));vBaseSyncBodies();
+ if(!bodies.length)bodies=[100,72,56,64].map((side,i)=>{const id='welcome-'+i,type=state.settings.defaultFruit==='random'?(i%2?'pear':'tomato'):state.settings.defaultFruit||'tomato';const previous=old.get(id);if(previous){previous.fruitType=type;return previous}return{id,play:true,x:width/2,y:height/3,r:side/2,vx:0,vy:0,a:0,spin:0,failed:false,fruitType:type}});
+ const fresh=vFruitEntrancePending?bodies:bodies.filter(b=>!old.has(b.id));if(fresh.length)vPlaceFruitAtClock(fresh);
+ canvas.setAttribute('aria-label',visibleTomatoes().length?'专注收获的果物，可点击跳起和拖动':'初始互动果物，不计入专注记录');
+};
+requestAnimationFrame(()=>{resize();syncBodies();vFruitEntrancePending=false});
 function vWeekRange(value){const d=new Date(dayStart(value)),startDay=state.settings.weekStart===0?0:1;d.setDate(d.getDate()-(d.getDay()-startDay+7)%7);const end=new Date(d);end.setDate(end.getDate()+7);return {start:d.getTime(),end:end.getTime()}}
 FP2_weekRange=vWeekRange;
 syncBodies();
+const vControlRenderTimer=renderTimer;
+renderTimer=function(){vControlRenderTimer();$('#pauseIcon').dataset.paused=String(!!state.active?.paused)};
+renderTimer();
