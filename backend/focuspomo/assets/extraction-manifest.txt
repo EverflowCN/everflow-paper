@@ -1,0 +1,27 @@
+FocusPomo 5.2.2 / decrypted IPA / Assets.car exact replacements
+
+This private page consumes original extracted renditions by semantic role rather than stretching one tomato/icon into every surface.
+The canonical SHA-1 blob ids expected after binary replacement are:
+
+tomato.png ccca94dba8a9c3584096a288028353e2a3a97e19
+tomato-small.png 8d413affcc7b77129c29f9c4139e919efeb0cb46
+tomato-interval.png 51f4ec2249ed5e644af847133df4b2063f9d0533
+tomato-data.png 81ad0e8f70cf4924a67d41cfd8f83cd4bbc9e4f5
+tomato-config.png d58209f20eac2ef53fc3e8c58eb4aae7cf0ecc8b
+fail_tomato1.png ece64aebd138feb127a8b71a48f7c20f9dcb3c68
+fail_tomato2.png b7be8591f96f37b2738037dfc0aab8108060fb23
+fail_tomato3.png 024dbb253374dd3e265d9a4dd15793bf11e81ce9
+fail-tomato-data.png 6b3fb8dedf9b5a7811f853de74bbf54ecb59fc23
+pause.png 05f8cfbd9254edc28210e7726bf887ef31926266
+continue.png 169d457d60c74ccd3559340ef16d72ef42139dfc
+stop.png f2e20ec362bf372bba6740c7b999367f54aa40b2
+sound.png 178da72f006a1b0b8c1b88a8256ced146af2a97e
+sound-off.png 2504684c402cf61f92731fed541135c4eaf59f2f
+back-data.png 0e972d7f611e2cc46efa5844c3b54ae292f97c1a
+prev-data.png 2df4e7c93201443680a2617029afd1e757bab0ef
+next-data.png 5b3badfe2df29d43e6de94b1546a8443142f0bd5
+next-data-disabled.png 07e39d6b11e6cd102636ddd1b07a3084d44db8b7
+tag-arrow.png 86b4c4286503d0c44a976a8fdc7550f024c97a82
+more.png 4cb06932812c7bafb63a3c459927cdda8b66972b
+picker-select.png c655243f47cf9b6e67761fb54998224c863d7c70
+app-icon.png d6b8b5aa80041a91d8e9ed521c3e616edf35508d
