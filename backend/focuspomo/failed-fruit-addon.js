@@ -4,6 +4,7 @@ const FP3_FAILED_TOMATO_ASSETS=[
  FP_ORIGINAL_ASSET_DATA.fail2||'assets/fail_tomato2.svg',
  FP_ORIGINAL_ASSET_DATA.fail3||'assets/fail_tomato3.svg'
 ];
+const FP3_DATA_CENTER_FAILED=FP_ORIGINAL_ASSET_DATA.failedData||FP3_FAILED_TOMATO_ASSETS[0];
 const FP3_failedTomatoSrc=row=>FP3_FAILED_TOMATO_ASSETS[hash(row?.id||'failed')%FP3_FAILED_TOMATO_ASSETS.length];
 const FP3_rowFruitSrc=(row,small=true)=>{
  if(row?.outcome==='abandoned'&&(row.fruitType||'tomato')==='tomato')return FP3_failedTomatoSrc(row);
@@ -22,7 +23,7 @@ renderData=function(){
  FP3_baseRenderData();if(!state.settings.showFailed)return;
  const wall=$('#tomatoWall');if(!wall)return;const failed=currentRows().filter(row=>!row.manual&&row.outcome==='abandoned');if(!failed.length)return;
  if(wall.querySelector('.empty'))wall.innerHTML='';
- wall.insertAdjacentHTML('beforeend',failed.map(row=>{const src=FP3_rowFruitSrc(row,true),size=FP2_durationSide(row.seconds);return `<button data-session="${FP2_escapeAttr(row.id)}" class="failed-session" title="放弃 · ${human(row.seconds)}" style="--detail-fruit:${Math.round(54+size/110*46)}%"><img src="${src}" alt="${esc(tag(row.tagId).name)} 放弃 ${human(row.seconds)}"></button>`}).join(''));
+ wall.insertAdjacentHTML('beforeend',failed.map(row=>{const src=(row.fruitType||'tomato')==='tomato'?FP3_DATA_CENTER_FAILED:FP3_rowFruitSrc(row,true),size=FP2_durationSide(row.seconds);return `<button data-session="${FP2_escapeAttr(row.id)}" class="failed-session" title="放弃 · ${human(row.seconds)}" style="--detail-fruit:${Math.round(54+size/110*46)}%"><img src="${src}" alt="${esc(tag(row.tagId).name)} 放弃 ${human(row.seconds)}"></button>`}).join(''));
  wall.querySelectorAll('.failed-session').forEach(button=>button.onclick=()=>editRecord(state.sessions.find(row=>row.id===button.dataset.session)));
 };
 animate=function(now){
