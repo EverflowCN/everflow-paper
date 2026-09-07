@@ -45,3 +45,31 @@
 @media(min-width:1101px){#window .start-focus{width:144px!important;min-width:144px!important;height:56px!important;padding:0!important;font-size:18px!important;border-radius:28px!important}#window .timer-value{font-size:68px!important}#window #focusControls button>span.original-control-icon{width:64px!important;height:64px!important;min-width:64px!important;min-height:64px!important}#window #focusControls button{min-width:64px!important;gap:10px!important}#window .focus-controls{gap:38px!important}}
 @media(max-height:550px){#window .focus-stage,#window.is-running .focus-stage{top:32%!important}#window .timer-value{font-size:64px!important}#window .start-focus{bottom:25%!important;height:54px!important}#window.is-running #focusControls{bottom:24px!important}#window #focusControls button>span.original-control-icon{width:60px!important;height:60px!important;min-width:60px!important;min-height:60px!important}#window #focusControls button{gap:8px!important}}
 @media(max-height:550px){#window.is-running .focus-stage{top:25%!important}#window.is-running #focusControls{bottom:116px!important}}
+/* Secondary-page geometry: decoded image pixels never determine a control's layout. */
+#window .v-data-head{display:grid!important;grid-template-columns:40px minmax(0,1fr) 40px!important;gap:10px!important;padding:16px 20px!important;height:76px!important}
+#window .v-data-head>button{width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;flex:none!important}
+#window .v-periods{width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;padding:3px!important;height:40px!important;gap:0!important}
+#window .v-periods button{width:auto!important;min-width:0!important;height:34px!important;padding:0 2px!important;white-space:nowrap!important;word-break:keep-all!important;font-size:13px!important;line-height:34px!important;text-align:center!important}
+#window .v-native-nav{background:transparent!important;box-shadow:none!important;padding:0!important;display:grid!important;place-items:center!important;flex-shrink:0!important}
+#window .v-extracted-icon{display:block!important;width:28px!important;height:28px!important;max-width:28px!important;max-height:28px!important;object-fit:contain!important;pointer-events:none!important}
+#window #vDataAdd .v-extracted-icon,#window #vCalAdd .v-extracted-icon{width:39px!important;height:31px!important;max-width:39px!important;max-height:31px!important}
+#window .v-data-scroll{height:calc(100% - 76px)!important;padding:6px 20px 32px!important}
+#window .v-data-scroll h1{font-size:26px!important;line-height:1.25!important;margin:8px 4px 2px!important}
+#window .v-data-date{height:44px!important;margin:0 0 14px!important;gap:8px!important;justify-content:flex-start!important;font-size:12px!important}
+#window .v-data-date button{width:36px!important;min-width:36px!important;max-width:36px!important;height:40px!important;flex:0 0 36px!important}
+#window .v-data-date .v-extracted-icon{width:24px!important;height:24px!important;max-width:24px!important;max-height:24px!important}
+#window .v-data[data-period=A] .v-data-date button{display:none!important}
+#window .v-data[data-period=A] .v-data-date{height:28px!important;padding-left:4px!important}
+#window .v-card{padding:20px!important;border-radius:22px!important}
+#window .v-pair{gap:12px!important;min-width:0!important}#window .v-pair>div{min-width:0!important}
+#window .v-pair span{font-size:13px!important;line-height:1.4!important}#window .v-pair b{font-size:26px!important;line-height:1.25!important}#window .v-pair small{font-size:12px!important}
+#window .v-fruit-wall{gap:5px!important;padding-top:18px!important}#window .v-fruit-wall button{min-width:0!important;width:100%!important;aspect-ratio:1!important;padding:0!important}#window .v-fruit-wall img{display:block!important;width:100%!important;height:100%!important;max-height:40px!important;object-fit:contain!important}
+#window .v-calendar-head{display:grid!important;grid-template-columns:36px minmax(0,1fr) 44px 40px!important;gap:6px!important;padding:16px 16px 8px!important}
+#window .v-calendar-head>button{min-width:0!important;height:40px!important;padding:0!important;white-space:nowrap!important}#window #vCalDate{font-size:17px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#window .v-week-strip{display:grid!important;grid-template-columns:28px repeat(7,minmax(0,1fr)) 28px!important;gap:2px!important;padding:6px 14px 12px!important}
+#window .v-week-strip button{min-width:0!important;padding:6px 0!important}#window .v-week-strip .v-extracted-icon{width:22px!important;height:22px!important;max-width:22px!important;max-height:22px!important}
+#window #vSettingsBack{width:40px!important;height:40px!important;min-width:40px!important;border-radius:50%!important}
+#window .settings-row em{width:14px!important;min-width:14px!important;flex:0 0 14px!important}#window .settings-row .v-extracted-chevron{width:8px!important;height:14px!important;object-fit:contain!important}
+#window .video-sheet .dialog-actions button{font-size:16px!important;min-height:44px!important}
+@media(min-width:761px){#window .v-data-head{grid-template-columns:40px minmax(220px,300px) 40px!important;justify-content:space-between!important;padding-left:28px!important;padding-right:28px!important}#window .v-data-scroll{padding-left:28px!important;padding-right:28px!important}#window .v-data-scroll h1{font-size:28px!important}#window .v-periods button{font-size:14px!important}}
+@media(max-width:360px){#window .v-data-head{padding-left:12px!important;padding-right:12px!important;gap:6px!important}#window .v-data-scroll{padding-left:14px!important;padding-right:14px!important}#window .v-card{padding:16px!important}}

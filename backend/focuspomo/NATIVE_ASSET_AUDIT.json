@@ -118,12 +118,12 @@
   },
   {
     "role": "newSession",
-    "source": "btn_newsession/btn_newsession@3x.png",
+    "source": "btn_newsession/btn_newsession@3x 1.png",
     "pixels": [
       117,
       93
     ],
-    "sha256": "2f6c91c659b3ebdd4c0b213ff828f805d2a00a582d262c5d7c3303389d629b45"
+    "sha256": "ad51955c086b3e739d2fb54c36348b41210f303bbf517d23b1a3cc1755538e84"
   },
   {
     "role": "pickerSelect",
