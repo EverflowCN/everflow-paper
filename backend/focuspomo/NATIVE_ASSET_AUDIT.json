@@ -1,0 +1,227 @@
+[
+  {
+    "role": "tomato",
+    "source": "ic_tomato/tomato_default@3x.png",
+    "pixels": [
+      450,
+      450
+    ],
+    "sha256": "75abc3c75465b5cbd6f8e201b6df61fcc458bbcb3938a09e87af66ba5eab16ec"
+  },
+  {
+    "role": "tomatoSmall",
+    "source": "tomato_for_data_center_details/tomato_default@3x 1.png",
+    "pixels": [
+      60,
+      60
+    ],
+    "sha256": "d97b9ac984fa0133fe6fbaaf19f6880a1098d621c0d1b705407020782a572058"
+  },
+  {
+    "role": "tomatoConfig",
+    "source": "tomatoForConfig/stiker_default 1.png",
+    "pixels": [
+      72,
+      72
+    ],
+    "sha256": "96cd64cce7c21f082066c9cfdd866fde1dd49d1d60f56d472c3578933cb2f772"
+  },
+  {
+    "role": "tomatoInterval",
+    "source": "tomato_for_select_interval/tomato_default.png",
+    "pixels": [
+      324,
+      324
+    ],
+    "sha256": "2ca9c89aa1127b6963127462912e726c7b108c80c46fd473c63e9ad8366de0e7"
+  },
+  {
+    "role": "tomatoData",
+    "source": "tomato_for_data_center/tomato_for_data_center@3x.png",
+    "pixels": [
+      78,
+      86
+    ],
+    "sha256": "0d433e12c2f03594e1aec4a1e07c11bc799c362c2af1ae5d3494d6f61bc519e2"
+  },
+  {
+    "role": "failedData",
+    "source": "failed_tomato_for_data_center/failed_tomato_for_data_center@3x.png",
+    "pixels": [
+      75,
+      75
+    ],
+    "sha256": "c138d5187560e80aec00c630df847f500a2df0754d5f4de876d6a941e6604121"
+  },
+  {
+    "role": "fail1",
+    "source": "fail_tomato1/fail1@3x.png",
+    "pixels": [
+      300,
+      300
+    ],
+    "sha256": "d1c6038fb9bb6355e7e9f718aed5317d2ab83c1a1e0ed5a8bc72a411053076ec"
+  },
+  {
+    "role": "fail2",
+    "source": "fail_tomato2/fail2@3x.png",
+    "pixels": [
+      300,
+      300
+    ],
+    "sha256": "c0fbcdba815cfede9356fbc4535091f4128d1bfb8deff10493f36487994d3e6d"
+  },
+  {
+    "role": "fail3",
+    "source": "fail_tomato3/fail3@3x.png",
+    "pixels": [
+      300,
+      300
+    ],
+    "sha256": "8ee1f99563bc90649ea9739f08c955b8a165f04ce40e4059f73f12e2739469ba"
+  },
+  {
+    "role": "backData",
+    "source": "backHomeFromData/backhome.png",
+    "pixels": [
+      144,
+      144
+    ],
+    "sha256": "96485a7258cd33bbf8227743257b168737b02bc9dc6dabda754bd329be26e411"
+  },
+  {
+    "role": "prevData",
+    "source": "data_center_prev_period/data_center_prev_period.png",
+    "pixels": [
+      72,
+      72
+    ],
+    "sha256": "90aa77aa7d2884fb4c3d6a69b720ab86c67e815d59a4d8d53af877301be38986"
+  },
+  {
+    "role": "nextData",
+    "source": "data_center_next_period/data_center_next_preriod.png",
+    "pixels": [
+      72,
+      72
+    ],
+    "sha256": "cf34511f2a5a0eec04c4ecf6afffbe44abea5b0aab4a9a22fe339f38112f9c39"
+  },
+  {
+    "role": "nextDataDisabled",
+    "source": "data_center_next_period_disabled/data_center_next_period_disabled.png",
+    "pixels": [
+      72,
+      72
+    ],
+    "sha256": "1c922e1507cf19565e1419c8b68dd72edcbdcb00cd234bb0a2d7a09824fd9f65"
+  },
+  {
+    "role": "newSession",
+    "source": "btn_newsession/btn_newsession@3x.png",
+    "pixels": [
+      117,
+      93
+    ],
+    "sha256": "2f6c91c659b3ebdd4c0b213ff828f805d2a00a582d262c5d7c3303389d629b45"
+  },
+  {
+    "role": "pickerSelect",
+    "source": "picker_select/picker_select@3x.png",
+    "pixels": [
+      39,
+      57
+    ],
+    "sha256": "49febb32c34e5883b8262765541282dfc44a110c530b6e88360a990f7d292a69"
+  },
+  {
+    "role": "sound",
+    "source": "focus_sound/focus_sound@3x.png",
+    "pixels": [
+      90,
+      90
+    ],
+    "sha256": "df86b3ca578d19472e93ebc240beb62431d795d88776e94922b5b81d8d4998f4"
+  },
+  {
+    "role": "soundOff",
+    "source": "focus_sound_mute/focus_sound_mute@3x.png",
+    "pixels": [
+      90,
+      90
+    ],
+    "sha256": "e5d56cf87b9deebe8d9f7ccb1640d0948a06fb7d96b94c308b1dc63e5390f7bf"
+  },
+  {
+    "role": "tagArrow",
+    "source": "selectTagArrowRight/selectTagArrowRight (1).png",
+    "pixels": [
+      23,
+      37
+    ],
+    "sha256": "801b8f29451289044f795983237086dd3d80eda6933beaf784353634cd262396"
+  },
+  {
+    "role": "tagArrowDark",
+    "source": "selectTagArrowRight/selectTagArrowRightDark.png",
+    "pixels": [
+      23,
+      37
+    ],
+    "sha256": "ac592f34a41e05ef1afb72ae3f2bd9777bdbf16be839f604da47cb6385ea391a"
+  },
+  {
+    "role": "pauseButton",
+    "source": "countup_pause/btn_pause@3x.png",
+    "pixels": [
+      246,
+      246
+    ],
+    "sha256": "305c622515178dbc2645372ca3219d28b94f38bced79b3aa17ed4eb6da7c5264"
+  },
+  {
+    "role": "pauseButtonDark",
+    "source": "countup_pause/btn_pause@3x-1.png",
+    "pixels": [
+      246,
+      246
+    ],
+    "sha256": "19721a4565af183df3e1db22e2e41c087be964745828a4847cf9bf81c22d7a49"
+  },
+  {
+    "role": "resumeButton",
+    "source": "countup_continue/btn_start@3x.png",
+    "pixels": [
+      246,
+      246
+    ],
+    "sha256": "c6e552d2ef9ad9c78fc154deefdce5c61e7e29f9fd943dc3d98f2d1ff7ce546e"
+  },
+  {
+    "role": "resumeButtonDark",
+    "source": "countup_continue/btn_start@3x-1.png",
+    "pixels": [
+      246,
+      246
+    ],
+    "sha256": "31465f1c55d72485f32de2860529b21405eded2e58349dcea69eb3dadbe6e8b5"
+  },
+  {
+    "role": "stopButton",
+    "source": "countup_stop/btn_done@3x.png",
+    "pixels": [
+      246,
+      246
+    ],
+    "sha256": "046767571e8876fb995347ad80fb651e42293674e73e8ea7cbd908e4eabec99c"
+  },
+  {
+    "role": "stopButtonDark",
+    "source": "countup_stop/btn_done@3x-1.png",
+    "pixels": [
+      246,
+      246
+    ],
+    "sha256": "b32fd26df6a5f2a4fc06de4677eed1d8a57b7806575ecb04b8b25de725868983"
+  }
+]

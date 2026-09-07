@@ -8,6 +8,7 @@ const FP4_ASSETS={
  tomatoData:FP4_data('tomatoData',FP4_data('tomatoSmall','assets/tomato-small.png')),
  tomatoConfig:FP4_data('tomatoConfig',FP4_data('tomatoSmall','assets/tomato-small.png')),
  failedData:FP4_data('failedData',FP4_data('fail1','assets/fail_tomato1.svg')),
+ pauseButton:FP4_data('pauseButton',''),pauseButtonDark:FP4_data('pauseButtonDark',''),resumeButton:FP4_data('resumeButton',''),resumeButtonDark:FP4_data('resumeButtonDark',''),stopButton:FP4_data('stopButton',''),stopButtonDark:FP4_data('stopButtonDark',''),
  pause:FP4_data('pause','assets/home-pause.svg'),resume:FP4_data('resume','assets/home-continue.svg'),stop:FP4_data('stop','assets/home-stop.svg'),
  pauseDark:FP4_data('pauseDark',FP4_data('pause','assets/home-pause.svg')),resumeDark:FP4_data('resumeDark',FP4_data('resume','assets/home-continue.svg')),stopDark:FP4_data('stopDark',FP4_data('stop','assets/home-stop.svg')),
  sound:FP4_data('sound',''),soundOff:FP4_data('soundOff',''),
@@ -36,8 +37,8 @@ function FP4_applyStaticAssets(){
 }
 function FP4_applyTimerAssets(){
  const a=state.active,dark=FP4_isDark(),pauseIcon=$('#pauseIcon'),finish=$('#finishBtn span');
- if(pauseIcon){const src=a?.paused?(dark?FP4_ASSETS.resumeDark:FP4_ASSETS.resume):(dark?FP4_ASSETS.pauseDark:FP4_ASSETS.pause);pauseIcon.classList.add('original-control-icon');pauseIcon.innerHTML=FP4_img(src,'original-icon',a?.paused?'继续':'暂停')}
- if(finish){finish.classList.add('original-control-icon');finish.innerHTML=FP4_img(dark?FP4_ASSETS.stopDark:FP4_ASSETS.stop,'original-icon','结束')}
+ if(pauseIcon){const src=a?.paused?(dark?FP4_ASSETS.resumeButtonDark:FP4_ASSETS.resumeButton):(dark?FP4_ASSETS.pauseButtonDark:FP4_ASSETS.pauseButton);pauseIcon.classList.add('original-control-icon');pauseIcon.innerHTML=FP4_img(src,'original-icon',a?.paused?'继续':'暂停')}
+ if(finish){finish.classList.add('original-control-icon');finish.innerHTML=FP4_img(dark?FP4_ASSETS.stopButtonDark:FP4_ASSETS.stopButton,'original-icon','结束')}
  const sound=$('#soundBtn .menu-original-icon');if(sound){const src=state.settings.sound?FP4_ASSETS.sound:FP4_ASSETS.soundOff;if(src)sound.src=src}
 }
 function FP4_applyFruitRoles(){
