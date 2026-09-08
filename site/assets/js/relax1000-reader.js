@@ -69,12 +69,23 @@ function renderNav(){
   if(!nav)return;const records=loadRecords(),groups=navGroups();
   nav.innerHTML=`<div class="relax-reader-nav-head"><div><strong>题目导航</strong><small>按科目 / 章节分组</small></div><span data-reader-nav-progress>${selectedIndex+1} / ${queue.length}</span></div><div class="relax-reader-nav-groups">${groups.map(group=>`<section class="relax-reader-nav-group" data-nav-group="${esc(group.key)}"><header><div><b>${esc(group.subject)}</b><strong>${group.chapterOrder?`第 ${group.chapterOrder} 章 · `:''}${esc(group.chapter)}</strong></div><em>${group.items.length} 题</em></header><div class="relax-reader-nav-grid">${group.items.map(({question,index})=>navButtonHtml(question,index,records)).join('')}</div></section>`).join('')}</div><div class="relax-reader-nav-legend"><span><i></i>未标记</span><span class="mastered"><i></i>熟悉</span><span class="fuzzy"><i></i>模糊</span><span class="weak"><i></i>不会</span></div>`;
   nav.querySelectorAll('[data-reader-jump]').forEach(button=>button.onclick=()=>jumpTo(Number(button.dataset.readerJump)));
+  const scroller=nav.querySelector('.relax-reader-nav-groups');
+  scroller.tabIndex=0;scroller.setAttribute('role','region');scroller.setAttribute('aria-label','题目导航，可上下滚动');
+  requestAnimationFrame(revealNavSelection);
 }
 function refreshNavButton(index){
   if(!nav||index<0||index>=queue.length)return;const button=nav.querySelector(`[data-reader-jump="${index}"]`);if(!button)return;const question=queue[index],records=loadRecords(),state=questionState(question,records),number=questionNumber(question,index);button.className=navClass(question,index,records);button.setAttribute('aria-label',`${question.chapter||''}第 ${number} 题${index===selectedIndex?'，当前题':''}`);if(index===selectedIndex)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');button.innerHTML=`<span>${esc(number)}</span>${state.favorite?'<i>★</i>':''}`;
 }
 function refreshNavSelection(previousIndex){
-  refreshNavButton(previousIndex);refreshNavButton(selectedIndex);const progress=nav?.querySelector('[data-reader-nav-progress]');if(progress)progress.textContent=`${selectedIndex+1} / ${queue.length}`;nav?.querySelector(`[data-reader-jump="${selectedIndex}"]`)?.scrollIntoView?.({block:'nearest',inline:'nearest'});
+  refreshNavButton(previousIndex);refreshNavButton(selectedIndex);const progress=nav?.querySelector('[data-reader-nav-progress]');if(progress)progress.textContent=`${selectedIndex+1} / ${queue.length}`;revealNavSelection();
+}
+function revealNavSelection(){
+  const scroller=nav?.querySelector('.relax-reader-nav-groups');
+  const button=nav?.querySelector(`[data-reader-jump="${selectedIndex}"]`);
+  if(!scroller||!button)return;
+  const viewport=scroller.getBoundingClientRect(),target=button.getBoundingClientRect();
+  if(target.top<viewport.top+6)scroller.scrollTop+=target.top-viewport.top-6;
+  else if(target.bottom>viewport.bottom-6)scroller.scrollTop+=target.bottom-viewport.bottom+6;
 }
 function shortcutHtml(){return `<div class="relax-reader-shortcuts" aria-label="电脑快捷键"><span><kbd>A-D</kbd>选项</span><span><kbd>Enter</kbd>提交</span><span><kbd>←</kbd><kbd>→</kbd>切题</span><span><kbd>1</kbd>熟悉</span><span><kbd>2</kbd>模糊</span><span><kbd>3</kbd>不会</span><span><kbd>F</kbd>收藏</span><span><kbd>E</kbd>解析</span><span><kbd>Esc</kbd>返回</span></div>`}
 function renderQuestion(){
