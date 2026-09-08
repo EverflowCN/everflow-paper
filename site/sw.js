@@ -1,4 +1,4 @@
-const CACHE='everflow-site-v60-private-focus';
+const CACHE='everflow-site-v61-relax-nav-scroll';
 const CORE=[
   '/',
   '/study/',
@@ -91,3 +91,4 @@ self.addEventListener('fetch',event=>{
   if(path.startsWith('/data/')&&/\.(?:png|jpe?g|webp|gif|svg)$/i.test(path)){event.respondWith(staleWhileRevalidate(request,event));return}
   event.respondWith(path.startsWith('/data/')?networkFirst(request,event):staleWhileRevalidate(request,event));
 });
+
