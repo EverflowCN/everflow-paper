@@ -19,9 +19,14 @@ const cleanLatex=value=>{
     .replace(/\\begin\{minipage\}\{[^}]*\}/g,'')
     .replace(/\\end\{minipage\}/g,'')
     .replace(/\\relax\b|\\mbox\s*\{\s*\}/g,'');
-  const fixMath=body=>body
-    .replace(/\\ExamBlank\b/g,'\\underline{\\hspace{3em}}')
-    .replace(/\\ExamSelection\b/g,'');
+  const fixMath=body=>{
+    let out=body
+      .replace(/\\ExamBlank\b/g,'\\underline{\\hspace{3em}}')
+      .replace(/\\ExamSelection\b/g,'')
+      .replace(/\\(iint|iiint|oint)\s*(?!\\limits)_(?=\{|[A-Za-z]|\\)/g,'\\$1\\limits_');
+    if(/\\(?:lim|sum|prod|int|iint|iiint|oint|max|min|sup|inf)\b/.test(out)&&!/\\(?:displaystyle|textstyle|scriptstyle|scriptscriptstyle)\b/.test(out))out='\\displaystyle '+out.trim();
+    return out;
+  };
   source=replaceMathSegment(source,/\$([^$]*)\$/gs,(_,body)=>`$${fixMath(body)}$`);
   source=replaceMathSegment(source,/\\\(([\s\S]*?)\\\)/g,(_,body)=>`\\(${fixMath(body)}\\)`);
   source=replaceMathSegment(source,/\\\[([\s\S]*?)\\\]/g,(_,body)=>`\\[${fixMath(body)}\\]`);
