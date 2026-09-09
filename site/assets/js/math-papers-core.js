@@ -10,6 +10,7 @@ export const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify
 export const subjectName=()=> '数学二';
 export const sectionName=id=>({choice:'选择题',fill:'填空题',solution:'解答题'}[id]||'题目');
 const CIRCLED={1:'①',2:'②',3:'③',4:'④',5:'⑤',6:'⑥',7:'⑦',8:'⑧',9:'⑨'};
+const CIRCLED_CHARS='①②③④⑤⑥⑦⑧⑨';
 const replaceMathSegment=(source,pattern,transform)=>source.replace(pattern,(full,body)=>transform(body));
 const normalizeMathUnicode=body=>String(body??'')
   .replace(/\\text\{\s*其他[，,]?\s*\}/g,'\\mathrm{otherwise}')
@@ -22,7 +23,7 @@ const normalizeMathUnicode=body=>String(body??'')
   .replace(/。/g,'.')
   .replace(/（/g,'(')
   .replace(/）/g,')')
-  .replace(/[①②③④⑤⑥⑦⑧⑨]/g,ch=>`\\mathrm{(${CIRCLED.indexOf(ch)+1})}`);
+  .replace(/[①②③④⑤⑥⑦⑧⑨]/g,ch=>`\\mathrm{(${CIRCLED_CHARS.indexOf(ch)+1})}`);
 const cleanLatex=value=>{
   let source=String(value??'')
     .replace(/\\textcircled\s*\{([1-9])\}/g,(_,n)=>CIRCLED[n]||n)
