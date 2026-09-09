@@ -1,42 +1,24 @@
-const body=document.body;
-if(body.dataset.view!=='zhenti')throw new Error('question-bank-switch loaded outside bank page');
-
+const body=document.body;if(body.dataset.view!=='zhenti')throw new Error('question-bank-switch loaded outside bank page');
 document.title='题库 · Everflow';
-const KEY='everflow-408-bank-source-v1';
-const RELAX_VERSION='20260828-qwer-strong1';
-const RELAX_DATA_VERSION='20260825-bank2';
-const current=(()=>{try{return localStorage.getItem(KEY)==='relax1000'?'relax1000':'zhenti'}catch{return'zhenti'}})();
-body.dataset.questionBank=current;
-body.classList.toggle('relax1000-active',current==='relax1000');
-
+const KEY='everflow-408-bank-source-v1',RELAX_VERSION='20260828-qwer-strong1',RELAX_DATA_VERSION='20260825-bank2',MATH_VERSION='20260909-math2-papers1';
+const raw=(()=>{try{return localStorage.getItem(KEY)}catch{return null}})();const current=['zhenti','relax1000','math-papers'].includes(raw)?raw:'zhenti';
+const noteFor=value=>value==='relax1000'?'408 区 · 章节题库 / 题库墙 / 独立阅读器 / 速刷卡片':value==='math-papers'?'数学区 · 数学二 107 套（无标准答案，需自行查找并自行判断正误）':'408 区 · 历年真题 / 真题墙 / 整套真题 / 速刷卡片';
+const shellMarkup=value=>`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-zones"><div class="bank-source-zone"><span>408 区</span><div class="bank-source-segmented" role="tablist" aria-label="408 题库"><button type="button" data-bank-source="zhenti" class="${value==='zhenti'?'active':''}">真题</button><button type="button" data-bank-source="relax1000" class="${value==='relax1000'?'active':''}">Relax1000</button></div></div><div class="bank-source-zone"><span>数学区</span><div class="bank-source-segmented" role="tablist" aria-label="数学题库"><button type="button" data-bank-source="math-papers" class="${value==='math-papers'?'active':''}">套题</button></div></div></div><span class="bank-source-note">${noteFor(value)}</span></div>`;
+body.dataset.questionBank=current;body.classList.toggle('relax1000-active',current==='relax1000');body.classList.toggle('math-papers-active',current==='math-papers');
 if(!document.querySelector('link[href*="question-bank-switch.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href=`/assets/css/question-bank-switch.css?v=${RELAX_VERSION}`;document.head.appendChild(css)}
-
-let shell=document.querySelector('[data-bank-source-shell]');
-if(!shell){shell=document.createElement('section');shell.className='bank-source-shell';shell.dataset.bankSourceShell='';shell.setAttribute('aria-label','题库切换');shell.innerHTML=`<div class="bank-source-inner"><span class="bank-source-label">题库</span><div class="bank-source-segmented" role="tablist"><button type="button" data-bank-source="zhenti" class="${current==='zhenti'?'active':''}">408 真题</button><button type="button" data-bank-source="relax1000" class="${current==='relax1000'?'active':''}">Relax1000</button></div><span class="bank-source-note">${current==='relax1000'?'章节题库 · 题库墙 / 独立阅读器 / 速刷卡片':'历年真题 · 真题墙 / 整套真题 / 速刷卡片'}</span></div>`}
-const main=document.querySelector('main');
-if(!shell.isConnected){if(main)main.before(shell);else document.body.appendChild(shell)}
-shell.querySelectorAll('[data-bank-source]').forEach(button=>{if(button.dataset.bankSourceBound==='1')return;button.dataset.bankSourceBound='1';button.addEventListener('click',()=>{
-  const next=button.dataset.bankSource;if(next===current)return;
-  try{localStorage.setItem(KEY,next)}catch{}
-  location.reload();
-})});
-
-if(current!=='relax1000'){
-  const warmRelax=()=>fetch(`/data/relax1000/data/questions.json?v=${RELAX_DATA_VERSION}`,{cache:'force-cache'}).catch(()=>null);
-  if('requestIdleCallback' in window)requestIdleCallback(warmRelax,{timeout:1800});else setTimeout(warmRelax,900);
-}
-
+if(!document.querySelector('[data-bank-zone-style]')){const style=document.createElement('style');style.dataset.bankZoneStyle='';style.textContent='.bank-source-zones{display:flex;align-items:center;gap:8px}.bank-source-zone{display:flex;align-items:center;gap:6px}.bank-source-zone>span{font-size:10px;font-weight:900;color:var(--muted,#7b7f89);white-space:nowrap}.bank-source-zone+.bank-source-zone{padding-left:8px;border-left:1px solid var(--line,#e2e2e7)}@media(max-width:620px){.bank-source-inner{align-items:stretch}.bank-source-zones{width:100%;display:grid;grid-template-columns:2fr 1fr;gap:6px}.bank-source-zone{display:grid;grid-template-columns:auto 1fr;gap:4px}.bank-source-zone>span{display:none}.bank-source-segmented{width:100%!important;display:grid!important}.bank-source-zone:first-child .bank-source-segmented{grid-template-columns:1fr 1fr}.bank-source-zone:last-child{border-left:0!important;padding-left:0!important}.bank-source-zone:last-child .bank-source-segmented{grid-template-columns:1fr}}';document.head.appendChild(style)}
+let shell=document.querySelector('[data-bank-source-shell]');if(!shell){shell=document.createElement('section');shell.className='bank-source-shell';shell.dataset.bankSourceShell='';shell.setAttribute('aria-label','题库切换')}
+if(!shell.querySelector('[data-bank-source="math-papers"]'))shell.innerHTML=shellMarkup(current);else{shell.querySelectorAll('[data-bank-source]').forEach(button=>button.classList.toggle('active',button.dataset.bankSource===current));const note=shell.querySelector('.bank-source-note');if(note)note.textContent=noteFor(current)}
+const main=document.querySelector('main');if(!shell.isConnected){if(main)main.before(shell);else document.body.appendChild(shell)}
+shell.querySelectorAll('[data-bank-source]').forEach(button=>{if(button.dataset.bankSourceBound==='1')return;button.dataset.bankSourceBound='1';button.addEventListener('click',()=>{const next=button.dataset.bankSource;if(next===current)return;try{localStorage.setItem(KEY,next)}catch{}location.reload()})});
+if(current!=='relax1000'){const warmRelax=()=>fetch(`/data/relax1000/data/questions.json?v=${RELAX_DATA_VERSION}`,{cache:'force-cache'}).catch(()=>null);if('requestIdleCallback' in window)requestIdleCallback(warmRelax,{timeout:1800});else setTimeout(warmRelax,900)}
+if(current!=='math-papers'){const warmMath=()=>fetch(`/data/math-papers/catalog.json?v=${MATH_VERSION}`,{cache:'force-cache'}).catch(()=>null);if('requestIdleCallback' in window)requestIdleCallback(warmMath,{timeout:2400});else setTimeout(warmMath,1200)}
 if(current==='relax1000'){
   if(!document.querySelector('link[href*="relax1000-controls.css"]')){const controls=document.createElement('link');controls.rel='stylesheet';controls.href=`/assets/css/relax1000-controls.css?v=${RELAX_VERSION}`;document.head.appendChild(controls)}
   if(!document.querySelector('link[href*="relax1000-wall-strong.css"]')){const strongWall=document.createElement('link');strongWall.rel='stylesheet';strongWall.href=`/assets/css/relax1000-wall-strong.css?v=${RELAX_VERSION}`;document.head.appendChild(strongWall)}
-  import(`/assets/js/relax1000-wall.js?v=${RELAX_VERSION}`)
-    .then(()=>import(`/assets/js/relax1000-cards.js?v=${RELAX_VERSION}`))
-    .then(()=>import(`/assets/js/relax1000-reset.js?v=${RELAX_VERSION}`))
-    .catch(error=>{
-      console.error('Everflow Relax1000 bank failed',error);
-      document.querySelector('.relax-bank-root')?.remove();
-      const fail=document.createElement('main');fail.className='relax-bank-root relax-load-failed';
-      fail.innerHTML='<section><h1>Relax1000 载入失败</h1><p>题库模块暂时没有完整载入，请刷新后重试。</p></section>';
-      shell.after(fail);
-    });
+  import(`/assets/js/relax1000-wall.js?v=${RELAX_VERSION}`).then(()=>import(`/assets/js/relax1000-cards.js?v=${RELAX_VERSION}`)).then(()=>import(`/assets/js/relax1000-reset.js?v=${RELAX_VERSION}`)).catch(error=>{console.error('Everflow Relax1000 bank failed',error);document.querySelector('.relax-bank-root')?.remove();const fail=document.createElement('main');fail.className='relax-bank-root relax-load-failed';fail.innerHTML='<section><h1>Relax1000 载入失败</h1><p>题库模块暂时没有完整载入，请刷新后重试。</p></section>';shell.after(fail)})
+}
+if(current==='math-papers'){
+  if(!document.querySelector('link[href*="math-papers.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href=`/assets/css/math-papers.css?v=${MATH_VERSION}`;document.head.appendChild(css)}
+  import(`/assets/js/math-papers.js?v=${MATH_VERSION}`).catch(error=>{console.error('Everflow math paper bank failed',error);document.querySelector('.math-bank-root')?.remove();const fail=document.createElement('main');fail.className='math-bank-root math-load-error';fail.innerHTML='<strong>数学套题库载入失败</strong><p>模块暂时没有完整载入，请刷新页面后重试。</p>';shell.after(fail)})
 }
