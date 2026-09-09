@@ -11,16 +11,30 @@ export const subjectName=()=> '数学二';
 export const sectionName=id=>({choice:'选择题',fill:'填空题',solution:'解答题'}[id]||'题目');
 const CIRCLED={1:'①',2:'②',3:'③',4:'④',5:'⑤',6:'⑥',7:'⑦',8:'⑧',9:'⑨'};
 const replaceMathSegment=(source,pattern,transform)=>source.replace(pattern,(full,body)=>transform(body));
+const normalizeMathUnicode=body=>String(body??'')
+  .replace(/\\text\{\s*其他[，,]?\s*\}/g,'\\mathrm{otherwise}')
+  .replace(/x\\text\{\s*为有理数\s*\}/g,'x\\in\\mathbb{Q}')
+  .replace(/x\\text\{\s*为无理数\s*\}/g,'x\\notin\\mathbb{Q}')
+  .replace(/x不是整数/g,'x\\notin\\mathbb{Z}')
+  .replace(/x是整数/g,'x\\in\\mathbb{Z}')
+  .replace(/\\text\{（([IVX]+)）\}/g,'\\mathrm{($1)}')
+  .replace(/[，、]/g,',')
+  .replace(/。/g,'.')
+  .replace(/（/g,'(')
+  .replace(/）/g,')')
+  .replace(/[①②③④⑤⑥⑦⑧⑨]/g,ch=>`\\mathrm{(${CIRCLED.indexOf(ch)+1})}`);
 const cleanLatex=value=>{
   let source=String(value??'')
     .replace(/\\textcircled\s*\{([1-9])\}/g,(_,n)=>CIRCLED[n]||n)
+    .replace(/m\/s\\textsuperscript\{2\}/g,'m/s²')
+    .replace(/\\quad\s*(?=[①②③④⑤⑥⑦⑧⑨])/g,'　')
     .replace(/\\NPEEQuestionContinuation\b/g,'\n')
     .replace(/\\par\b/g,'\n')
     .replace(/\\begin\{minipage\}\{[^}]*\}/g,'')
     .replace(/\\end\{minipage\}/g,'')
     .replace(/\\relax\b|\\mbox\s*\{\s*\}/g,'');
   const fixMath=body=>{
-    let out=body
+    let out=normalizeMathUnicode(body)
       .replace(/\\ExamBlank\b/g,'\\underline{\\hspace{3em}}')
       .replace(/\\ExamSelection\b/g,'')
       .replace(/\\(iint|iiint|oint)\s*(?!\\limits)_(?=\{|[A-Za-z]|\\)/g,'\\$1\\limits_');
@@ -45,14 +59,19 @@ export const percent=(done,total)=>total?Math.round(done/total*100):0;
 export const formatTime=seconds=>{seconds=Math.max(0,Math.floor(seconds||0));const h=Math.floor(seconds/3600),m=Math.floor(seconds%3600/60),s=seconds%60;return[h,m,s].map(v=>String(v).padStart(2,'0')).join(':')};
 
 let mathJaxPromise=null;
+const MATHJAX_SOURCES=[
+  'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js',
+  'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js'
+];
+function loadMathJaxScript(src){return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=true;script.dataset.everflowMathjax='';script.onload=()=>resolve();script.onerror=()=>{script.remove();reject(new Error(`MathJax load failed: ${src}`))};document.head.appendChild(script)})}
 function ensureMathJax(){
   if(window.MathJax?.typesetPromise)return Promise.resolve(window.MathJax);
   if(mathJaxPromise)return mathJaxPromise;
-  window.MathJax={loader:{load:['[tex]/boldsymbol']},tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true,packages:{'[+]':['ams','boldsymbol']}},svg:{fontCache:'global'},startup:{typeset:false}};
-  mathJaxPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';script.async=true;script.onload=()=>resolve(window.MathJax);script.onerror=()=>reject(new Error('MathJax load failed'));document.head.appendChild(script)});
+  window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true,packages:{'[+]':['ams','boldsymbol']}},svg:{fontCache:'global'},startup:{typeset:false}};
+  mathJaxPromise=(async()=>{let lastError=null;for(const src of MATHJAX_SOURCES){try{await loadMathJaxScript(src);if(window.MathJax?.typesetPromise)return window.MathJax}catch(error){lastError=error}}throw lastError||new Error('MathJax unavailable')})().catch(error=>{mathJaxPromise=null;throw error});
   return mathJaxPromise;
 }
-export async function typeset(node){try{const mj=await ensureMathJax();if(mj.typesetClear)mj.typesetClear([node]);await mj.typesetPromise([node]);const width=node?.clientWidth||0;if(width)node.querySelectorAll('mjx-container').forEach(el=>{el.classList.remove('math-wide-formula');if(el.getBoundingClientRect().width>width-4)el.classList.add('math-wide-formula')})}catch(error){console.warn('[Everflow] 数学公式渲染不可用，保留原始 LaTeX。',error)}}
+export async function typeset(node){try{node?.removeAttribute('data-math-render-error');const mj=await ensureMathJax();if(mj.typesetClear)mj.typesetClear([node]);await mj.typesetPromise([node]);const width=node?.clientWidth||0;if(width)node.querySelectorAll('mjx-container').forEach(el=>{el.classList.remove('math-wide-formula');if(el.getBoundingClientRect().width>width-4)el.classList.add('math-wide-formula')})}catch(error){node?.setAttribute('data-math-render-error','1');console.warn('[Everflow] 数学公式组件加载失败，已保留原始 LaTeX。',error)}}
 
 export function getProgress(){const value=readJson(PROGRESS_KEY,{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
 export function paperRecord(id){const all=getProgress();const raw=all[id]&&typeof all[id]==='object'?all[id]:{};return{answers:raw.answers||{},judgements:raw.judgements||{},visited:Array.isArray(raw.visited)?raw.visited:[],elapsed:Number(raw.elapsed)||0,...raw}}
