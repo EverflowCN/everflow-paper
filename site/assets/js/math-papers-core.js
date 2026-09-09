@@ -9,14 +9,28 @@ const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)|
 export const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
 export const subjectName=()=> '数学二';
 export const sectionName=id=>({choice:'选择题',fill:'填空题',solution:'解答题'}[id]||'题目');
-const cleanLatex=value=>String(value??'')
-  .replace(/\\ExamSelection\b/g,'')
-  .replace(/\\ExamBlank\b/g,'______')
-  .replace(/\\NPEEQuestionContinuation\b/g,'')
-  .replace(/\\par\b/g,'\n')
-  .replace(/\\begin\{minipage\}\{[^}]*\}/g,'')
-  .replace(/\\end\{minipage\}/g,'')
-  .trim();
+const CIRCLED={1:'①',2:'②',3:'③',4:'④',5:'⑤',6:'⑥',7:'⑦',8:'⑧',9:'⑨'};
+const replaceMathSegment=(source,pattern,transform)=>source.replace(pattern,(full,body)=>transform(body,full));
+const cleanLatex=value=>{
+  let source=String(value??'')
+    .replace(/\\textcircled\s*\{([1-9])\}/g,(_,n)=>CIRCLED[n]||n)
+    .replace(/\\NPEEQuestionContinuation\b/g,'\n')
+    .replace(/\\par\b/g,'\n')
+    .replace(/\\begin\{minipage\}\{[^}]*\}/g,'')
+    .replace(/\\end\{minipage\}/g,'')
+    .replace(/\\relax\b|\\mbox\s*\{\s*\}/g,'');
+  const fixMath=body=>body
+    .replace(/\\ExamBlank\b/g,'\\underline{\\hspace{3em}}')
+    .replace(/\\ExamSelection\b/g,'');
+  source=replaceMathSegment(source,/\$([^$]*)\$/gs,(_,body)=>`$${fixMath(body)}$`);
+  source=replaceMathSegment(source,/\\\(([\s\S]*?)\\\)/g,(_,body)=>`\\(${fixMath(body)}\\)`);
+  source=replaceMathSegment(source,/\\\[([\s\S]*?)\\\]/g,(_,body)=>`\\[${fixMath(body)}\\]`);
+  return source
+    .replace(/\\ExamBlank\b/g,'______')
+    .replace(/\\ExamSelection\b/g,'')
+    .replace(/^\\\s*$/gm,'')
+    .trim();
+};
 export const latexHtml=value=>esc(cleanLatex(value)).replace(/\n/g,'<br>');
 export const svgDataUrl=value=>`data:image/svg+xml;charset=utf-8,${encodeURIComponent(String(value||''))}`;
 export const percent=(done,total)=>total?Math.round(done/total*100):0;
@@ -26,7 +40,7 @@ let mathJaxPromise=null;
 function ensureMathJax(){
   if(window.MathJax?.typesetPromise)return Promise.resolve(window.MathJax);
   if(mathJaxPromise)return mathJaxPromise;
-  window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true,packages:{'[+]':['ams']}},svg:{fontCache:'global'},startup:{typeset:false}};
+  window.MathJax={loader:{load:['[tex]/boldsymbol']},tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true,packages:{'[+]':['ams','boldsymbol']}},svg:{fontCache:'global'},startup:{typeset:false}};
   mathJaxPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';script.async=true;script.onload=()=>resolve(window.MathJax);script.onerror=()=>reject(new Error('MathJax load failed'));document.head.appendChild(script)});
   return mathJaxPromise;
 }
@@ -38,7 +52,6 @@ export function savePaperRecord(id,record){const all=getProgress();all[id]={...r
 export function answerDone(value){return typeof value==='string'?Boolean(value.trim()):value!==undefined&&value!==null&&value!==''}
 export function answeredCount(record){return Object.values(record?.answers||{}).filter(answerDone).length}
 export function judgementCount(record,value){return Object.values(record?.judgements||{}).filter(v=>v===value).length}
-
 
 export function expandCatalog(doc){
   if(doc&&!Array.isArray(doc.papers)&&Array.isArray(doc.paper_rows)){
