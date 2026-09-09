@@ -10,7 +10,7 @@ export const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify
 export const subjectName=()=> '数学二';
 export const sectionName=id=>({choice:'选择题',fill:'填空题',solution:'解答题'}[id]||'题目');
 const CIRCLED={1:'①',2:'②',3:'③',4:'④',5:'⑤',6:'⑥',7:'⑦',8:'⑧',9:'⑨'};
-const replaceMathSegment=(source,pattern,transform)=>source.replace(pattern,(full,body)=>transform(body,full));
+const replaceMathSegment=(source,pattern,transform)=>source.replace(pattern,(full,body)=>transform(body));
 const cleanLatex=value=>{
   let source=String(value??'')
     .replace(/\\textcircled\s*\{([1-9])\}/g,(_,n)=>CIRCLED[n]||n)
@@ -24,13 +24,16 @@ const cleanLatex=value=>{
       .replace(/\\ExamBlank\b/g,'\\underline{\\hspace{3em}}')
       .replace(/\\ExamSelection\b/g,'')
       .replace(/\\(iint|iiint|oint)\s*(?!\\limits)_(?=\{|[A-Za-z]|\\)/g,'\\$1\\limits_');
-    if(/\\(?:lim|sum|prod|int|iint|iiint|oint|max|min|sup|inf)\b/.test(out)&&!/\\(?:displaystyle|textstyle|scriptstyle|scriptscriptstyle)\b/.test(out))out='\\displaystyle '+out.trim();
+    if(/\\(?:lim|sum|prod|int|iint|iiint|oint|max|min|sup|inf)(?![A-Za-z])/.test(out)&&!/\\(?:displaystyle|textstyle|scriptstyle|scriptscriptstyle)(?![A-Za-z])/.test(out))out='\\displaystyle '+out.trim();
     return out;
   };
-  source=replaceMathSegment(source,/\$([^$]*)\$/gs,(_,body)=>`$${fixMath(body)}$`);
-  source=replaceMathSegment(source,/\\\(([\s\S]*?)\\\)/g,(_,body)=>`\\(${fixMath(body)}\\)`);
-  source=replaceMathSegment(source,/\\\[([\s\S]*?)\\\]/g,(_,body)=>`\\[${fixMath(body)}\\]`);
+  source=replaceMathSegment(source,/\$([^$]*)\$/gs,body=>`$${fixMath(body)}$`);
+  source=replaceMathSegment(source,/\\\(([\s\S]*?)\\\)/g,body=>`\\(${fixMath(body)}\\)`);
+  source=replaceMathSegment(source,/\\\[([\s\S]*?)\\\]/g,body=>`\\[${fixMath(body)}\\]`);
   return source
+    .replace(/\$\s*\$/g,'')
+    .replace(/\\\(\s*\\\)/g,'')
+    .replace(/\\\[\s*\\\]/g,'')
     .replace(/\\ExamBlank\b/g,'______')
     .replace(/\\ExamSelection\b/g,'')
     .replace(/^\\\s*$/gm,'')
@@ -49,7 +52,7 @@ function ensureMathJax(){
   mathJaxPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';script.async=true;script.onload=()=>resolve(window.MathJax);script.onerror=()=>reject(new Error('MathJax load failed'));document.head.appendChild(script)});
   return mathJaxPromise;
 }
-export async function typeset(node){try{const mj=await ensureMathJax();if(mj.typesetClear)mj.typesetClear([node]);await mj.typesetPromise([node])}catch(error){console.warn('[Everflow] 数学公式渲染不可用，保留原始 LaTeX。',error)}}
+export async function typeset(node){try{const mj=await ensureMathJax();if(mj.typesetClear)mj.typesetClear([node]);await mj.typesetPromise([node]);const width=node?.clientWidth||0;if(width)node.querySelectorAll('mjx-container').forEach(el=>{el.classList.remove('math-wide-formula');if(el.getBoundingClientRect().width>width-4)el.classList.add('math-wide-formula')})}catch(error){console.warn('[Everflow] 数学公式渲染不可用，保留原始 LaTeX。',error)}}
 
 export function getProgress(){const value=readJson(PROGRESS_KEY,{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
 export function paperRecord(id){const all=getProgress();const raw=all[id]&&typeof all[id]==='object'?all[id]:{};return{answers:raw.answers||{},judgements:raw.judgements||{},visited:Array.isArray(raw.visited)?raw.visited:[],elapsed:Number(raw.elapsed)||0,...raw}}
@@ -74,7 +77,7 @@ function expandCompactBundle(doc){
     if(subjectCode!==2)throw new Error('unexpected non-math2 paper');
     const seriesKey=doc.s[seriesIndex];
     const id=`${year}-math2-${seriesKey}-${paperNo}`;
-    const questions=(items||[]).map(q=>({id:`${id}-q${q[0]}`,number:q[0],section:sectionMap[q[1]]||'solution',points:q[2]||0,latex:q[3]||'',choices:Array.isArray(q[4])?q[4]:[],subparts:Array.isArray(q[5])?q[5]:[],figures_svg:Array.isArray(q[6])?q[6]:[],choice_svgs:q[7]&&typeof q[7]==='object'?q[7]:{}}));
+    const questions=(items||[]).map(q=>{const section=sectionMap[q[1]]||'solution';const rawPoints=Number(q[2])||0;const points=rawPoints>0?rawPoints:(section==='choice'||section==='fill'?5:0);return{id:`${id}-q${q[0]}`,number:q[0],section,points,latex:q[3]||'',choices:Array.isArray(q[4])?q[4]:[],subparts:Array.isArray(q[5])?q[5]:[],figures_svg:Array.isArray(q[6])?q[6]:[],choice_svgs:q[7]&&typeof q[7]==='object'?q[7]:{}}});
     const counts={choice:questions.filter(q=>q.section==='choice').length,fill:questions.filter(q=>q.section==='fill').length,solution:questions.filter(q=>q.section==='solution').length};
     return{id,year,subject:'math2',subject_label:'数学二',series_key:seriesKey,series_name:seriesMap[seriesKey]||seriesKey,paper_no:paperNo,question_count:questions.length,counts,questions};
   });
