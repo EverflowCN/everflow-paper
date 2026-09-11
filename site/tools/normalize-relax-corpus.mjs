@@ -60,6 +60,8 @@ const patches={
   }
 };
 
+Object.assign(patches,JSON.parse(fs.readFileSync(path.join(SITE,'tools','relax-image-restorations.json'),'utf8')));
+
 for(const [id,patch] of Object.entries(patches)){
   const question=byId.get(id);
   if(!question)throw new Error(`Relax normalization target missing: ${id}`);
@@ -84,4 +86,4 @@ for(const question of data.questions||[]){
 
 data.meta={...(data.meta||{}),integrityVersion:'20260825-bank1'};
 fs.writeFileSync(FILE,`${JSON.stringify(data)}\n`,'utf8');
-console.log(`Relax corpus normalized: ${Object.keys(patches).length} known option defects repaired`);
+console.log(`Relax corpus normalized: ${Object.keys(patches).length} question corrections applied`);
