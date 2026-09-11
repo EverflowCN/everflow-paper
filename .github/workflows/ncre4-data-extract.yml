@@ -13,7 +13,7 @@ jobs:
   extract:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch public source JSON
+      - name: Fetch public sources
         shell: bash
         run: |
           set -euo pipefail
@@ -24,8 +24,15 @@ jobs:
           curl -fL --retry 3 --retry-delay 2 \
             https://raw.githubusercontent.com/ZMQL16lab/ncre4-network-exam/main/duoxuan.json \
             -o data/duoxuan.json
+
+          PROFILE='https://www.xiaohongshu.com/user/profile/68f76acf0000000037007d4b?channel_type=web_note_detail_r10&parent_page_channel_type=web_profile_board&xsec_token=ABF1gQWTZCWWxH9SNNov1mRi_LOrsnu9x-1CGh-sbEleE=&xsec_source=pc_user'
+          curl -L --retry 2 --max-time 30 \
+            -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36' \
+            -H 'Accept-Language: zh-CN,zh;q=0.9' \
+            "$PROFILE" -D data/xhs-headers.txt -o data/xhs-profile.html || true
+
           python - <<'PY'
-          import json
+          import json,re,html
           from collections import Counter, defaultdict
           from pathlib import Path
 
@@ -37,11 +44,25 @@ jobs:
               by_subject=Counter(str(r.get('km','')) for r in rows)
               for k,v in sorted(by_subject.items()): report.append(f'{label}_subject[{k}]={v}')
               th=defaultdict(set)
-              for r in rows:
-                  th[str(r.get('km',''))].add(str(r.get('th','')))
+              for r in rows: th[str(r.get('km',''))].add(str(r.get('th','')))
               for k,vals in sorted(th.items()):
                   nums=sorted((int(x) for x in vals if x.isdigit()))
                   report.append(f'{label}_sets[{k}]={nums}')
+
+          p=Path('data/xhs-profile.html')
+          if p.exists():
+              raw=p.read_text(encoding='utf-8',errors='ignore')
+              report.append(f'xhs_html_bytes={p.stat().st_size}')
+              report.append(f'xhs_contains_keyword={"计算机四级" in raw}')
+              # collect visible/serialized titles containing 真题
+              normalized=html.unescape(raw).replace('\\u8ba1\\u7b97\\u673a','计算机').replace('\\u56db\\u7ea7','四级').replace('\\u7f51\\u7edc','网络').replace('\\u771f\\u9898','真题')
+              hits=[]
+              for m in re.finditer(r'.{0,80}计算机四级.{0,120}', normalized):
+                  s=re.sub(r'<[^>]+>',' ',m.group(0))
+                  s=re.sub(r'\\s+',' ',s).strip()
+                  if s not in hits: hits.append(s)
+              Path('data/xhs-keyword-hits.txt').write_text('\n'.join(hits[:500]),encoding='utf-8')
+              report.append(f'xhs_keyword_hits={len(hits)}')
           Path('data/report.txt').write_text('\n'.join(report),encoding='utf-8')
           print('\n'.join(report))
           PY
