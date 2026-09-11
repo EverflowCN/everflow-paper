@@ -1,0 +1,487 @@
+% !TeX encoding = UTF-8
+% 全国计算机等级考试四级网络工程师真题（包11）
+% 由结构化 Markdown 转换；Markdown 为唯一题源。
+% 答案高亮仅表示原截图中的蓝色标记，不代表官方答案复核结果。
+\providecommand{\answerhl}[1]{%
+  \begingroup\setlength{\fboxsep}{1.4pt}%
+  \colorbox{yellow!82}{\strut\textbf{#1}}%
+  \endgroup}
+
+\section{操作系统·单项选择题}
+\begin{qitems}[startnum=1]
+
+\begin{bbox}
+\qitem 从计算机系统发展角度来看，操作系统的主要作用是提供（ ）。\par
+\fourchoices{人机交互接口}{软件开发基础}{第一道安全防线}{\answerhl{虚拟机和扩展机}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 用户进程在实现系统调用时，下列哪种方法不能用于传递参数（ ）。\par
+\fourchoices{通过寄存器传递}{通过堆栈传递}{通过指令自带传递}{\answerhl{通过变量传递}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在操作系统中，既可以在内核态下运行又可以在用户态下运行的指令是（ ）。\par
+\fourchoices{置程序计数器}{清指令寄存器}{清溢出标志}{\answerhl{置移位方向标志}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列哪一种中断与当前运行的进程有关（ ）。\par
+\fourchoices{故障性中断}{时钟中断}{I/O中断}{\answerhl{程序性中断}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 进程有三种基本状态，在允许抢占并采用高优先级优先调度算法的系统中，一个进程从就绪状态转换为运行状态的可能事件是（ ）。\par
+\fourchoices{\answerhl{该进程创建完成进入就绪队列并具有最高优先级}}{该进程等待从硬盘上读取文件数据}{该进程的优先级由于某原因被降为低于其他进程}{该进程完成计算并退出运行}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列进程控制块的组织方式中，哪一种是错误的（ ）。\par
+\fourchoices{\answerhl{B+树方法}}{线性方法}{索引方法}{链接方法}
+\end{bbox}
+
+\begin{bbox}
+\qitem 某单核处理机的计算机系统中共有20个进程，那么，处于阻塞状态的进程最多有几个（ ）。\par
+\fourchoices{1}{\answerhl{20}}{19}{0}
+\end{bbox}
+
+\begin{bbox}
+\qitem 系统中有多个进程分别处于就绪状态、运行状态和阻塞状态，下列哪一个进程的状态变化必然引起另一个进程的状态发生变化（ ）。\par
+\fourchoices{\answerhl{运行状态→阻塞状态}}{阻塞状态→就绪状态}{阻塞状态→挂起状态}{就绪状态→运行状态}
+\end{bbox}
+
+\begin{bbox}
+\qitem 对于如下C语言程序，在UNIX操作系统中正确编译链接后，其正确的运行结果是（ ）。\par
+{\ttfamily\small
+int main()\par
+\{\par
+\quad printf("Hello World\textbackslash n");\par
+\quad fork();\par
+\quad printf("HelloWorld\textbackslash n");\par
+\quad fork();\par
+\quad printf("Hello World\textbackslash n");\par
+\}\par
+}
+\fourchoices{共打印出6行Hello World}{\answerhl{共打印出7行Hello World}}{共打印出8行Hello World}{共打印出9行Hello World}
+\end{bbox}
+
+\begin{bbox}
+\qitem 有如下C语言程序，针对上述程序，下列叙述中哪一个是正确的（ ）。\par
+{\ttfamily\small
+void * th\_f(void * arg)\par
+\{\par
+\quad printf("Hello World");\par
+\quad pthread\_exit(0);\par
+\}\par
+int main(void)\par
+\{\par
+\quad pthread\_t tid;\par
+\quad int st;\par
+\quad st = pthread\_create(\&tid, NULL, th\_f, NULL);\par
+\quad if(st == 0)\par
+\qquad printf("Oops,I can not create thread\textbackslash n");\par
+\quad exit(NULL);\par
+\}\par
+}
+\fourchoices{程序运行中最多存在1个线程}{\answerhl{程序运行中最多存在2个线程}}{程序运行中最多存在3个线程}{程序运行中最多存在4个线程}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在民航网络订票系统中，相同的订票人发起的订票进程其相互之间的关系是（ ）。\par
+\fourchoices{同步关系}{\answerhl{互斥关系}}{前趋关系}{后趋关系}
+\end{bbox}
+
+\begin{bbox}
+\qitem 解决进程同步与互斥问题时，信号量机制中所谓的“临界区”是指（ ）。\par
+\fourchoices{临界资源本身}{可读写的共享资源}{\answerhl{访问临界资源的代码}}{只读的共享资源}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列关于管程的叙述中，哪一个是错误的（ ）。\par
+\fourchoices{管程中不允许同时存在两个或两个以上的运行进程}{Hoare提出了管程的一种实现方案}{\answerhl{管程的互斥是由信号量及PV操作实现的}}{条件变量是用于解决同步问题的}
+\end{bbox}
+
+\begin{bbox}
+\qitem 每个进程都有其相对独立的进程地址空间，如果进程在运行时所产生的地址超出其地址空间，则将发生了（ ）。\par
+\fourchoices{缺页中断}{写时复制}{地址错误}{\answerhl{地址越界}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在虚拟页式系统中进行页面置换时，检查进入内存时间最久页面的R位，如果是0，则置换该页；如果是1，就将R位置0，并把该页面放到链表的尾端，修改其进入时间，然后继续搜索，这一策略称为（ ）。\par
+\fourchoices{先进先出页面置换算法}{最近最少使用页面置换算法}{最近最不常用页面置换算法}{\answerhl{第二次机会页面置换算法}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 页式存储管理方案中，若地址用28位二进制表示，页内地址部分占12个二进制位，则最大允许进程有多少个页面（ ）。\par
+\fourchoices{4096}{8192}{16384}{\answerhl{65536}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列关于页式存储管理方案的叙述中，哪一个是正确的（ ）。\par
+\fourchoices{\answerhl{逻辑地址连续，物理页面可以不相邻}}{用户编程时需要考虑如何分页}{分配物理页面采用的是最优适应算法}{物理地址的计算公式为内存块号+页内地址}
+\end{bbox}
+
+\begin{bbox}
+\qitem 有一个虚拟页式存储系统采用最近最少使用（LRU）页面置换算法，系统分给每个进程3页内存，其中一页用来存放程序和变量$i$、$j$（不作他用）。假设一个页面可以存放300个整数变量。某进程程序如下：\par
+{\ttfamily\small
+VAR A: ARRAY[1..300, 1..200] OF integer;\par
+i,j: integer;\par
+FOR i := 1 to 300 DO\par
+\quad FOR j := 1 to 200 DO\par
+\qquad A[i,j] := 0;\par
+}
+设变量$i$、$j$放在程序页面中，初始时，程序及变量$i$、$j$已在内存，其余两页为空。矩阵A按行序存放。试问当程序执行完后，共缺页多少次（ ）。\par
+\fourchoices{\answerhl{200}}{300}{500}{301}
+\end{bbox}
+
+\begin{bbox}
+\qitem 假设某计算机系统的内存大小为256K，在某一时刻内存的使用情况如下表所示。此时，若进程顺序请求10K、15K和5K的存储空间，系统采用某种算法为进程分配内存，分配后的内存情况如下表所示。那么系统采用的是什么分配算法（ ）。\par
+\begin{center}\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}\hline
+起始地址 & 0K & 20K & 50K & 90K & 100K & 105K & 135K & 160K & 175K & 195K \\ \hline
+状态 & 已用 & 未用 & 已用 & 已用 & 未用 & 已用 & 未用 & 已用 & 已用 & 未用 \\ \hline
+容量 & 20K & 30K & 40K & 10K & 5K & 30K & 25K & 15K & 20K & 25K \\ \hline
+\end{tabular}\par\medskip
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}\hline
+起始地址 & 0K & 20K & 50K & 90K & 100K & 105K & 135K & 145K & 160K & 175K & 195K \\ \hline
+状态 & 已用 & 未用 & 已用 & 已用 & 已用 & 已用 & 已用 & 已用 & 已用 & 已用 & 未用 \\ \hline
+容量 & 20K & 30K & 40K & 10K & 5K & 30K & 10K & 15K & 15K & 20K & 25K \\ \hline
+\end{tabular}\end{center}
+\fourchoices{\answerhl{最佳适配}}{最差适配}{首次适配}{下次适配}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列哪一种文件的物理结构检索速度慢，且不适于随机存取文件（ ）。\par
+\fourchoices{顺序结构}{\answerhl{链接结构}}{索引结构}{节点结构}
+\end{bbox}
+
+\begin{bbox}
+\qitem 对需要经常进行访问的文件，下列各选项中，哪一类文件最适合连续存取（ ）。\par
+\fourchoices{\answerhl{顺序文件}}{链接文件}{记录式文件}{索引文件}
+\end{bbox}
+
+\begin{bbox}
+\qitem 通常对外存储设备存取的过程是按某一顺序完成的。下列哪一个顺序是正确的（ ）。\par
+\fourchoices{置地址→置数据→读状态→置控制→再置地址……}{读状态→置地址→置数据→置控制→再读状态……}{\answerhl{读状态→置数据→置地址→置控制→再读状态……}}{置地址→读状态→置控制→置数据→再置地址……}
+\end{bbox}
+
+\begin{bbox}
+\qitem 假设磁头当前位置于第105道，正在向磁道序号增加的方向移动。现有一个磁道访问请求序列为35、45、12、68、110、180、170、195，采用FCFS调度（先来先服务调度）算法得到的磁道访问序列是（ ）。\par
+\fourchoices{110,170,180,195,68,45,35,12}{110,68,45,35,12,170,180,195}{12,35,45,68,110,170,180,195}{\answerhl{35,45,12,68,110,180,170,195}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在一个采用三级索引结构的UNIX文件系统中，假设物理块大小为2KB，用64位表示一个物理块号。主索引表含有13个块地址指针，其中前10个直接指向盘块号，第11个指向一级索引表，第12个指向二级索引表，第13个指向三级索引表。那么，一个文件最大可有多少块（ ）。\par
+\fourchoices{$10+64+64^2+64^3$}{$10+128+128^2+128^3$}{\answerhl{$10+256+256^2+256^3$}}{$10+512+512^2+512^3$}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在实现文件系统时，可采用“目录项分解法”加快文件目录检索速度。假设目录文件存放在磁盘上，每个盘块512字节。文件控制块有32字节，其中文件名占8字节，文件控制块分解后，第一部分占12字节（包括文件名和文件内部号），第二部分占26字节（包括文件内部号和文件其他信息）。假设某一个目录文件共有256个文件控制块，则采用目录项分解法前，查找该目录文件的某一个文件控制块的平均访盘次数是（ ）。\par
+\fourchoices{9}{\answerhl{8.5}}{8}{7.5}
+\end{bbox}
+
+\begin{bbox}
+\qitem 计算机操作系统中，设备管理的主要任务之一是（ ）。\par
+\fourchoices{\answerhl{通过接口技术为用户提供一致的系统调用}}{通过改变配置加速数据传输}{通过适配技术连接不同设备}{通过总线技术提高设备效率}
+\end{bbox}
+
+\begin{bbox}
+\qitem 按照信息交换方式的不同，一个系统中可以设置多种类型的通道，下列哪一个选项不属于通道类型（ ）。\par
+\fourchoices{\answerhl{顺序通道}}{字节多路通道}{数组多路通道}{选择通道}
+\end{bbox}
+
+\begin{bbox}
+\qitem 计算机系统中拥有各种软硬件资源，时钟中断是属于（ ）。\par
+\fourchoices{可重用资源}{\answerhl{不可重用资源}}{临界资源}{共享资源}
+\end{bbox}
+
+\begin{bbox}
+\qitem 解决死锁有多种方法，一次分配所有资源来解决死锁的方法称为（ ）。\par
+\fourchoices{\answerhl{死锁预防}}{死锁避免}{死锁检测}{死锁解除}
+\end{bbox}
+
+\begin{bbox}
+\qitem 某计算机系统中共有3个进程P1、P2和P3，4类资源$r_1$、$r_2$、$r_3$和$r_4$。其中$r_1$和$r_3$每类资源只有1个实例，$r_2$资源有2个实例，$r_4$有3个实例。当前的资源分配状态如下：\par
+{\ttfamily\small E=\{<P1,r1>, <P2,r3>, <r2,P1>, <r1,P2>, <P2,r2>, <r3,P3>, <P3,r4>\}\par}
+\begin{center}\includegraphics[width=0.90\linewidth]{assets/真题11/q30-resource-graph.jpg}\end{center}
+若进程P2申请一个$r_4$类资源\texttt{<P2,r4>}，则系统可能会发生下列哪一种现象（ ）。\par
+\fourchoices{死锁}{\answerhl{无死锁}}{活锁}{饥饿}
+\end{bbox}
+
+\end{qitems}
+
+\section{操作系统·多项选择题}
+\begin{qitems}[startnum=31]
+
+\begin{bbox}
+\qitem 一般系统中产生的事件分为中断和异常两类。下列哪些属于异常事件（ ）。\par
+\fivechoices{\answerhl{算术溢出}}{\answerhl{虚存中的缺页中断}}{\answerhl{被跟踪}}{时钟中断}{输入/输出中断}
+\end{bbox}
+
+\begin{bbox}
+\qitem 线程的实现机制有多种途径，下列哪几项属于典型的线程实现方式（ ）。\par
+\fivechoices{\answerhl{用户线程}}{\answerhl{内核线程}}{\answerhl{混合线程}}{独立线程}{互斥线程}
+\end{bbox}
+
+\begin{bbox}
+\qitem 对于实时系统，其调度算法的设计目标是（ ）。\par
+\fivechoices{较大的吞吐量}{较短的周转时间}{较高的CPU利用率}{\answerhl{满足截止时间要求}}{\answerhl{满足可靠性要求}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 当采用信箱进行通信时，接收原语receive()操作中必须包含的信息是（ ）。\par
+\fivechoices{\answerhl{指定的信箱名}}{\answerhl{取出的信件将存放的内存地址}}{读取信件的名称}{读取信件的长度}{信箱的互斥信号量}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在可变分区存储管理方案中，下列关于移动技术的叙述中，哪些是错误的（ ）。\par
+\fivechoices{\answerhl{内存中的进程都能随时移动}}{采用移动技术时应尽可能减少移动的进程数量}{移动技术为进程执行过程中“扩充”内存提供方便}{\answerhl{在内存中移动进程不会增加系统开销}}{\answerhl{在内存中只能将进程从低地址区域移到高地址区域}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列关于虚拟存储管理方案的叙述中，哪些是正确的（ ）。\par
+\fivechoices{采用LRU页面置换算法可能导致Belady现象}{\answerhl{颠簸是由于缺页率高而引起的现象}}{\answerhl{工作集是随时间而变化的}}{\answerhl{采用工作集模型可以解决颠簸问题}}{进程对内存有临界要求，当分配给进程的物理页面数大于该临界值时，增加物理页面数可以显著减少缺页次数}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下列选项中，哪些是按照文件的物理结构划分的文件分类（ ）。\par
+\fivechoices{\answerhl{顺序文件}}{普通文件}{\answerhl{链接文件}}{用户文件}{\answerhl{索引文件}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在UNIX系统中，若文件File5的权限是544，则表示（ ）。\par
+\fivechoices{文件属主可写File5}{\answerhl{文件属主可读File5}}{\answerhl{同组用户可读File5}}{同组用户可执行File5}{\answerhl{其他用户可读File5}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 设备分配时需要考虑公平性、共享性等多种因素，所以设备分配策略主要包括（ ）。\par
+\fivechoices{\answerhl{先来先服务}}{\answerhl{高优先级优先}}{时间片轮转}{最短截止时间优先}{安全优先}
+\end{bbox}
+
+\begin{bbox}
+\qitem 某操作系统的当前资源分配状态如下表所示。假设当前系统可用资源R1、R2和R3的数量为（3，3，2），且该系统目前处于安全状态，那么下列哪些是安全序列（ ）。\par
+\begin{center}\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|c|ccc|ccc|}\hline
+进程 & \multicolumn{3}{c|}{最大资源需求量} & \multicolumn{3}{c|}{已分配资源量} \\ \cline{2-7}
+ & R1 & R2 & R3 & R1 & R2 & R3 \\ \hline
+P1 & 7 & 5 & 3 & 0 & 1 & 0 \\ \hline
+P2 & 3 & 2 & 2 & 2 & 0 & 0 \\ \hline
+P3 & 9 & 0 & 2 & 3 & 0 & 2 \\ \hline
+P4 & 2 & 2 & 2 & 2 & 1 & 1 \\ \hline
+P5 & 4 & 3 & 3 & 0 & 0 & 2 \\ \hline
+\end{tabular}\end{center}
+\fivechoices{\answerhl{P2P4P1P5P3}}{P4P5P3P1P2}{\answerhl{P2P5P4P1P3}}{\answerhl{P4P2P1P3P5}}{\answerhl{P2P4P3P5P1}}
+\end{bbox}
+
+\end{qitems}
+
+\section{计算机网络·单项选择题}
+\begin{qitems}[startnum=41]
+
+\begin{bbox}
+\qitem 在OSI参考模型中，提供透明的比特流传输的层次是（ ）。\par
+\fourchoices{应用层}{表示层}{\answerhl{物理层}}{互联层}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在以下操作系统中，属于Unix操作系统产品的是（ ）。\par
+\fourchoices{Slackware}{Vista}{\answerhl{Solaris}}{Redhat}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于TCP/IP参考模型传输层的描述中，错误的是（ ）。\par
+\fourchoices{提供分布式进程通信功能}{支持面向连接的TCP协议}{支持无连接的UDP协议}{\answerhl{提供路由选择功能}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于虚电路交换方式的描述中，正确的是（ ）。\par
+\fourchoices{\answerhl{源结点与目的结点之间需要预先建立逻辑连接}}{数据分组通过虚电路传输时需要执行路由选择}{在数据分组中需要携带源地址与目的地址}{源结点发送分组的顺序与目的结点接收分组的顺序可能不同}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在以下几种技术中，属于局域网组网技术的是（ ）。\par
+\fourchoices{FR}{X.25}{WDM}{\answerhl{Ethernet}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在IEEE 802.11标准中，实现虚拟监听机制的层次是（ ）。\par
+\fourchoices{应用层}{物理层}{\answerhl{MAC层}}{LLC层}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于Ethernet交换机的描述中，正确的是（ ）。\par
+\fourchoices{\answerhl{转发端口采用直接交换方式}}{通常使用端口/IP地址映射表}{核心技术是IP路由选择技术}{都不支持虚拟局域网}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于IEEE 802.11标准的描述中，错误的是（ ）。\par
+\fourchoices{采用的是层次结构模型}{物理层定义了数据传输标准}{MAC层实现介质访问控制功能}{\answerhl{仅支持争用服务的访问方式}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于直接序列扩频的描述中，正确的是（ ）。\par
+\fourchoices{对应的英文缩写为FHSS}{\answerhl{可以使用专用的ISM频段}}{通常在固定电话通信中使用}{最小传输速率为1Gbps}
+\end{bbox}
+
+\begin{bbox}
+\qitem 1000 BASE-LX标准支持的单模光纤最大长度为（ ）。\par
+\fourchoices{25m}{100m}{300m}{\answerhl{5000m}}
+\end{bbox}
+
+\begin{bbox}
+\qitem IP协议规定的内容不包括（ ）。\par
+\fourchoices{IP数据报的格式}{数据报寻址和路由}{\answerhl{路由器的硬件和实现方法}}{数据报分片和重组}
+\end{bbox}
+
+\begin{bbox}
+\qitem 两台主机处于掩码为255.255.255.224的同一子网中。如果一台主机的IP地址为205.113.28.65，那么另一台主机的IP地址可以为（ ）。\par
+\fourchoices{205.113.28.186}{205.113.28.129}{\answerhl{205.113.28.94}}{205.113.28.62}
+\end{bbox}
+
+\begin{bbox}
+\qitem 当路由器检测到其相邻主机发送的IP数据报经非优路径传输时，它通知该主机使用的ICMP报文为（ ）。\par
+\fourchoices{参数出错报文}{源抑制报文}{\answerhl{重定向报文}}{掩码请求报文}
+\end{bbox}
+
+\begin{bbox}
+\qitem TCP进行流量控制采用的机制为（ ）。\par
+\fourchoices{重发机制}{三次握手机制}{全双工机制}{\answerhl{窗口机制}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在Internet中，实现异构网络互联的设备通常是（ ）。\par
+\fourchoices{调制解调器}{集线器}{中继器}{\answerhl{路由器}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在资源记录中，类型“A”表示（ ）。\par
+\fourchoices{域名服务器}{\answerhl{主机地址}}{别名}{指针}
+\end{bbox}
+
+\begin{bbox}
+\qitem POP3邮件传递过程可以分为三个阶段，它们是（ ）。\par
+\fourchoices{\answerhl{认证阶段、事务处理阶段、更新阶段}}{连接建立阶段、认证阶段、更新阶段}{连接建立阶段、认证阶段、连接关闭阶段}{连接建立阶段、邮件传送阶段、连接关闭阶段}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于Web服务的描述中，错误的是（ ）。\par
+\fourchoices{Web服务采用客户机-服务器模式}{Web服务以超文本方式组织网页信息}{\answerhl{Web浏览器的解释单元负责接收用户的输入}}{Web服务器需要实现HTTP协议}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在访问Web站点时，为了防止第三方偷看传输的内容，我们可以采取的行动为（ ）。\par
+\fourchoices{将整个Internet划分成Internet、Intranet、可信、受限等不同区域}{在主机浏览器中加载自己的证书}{浏览站点前索要Web站点的证书}{\answerhl{通信中使用SSL技术}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于混合式P2P网络中索引结点的描述中，正确的是（ ）。\par
+\fourchoices{索引结点是不具有任何特殊功能的用户结点}{索引结点需要为活跃结点计算信誉值}{\answerhl{索引结点保存可以利用的搜索结点信息}}{索引结点监控用户的下载内容}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于SIP的描述中，正确的是（ ）。\par
+\fourchoices{需要邮件服务器支持}{\answerhl{属于应用层协议}}{采用XML标识用户}{消息体必须加密传输}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于SIP中INVITE消息的描述中，正确的是（ ）。\par
+\fourchoices{由服务器生成并发送}{\answerhl{用来邀请用户参加会话}}{代理服务器自动用OPTIONS响应}{消息的起始行是状态行}
+\end{bbox}
+
+\begin{bbox}
+\qitem NFS服务器可以共享目录和文件，用来记录共享目录和文件列表的文件是（ ）。\par
+\fourchoices{\texttt{/usr/exports}}{\answerhl{\texttt{/etc/exports}}}{\texttt{/file/shared}}{\texttt{/etc/shared}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在SIMPLE中，与SIP的UAJ功能接近的是（ ）。\par
+\fourchoices{呈现服务器PS}{观察者Watcher}{\answerhl{呈现代理PA}}{呈现用户代理PUA}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于VoIP系统中网守功能的描述中，正确的是（ ）。\par
+\fourchoices{调制信号}{号码查询}{\answerhl{确定网关地址}}{压缩与解压信号}
+\end{bbox}
+
+\begin{bbox}
+\qitem 某信息系统属于强制安全保护类型，其安全等级应该是（ ）。\par
+\fourchoices{\answerhl{B1}}{C1}{C2}{D}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在以下几种攻击中，不属于欺骗攻击的是（ ）。\par
+\fourchoices{\answerhl{流量分析}}{ARP欺骗}{中间人攻击}{重发攻击}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在DES密钥中，用于奇偶校验的位数是（ ）。\par
+\fourchoices{4位}{\answerhl{8位}}{16位}{32位}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于身份认证的描述中，错误的是（ ）。\par
+\fourchoices{可基于密码实现认证}{可基于证件实现认证}{可基于指纹实现认证}{\answerhl{不可基于视网膜实现认证}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于网络管理的描述中，错误的是（ ）。\par
+\fourchoices{管理器是一个管理进程}{代理通常位于被管设备中}{管理器与代理之间交换管理信息}{\answerhl{仅有SNMP一种网管协议}}
+\end{bbox}
+
+\end{qitems}
+
+\section{计算机网络·多项选择题}
+\begin{qitems}[startnum=71]
+
+\begin{bbox}
+\qitem 关于国际标准化组织的描述中，正确的是（ ）。\par
+\fivechoices{对应的英文缩写为OSI}{\answerhl{有专门部门从事网络协议标准化工作}}{创建并资助ARPANET}{\answerhl{对网络体系结构发展有贡献}}{Ethernet标准的主要制定者}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于传统Ethernet帧的描述中，错误的是（ ）。\par
+\fivechoices{\answerhl{源地址字段使用发送结点的IP地址}}{\answerhl{目的地址字段使用接收结点的IP地址}}{前导码与帧前定界符总长度为8字节}{\answerhl{帧校验字段采用32位的曼彻斯特编码}}{\answerhl{数据字段的最大长度为1518字节}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于CSMA/CA方法的描述中，正确的是（ ）。\par
+\fivechoices{\answerhl{结点在发送数据前需侦听信道}}{实现对双绞线的介质访问控制}{\answerhl{SIFS用于分隔一次会话中的各帧}}{支持MAC层的争用服务}{\answerhl{可以完全避免冲突的发生}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于IP服务的描述中，正确的是（ ）。\par
+\fivechoices{\answerhl{IP不能保证数据报的可靠投递}}{IP具有可靠的错误通知机制}{\answerhl{IP不能保证发送的报文被正确接收}}{IP协议可以随意丢弃数据报}{\answerhl{从源到目的结点的各个数据报可能经不同路径传输}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 下图为一个简单的互联网示意图。路由器Q的路由表中到达网络50.0.0.0的下一跳步IP地址可能取值为（ ）。\par
+\begin{center}\includegraphics[width=0.90\linewidth]{assets/真题11/q75-routing-topology.jpg}\end{center}
+\fivechoices{10.0.0.5}{\answerhl{20.0.0.6}}{30.0.0.7}{40.0.0.8}{\answerhl{20.0.0.8}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 在客户机/服务器模型中，响应并发请求有不同的解决方案，这些方案包括（ ）。\par
+\fivechoices{集中服务器方案}{响应服务器方案}{\answerhl{并发服务器方案}}{认证服务器方案}{\answerhl{重复服务器方案}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于FTP用户接口命令的描述中，正确的是（ ）。\par
+\fivechoices{\answerhl{\texttt{ftp}用于进入ftp会话状态}}{\answerhl{\texttt{close}用于中断与ftp服务器的连接}}{\answerhl{\texttt{passive}用于请求使用被动传输模式}}{\texttt{pwd}用于传送用户口令}{\answerhl{\texttt{binary}指示服务器使用二进制文件传输方式}}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于Skype的描述中，正确的是（ ）。\par
+\fivechoices{超级结点负责用户认证}{\answerhl{登录服务器保存用户密码}}{\answerhl{支持好友列表}}{\answerhl{采用iLBC和iSAC编码技术}}{采用集中式拓扑}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于IPSec的描述中，正确的是（ ）。\par
+\fivechoices{\answerhl{工作于网络层}}{\answerhl{包含AH和ESP协议}}{SA定义逻辑的双工连接}{SA由四元组确定}{ESP头部采用16位顺序号}
+\end{bbox}
+
+\begin{bbox}
+\qitem 关于网络防火墙的描述中，正确的是（ ）。\par
+\fivechoices{\answerhl{包过滤路由器基于规则表进行过滤}}{\answerhl{应用级网关在应用层实现访问控制}}{代理服务器是一种包过滤路由器}{包过滤路由器只工作于传输层}{\answerhl{双归属主机可连接两个网络}}
+\end{bbox}
+
+\end{qitems}
