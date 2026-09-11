@@ -1,0 +1,55 @@
+name: NCRE4 Data Extract
+
+on:
+  push:
+    branches:
+      - ncre4-data-extract
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch public source JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          curl -fL --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/ZMQL16lab/ncre4-network-exam/main/danxuan.json \
+            -o data/danxuan.json
+          curl -fL --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/ZMQL16lab/ncre4-network-exam/main/duoxuan.json \
+            -o data/duoxuan.json
+          python - <<'PY'
+          import json
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          singles=json.loads(Path('data/danxuan.json').read_text(encoding='utf-8'))
+          multis=json.loads(Path('data/duoxuan.json').read_text(encoding='utf-8'))
+          report=[]
+          for label, rows in [('single',singles),('multi',multis)]:
+              report.append(f'{label}_total={len(rows)}')
+              by_subject=Counter(str(r.get('km','')) for r in rows)
+              for k,v in sorted(by_subject.items()): report.append(f'{label}_subject[{k}]={v}')
+              th=defaultdict(set)
+              for r in rows:
+                  th[str(r.get('km',''))].add(str(r.get('th','')))
+              for k,vals in sorted(th.items()):
+                  nums=sorted((int(x) for x in vals if x.isdigit()))
+                  report.append(f'{label}_sets[{k}]={nums}')
+          Path('data/report.txt').write_text('\n'.join(report),encoding='utf-8')
+          print('\n'.join(report))
+          PY
+
+      - name: Upload source data
+        uses: actions/upload-artifact@v4
+        with:
+          name: ncre4-source-json
+          path: data/
+          if-no-files-found: error
+          retention-days: 3
