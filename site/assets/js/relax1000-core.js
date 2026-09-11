@@ -1,5 +1,5 @@
 const RELAX_ASSET_BASE='/data/relax1000';
-const DATA_VERSION='20260904-editor1';
+const DATA_VERSION='20260911-images1';
 export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json?v=${DATA_VERSION}`;
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
@@ -37,11 +37,14 @@ export function assetUrl(value){
   if(!src)return'';
   if(src.startsWith('data:image/'))return src;
   if(src.startsWith('/data/'))return src;
-  if(src.startsWith(`${RELAX_ASSET_BASE}/`))return src;
   const cloudBase=String(window.EVERFLOW_CLOUD?.url||'').replace(/\/$/,'');
   if(cloudBase&&src.startsWith(`${cloudBase}/storage/v1/object/public/question-assets/`))return src;
-  if(/^https?:\/\//i.test(src))return'';
+  if(/^(?:https?:)?\/\//i.test(src)){
+    try{const url=new URL(src,window.location.origin);return url.origin===window.location.origin&&url.pathname.startsWith('/data/')?`${url.pathname}${url.search}${url.hash}`:''}catch{return''}
+  }
+  if(/^[a-z][a-z0-9+.-]*:/i.test(src))return'';
   const clean=src.replace(/^\.\//,'').replace(/^\//,'');
+  if(clean.startsWith('data/relax1000/'))return `/${clean}`;
   return `${RELAX_ASSET_BASE}/${clean}`;
 }
 export function hasBrokenSymbols(value){

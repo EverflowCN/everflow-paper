@@ -70,6 +70,7 @@ function auditRelax(){
     const keys=options.map(item=>String(item?.key||''));
     if(keys.join('')!=='ABCD')fail('relax',id,'invalid-option-keys',keys.join(','));
     if(!keys.includes(String(question.answer||'')))fail('relax',id,'invalid-answer',question.answer);
+    if(/如图|下图|图所示|右图|左图|图示/.test(question.stem||'')&&!question.questionImages?.length)fail('relax',id,'referenced-diagram-without-image');
     const damaged=[question.stem,...options.map(item=>item?.text)].some(broken);
     if(damaged&&!question.questionImages?.length)fail('relax',id,'damaged-ocr-without-question-image');
     for(const [kind,list] of [['question',question.questionImages],['explanation',question.explanationImages]]){
