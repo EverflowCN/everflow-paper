@@ -1,0 +1,1 @@
+目标：前12套纯文字 MD → Everflow LaTeX → Exam A4 PDF。禁止用原图整页替代最终文字版。
