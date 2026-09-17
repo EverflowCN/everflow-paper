@@ -11,16 +11,45 @@
   <link rel="stylesheet" href="../assets/css/responsive.css?v=20260828-course3">
   <link rel="stylesheet" href="../assets/css/study.css?v=20260828-course3">
   <link rel="stylesheet" href="../assets/css/learning-center.css?v=20260828-course3">
-  <link rel="stylesheet" href="../assets/css/course-picker.css?v=20260917-picker1">
+  <!-- Keep critical course UI styles in the document to avoid an unstyled selector during cache updates. -->
+  <style>
+.course-selector{min-width:0;margin:0 0 20px}
+.course-picker{border:1px solid var(--line);border-radius:20px;background:var(--card);overflow:hidden}
+.course-picker-summary{display:flex;align-items:center;gap:16px;padding:20px;cursor:pointer;list-style:none;touch-action:manipulation}
+.course-picker-summary::-webkit-details-marker{display:none}
+.course-picker-icon{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:14px;background:rgba(243,18,36,.07);color:var(--red);font-size:18px;font-weight:800}
+.course-picker-current{display:grid;gap:3px;min-width:0;flex:1}
+.course-picker-label{font-size:11px;color:var(--muted);letter-spacing:.08em}
+.course-picker-current strong{font-size:16px;line-height:1.55;overflow-wrap:anywhere}
+.course-picker-current small{font-size:12px;color:var(--muted)}
+.course-picker-action{display:flex;align-items:center;gap:8px;flex-shrink:0;padding:6px 12px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:650;color:var(--ink)}
+.course-picker-chevron{font-size:18px;transition:transform .15s}
+.course-picker[open] .course-picker-chevron{transform:rotate(180deg)}
+.course-picker-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 16px 16px;max-height:420px;max-height:min(55dvh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.course-picker-option{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0;min-height:80px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;font:inherit;cursor:pointer;touch-action:manipulation}
+.course-picker-option>span:first-child{min-width:0;display:grid;gap:6px}
+.course-picker-option strong{font-size:13px;line-height:1.6;white-space:normal;overflow-wrap:anywhere}
+.course-picker-option small{font-size:11px;color:var(--muted)}
+.course-picker-selected{flex-shrink:0;font-size:17px;color:var(--muted)}
+.course-picker-option:hover{background:var(--soft)}
+.course-picker-option[aria-pressed="true"]{border-color:var(--red);background:rgba(243,18,36,.045)}
+.course-picker-option[aria-pressed="true"] .course-picker-selected{color:var(--red)}
+.course-picker-summary:focus-visible,.course-picker-option:focus-visible{outline:2px solid var(--red);outline-offset:-4px}
+.course-picker-loading{padding:18px;color:var(--muted)}
+.course-time{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.course-time>div{display:grid;gap:5px;min-width:0}.course-time span{font-size:12px;color:var(--muted)}.course-time strong{font-size:18px;font-variant-numeric:tabular-nums;line-height:1.5;overflow-wrap:anywhere}.course-time p{grid-column:1/-1;margin:0;font-size:11px;color:var(--muted)}
+@media(max-width:600px){.course-picker-summary{padding:14px;gap:10px}.course-picker-icon{flex-basis:34px;height:38px;font-size:16px}.course-picker-current strong{font-size:13px}.course-picker-current small{font-size:11px}.course-picker-action{padding:5px 8px;gap:5px}.course-picker-list{grid-template-columns:minmax(0,1fr);padding:0 10px 10px;gap:8px}.course-picker-option{min-height:70px;padding:12px}.course-time{gap:10px}.course-time strong{font-size:14px}.course-time span{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.course-picker-chevron{transition:none}}
+  </style>
 </head>
 <body>
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
 <div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
 <main class="wrap checkin-shell" data-checkin-root>
-  <header class="checkin-head"><div><div class="eyebrow">学习中心 / 课程 / OXYGEN 11</div><h1>408 课程打卡</h1><p><strong>课程目录现在由后台统一管理。</strong> 历年真题讲解与原四科强化完整保留；后台新增、停用或恢复课程会与这里一一对应，历史勾选和备注始终独立保存，不会因为课程下架被删除。</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="learning-btn" href="../study/">返回学习中心</a><a class="learning-btn primary" href="https://www.bilibili.com/video/BV1MW8i6tEa1" target="_blank" rel="noopener">打开真题合集</a></div></header>
+  <header class="checkin-head"><div><div class="eyebrow">学习中心 / 课程 / OXYGEN 11</div><h1>408 课程打卡</h1><p>选择课程，记录每一节的学习进度。总时长自动汇总，打卡和笔记随时接着用。</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="learning-btn" href="../study/">返回学习中心</a><a class="learning-btn primary" href="https://www.bilibili.com/video/BV1MW8i6tEa1" target="_blank" rel="noopener">打开真题合集</a></div></header>
   <nav class="course-selector" data-course-tabs aria-label="课程选择"><div class="course-picker-loading">正在加载课程列表…</div></nav>
   <nav class="checkin-tabs" data-subject-tabs aria-label="课程分组" hidden><button class="checkin-tab active" data-subject="ds">DS --</button><button class="checkin-tab" data-subject="co">CO --</button><button class="checkin-tab" data-subject="os">OS --</button><button class="checkin-tab" data-subject="cn">CN --</button></nav>
-  <section class="overall-card"><div class="overall-row"><div><div class="eyebrow">COURSE PROGRESS</div><strong data-total-text>正在加载课程…</strong></div><strong data-total-percent>--</strong></div><div class="big-progress"><span data-total-bar></span></div></section>
+  <section class="overall-card"><div class="overall-row"><div><div class="eyebrow">COURSE PROGRESS</div><strong data-total-text>正在加载课程…</strong></div><strong data-total-percent>--</strong></div><div class="big-progress"><span data-total-bar></span></div><div class="course-time" data-course-time aria-live="polite"></div></section>
   <section class="checkin-panel active" data-course-panel><div class="empty-state">正在读取课程目录，请稍候…</div></section>
 </main>
 <footer class="footer"><div class="wrap footer-inner"><span>课程进度 · 本地优先保存 · 登录后可云同步</span><span><a href="../study/practice/">去刷题 →</a></span></div></footer>
@@ -30,7 +59,7 @@
 <script src="../assets/js/course-catalog-public.js?v=20260828-course3"></script>
 <script src="../assets/js/course-catalog-baseline.js?v=20260828-course-baseline1"></script>
 <script type="module" src="../assets/js/cloud.js?v=20260828-course3"></script>
-<script src="../assets/js/checkin.js?v=20260917-picker1"></script>
+<script src="../assets/js/checkin.js?v=20260917-picker2"></script>
 <script src="../assets/js/checkin-cloud-bridge.js?v=20260828-course3"></script>
 </body>
 </html>
