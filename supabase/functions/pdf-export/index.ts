@@ -7,13 +7,14 @@ const WORKER_CAPACITY=2;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const headers={'Content-Type':'application/json','Cache-Control':'no-store'};
 function reply(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers})}
-function etaFor(status:string,position=1,fast=false){
- const p=Math.max(1,Number(position)||1);
+function etaFor(status:string,position=1,fast=false,capacity=2,count=40){
+ const p=Math.max(1,Number(position)||1),c=Math.max(1,Number(capacity)||1),q=Math.max(1,Math.min(100,Number(count)||40));
  if(fast){
-  if(status==='queued')return{etaMinSeconds:8+(p-1)*15,etaMaxSeconds:75+(p-1)*60};
-  if(status==='preparing')return{etaMinSeconds:8,etaMaxSeconds:45};
-  if(status==='compiling')return{etaMinSeconds:12,etaMaxSeconds:90};
-  if(status==='storing')return{etaMinSeconds:3,etaMaxSeconds:20};
+  const factor=Math.max(.5,Math.min(2.5,q/40)),waves=Math.max(0,Math.ceil(p/c)-1);
+  if(status==='queued')return{etaMinSeconds:Math.round(6+3*factor+waves*8*factor),etaMaxSeconds:Math.round(18+12*factor+waves*20*factor)};
+  if(status==='preparing')return{etaMinSeconds:Math.round(3+3*factor),etaMaxSeconds:Math.round(10+10*factor)};
+  if(status==='compiling')return{etaMinSeconds:Math.round(4+3*factor),etaMaxSeconds:Math.round(12+13*factor)};
+  if(status==='storing')return{etaMinSeconds:2,etaMaxSeconds:10};
  }else{
   if(status==='queued')return{etaMinSeconds:90+(p-1)*20,etaMaxSeconds:420+(p-1)*60};
   if(status==='preparing')return{etaMinSeconds:60,etaMaxSeconds:180};
@@ -113,7 +114,7 @@ Deno.serve(async(req)=>{
   const manager=['admin','owner'].includes(user.app_metadata?.role);
   if(req.method==='GET'&&endpoint.searchParams.get('availability')==='1'){
    if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
-   const snap=await workerSnapshot(),eta=etaFor('queued',1,snap.fast);
+   const snap=await workerSnapshot(),eta=etaFor('queued',1,snap.fast,snap.workers.total,40);
    return reply({...eta,workers:snap.workers});
   }
   let job:any;
@@ -144,10 +145,10 @@ Deno.serve(async(req)=>{
    const score=(x:any)=>x.priority+Math.floor((Date.now()-Date.parse(x.created_at))/600000);
    waiting?.sort((a:any,b:any)=>score(b)-score(a)||Date.parse(a.created_at)-Date.parse(b.created_at)||a.id.localeCompare(b.id));
    result.position=(waiting?.findIndex((x:any)=>x.id===job.id)??-1)+1;
-   Object.assign(result,etaFor('queued',result.position,fastWorker));
+   Object.assign(result,etaFor('queued',result.position,fastWorker,result.workers.total,result.count));
    result.message='已进入生成队列。预计时间会随当前队列与编译节点自动调整；关闭窗口后任务仍会继续。';
   }else if(job.status==='failed')result.message=job.error;
-  else Object.assign(result,etaFor(job.status,1,fastWorker));
+  else Object.assign(result,etaFor(job.status,1,fastWorker,result.workers.total,result.count));
   if(job.status==='completed'&&job.object_path){const {data,error}=await db.storage.from('exam-pdfs').createSignedUrl(job.object_path,600);if(error)throw error;result.downloadUrl=data.signedUrl;}
   return reply(result,req.method==='POST'?202:200);
  }catch(error){console.error('pdf-export',error instanceof Error?error.message:'error');return reply({error:'PDF 服务暂时不可用，请稍后重试'},503)}
