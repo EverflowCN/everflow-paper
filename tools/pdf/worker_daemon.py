@@ -7,6 +7,7 @@ import concurrent.futures
 import json
 import os
 import signal
+import socket
 import tempfile
 import threading
 import time
@@ -19,6 +20,7 @@ WORKER_SECRET=os.environ.get('EVERFLOW_PDF_WORKER_SECRET','').strip()
 CAPACITY=max(1,min(8,int(os.environ.get('PDF_WORKER_CAPACITY','2'))))
 POLL_SECONDS=max(0.5,float(os.environ.get('PDF_WORKER_POLL_SECONDS','1.5')))
 PORT=int(os.environ.get('PORT','8080'))
+NODE_ID=os.environ.get('PDF_WORKER_NODE_ID','').strip() or socket.gethostname().replace(' ','-')[:64]
 STOP=threading.Event()
 STATE_LOCK=threading.Lock()
 STATE={
@@ -106,6 +108,16 @@ def serve_health():
         server.handle_request()
     server.server_close()
 
+def heartbeat():
+    while not STOP.is_set():
+        try:
+            state=snapshot()
+            call('heartbeat',{'id':NODE_ID,'capacity':CAPACITY,'active':state['active']})
+        except Exception as exc:
+            update_state(lastError=str(exc)[:1000])
+            print('Heartbeat failed',str(exc)[:1200],flush=True)
+        STOP.wait(10)
+
 def shutdown(*_):
     STOP.set()
 
@@ -115,8 +127,9 @@ def main():
     signal.signal(signal.SIGTERM,shutdown)
     signal.signal(signal.SIGINT,shutdown)
     threading.Thread(target=serve_health,name='health',daemon=True).start()
+    threading.Thread(target=heartbeat,name='heartbeat',daemon=True).start()
     next_cleanup=0.0
-    print('Everflow persistent PDF worker online',{'capacity':CAPACITY,'pollSeconds':POLL_SECONDS,'port':PORT},flush=True)
+    print('Everflow persistent PDF worker online',{'node':NODE_ID,'capacity':CAPACITY,'pollSeconds':POLL_SECONDS,'port':PORT},flush=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=CAPACITY,thread_name_prefix='pdf') as pool:
         futures=set()
         while not STOP.is_set():
