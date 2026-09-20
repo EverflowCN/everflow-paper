@@ -142,17 +142,34 @@ async function setSource(next){
 }
 
 function simulationPaper(pool){const result=[];for(const sid of SUBJECT_ORDER)result.push(...choose(pool.filter(q=>q.subjectId===sid),QUOTA[sid],true));return result}
-async function generate(){
-  if(loading)return;
-  try{await withLoading(ensureModeData)}catch(error){showLoadError(error);return}
+function currentPaperTitle(){
+  const label=mode==='wrong'?'双题库错题组卷':mode==='simulation'?'408 仿真组卷':mode==='quick'?'快速练习':'范围专项';
+  const src=mode==='wrong'?'真题 + Relax1000':source==='zhenti'?'408 真题':'Relax1000';
+  return `${label} · ${src}`;
+}
+async function buildPaperSelection(){
+  if(loading)return null;
+  try{await withLoading(ensureModeData)}catch(error){showLoadError(error);return null}
   loading=false;syncBuilder();
-  const pool=activePool();if(!pool.length){window.EveraUI?.toast?.('当前范围没有可用题目',{type:'error'});return}
+  const pool=activePool();if(!pool.length){window.EveraUI?.toast?.('当前范围没有可用题目',{type:'error'});return null}
   if(mode==='simulation'){
     const shortage=SUBJECT_ORDER.find(s=>pool.filter(q=>q.subjectId===s).length<QUOTA[s]);
-    if(shortage){window.EveraUI?.toast?.(`${SUBJECT_LABEL[shortage]} 可用题量不足，无法保持 11/11/10/8 仿真结构`,{type:'error'});return}
+    if(shortage){window.EveraUI?.toast?.(`${SUBJECT_LABEL[shortage]} 可用题量不足，无法保持 11/11/10/8 仿真结构`,{type:'error'});return null}
   }
-  paper=mode==='simulation'?simulationPaper(pool):choose(pool,size,true);if(!paper.length)return;if($('[data-shuffle]')?.checked)paper=shuffle(paper);if(!['queued','preparing','compiling','storing'].includes(exportJob.status))resetExportUi();answers={};index=0;seconds=0;clearInterval(timer);timer=setInterval(()=>{seconds++;els.timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`},1000);
-  els.builder.hidden=true;els.result.hidden=true;els.paper.hidden=false;const label=mode==='wrong'?'双题库错题组卷':mode==='simulation'?'408 仿真组卷':mode==='quick'?'快速练习':'范围专项';const src=mode==='wrong'?'真题 + Relax1000':source==='zhenti'?'408 真题':'Relax1000';els.paperTitle.textContent=`${label} · ${src}`;renderPaper();window.scrollTo({top:0,behavior:'smooth'});
+  let next=mode==='simulation'?simulationPaper(pool):choose(pool,size,true);
+  if(!next.length)return null;
+  if($('[data-shuffle]')?.checked)next=shuffle(next);
+  return next;
+}
+async function generate(){
+  const next=await buildPaperSelection();if(!next)return;
+  paper=next;if(!['queued','preparing','compiling','storing'].includes(exportJob.status))resetExportUi();answers={};index=0;seconds=0;clearInterval(timer);timer=setInterval(()=>{seconds++;els.timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`},1000);
+  els.builder.hidden=true;els.result.hidden=true;els.paper.hidden=false;els.paperTitle.textContent=currentPaperTitle();renderPaper();window.scrollTo({top:0,behavior:'smooth'});
+}
+async function prepareExportFromBuilder(){
+  const next=await buildPaperSelection();if(!next)return;
+  paper=next;if(!['queued','preparing','compiling','storing'].includes(exportJob.status))resetExportUi();els.paperTitle.textContent=currentPaperTitle();
+  await openExportDialog();
 }
 
 function optionList(q){
@@ -261,7 +278,7 @@ function showLoadError(error){
 
 $$('[data-source]').forEach(b=>b.addEventListener('click',()=>{void setSource(b.dataset.source)}));$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{void setMode(b.dataset.mode)}));$$('[data-size]').forEach(b=>b.addEventListener('click',()=>{if(mode==='simulation')return;size=Number(b.dataset.size);syncSizeButtons()}));
 $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{if(input.value==='all'&&input.checked)$$('.relax-filters input').forEach(i=>{if(i!==input)i.checked=false});else if(input.value!=='all'&&input.checked)$('.relax-filters input[value="all"]').checked=false;if(!$$('.relax-filters input:checked').length)$('.relax-filters input[value="all"]').checked=true}));
-els.builderExport?.addEventListener('click',async()=>{await generate();if(paper.length)await openExportDialog()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
+els.builderExport?.addEventListener('click',()=>{void prepareExportFromBuilder()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
 els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventListener('click',()=>{if(index>0){index--;renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 window.addEventListener('storage',event=>{if(event.key===ZHENTI_KEY)zhentiRecordsCache=null});
