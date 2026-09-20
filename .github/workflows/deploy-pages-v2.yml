@@ -103,12 +103,16 @@ jobs:
           const overlay=html.indexOf('zhenti-data-overlay.js');
           const builder=html.indexOf('paper-builder.js');
           if(overlay<0||builder<0||overlay>builder)throw new Error('paper builder must load zhenti data overlay first');
-          if(!js.includes("$('[data-export-close]').forEach"))throw new Error('PDF dialog close controls must use querySelectorAll helper');
+          if(!js.includes("$$('[data-export-close]').forEach"))throw new Error('PDF dialog close controls must use querySelectorAll helper');
           if(!js.includes("const EXPORT_API='https://api.evera.top/api/pdf/export'"))throw new Error('PDF export API origin changed unexpectedly');
           if(!js.includes("EXPORT_JOB_KEY='everflow-pdf-export-job-v1'"))throw new Error('PDF export persistence missing');
           if(!js.includes("fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id)"))throw new Error('PDF job polling endpoint changed unexpectedly');
           if(!js.includes("schema:'everflow-pdf-export-v1'"))throw new Error('PDF canonical export schema missing');
-          if(/stem:q\.stem|figures:mediaList|options:Object\.fromEntries/.test(js))throw new Error('PDF request must not trust client-supplied question content');
+          const exportStart=js.indexOf('function exportPayload()');
+          const exportEnd=js.indexOf('async function exportHeaders()',exportStart);
+          if(exportStart<0||exportEnd<0)throw new Error('PDF export payload function missing');
+          const exportBody=js.slice(exportStart,exportEnd);
+          if(/stem\s*:|options\s*:|figures\s*:/.test(exportBody))throw new Error('PDF request must not trust client-supplied question content');
           console.log('Paper export regression guards OK');
           NODE
           git diff --check
