@@ -1,10 +1,11 @@
 import unittest
 from pathlib import Path
 from render import escape,rich,render,merge_layers,resolve
+
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
   for s in [r'\input{/etc/passwd}',r'$\input{secret}$',r'$^^5cinput{secret}$']:
-    self.assertNotIn(r'\vspace*{25mm}',tex)
+   self.assertNotIn(r'\input{',rich(s))
  def test_math(self):self.assertEqual(r'$\frac{1}{2}$',rich(r'$\frac{1}{2}$'))
  def test_escape(self):self.assertEqual(r'a\_b\%',escape('a_b%'))
  def test_original_supplement_wins(self):
@@ -12,7 +13,7 @@ class Safety(unittest.TestCase):
   original={'stem':'original','verification':{'status':'verified','mode':'original-paper'}}
   merged=merge_layers([{'questions':{'1':paraphrase}},{'questions':{'1':original,'2':original}}])
   self.assertEqual(merged['questions']['1'],original)
-    self.assertIn(r'\vspace*{25mm}',tex)
+  self.assertIn('2',merged['questions'])
  def test_canonical_figures(self):
   payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2026-28'},{'source':'zhenti','id':'2026-36'},{'source':'zhenti','id':'2025-1'}]}
   questions=resolve(payload,[])
@@ -29,4 +30,5 @@ class Safety(unittest.TestCase):
     self.assertIn(r'\vspace*{25mm}',tex)
    else:
     self.assertNotIn(r'\vspace*{25mm}',tex)
+
 if __name__=='__main__':unittest.main()
