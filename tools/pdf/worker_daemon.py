@@ -20,6 +20,7 @@ WORKER_SECRET=os.environ.get('EVERFLOW_PDF_WORKER_SECRET','').strip()
 CAPACITY=max(1,min(8,int(os.environ.get('PDF_WORKER_CAPACITY','2'))))
 POLL_SECONDS=max(0.5,float(os.environ.get('PDF_WORKER_POLL_SECONDS','1.5')))
 PORT=int(os.environ.get('PORT','8080'))
+BUILD_SHA=os.environ.get('EVERFLOW_BUILD_SHA','unknown').strip() or 'unknown'
 NODE_ID=os.environ.get('PDF_WORKER_NODE_ID','').strip() or socket.gethostname().replace(' ','-')[:64]
 STOP=threading.Event()
 STATE_LOCK=threading.Lock()
@@ -111,6 +112,7 @@ class HealthHandler(BaseHTTPRequestHandler):
             self.send_response(404);self.end_headers();return
         payload={
             'ok':True,
+            'buildSha':BUILD_SHA,
             'capacity':CAPACITY,
             'uptimeSeconds':round(time.time()-STATE['startedAt']),
             **snapshot(),
@@ -148,7 +150,7 @@ def main():
     threading.Thread(target=serve_health,name='health',daemon=True).start()
     threading.Thread(target=heartbeat,name='heartbeat',daemon=True).start()
     next_cleanup=0.0
-    print('Everflow persistent PDF worker online',{'node':NODE_ID,'capacity':CAPACITY,'pollSeconds':POLL_SECONDS,'port':PORT},flush=True)
+    print('Everflow persistent PDF worker online',{'node':NODE_ID,'buildSha':BUILD_SHA,'capacity':CAPACITY,'pollSeconds':POLL_SECONDS,'port':PORT},flush=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=CAPACITY,thread_name_prefix='pdf') as pool:
         futures=set()
         while not STOP.is_set():

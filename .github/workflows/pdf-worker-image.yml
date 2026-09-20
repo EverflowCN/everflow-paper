@@ -33,14 +33,25 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - name: Build immutable worker image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: tools/pdf/Dockerfile.worker
           push: true
-          tags: |
-            ghcr.io/everflowcn/everflow-pdf-worker:latest
-            ghcr.io/everflowcn/everflow-pdf-worker:sha-${{ github.sha }}
+          tags: ghcr.io/everflowcn/everflow-pdf-worker:sha-${{ github.sha }}
+          build-args: |
+            EVERFLOW_BUILD_SHA=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
+      - name: Test immutable worker image
+        run: |
+          IMAGE="ghcr.io/everflowcn/everflow-pdf-worker:sha-${GITHUB_SHA}"
+          docker pull "$IMAGE"
+          docker run --rm "$IMAGE" bash -lc 'PYTHONPATH=tools/pdf python3 -m unittest test_render.Safety.test_compile && PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py'
+      - name: Promote tested image to latest
+        run: |
+          IMAGE="ghcr.io/everflowcn/everflow-pdf-worker:sha-${GITHUB_SHA}"
+          docker tag "$IMAGE" ghcr.io/everflowcn/everflow-pdf-worker:latest
+          docker push ghcr.io/everflowcn/everflow-pdf-worker:latest
