@@ -19,6 +19,21 @@ class Safety(unittest.TestCase):
   merged=merge_layers([{'questions':{'1':paraphrase}},{'questions':{'1':original,'2':original}}])
   self.assertEqual(merged['questions']['1'],original)
   self.assertIn('2',merged['questions'])
+ def test_real_relax_ascii_blanks(self):
+  payload={'title':'Relax 半角空格回归','layout':'compact','questions':[
+   {'source':'relax','id':'ds-5-37'},
+   {'source':'relax','id':'ds-5-44'},
+   {'source':'relax','id':'os-2-26'},
+   {'source':'relax','id':'os-1-17'},
+   {'source':'relax','id':'os-2-9'},
+  ]}
+  questions=resolve(payload,[])
+  rendered=[rich(q.get('stem','')) for q in questions]
+  self.assertIn(r'\blank{}',rendered[0])
+  self.assertIn(r'\blank{}',rendered[1])
+  self.assertIn(r'\blank{}',rendered[2])
+  self.assertIn('sin()',rendered[3])
+  self.assertIn('wait()',rendered[4])
  def test_canonical_figures(self):
   payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2026-28'},{'source':'zhenti','id':'2026-36'},{'source':'zhenti','id':'2025-1'}]}
   questions=resolve(payload,[])
