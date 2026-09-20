@@ -175,7 +175,8 @@ Deno.serve(async(req)=>{
    const {data:waiting,error}=await db.from('pdf_export_jobs').select('id,priority,created_at').eq('status','queued').gt('expires_at',new Date().toISOString());if(error)throw error;
    const score=(x:any)=>x.priority+Math.floor((Date.now()-Date.parse(x.created_at))/600000);
    waiting?.sort((a:any,b:any)=>score(b)-score(a)||Date.parse(a.created_at)-Date.parse(b.created_at)||a.id.localeCompare(b.id));
-   result.position=(waiting?.findIndex((x:any)=>x.id===job.id)??-1)+1;
+   const queueIndex=waiting?.findIndex((x:any)=>x.id===job.id)??-1;
+   result.position=queueIndex>=0?queueIndex+1:1;
    Object.assign(result,etaFor('queued',result.position,fastWorker,result.workers.total,result.count,result.workers.busy));
    result.message='已进入生成队列。预计时间会随当前队列与编译节点自动调整；关闭窗口后任务仍会继续。';
   }else if(job.status==='failed')result.message=job.error;
