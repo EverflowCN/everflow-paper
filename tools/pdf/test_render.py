@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from render import escape,rich,render,merge_layers
+from render import escape,rich,render,merge_layers,resolve
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
   for s in [r'\input{/etc/passwd}',r'$\input{secret}$',r'$^^5cinput{secret}$']:
@@ -13,6 +13,11 @@ class Safety(unittest.TestCase):
   merged=merge_layers([{'questions':{'1':paraphrase}},{'questions':{'1':original,'2':original}}])
   self.assertEqual(merged['questions']['1'],original)
   self.assertIn('2',merged['questions'])
+ def test_canonical_figures(self):
+  payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2026-28'},{'source':'zhenti','id':'2026-36'},{'source':'zhenti','id':'2025-1'}]}
+  questions=resolve(payload,[])
+  self.assertTrue(any(q.get('figures') for q in questions))
+  render(payload,questions,Path('/tmp/pdf-verification/canonical'))
  def test_compile(self):
   questions=[{'_source':'zhenti','_id':str(i),'stem':f'第 {i} 道验证题。已知 $A=\\begin{{bmatrix}}1&2\\\\3&4\\end{{bmatrix}}$，请判断 $2^{{10}}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
   for layout in ['compact','spacious']:

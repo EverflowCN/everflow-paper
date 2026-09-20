@@ -15,6 +15,7 @@ def main():
     from render import resolve,render
     # Bound each run; expired leases safely recover after runner termination.
     until=time.monotonic()+1200
+    failures=0
     for _ in range(30):
         if time.monotonic()>until:break
         result=call('claim');job=result.get('job')
@@ -28,6 +29,8 @@ def main():
                 call('upload',job=job,pdf=pdf.read_bytes())
             print('Completed',job['id'],len(questions))
         except Exception as e:
+            failures+=1
             print('Failed',job['id'],str(e)[:2500])
             call('update',{'status':'failed'},job)
+    if failures:raise SystemExit(f'{failures} PDF jobs failed')
 if __name__=='__main__':main()

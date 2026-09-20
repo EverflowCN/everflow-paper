@@ -1,5 +1,5 @@
 """Canonical question -> body-only XeLaTeX. No client-supplied TeX is executed."""
-import html,json,re,shutil,subprocess,urllib.request,urllib.parse,urllib.error
+import html,json,re,shutil,subprocess,urllib.request,urllib.parse,urllib.error,io
 from pathlib import Path
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[2]
@@ -18,7 +18,8 @@ def fetch(url,limit=20000000):
 
 def escape(s):
     table={'\\':r'\textbackslash{}','{':r'\{','}':r'\}','$':r'\$','&':r'\&','#':r'\#','%':r'\%','_':r'\_','^':r'\textasciicircum{}','~':r'\textasciitilde{}'}
-    return ''.join(table.get(c,c) for c in str(s))
+    symbols={'→':r'\ensuremath{\to}','←':r'\ensuremath{\leftarrow}','×':r'\ensuremath{\times}','μ':r'\ensuremath{\mu}','−':r'\ensuremath{-}','≤':r'\ensuremath{\le}','≥':r'\ensuremath{\ge}','∞':r'\ensuremath{\infty}','∈':r'\ensuremath{\in}','≠':r'\ensuremath{\ne}','√':r'\ensuremath{\surd}','Σ':r'\ensuremath{\Sigma}','α':r'\ensuremath{\alpha}','β':r'\ensuremath{\beta}','≫':r'\ensuremath{\gg}'}
+    return ''.join(symbols.get(c,table.get(c,c)) for c in str(s))
 
 def rich(s):
     s=html.unescape(str(s or ''))
@@ -90,11 +91,19 @@ def render(payload,questions,dest):
     def figure(src,source):
         nonlocal nimage
         data=fetch(asset_url(src,source));nimage+=1
-        raw=dest/f'asset-{nimage}.bin';raw.write_bytes(data)
-        with Image.open(raw) as im:
+        if b'<svg' in data[:1000]:
+            import cairosvg
+            from defusedxml import ElementTree
+            tree=ElementTree.fromstring(data)
+            for element in tree.iter():
+                for key,value in element.attrib.items():
+                    if key.endswith('href') and not value.startswith('#'):raise ValueError('External SVG reference')
+                    if re.search(r'url\(\s*[\"\']?(?!#)',value):raise ValueError('External SVG style')
+                if element.tag.endswith('style') and re.search(r'@import|url\(',element.text or ''):raise ValueError('External SVG CSS')
+            data=cairosvg.svg2png(bytestring=data,output_width=1600)
+        with Image.open(io.BytesIO(data)) as im:
             if im.width*im.height>40000000:raise ValueError('Image too large')
             im.convert('RGB').save(dest/f'figure-{nimage}.png')
-        raw.unlink()
         return '\n'+r'\par\begin{center}\includegraphics[width=.88\linewidth,height=.48\textheight,keepaspectratio]{figure-'+str(nimage)+r'.png}\end{center}'+'\n'
     for q in questions:
         source=q['_source']; options=q.get('options',{})
