@@ -36,7 +36,10 @@ class Safety(unittest.TestCase):
    self.assertTrue((dest/'assets/watermark/water.png').is_file())
    self.assertIn(r'\providecommand{\EverflowExamWatermarkEnabled}{true}',(dest/'00-user-config/05-watermark-config.tex').read_text(encoding='utf8'))
    tex=(dest/'questions.tex').read_text(encoding='utf8')
-   self.assertIn(r'\blank',tex)
+   self.assertIn(r'答案位置\blank，',tex)
+   self.assertNotIn(r'\\blank',tex)
+   self.assertNotIn('blankNone',tex)
+   self.assertNotIn('blankNone',text)
    if layout=='spacious':
     self.assertIn(r'\vspace*{25mm}',tex)
    else:
