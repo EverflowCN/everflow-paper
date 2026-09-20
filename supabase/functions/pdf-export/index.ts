@@ -18,6 +18,15 @@ Deno.serve(async(req)=>{
   if(action){
    try{await worker(req)}catch{return reply({error:'Unauthorized worker'},401)}
    if(req.method!=='POST')return reply({error:'Method not allowed'},405);
+   if(action==='cleanup'){
+    const now=new Date().toISOString();
+    const {data:expired,error}=await db.from('pdf_export_jobs').select('id,object_path').lte('expires_at',now).limit(100);if(error)throw error;
+    const paths=(expired||[]).map((x:any)=>x.object_path).filter(Boolean);
+    if(paths.length){const {error:removeError}=await db.storage.from('exam-pdfs').remove(paths);if(removeError)throw removeError;}
+    const ids=(expired||[]).map((x:any)=>x.id);
+    if(ids.length){const {error:deleteError}=await db.from('pdf_export_jobs').delete().in('id',ids);if(deleteError)throw deleteError;}
+    return reply({cleaned:ids.length,files:paths.length});
+   }
    if(action==='pending'){const {count,error}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['queued','preparing','compiling','storing']).gt('expires_at',new Date().toISOString());if(error)throw error;return reply({pending:count||0})}
    if(action==='claim'){
     const {data,error}=await db.rpc('pdf_export_claim');if(error)throw error;
