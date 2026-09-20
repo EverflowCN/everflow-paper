@@ -41,6 +41,24 @@ def update_state(**patch):
     with STATE_LOCK:
         STATE.update(patch)
 
+def mark_job_started():
+    with STATE_LOCK:
+        STATE['active']=min(CAPACITY,STATE['active']+1)
+        STATE['lastClaimAt']=time.time()
+        return dict(STATE)
+
+def mark_job_finished(success,error=''):
+    with STATE_LOCK:
+        STATE['active']=max(0,STATE['active']-1)
+        if success:
+            STATE['completed']+=1
+            STATE['lastCompleteAt']=time.time()
+            STATE['lastError']=''
+        else:
+            STATE['failed']+=1
+            STATE['lastError']=str(error)[:1000]
+        return dict(STATE)
+
 def call(action,body=None,job=None,pdf=None):
     if not WORKER_SECRET:
         raise RuntimeError('EVERFLOW_PDF_WORKER_SECRET is required')
@@ -56,10 +74,18 @@ def call(action,body=None,job=None,pdf=None):
     with urllib.request.urlopen(req,timeout=90) as response:
         return json.load(response)
 
+def report_heartbeat(state=None):
+    try:
+        state=state or snapshot()
+        call('heartbeat',{'id':NODE_ID,'capacity':CAPACITY,'active':state['active']})
+    except Exception as exc:
+        update_state(lastError=str(exc)[:1000])
+        print('Heartbeat failed',str(exc)[:1200],flush=True)
+
 def process(result):
     from render import resolve,render
     job=result['job']
-    update_state(active=snapshot()['active']+1,lastClaimAt=time.time())
+    report_heartbeat(mark_job_started())
     try:
         questions=resolve(job['payload'],result['overrides'])
         call('update',{'status':'compiling'},job)
@@ -67,13 +93,11 @@ def process(result):
             pdf=render(job['payload'],questions,Path(tmp))
             call('update',{'status':'storing'},job)
             call('upload',job=job,pdf=pdf.read_bytes())
-        state=snapshot()
-        update_state(active=max(0,state['active']-1),completed=state['completed']+1,lastCompleteAt=time.time(),lastError='')
+        report_heartbeat(mark_job_finished(True))
         print('Completed',job['id'],len(questions),flush=True)
         return 0
     except Exception as exc:
-        state=snapshot()
-        update_state(active=max(0,state['active']-1),failed=state['failed']+1,lastError=str(exc)[:1000])
+        report_heartbeat(mark_job_finished(False,exc))
         print('Failed',job['id'],str(exc)[:2500],flush=True)
         try:
             call('update',{'status':'failed'},job)
@@ -110,12 +134,7 @@ def serve_health():
 
 def heartbeat():
     while not STOP.is_set():
-        try:
-            state=snapshot()
-            call('heartbeat',{'id':NODE_ID,'capacity':CAPACITY,'active':state['active']})
-        except Exception as exc:
-            update_state(lastError=str(exc)[:1000])
-            print('Heartbeat failed',str(exc)[:1200],flush=True)
+        report_heartbeat()
         STOP.wait(10)
 
 def shutdown(*_):
