@@ -81,6 +81,7 @@ jobs:
             site/assets/js/workspace-v3.js \
             site/assets/js/workspace-shell-v1.js \
             site/assets/js/workspace-operations-v1.js \
+            site/assets/js/workspace-pdf-v1.js \
             site/assets/js/workspace-questions-v1.js \
             site/sw.js
           do
@@ -91,6 +92,8 @@ jobs:
           grep -q 'has-srs-groups' site/assets/js/site-boot-v1.js
           grep -q 'resource-card-skeleton' site/links/index.html
           grep -q 'data-ws-panel="operations"' site/workspace/index.html
+          grep -q 'data-ws-panel="pdf"' site/workspace/index.html
+          grep -q 'workspace-pdf-v1.js' site/workspace/index.html
           grep -q 'data-question-pane="preview"' site/workspace/index.html
           grep -q 'data-question-status-filter' site/workspace/index.html
           grep -q 'workspace-questions-v2.css' site/workspace/index.html
