@@ -202,10 +202,10 @@ let exportManager=false;
 let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=false;
 const exportLayout=$('[data-export-layout]');
 function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'}
-function renderExportPriority(user,enabled=true){
+function renderExportPriority(user,enabled=null){
   exportManager=exportRole(user);
   if(!els.exportAdmin)return;
-  if(!exportManager){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren();return}
+  if(!exportManager||enabled===null){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren();return}
   els.exportAdmin.hidden=false;
   els.exportAdmin.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 3 3 4-6 4 6 3-3-1 9H6L5 8ZM6 20h12"/></svg><span><b>${enabled?'优先导出已启用':'当前任务未启用优先'}</b><small>${enabled?'管理账号将在下一可用编译节点优先处理。':'本次任务按普通队列顺序处理。'}</small></span>`;
 }
@@ -241,7 +241,7 @@ function closeExportDialog(){if(!els.exportLayer)return;els.exportLayer.hidden=t
 async function openExportDialog(){
   if(!paper.length&&!exportJob.id&&!exportJob.downloadUrl){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
   if(!els.exportLayer)return;els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');
-  try{const user=await window.EveraCloud?.getUser?.();if(exportOwner&&user?.id!==exportOwner)resetExportUi();renderExportPriority(user,false);if(exportJob.id)void pollExportJob()}catch{exportManager=false;if(els.exportAdmin){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren()}}
+  try{const user=await window.EveraCloud?.getUser?.();if(exportOwner&&user?.id!==exportOwner)resetExportUi();renderExportPriority(user,null);if(exportJob.id)void pollExportJob()}catch{exportManager=false;if(els.exportAdmin){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren()}}
   if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':exportJob.status==='failed'?'生成失败':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
   setTimeout(()=>els.exportStart?.focus(),40);
 }
