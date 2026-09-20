@@ -22,6 +22,24 @@ function etaFor(status:string,position=1,fast=false){
  }
  return{etaMinSeconds:0,etaMaxSeconds:0};
 }
+async function membershipActive(userId:string){
+ const {data:membership,error}=await db.from('memberships').select('plan,status,source,expires_at').eq('user_id',userId).maybeSingle();if(error)throw error;
+ let effectiveExpiresAt=membership?.expires_at||null;
+ if(membership?.source==='promo_exam_2027'&&!effectiveExpiresAt){
+  const {data:cfg,error:cfgError}=await db.from('membership_config').select('pro_free_until').eq('id','default').single();if(cfgError)throw cfgError;
+  effectiveExpiresAt=cfg?.pro_free_until||null;
+ }
+ return Boolean(membership&&['member','pro'].includes(membership.plan)&&membership.status==='active'&&(!effectiveExpiresAt||Date.parse(effectiveExpiresAt)>Date.now()));
+}
+async function workerSnapshot(){
+ const freshSince=new Date(Date.now()-45*1000).toISOString();
+ const {data:nodes,error:nodesError}=await db.from('pdf_worker_nodes').select('capacity,active').eq('kind','persistent').gt('updated_at',freshSince);if(nodesError)throw nodesError;
+ const persistentCapacity=(nodes||[]).reduce((sum:number,node:any)=>sum+(Number(node.capacity)||0),0);
+ const persistentBusy=(nodes||[]).reduce((sum:number,node:any)=>sum+Math.min(Number(node.active)||0,Number(node.capacity)||0),0);
+ if(persistentCapacity>0)return{fast:true,workers:{busy:persistentBusy,total:persistentCapacity,mode:'persistent'}};
+ const {count:activeWorkers,error:workersError}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['preparing','compiling','storing']).gt('lease_until',new Date().toISOString()).gt('expires_at',new Date().toISOString());if(workersError)throw workersError;
+ return{fast:false,workers:{busy:Math.min(activeWorkers||0,WORKER_CAPACITY),total:WORKER_CAPACITY,mode:'scheduled'}};
+}
 async function digest(value:string){return new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))}
 async function sharedWorker(req:Request){
  const provided=req.headers.get('X-Everflow-Worker-Key')||'';
@@ -93,16 +111,14 @@ Deno.serve(async(req)=>{
   const {data:{user},error:authError}=await db.auth.getUser(token);
   if(authError||!user)return reply({error:'请先登录后导出 PDF'},401);
   const manager=['admin','owner'].includes(user.app_metadata?.role);
+  if(req.method==='GET'&&endpoint.searchParams.get('availability')==='1'){
+   if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
+   const snap=await workerSnapshot(),eta=etaFor('queued',1,snap.fast);
+   return reply({...eta,workers:snap.workers});
+  }
   let job:any;
   if(req.method==='POST'){
-   const {data:membership,error:membershipError}=await db.from('memberships').select('plan,status,source,expires_at').eq('user_id',user.id).maybeSingle();if(membershipError)throw membershipError;
-   let effectiveExpiresAt=membership?.expires_at||null;
-   if(membership?.source==='promo_exam_2027'&&!effectiveExpiresAt){
-    const {data:cfg,error:cfgError}=await db.from('membership_config').select('pro_free_until').eq('id','default').single();if(cfgError)throw cfgError;
-    effectiveExpiresAt=cfg?.pro_free_until||null;
-   }
-   const membershipActive=Boolean(membership&&['member','pro'].includes(membership.plan)&&membership.status==='active'&&(!effectiveExpiresAt||Date.parse(effectiveExpiresAt)>Date.now()));
-   if(!membershipActive)return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
+   if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
    const raw=await req.text();if(raw.length>50000)return reply({error:'试卷数据过大'},413);
    const body=JSON.parse(raw);
    if(body.schema!=='everflow-pdf-export-v1'||body.template!=='exam-A4'||!['compact','spacious'].includes(body.layout)||!uuid.test(body.requestId||'')||!Array.isArray(body.questions)||body.questions.length<1||body.questions.length>100)return reply({error:'试卷参数无效'},400);
@@ -119,16 +135,8 @@ Deno.serve(async(req)=>{
   }else return reply({error:'Method not allowed'},405);
   if(Date.parse(job.expires_at)<=Date.now())return reply({error:'任务已过期，请重新生成'},410);
   const result:any={id:job.id,jobId:job.id,status:job.status,title:job.payload.title,count:job.payload.questions.length,layout:job.payload.layout,expiresAt:job.expires_at};
-  const freshSince=new Date(Date.now()-45*1000).toISOString();
-  const {data:nodes,error:nodesError}=await db.from('pdf_worker_nodes').select('capacity,active').eq('kind','persistent').gt('updated_at',freshSince);if(nodesError)throw nodesError;
-  const persistentCapacity=(nodes||[]).reduce((sum:number,node:any)=>sum+(Number(node.capacity)||0),0);
-  const persistentBusy=(nodes||[]).reduce((sum:number,node:any)=>sum+Math.min(Number(node.active)||0,Number(node.capacity)||0),0);
-  let fastWorker=persistentCapacity>0;
-  if(fastWorker)result.workers={busy:persistentBusy,total:persistentCapacity,mode:'persistent'};
-  else{
-   const {count:activeWorkers,error:workersError}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['preparing','compiling','storing']).gt('lease_until',new Date().toISOString()).gt('expires_at',new Date().toISOString());if(workersError)throw workersError;
-   result.workers={busy:Math.min(activeWorkers||0,WORKER_CAPACITY),total:WORKER_CAPACITY,mode:'scheduled'};
-  }
+  const snap=await workerSnapshot(),fastWorker=snap.fast;
+  result.workers=snap.workers;
   if(manager)result.priorityEnabled=job.priority>0;
   if(job.status==='queued'){
    // Return only a count, never other users' records or priority attributes.
