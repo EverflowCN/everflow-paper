@@ -7,12 +7,19 @@ const WORKER_CAPACITY=2;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const headers={'Content-Type':'application/json','Cache-Control':'no-store'};
 function reply(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers})}
-function etaFor(status:string,position=1){
+function etaFor(status:string,position=1,fast=false){
  const p=Math.max(1,Number(position)||1);
- if(status==='queued')return{etaMinSeconds:90+(p-1)*20,etaMaxSeconds:420+(p-1)*60};
- if(status==='preparing')return{etaMinSeconds:60,etaMaxSeconds:180};
- if(status==='compiling')return{etaMinSeconds:20,etaMaxSeconds:120};
- if(status==='storing')return{etaMinSeconds:5,etaMaxSeconds:30};
+ if(fast){
+  if(status==='queued')return{etaMinSeconds:8+(p-1)*15,etaMaxSeconds:75+(p-1)*60};
+  if(status==='preparing')return{etaMinSeconds:8,etaMaxSeconds:45};
+  if(status==='compiling')return{etaMinSeconds:12,etaMaxSeconds:90};
+  if(status==='storing')return{etaMinSeconds:3,etaMaxSeconds:20};
+ }else{
+  if(status==='queued')return{etaMinSeconds:90+(p-1)*20,etaMaxSeconds:420+(p-1)*60};
+  if(status==='preparing')return{etaMinSeconds:60,etaMaxSeconds:180};
+  if(status==='compiling')return{etaMinSeconds:20,etaMaxSeconds:120};
+  if(status==='storing')return{etaMinSeconds:5,etaMaxSeconds:30};
+ }
  return{etaMinSeconds:0,etaMaxSeconds:0};
 }
 async function digest(value:string){return new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))}
@@ -45,6 +52,14 @@ Deno.serve(async(req)=>{
     return reply({cleaned:ids.length,files:paths.length});
    }
    if(action==='pending'){const {count,error}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['queued','preparing','compiling','storing']).gt('expires_at',new Date().toISOString());if(error)throw error;return reply({pending:count||0})}
+   if(action==='heartbeat'){
+    const body=await req.json(),nodeId=String(body.id||'').slice(0,80);
+    if(!/^[a-zA-Z0-9._:-]{1,80}$/.test(nodeId))return reply({error:'Invalid worker id'},400);
+    const capacity=Math.max(1,Math.min(32,Number(body.capacity)||1)),active=Math.max(0,Math.min(capacity,Number(body.active)||0)),now=new Date().toISOString();
+    const {error}=await db.from('pdf_worker_nodes').upsert({id:nodeId,kind:'persistent',capacity,active,updated_at:now},{onConflict:'id'});if(error)throw error;
+    await db.from('pdf_worker_nodes').delete().lt('updated_at',new Date(Date.now()-5*60*1000).toISOString());
+    return reply({ok:true,at:now});
+   }
    if(action==='claim'){
     const {data,error}=await db.rpc('pdf_export_claim');if(error)throw error;
     const job=data?.[0]||null;
@@ -102,8 +117,16 @@ Deno.serve(async(req)=>{
   }else return reply({error:'Method not allowed'},405);
   if(Date.parse(job.expires_at)<=Date.now())return reply({error:'任务已过期，请重新生成'},410);
   const result:any={id:job.id,jobId:job.id,status:job.status,title:job.payload.title,count:job.payload.questions.length,layout:job.payload.layout,expiresAt:job.expires_at};
-  const {count:activeWorkers,error:workersError}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['preparing','compiling','storing']).gt('lease_until',new Date().toISOString()).gt('expires_at',new Date().toISOString());if(workersError)throw workersError;
-  result.workers={busy:Math.min(activeWorkers||0,WORKER_CAPACITY),total:WORKER_CAPACITY};
+  const freshSince=new Date(Date.now()-45*1000).toISOString();
+  const {data:nodes,error:nodesError}=await db.from('pdf_worker_nodes').select('capacity,active').eq('kind','persistent').gt('updated_at',freshSince);if(nodesError)throw nodesError;
+  const persistentCapacity=(nodes||[]).reduce((sum:number,node:any)=>sum+(Number(node.capacity)||0),0);
+  const persistentBusy=(nodes||[]).reduce((sum:number,node:any)=>sum+Math.min(Number(node.active)||0,Number(node.capacity)||0),0);
+  let fastWorker=persistentCapacity>0;
+  if(fastWorker)result.workers={busy:persistentBusy,total:persistentCapacity,mode:'persistent'};
+  else{
+   const {count:activeWorkers,error:workersError}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['preparing','compiling','storing']).gt('lease_until',new Date().toISOString()).gt('expires_at',new Date().toISOString());if(workersError)throw workersError;
+   result.workers={busy:Math.min(activeWorkers||0,WORKER_CAPACITY),total:WORKER_CAPACITY,mode:'scheduled'};
+  }
   if(manager)result.priorityEnabled=job.priority>0;
   if(job.status==='queued'){
    // Return only a count, never other users' records or priority attributes.
@@ -111,10 +134,10 @@ Deno.serve(async(req)=>{
    const score=(x:any)=>x.priority+Math.floor((Date.now()-Date.parse(x.created_at))/600000);
    waiting?.sort((a:any,b:any)=>score(b)-score(a)||Date.parse(a.created_at)-Date.parse(b.created_at)||a.id.localeCompare(b.id));
    result.position=(waiting?.findIndex((x:any)=>x.id===job.id)??-1)+1;
-   Object.assign(result,etaFor('queued',result.position));
+   Object.assign(result,etaFor('queued',result.position,fastWorker));
    result.message='已进入生成队列。预计时间会随当前队列与编译节点自动调整；关闭窗口后任务仍会继续。';
   }else if(job.status==='failed')result.message=job.error;
-  else Object.assign(result,etaFor(job.status,1));
+  else Object.assign(result,etaFor(job.status,1,fastWorker));
   if(job.status==='completed'&&job.object_path){const {data,error}=await db.storage.from('exam-pdfs').createSignedUrl(job.object_path,600);if(error)throw error;result.downloadUrl=data.signedUrl;}
   return reply(result,req.method==='POST'?202:200);
  }catch(error){console.error('pdf-export',error instanceof Error?error.message:'error');return reply({error:'PDF 服务暂时不可用，请稍后重试'},503)}
