@@ -241,7 +241,7 @@ function applyExportUpdate(data={}){
 }
 async function pollExportJob(){
   if(!exportJob.id)return;
-  try{const res=await fetch(EXPORT_API+'/'+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)}catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
+  try{const res=await fetch(EXPORT_API+'/'+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),credentials:'include',cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)}catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
 }
 function watchExportJob(){stopExportStream();pollExportJob();}
 async function startPdfExport(){
