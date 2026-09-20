@@ -6,7 +6,7 @@ const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
 
 const $=s=>app.querySelector(s),$$=s=>[...app.querySelectorAll(s)];
-const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]')};
+const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]')};
 
 const YEARS=Array.from({length:18},(_,i)=>2009+i);
 const SUBJECT_ORDER=['ds','co','os','cn'];
@@ -168,9 +168,11 @@ async function generate(){
 }
 async function prepareExportFromBuilder(){
   if(exportBusy()){await openExportDialog();return}
+  const access=await checkPdfAccess();
+  if(!access.allowed){await openExportDialog(access);return}
   const next=await buildPaperSelection();if(!next)return;
-  paper=next;resetExportUi();els.paperTitle.textContent=currentPaperTitle();
-  await openExportDialog();
+  paper=next;resetExportUi();renderPdfAccess(access);els.paperTitle.textContent=currentPaperTitle();
+  await openExportDialog(access);
 }
 
 function optionList(q){
@@ -200,7 +202,70 @@ const exportBusy=()=>['queued','preparing','compiling','storing'].includes(expor
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 let exportManager=false;
 let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=false;
-const exportLayout=$('[data-export-layout]');
+const exportLayoutInputs=$('[data-export-layout-input]');
+const selectedExportLayout=()=>exportLayoutInputs.find(input=>input.checked)?.value==='spacious'?'spacious':'compact';
+function setSelectedExportLayout(value){exportLayoutInputs.forEach(input=>{input.checked=input.value===(value==='spacious'?'spacious':'compact')})}
+let exportAccessAllowed=false,exportAccessCache=null,exportEtaDeadline=0,exportEtaKey='',exportEtaTimer=0;
+async function checkPdfAccess(force=false){
+  if(!force&&exportAccessCache&&Date.now()-exportAccessCache.checkedAt<30000)return exportAccessCache;
+  await window.EveraCloud?.ready;
+  const user=await window.EveraCloud?.getUser?.().catch(()=>null);
+  if(!user)return exportAccessCache={allowed:false,kind:'login',user:null,checkedAt:Date.now()};
+  try{
+    const membership=await window.EveraCloud.membership('status');
+    const allowed=Boolean(membership?.active&&['member','pro'].includes(membership?.plan));
+    return exportAccessCache={allowed,kind:allowed?'member':'membership',user,membership,checkedAt:Date.now()};
+  }catch(error){
+    return exportAccessCache={allowed:false,kind:'error',user,error,checkedAt:Date.now()};
+  }
+}
+function renderPdfAccess(access){
+  exportAccessAllowed=Boolean(access?.allowed);
+  if(els.exportAccess){
+    els.exportAccess.hidden=exportAccessAllowed;
+    if(!exportAccessAllowed){
+      const login=access?.kind==='login',error=access?.kind==='error';
+      if(els.exportAccessTitle)els.exportAccessTitle.textContent=login?'登录后使用 PDF 导出':error?'暂时无法核验会员':'会员专属 PDF 导出';
+      if(els.exportAccessCopy)els.exportAccessCopy.textContent=login?'请先登录 Everflow 账户，再使用在线组卷导出。':error?'会员状态读取失败，请稍后重试。':'当前账户没有有效会员；普通会员或 Pro 均可使用。';
+      if(els.exportAccessAction){els.exportAccessAction.href=login?'../account/':'../membership/';els.exportAccessAction.textContent=login?'去登录':error?'查看账户':'开通会员'}
+    }
+  }
+  if(els.exportStart)els.exportStart.disabled=!exportAccessAllowed||exportBusy();
+}
+function fallbackEta(status,position=1){
+  const p=Math.max(1,Number(position)||1);
+  if(status==='queued')return{min:90+(p-1)*20,max:420+(p-1)*60};
+  if(status==='preparing')return{min:60,max:180};
+  if(status==='compiling')return{min:20,max:120};
+  if(status==='storing')return{min:5,max:30};
+  return{min:0,max:0};
+}
+function etaRangeText(min,max){
+  if(max<=0)return '—';
+  if(max<60)return `约 ${Math.max(1,Math.ceil(min))}–${Math.ceil(max)} 秒`;
+  return `约 ${Math.max(1,Math.ceil(min/60))}–${Math.ceil(max/60)} 分钟`;
+}
+function formatCountdown(seconds){
+  const s=Math.max(0,Math.ceil(seconds)),m=Math.floor(s/60),r=s%60;
+  return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
+}
+function stopExportEta(){clearInterval(exportEtaTimer);exportEtaTimer=0}
+function tickExportEta(){
+  if(!els.exportCountdown||!exportEtaDeadline)return;
+  const remain=Math.max(0,(exportEtaDeadline-Date.now())/1000);
+  els.exportCountdown.textContent=remain>0?formatCountdown(remain):'仍在处理中';
+}
+function updateExportEta(data={},status=exportJob.status,position=data.position){
+  if(status==='completed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='已完成';if(els.exportCountdown)els.exportCountdown.textContent='00:00';return}
+  if(status==='failed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='—';if(els.exportCountdown)els.exportCountdown.textContent='—';return}
+  if(status==='idle'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='约 2–7 分钟';if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';return}
+  const fallback=fallbackEta(status,position),min=Number.isFinite(Number(data.etaMinSeconds))?Number(data.etaMinSeconds):fallback.min,max=Number.isFinite(Number(data.etaMaxSeconds))?Number(data.etaMaxSeconds):fallback.max;
+  if(els.exportEtaRange)els.exportEtaRange.textContent=etaRangeText(min,max);
+  const key=`${status}:${position??''}:${min}:${max}`;
+  if(key!==exportEtaKey||!exportEtaDeadline){exportEtaKey=key;exportEtaDeadline=Date.now()+max*1000}
+  if(!exportEtaTimer)exportEtaTimer=setInterval(tickExportEta,1000);
+  tickExportEta();
+}
 function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'}
 function renderExportPriority(user,enabled=null){
   exportManager=exportRole(user);
@@ -218,7 +283,7 @@ function persistExportJob(){
 }
 function clearPersistedExportJob(){try{localStorage.removeItem(EXPORT_JOB_KEY)}catch{}}
 function setExportState(status,{position=null,workers=null,message='',downloadUrl=''}={}){
-  exportJob.status=status;setExportSteps(status);if(exportLayout)exportLayout.disabled=exportBusy();
+  exportJob.status=status;setExportSteps(status);exportLayoutInputs.forEach(input=>{input.disabled=exportBusy()||!exportAccessAllowed});
   els.exportLayer?.classList.toggle('is-busy',['queued','preparing','compiling','storing'].includes(status));
   els.exportLayer?.classList.toggle('is-complete',status==='completed');els.exportLayer?.classList.toggle('is-error',status==='failed');
   const labels={idle:'准备生成',queued:'正在排队',preparing:'正在准备排版',compiling:'正在生成 PDF',processing:'正在生成 PDF',storing:'正在保存 PDF',completed:'生成完成',failed:'生成失败'};
@@ -227,7 +292,7 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   if(els.exportWorker)els.exportWorker.textContent=workers?('编译节点 '+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌'):status==='queued'?'等待可用编译节点':status==='compiling'?'XeLaTeX 正在排版':status==='completed'?'文件已准备好':'编译节点状态将在提交后显示';
   if(message&&els.exportMessage)els.exportMessage.textContent=message;
   if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
-  if(els.exportStart){els.exportStart.disabled=['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
+  if(els.exportStart){els.exportStart.disabled=!exportAccessAllowed||['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
   if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
   exportJob.updatedAt=Date.now();persistExportJob();
 }
@@ -235,13 +300,21 @@ function resetExportUi(){
   stopExportStream();clearPersistedExportJob();exportRequestId='';exportPollFailures=0;exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
   if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
   if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
-  setExportState('idle',{message:'仅生成题目页，不含封面、前言、目录、答案与解析。请选择紧凑版或留空版。'});
+  setExportState('idle',{message:'仅生成题目页，不含封面、前言、目录、答案与解析。'});updateExportEta({},'idle');
 }
 function closeExportDialog(){if(!els.exportLayer)return;els.exportLayer.hidden=true;document.body.classList.remove('paper-export-open')}
-async function openExportDialog(){
-  if(!paper.length&&!exportJob.id&&!exportJob.downloadUrl){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
-  if(!els.exportLayer)return;els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');
-  try{const user=await window.EveraCloud?.getUser?.();if(exportOwner&&user?.id!==exportOwner)resetExportUi();renderExportPriority(user,null);if(exportJob.id)void pollExportJob()}catch{exportManager=false;if(els.exportAdmin){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren()}}
+async function openExportDialog(accessOverride=null){
+  if(!els.exportLayer)return;
+  const access=accessOverride||await checkPdfAccess();
+  els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');renderPdfAccess(access);
+  const user=access?.user||null;
+  if(exportOwner&&user?.id!==exportOwner)resetExportUi();
+  renderExportPriority(user,null);
+  if(!access.allowed&&!exportJob.id&&!exportJob.downloadUrl){
+    setExportState('idle',{message:access.kind==='login'?'PDF 导出仅对已登录用户开放。':'PDF 导出为会员权益，请先开通有效会员。'});updateExportEta({},'idle');return;
+  }
+  if(!paper.length&&!exportJob.id&&!exportJob.downloadUrl){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});closeExportDialog();return}
+  if(exportJob.id)void pollExportJob();
   if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':exportJob.status==='failed'?'生成失败':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
   setTimeout(()=>els.exportStart?.focus(),40);
 }
@@ -251,8 +324,8 @@ function exportPayload(){
     requestId:exportRequestId||=crypto.randomUUID(),
     template:'exam-A4',
     templateVersion:'everflow-exam-online-v1',
-    layout:exportLayout?.value==='spacious'?'spacious':'compact',
-    answerSpace:exportLayout?.value==='spacious'?'25mm':'none',
+    layout:selectedExportLayout(),
+    answerSpace:selectedExportLayout()==='spacious'?'25mm':'none',
     includeAnswers:false,
     title:els.paperTitle?.textContent||'408 组卷',
     source,
@@ -278,7 +351,7 @@ function applyExportUpdate(data={}){
   if(exportManager&&('priorityEnabled'in data||'priority'in data))renderExportPriority({app_metadata:{role:'owner'}},Boolean(data.priorityEnabled??data.priority));
   const rawStatus=String(data.status||exportJob.status||'queued');const status=({processing:'compiling',ready:'completed'})[rawStatus]||rawStatus;
   if(data.title)exportJob.title=data.title;if(data.count)exportJob.count=data.count;
-  if(data.layout&&exportLayout)exportLayout.value=data.layout;setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});
+  if(data.layout)setSelectedExportLayout(data.layout);setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});updateExportEta(data,status,data.position);
   if(status==='completed'||status==='failed'){stopExportStream();exportRequestId='';persistExportJob()}
 }
 async function pollExportJob(){
@@ -304,12 +377,14 @@ async function restoreExportJob(){
 async function startPdfExport(){
   if(!paper.length||exportBusy()||exportSubmitting)return;
   exportSubmitting=true;
-  const user=await window.EveraCloud?.getUser?.().catch(()=>null);
-  if(!user){exportSubmitting=false;setExportState('failed',{message:'请先在账户页面登录，再导出 PDF。'});return}
+  const access=await checkPdfAccess(true);
+  renderPdfAccess(access);
+  const user=access?.user||null;
+  if(!access.allowed){exportSubmitting=false;setExportState('idle',{message:access.kind==='login'?'请先登录账户，再导出 PDF。':'PDF 导出为会员权益，请先开通有效会员。'});updateExportEta({},'idle');return}
   exportOwner=user.id;stopExportStream();exportJob.id='';exportJob.downloadUrl='';
   for(const link of [els.exportDownload,els.exportPreview])if(link){link.hidden=true;link.removeAttribute('href')}
   const payload=exportPayload();exportJob.title=payload.title;exportJob.count=payload.questions.length;
-  setExportState('queued',{message:`正在提交「${exportJob.title}」· ${exportJob.count} 题到 PDF 生成队列…`});if(els.exportStart)els.exportStart.disabled=true;
+  setExportState('queued',{message:`正在提交「${exportJob.title}」· ${exportJob.count} 题到 PDF 生成队列…`});updateExportEta({},'queued',1);if(els.exportStart)els.exportStart.disabled=true;
   try{
     const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),credentials:'include',body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
     let data={};try{data=await res.json()}catch{}
@@ -333,7 +408,7 @@ function showLoadError(error){
 $$('[data-source]').forEach(b=>b.addEventListener('click',()=>{void setSource(b.dataset.source)}));$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{void setMode(b.dataset.mode)}));$$('[data-size]').forEach(b=>b.addEventListener('click',()=>{if(mode==='simulation')return;size=Number(b.dataset.size);syncSizeButtons()}));
 $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{if(input.value==='all'&&input.checked)$$('.relax-filters input').forEach(i=>{if(i!==input)i.checked=false});else if(input.value!=='all'&&input.checked)$('.relax-filters input[value="all"]').checked=false;if(!$$('.relax-filters input:checked').length)$('.relax-filters input[value="all"]').checked=true}));
 els.builderExport?.addEventListener('click',()=>{void prepareExportFromBuilder()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});$$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
-exportLayout?.addEventListener('change',()=>{if(!exportBusy())resetExportUi()});
+exportLayoutInputs.forEach(input=>input.addEventListener('change',()=>{if(!exportBusy()){resetExportUi();renderPdfAccess(exportAccessCache)}}));
 els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventListener('click',()=>{if(index>0){index--;renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder()});
 document.addEventListener('keydown',e=>{if(!els.exportLayer?.hidden&&e.key!=='Escape'){if(e.key==='Tab'){const nodes=[...els.exportLayer.querySelectorAll('button:not([disabled]),a[href],select:not([disabled])')].filter(n=>!n.hidden&&n.tabIndex>=0&&n.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){last?.focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===last){first?.focus();e.preventDefault()}}return;}if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 window.addEventListener('storage',event=>{if(event.key===ZHENTI_KEY)zhentiRecordsCache=null});
