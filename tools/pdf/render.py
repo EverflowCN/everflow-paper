@@ -32,7 +32,13 @@ def rich(s):
             # Reject unsafe commands, ^^ escapes and comments even in trusted corpus patches.
             if all(c in MATH_COMMANDS for c in commands) and '^^' not in part and '%' not in part and all(e in {'cases','matrix','pmatrix','bmatrix','vmatrix','Vmatrix','aligned','array'} for e in re.findall(r'\\(?:begin|end)\{([^}]+)\}',part)):
                 out.append(part);continue
-        out.append(escape(part).replace('\n',r'\par '))
+        plain=[]
+        for token in re.split(r'(（[ \\t\\u3000]*）|\\([ \\t\\u3000]*\\))',part):
+            if re.fullmatch(r'（[ \\t\\u3000]*）|\\([ \\t\\u3000]*\\)',token or ''):
+                plain.append(r'\\blank')
+            else:
+                plain.append(escape(token).replace('\\n',r'\\par '))
+        out.append(''.join(plain))
     return ''.join(out)
 
 def evidence_rank(q):
