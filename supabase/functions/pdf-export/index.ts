@@ -20,8 +20,8 @@ Deno.serve(async(req)=>{
    if(req.method!=='POST')return reply({error:'Method not allowed'},405);
    if(action==='cleanup'){
     const now=new Date().toISOString();
-    const {data:expired,error}=await db.from('pdf_export_jobs').select('id,object_path').lte('expires_at',now).limit(100);if(error)throw error;
-    const paths=(expired||[]).map((x:any)=>x.object_path).filter(Boolean);
+    const {data:expired,error}=await db.from('pdf_export_jobs').select('id,user_id,object_path').lte('expires_at',now).limit(100);if(error)throw error;
+    const paths=[...new Set((expired||[]).map((x:any)=>x.object_path||`${x.user_id}/${x.id}.pdf`).filter(Boolean))];
     if(paths.length){const {error:removeError}=await db.storage.from('exam-pdfs').remove(paths);if(removeError)throw removeError;}
     const ids=(expired||[]).map((x:any)=>x.id);
     if(ids.length){const {error:deleteError}=await db.from('pdf_export_jobs').delete().in('id',ids);if(deleteError)throw deleteError;}
@@ -42,7 +42,7 @@ Deno.serve(async(req)=>{
    if(action==='upload'){
     const bytes=new Uint8Array(await req.arrayBuffer());
     if(bytes.length>20971520||new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')return reply({error:'Invalid PDF'},400);
-    const path=`${job.user_id}/${job.id}/${lease}.pdf`;
+    const path=`${job.user_id}/${job.id}.pdf`;
     const {error}=await db.storage.from('exam-pdfs').upload(path,bytes,{contentType:'application/pdf',upsert:true});if(error)throw error;
     const {data:done,error:de}=await db.from('pdf_export_jobs').update({status:'completed',object_path:path,updated_at:new Date().toISOString()}).eq('id',id).eq('lease_token',lease).gt('lease_until',new Date().toISOString()).select('id');if(de)throw de;
     return reply({ok:Boolean(done?.length)});
