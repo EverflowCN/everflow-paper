@@ -37,7 +37,7 @@ jobs:
         if: steps.pending.outputs.count != '0' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends texlive-xetex texlive-plain-generic texlive-lang-chinese texlive-latex-extra texlive-science texlive-fonts-recommended fonts-texgyre fonts-texgyre-math fonts-oflb-asana-math python3-pil python3-cairosvg fonts-noto-cjk
+          sudo apt-get install -y --no-install-recommends texlive-xetex texlive-plain-generic texlive-lang-chinese texlive-latex-extra texlive-science texlive-fonts-recommended fonts-texgyre fonts-texgyre-math fonts-oflb-asana-math python3-pil python3-cairosvg fonts-noto-cjk poppler-utils
       - name: Test body-only layouts
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
