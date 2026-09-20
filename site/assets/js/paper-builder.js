@@ -254,7 +254,13 @@ function applyExportUpdate(data={}){
 }
 async function pollExportJob(){
   if(!exportJob.id)return;
-  try{const res=await fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),credentials:'include',cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)}catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
+  try{
+    const res=await fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),credentials:'include',cache:'no-store'});
+    if([401,403].includes(res.status)){setExportState('failed',{message:'无法继续读取该导出任务，请重新登录后再生成。'});stopExportStream();return}
+    if([404,410].includes(res.status)){setExportState('failed',{message:'该 PDF 导出任务已失效，请重新生成。'});stopExportStream();return}
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)
+  }catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
 }
 function watchExportJob(){stopExportStream();pollExportJob();}
 function restoreExportJob(){
