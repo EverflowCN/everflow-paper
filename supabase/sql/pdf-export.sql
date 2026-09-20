@@ -75,3 +75,26 @@ create table if not exists public.pdf_worker_tokens (
 alter table public.pdf_worker_tokens enable row level security;
 revoke all on public.pdf_worker_tokens from public,anon,authenticated;
 grant all on public.pdf_worker_tokens to service_role;
+
+
+alter table public.pdf_worker_tokens
+ drop constraint if exists pdf_worker_tokens_hash_format;
+alter table public.pdf_worker_tokens
+ add constraint pdf_worker_tokens_hash_format
+ check (token_hash ~ '^[0-9a-f]{64}$');
+
+drop policy if exists "pdf_worker_nodes_deny_client_access" on public.pdf_worker_nodes;
+create policy "pdf_worker_nodes_deny_client_access"
+on public.pdf_worker_nodes
+for all
+to anon, authenticated
+using (false)
+with check (false);
+
+drop policy if exists "pdf_worker_tokens_deny_client_access" on public.pdf_worker_tokens;
+create policy "pdf_worker_tokens_deny_client_access"
+on public.pdf_worker_tokens
+for all
+to anon, authenticated
+using (false)
+with check (false);
