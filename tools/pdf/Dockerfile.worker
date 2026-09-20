@@ -1,8 +1,6 @@
 FROM ubuntu:24.04
 
-ARG EVERFLOW_BUILD_SHA=unknown
-ENV EVERFLOW_BUILD_SHA=${EVERFLOW_BUILD_SHA} \
-    DEBIAN_FRONTEND=noninteractive \
+ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -25,6 +23,9 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     fonts-oflb-asana-math \
     fonts-noto-cjk \
  && rm -rf /var/lib/apt/lists/*
+
+ARG EVERFLOW_BUILD_SHA=unknown
+ENV EVERFLOW_BUILD_SHA=${EVERFLOW_BUILD_SHA}
 
 WORKDIR /app
 COPY tools/pdf /app/tools/pdf
