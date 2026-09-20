@@ -3,13 +3,14 @@ import {createRemoteJWKSet,jwtVerify} from 'npm:jose@5.9.6';
 const url=Deno.env.get('SUPABASE_URL')!;
 const db=createClient(url,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false}});
 const jwks=createRemoteJWKSet(new URL('https://token.actions.githubusercontent.com/.well-known/jwks'));
+const WORKER_CAPACITY=2;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const headers={'Content-Type':'application/json','Cache-Control':'no-store'};
 function reply(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers})}
 async function worker(req:Request){
  const token=(req.headers.get('Authorization')||'').replace(/^Bearer /,'');
  const {payload}=await jwtVerify(token,jwks,{issuer:'https://token.actions.githubusercontent.com',audience:'everflow-pdf-worker',maxTokenAge:'10m'});
- if(payload.repository!=='EverflowCN/everflow-paper'||payload.ref!=='refs/heads/main'||payload.workflow_ref!=='EverflowCN/everflow-paper/.github/workflows/pdf-export-worker.yml@refs/heads/main'||!['schedule','workflow_dispatch','push'].includes(String(payload.event_name)))throw new Error('worker_denied');
+ if(payload.repository!=='EverflowCN/everflow-paper'||payload.ref!=='refs/heads/main'||payload.workflow_ref!=='EverflowCN/everflow-paper/.github/workflows/pdf-export-worker.yml@refs/heads/main'||!['schedule','workflow_dispatch','repository_dispatch','push'].includes(String(payload.event_name)))throw new Error('worker_denied');
 }
 Deno.serve(async(req)=>{
  const endpoint=new URL(req.url),action=endpoint.searchParams.get('action');
@@ -67,6 +68,8 @@ Deno.serve(async(req)=>{
   }else return reply({error:'Method not allowed'},405);
   if(Date.parse(job.expires_at)<=Date.now())return reply({error:'任务已过期，请重新生成'},410);
   const result:any={id:job.id,jobId:job.id,status:job.status,title:job.payload.title,count:job.payload.questions.length,layout:job.payload.layout,expiresAt:job.expires_at};
+  const {count:activeWorkers,error:workersError}=await db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).in('status',['preparing','compiling','storing']).gt('lease_until',new Date().toISOString()).gt('expires_at',new Date().toISOString());if(workersError)throw workersError;
+  result.workers={busy:Math.min(activeWorkers||0,WORKER_CAPACITY),total:WORKER_CAPACITY};
   if(manager)result.priorityEnabled=job.priority>0;
   if(job.status==='queued'){
    // Return only a count, never other users' records or priority attributes.
