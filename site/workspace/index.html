@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/css/app-ui.css">
 <link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260904-editor1">
 <link rel="stylesheet" href="../assets/css/workspace-tabler-v1.css?v=20260904-tabler1">
-<link rel="stylesheet" href="../assets/css/workspace-questions-v2.css?v=20260904-qwb2">
+<link rel="stylesheet" href="../assets/css/workspace-questions-v2.css?v=20260904-qwb2">\n<link rel="stylesheet" href="../assets/css/workspace-pdf-v1.css?v=20260920-pdf1">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -84,6 +84,9 @@
 <nav class="ws-nav">
 <button data-ws-nav="oxygen">
 <span>408 更新</span>
+</button>
+<button data-ws-nav="pdf">
+<span>PDF 编译</span>
 </button>
 <button data-ws-nav="audit">
 <span>审计</span>
@@ -689,6 +692,44 @@
 </section>
 </div>
 </section>
+
+<section class="ws-panel" data-ws-panel="pdf">
+<div class="ws-intro">
+<div>
+<span class="eyebrow">PDF COMPILER</span>
+<h2>PDF 编译中心</h2>
+<p>查看常驻 XeLaTeX 节点、实时队列与最近导出任务。该页面仅 Owner 可见。</p>
+</div>
+<button class="ws-btn primary" type="button" data-pdf-admin-refresh>刷新状态</button>
+</div>
+<div class="pdf-admin-summary">
+<article><span>在线节点</span><strong data-pdf-admin-online>--</strong><small>45 秒内有心跳</small></article>
+<article><span>并发容量</span><strong data-pdf-admin-capacity>--</strong><small>当前可同时编译</small></article>
+<article><span>当前忙碌</span><strong data-pdf-admin-busy>--</strong><small>常驻 Worker</small></article>
+<article><span>排队任务</span><strong data-pdf-admin-queued>--</strong><small>等待领取</small></article>
+<article><span>24h 失败</span><strong data-pdf-admin-failed>--</strong><small>需要检查</small></article>
+</div>
+<div class="ws-grid two pdf-admin-grid">
+<section class="ws-card">
+<div class="ws-card-head"><div><span class="eyebrow">WORKERS</span><h3>编译节点</h3></div><span class="pill" data-pdf-admin-mode>--</span></div>
+<div class="ws-list" data-pdf-admin-workers><div class="quality-empty">正在读取节点…</div></div>
+</section>
+<section class="ws-card">
+<div class="ws-card-head"><div><span class="eyebrow">QUEUE</span><h3>实时队列</h3></div><span class="pill" data-pdf-admin-updated>--</span></div>
+<div class="pdf-admin-queue" data-pdf-admin-queue></div>
+<div class="pdf-admin-fallback"><span>兜底编译</span><strong>GitHub Actions</strong><small>常驻节点不可用时继续处理，定时检查间隔 5 分钟。</small></div>
+</section>
+</div>
+<section class="ws-card" style="margin-top:12px">
+<div class="ws-card-head"><div><span class="eyebrow">RECENT EXPORTS</span><h3>最近导出任务</h3></div><span class="pill" data-pdf-admin-recent-count>--</span></div>
+<div class="ws-table embedded pdf-admin-table">
+<table>
+<thead><tr><th>时间</th><th>试卷</th><th>版式</th><th>状态</th><th>耗时</th><th>尝试</th></tr></thead>
+<tbody data-pdf-admin-recent><tr><td colspan="6">正在读取任务…</td></tr></tbody>
+</table>
+</div>
+</section>
+</section>
 <section class="ws-panel" data-ws-panel="audit">
 <div class="ws-intro">
 <div>
@@ -809,9 +850,9 @@
 </div>
 <script src="../assets/js/cloud-config.js?v=20260904-editor1">
 </script>
-<script type="module" src="../assets/js/admin-cloud.js?v=20260904-editor1">
+<script type="module" src="../assets/js/admin-cloud.js?v=20260920-pdf1">
 </script>
-<script type="module" src="../assets/js/workspace-v3.js?v=20260904-tabler1">
+<script type="module" src="../assets/js/workspace-v3.js?v=20260920-pdf1">
 </script>
 <script type="module" src="../assets/js/workspace-operations-v1.js?v=20260904-qwb2">
 </script>
