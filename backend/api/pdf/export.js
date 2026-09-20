@@ -1,6 +1,6 @@
 import { handleOptions, json, requireTrustedOrigin } from '../../lib/common.js';
 const EDGE='https://xzodetdohinktagxuwhs.supabase.co/functions/v1/pdf-export';
-// PDF export proxy v3: forwards question-aware ETA/manager queries and uses WHATWG URL parsing.
+// PDF export proxy v4: forwards question-aware ETA/manager queries and uses WHATWG URL parsing.
 export default async function handler(req,res){
  if(handleOptions(req,res))return;
  if(!['GET','POST'].includes(req.method))return json(req,res,405,{error:'Method not allowed'});
