@@ -2,18 +2,44 @@
 
 This extends the existing `/relax/` builder and Vercel backend. Only question pages are generated. `compact` uses the template's 0.45-baseline gap; `spacious` reserves 25 mm after each question. The question core and exam-zh class are taken from the user's 85-paper template (itself based on the approved mixed-A4 template); upstream LPPL headers are retained. No covers, TOC, print pages or fixed total-page numbers are included. XeLaTeX runs twice for actual page totals.
 
-Flow: authenticated browser → `/api/pdf/export` → Supabase `pdf-export` → private durable queue → GitHub Actions XeLaTeX worker → private `exam-pdfs` bucket → 10-minute signed download URL. Jobs expire after 24 hours. Regular users receive only their own status; priority is computed from verified app metadata and omitted from ordinary responses. Request UUIDs make retries idempotent. Claims are atomic, use bounded leases, allow two workers and age waiting jobs to avoid indefinite starvation. A user's single active task and 20/hour limit bound abuse.
+## Production flow
 
-The worker trusts only GitHub OIDC tokens issued for this repository's main-branch `pdf-export-worker.yml`, and never stores a cloud service key in GitHub. The Edge Function checks Supabase Auth tokens for users, and validates OIDC signature/issuer/audience/repository/ref/workflow for workers, so gateway JWT verification is intentionally disabled there.
+Authenticated member browser → `https://api.evera.top/api/pdf/export` → Supabase `pdf-export` Edge Function → private durable `pdf_export_jobs` queue → persistent XeLaTeX worker → private `exam-pdfs` bucket → 10-minute signed download URL.
+
+The primary compiler is the Railway service `Everflow PDF Worker / pdf-worker`, built from `ghcr.io/everflowcn/everflow-pdf-worker:latest`. It keeps XeLaTeX, CJK fonts, Pillow and CairoSVG warm and polls the queue every 1.5 seconds with capacity 2. A `/healthz` endpoint is configured for Railway health checks.
+
+GitHub Actions `.github/workflows/pdf-export-worker.yml` remains as a durable fallback. It now uses the same prebuilt GHCR image instead of installing TeX Live on every run. Scheduled fallback polling remains every five minutes.
+
+## Access and queue policy
+
+PDF export requires both a valid Supabase login and an active `member` or `pro` membership. The Edge Function enforces this server-side; the browser check is only UX.
+
+Regular users receive only their own task status, queue position and worker state. Manager priority is derived from verified `app_metadata.role` and is returned only to manager accounts. Request UUIDs make retries idempotent. Each user is limited to one active export and 20 starts per hour. Jobs expire after 24 hours.
+
+Claims are atomic and lease based. Persistent workers report heartbeats to `pdf_worker_nodes`; the UI uses live node capacity to choose a fast ETA when a persistent node is healthy, otherwise it automatically falls back to the scheduled-worker ETA.
+
+Persistent worker authentication uses a dedicated opaque token. Only its SHA-256 hash is stored in `pdf_worker_tokens`; the plaintext token exists only in the worker runtime environment. GitHub Actions continues to authenticate through GitHub OIDC. No Supabase service-role key is stored in either worker.
 
 ## Deployment
 
-Run `supabase/sql/pdf-export.sql` in the existing Supabase project; deploy `supabase/functions/pdf-export`. Vercel uses the existing `backend` root and GitHub integration. The existing Pages workflow publishes the UI. No new project is required.
+- UI: GitHub Pages
+- API proxy: Vercel project `everflow-blog-admin-api`
+- Auth / queue / signed URLs / worker control plane: Supabase
+- Primary compiler: Railway persistent worker
+- Fallback compiler: GitHub Actions
+- Worker image: GHCR `ghcr.io/everflowcn/everflow-pdf-worker:latest`
 
-Actions checks every five minutes; GitHub may delay scheduled runs. This is a durable baseline, **not a low-latency or high-throughput production worker**. Cold TeX package installation adds startup time. `workflow_dispatch` can trigger a run immediately. If sub-minute startup is required, replace scheduling with a provisioned always-on worker (and its narrowly scoped authentication); don't fake progress or run a worker as a transient development process. The no-job check avoids TeX installation during idle scheduled runs.
+The persistent worker files are:
+
+- `tools/pdf/Dockerfile.worker`
+- `tools/pdf/worker_daemon.py`
+- `tools/pdf/docker-compose.worker.yml`
+- `.github/workflows/pdf-worker-image.yml`
 
 ## Verification
 
-`python3 tools/pdf/test_render.py` requires XeLaTeX, CJK packages, TeX Gyre math fonts and Pillow. CI uploads two body-only verification PDFs. The worker reads canonical published question records plus server-side correction rows; request bodies cannot supply question text, assets, answers or TeX. Asset hosts/paths are restricted and redirects rejected. TeX runs without shell escape; mathematical commands/environments are allowlisted. Missing images fail the job instead of silently omitting diagrams.
+The renderer reads canonical published question records plus server-side correction rows. Browser requests cannot supply arbitrary question text, assets, answers or TeX. Asset hosts and paths are restricted, redirects are refused, TeX runs with `-no-shell-escape`, and mathematical commands/environments are allowlisted.
 
-Remaining operational considerations: provision a faster worker before promising rapid export; add retention cleanup for expired private PDFs if export volume grows. Database expiration currently revokes job download retrieval, but objects remain private until cleaned up.
+On 2026-09-20 a 40-question Relax1000 smoke export was inserted into the production queue and processed by the Railway persistent worker. It entered `compiling` about 1.8 seconds after enqueue and reached `completed` in 8.585 seconds total. The private test PDF and test job were then removed through the normal expiry cleanup path.
+
+The GitHub Actions prebuilt-image fallback was also verified successfully. A validation run completed in about 51 seconds total; pulling the image took about 29 seconds, replacing the previous cold TeX installation step that alone took roughly 94 seconds.
