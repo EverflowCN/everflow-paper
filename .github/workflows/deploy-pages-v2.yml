@@ -108,6 +108,9 @@ jobs:
           if(!js.includes("EXPORT_JOB_KEY='everflow-pdf-export-job-v1'"))throw new Error('PDF export persistence missing');
           if(!js.includes("fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id)"))throw new Error('PDF job polling endpoint changed unexpectedly');
           if(!js.includes("schema:'everflow-pdf-export-v1'"))throw new Error('PDF canonical export schema missing');
+          if(/管理员优先|优先导出已启用|下一可用编译节点/.test(html))throw new Error('Manager priority copy must never be present in public static HTML');
+          if(!js.includes("('priorityEnabled'in data||'priority'in data)"))throw new Error('Manager priority UI must be driven by authenticated server response');
+          if(!js.includes("if(!exportManager||enabled===null)"))throw new Error('Manager priority UI must stay hidden until server confirmation');
           const exportStart=js.indexOf('function exportPayload()');
           const exportEnd=js.indexOf('async function exportHeaders()',exportStart);
           if(exportStart<0||exportEnd<0)throw new Error('PDF export payload function missing');
