@@ -20,17 +20,23 @@ class Safety(unittest.TestCase):
   self.assertTrue(any(q.get('figures') for q in questions))
   render(payload,questions,Path('/tmp/pdf-verification/canonical'))
  def test_compile(self):
-  questions=[{'_source':'zhenti','_id':str(i),'stem':r'验证题。已知 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$，请判断 $2^{10}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
+  questions=[{'_source':'zhenti','_id':str(i),'stem':r'验证题。答案位置（ ），已知 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$，请判断 $2^{10}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
   for layout in ['compact','spacious']:
    dest=Path('/tmp/pdf-verification')/layout
    pdf=render({'title':'408 组卷排版验证','layout':layout},questions,dest)
    self.assertGreater(pdf.stat().st_size,10000)
    text=subprocess.run(['pdftotext','-layout',str(pdf),'-'],capture_output=True,text=True,check=True).stdout
-   self.assertRegex(text,r'(?m)^\s*1\.\s')
+   for number in (1,2,3,20):
+    self.assertRegex(text,rf'(?m)^\s*{number}\.\s')
    paper_tex=(dest/'paper.tex').read_text(encoding='utf8')
    self.assertIn(r'\begin{qitems}',paper_tex)
    self.assertIn(r'\end{qitems}',paper_tex)
+   self.assertIn(r'\input{00-user-config/05-watermark-config.tex}',paper_tex)
+   self.assertIn(r'\input{90-core/everflow-watermark-core.sty}',paper_tex)
+   self.assertTrue((dest/'assets/watermark/water.png').is_file())
+   self.assertIn(r'\providecommand{\EverflowExamWatermarkEnabled}{true}',(dest/'00-user-config/05-watermark-config.tex').read_text(encoding='utf8'))
    tex=(dest/'questions.tex').read_text(encoding='utf8')
+   self.assertIn(r'\blank',tex)
    if layout=='spacious':
     self.assertIn(r'\vspace*{25mm}',tex)
    else:
