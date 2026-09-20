@@ -229,8 +229,12 @@ async function openExportDialog(){
   if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
   setTimeout(()=>els.exportStart?.focus(),40);
 }
+function exportFigureUrl(value){
+  const src=String(value||'').trim();if(!src||src.startsWith('data:'))return'';
+  try{const url=new URL(src,location.origin);return /^https?:$/.test(url.protocol)?url.href:''}catch{return''}
+}
 function exportPayload(){
-  return{template:'exam-A4',layout:'compact',answerSpace:'auto',includeAnswers:false,title:els.paperTitle?.textContent||'408 组卷',source,mode,questions:paper.map((q,i)=>({order:i+1,uid:q.uid,id:String(q.id||''),source:q.source,year:q.year||null,number:q.number||null,subjectId:q.subjectId,chapter:q.chapter||'',stem:q.stem||'',options:Object.fromEntries(optionList(q).map(o=>[o.key,o.text||''])),figures:mediaList(q).map(x=>x.src)}))};
+  return{template:'exam-A4',layout:'compact',answerSpace:'auto',includeAnswers:false,title:els.paperTitle?.textContent||'408 组卷',source,mode,questions:paper.map((q,i)=>({order:i+1,uid:q.uid,id:String(q.id||''),source:q.source,year:q.year||null,number:q.number||null,subjectId:q.subjectId,chapter:q.chapter||'',stem:q.stem||'',options:Object.fromEntries(optionList(q).map(o=>[o.key,o.text||''])),figures:mediaList(q).map(x=>exportFigureUrl(x.src)).filter(Boolean)}))};
 }
 async function exportHeaders(){
   const headers={'Content-Type':'application/json'};
