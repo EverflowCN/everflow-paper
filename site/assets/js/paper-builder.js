@@ -202,7 +202,7 @@ const exportBusy=()=>['queued','preparing','compiling','storing'].includes(expor
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 let exportManager=false;
 let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=false;
-const exportLayoutInputs=$('[data-export-layout-input]');
+const exportLayoutInputs=$$('[data-export-layout-input]');
 const selectedExportLayout=()=>exportLayoutInputs.find(input=>input.checked)?.value==='spacious'?'spacious':'compact';
 function setSelectedExportLayout(value){exportLayoutInputs.forEach(input=>{input.checked=input.value===(value==='spacious'?'spacious':'compact')})}
 let exportAccessAllowed=false,exportAccessCache=null,exportEtaDeadline=0,exportEtaKey='',exportEtaTimer=0;
