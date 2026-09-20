@@ -7,7 +7,15 @@ on:
     types: [pdf-export]
   push:
     branches: [main]
-    paths: ['tools/pdf/**', '.github/workflows/pdf-export-worker.yml', 'supabase/functions/pdf-export/**', 'supabase/sql/pdf-export.sql']
+    paths:
+      - 'tools/pdf/worker.py'
+      - 'tools/pdf/render.py'
+      - 'tools/pdf/template/**'
+      - 'tools/pdf/test_render.py'
+      - 'tools/pdf/test_worker.py'
+      - '.github/workflows/pdf-export-worker.yml'
+      - 'supabase/functions/pdf-export/**'
+      - 'supabase/sql/pdf-export.sql'
 permissions:
   contents: read
   packages: read
@@ -40,7 +48,7 @@ jobs:
           PY
           renderer=0
           if [ "${{ github.event_name }}" = "push" ]; then
-            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" | grep -Eq '^(tools/pdf/|\.github/workflows/pdf-export-worker\.yml$)' && renderer=1 || true
+            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" | grep -Eq '^(tools/pdf/(render\.py|worker\.py|test_render\.py|test_worker\.py|template/)|\.github/workflows/pdf-export-worker\.yml$)' && renderer=1 || true
           fi
           echo "renderer=$renderer" >> "$GITHUB_OUTPUT"
           echo "Renderer changed: $renderer"
