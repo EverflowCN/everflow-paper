@@ -131,12 +131,16 @@ Deno.serve(async(req)=>{
    for(const result of countResults)if(result.error)throw result.error;
    const counts=Object.fromEntries(statuses.map((status,index)=>[status,countResults[index].count||0]));
    const nodes=(nodesResult.data||[]).map((node:any)=>({...node,healthy:Date.parse(node.updated_at)>Date.parse(freshSince)}));
-   const recent=(recentResult.data||[]).map((job:any)=>({
-    id:job.id,status:job.status,title:String(job.payload?.title||'408 组卷'),count:Array.isArray(job.payload?.questions)?job.payload.questions.length:0,
-    layout:job.payload?.layout||'compact',priorityEnabled:Number(job.priority)>0,attempts:Number(job.attempts)||0,
-    createdAt:job.created_at,updatedAt:job.updated_at,error:job.error||null,
-    elapsedSeconds:Math.max(0,Math.round((Date.parse(job.updated_at)-Date.parse(job.created_at))/100)/10)
-   }));
+   const recent=(recentResult.data||[]).map((job:any)=>{
+    const active=['queued','preparing','compiling','storing'].includes(job.status);
+    const elapsedEnd=active?Date.now():Date.parse(job.updated_at);
+    return{
+     id:job.id,status:job.status,title:String(job.payload?.title||'408 组卷'),count:Array.isArray(job.payload?.questions)?job.payload.questions.length:0,
+     layout:job.payload?.layout||'compact',priorityEnabled:Number(job.priority)>0,attempts:Number(job.attempts)||0,
+     createdAt:job.created_at,updatedAt:job.updated_at,error:job.error||null,
+     elapsedSeconds:Math.max(0,Math.round((elapsedEnd-Date.parse(job.created_at))/100)/10)
+    };
+   });
    return reply({workers:nodes,tokens:(tokensResult.data||[]).map((token:any)=>({id:token.id,enabled:token.enabled,lastUsedAt:token.last_used_at})),counts,recent,fallback:{enabled:true,kind:'github-actions',scheduleMinutes:5}});
   }
   if(req.method==='GET'&&endpoint.searchParams.get('availability')==='1'){
