@@ -38,7 +38,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends texlive-xetex texlive-plain-generic texlive-lang-chinese texlive-latex-extra texlive-science texlive-fonts-recommended fonts-texgyre fonts-texgyre-math fonts-oflb-asana-math python3-pil python3-cairosvg fonts-noto-cjk
       - name: Test body-only layouts
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        run: python3 tools/pdf/test_render.py
+        run: |
+          python3 tools/pdf/test_render.py
+          PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py
       - name: Process queued exports
         if: steps.pending.outputs.count != '0'
         run: python3 tools/pdf/worker.py
