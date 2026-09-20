@@ -112,6 +112,28 @@ Deno.serve(async(req)=>{
   const {data:{user},error:authError}=await db.auth.getUser(token);
   if(authError||!user)return reply({error:'请先登录后导出 PDF'},401);
   const manager=['admin','owner'].includes(user.app_metadata?.role);
+  if(req.method==='GET'&&endpoint.searchParams.get('admin')==='1'){
+   if(!manager)return reply({error:'not_found'},404);
+   const now=new Date().toISOString(),freshSince=new Date(Date.now()-45*1000).toISOString(),dayAgo=new Date(Date.now()-24*60*60*1000).toISOString();
+   const statuses=['queued','preparing','compiling','storing','completed','failed'];
+   const [nodesResult,tokensResult,recentResult,...countResults]=await Promise.all([
+    db.from('pdf_worker_nodes').select('id,kind,capacity,active,updated_at').order('updated_at',{ascending:false}).limit(20),
+    db.from('pdf_worker_tokens').select('id,enabled,last_used_at').order('created_at',{ascending:true}).limit(20),
+    db.from('pdf_export_jobs').select('id,status,priority,payload,created_at,updated_at,attempts,error,lease_until').gte('created_at',dayAgo).order('created_at',{ascending:false}).limit(40),
+    ...statuses.map(status=>db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('status',status).gt('expires_at',now))
+   ]);
+   if(nodesResult.error)throw nodesResult.error;if(tokensResult.error)throw tokensResult.error;if(recentResult.error)throw recentResult.error;
+   for(const result of countResults)if(result.error)throw result.error;
+   const counts=Object.fromEntries(statuses.map((status,index)=>[status,countResults[index].count||0]));
+   const nodes=(nodesResult.data||[]).map((node:any)=>({...node,healthy:Date.parse(node.updated_at)>Date.parse(freshSince)}));
+   const recent=(recentResult.data||[]).map((job:any)=>({
+    id:job.id,status:job.status,title:String(job.payload?.title||'408 组卷'),count:Array.isArray(job.payload?.questions)?job.payload.questions.length:0,
+    layout:job.payload?.layout||'compact',priorityEnabled:Number(job.priority)>0,attempts:Number(job.attempts)||0,
+    createdAt:job.created_at,updatedAt:job.updated_at,error:job.error||null,
+    elapsedSeconds:Math.max(0,Math.round((Date.parse(job.updated_at)-Date.parse(job.created_at))/100)/10)
+   }));
+   return reply({workers:nodes,tokens:(tokensResult.data||[]).map((token:any)=>({id:token.id,enabled:token.enabled,lastUsedAt:token.last_used_at})),counts,recent,fallback:{enabled:true,kind:'github-actions',scheduleMinutes:5}});
+  }
   if(req.method==='GET'&&endpoint.searchParams.get('availability')==='1'){
    if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
    const snap=await workerSnapshot(),eta=etaFor('queued',1,snap.fast,snap.workers.total,40);
