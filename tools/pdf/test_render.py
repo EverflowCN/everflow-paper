@@ -21,6 +21,12 @@ class Safety(unittest.TestCase):
  def test_compile(self):
   questions=[{'_source':'zhenti','_id':str(i),'stem':f'第 {i} 道验证题。已知 $A=\\begin{{bmatrix}}1&2\\\\3&4\\end{{bmatrix}}$，请判断 $2^{{10}}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
   for layout in ['compact','spacious']:
-   pdf=render({'title':'408 组卷排版验证','layout':layout},questions,Path('/tmp/pdf-verification')/layout)
+   dest=Path('/tmp/pdf-verification')/layout
+   pdf=render({'title':'408 组卷排版验证','layout':layout},questions,dest)
    self.assertGreater(pdf.stat().st_size,10000)
+   tex=(dest/'questions.tex').read_text(encoding='utf8')
+   if layout=='spacious':
+    self.assertIn(r'\\vspace*{25mm}',tex)
+   else:
+    self.assertNotIn(r'\\vspace*{25mm}',tex)
 if __name__=='__main__':unittest.main()
