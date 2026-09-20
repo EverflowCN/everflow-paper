@@ -59,7 +59,7 @@ async function quotaSnapshot(userId:string,isManager:boolean,cfg?:PdfExportConfi
  ]);
  if(dayResult.error)throw dayResult.error;if(hourResult.error)throw hourResult.error;
  const usedDaily=dayResult.count||0,usedHourly=hourResult.count||0;
- return{enabled:config.enabled,unlimited:false,dailyLimit:config.dailyLimit,hourlyLimit:config.hourlyLimit,usedDaily,usedHourly,remainingDaily:Math.max(0,config.dailyLimit-usedDaily),remainingHourly:Math.max(0,config.hourlyLimit-usedHourly),resetAt,timezone:'Asia/Shanghai'};
+ return{enabled:config.enabled,dailyLimit:config.dailyLimit,hourlyLimit:config.hourlyLimit,usedDaily,usedHourly,remainingDaily:Math.max(0,config.dailyLimit-usedDaily),remainingHourly:Math.max(0,config.hourlyLimit-usedHourly),resetAt,timezone:'Asia/Shanghai'};
 }
 async function workerSnapshot(){
  const freshSince=new Date(Date.now()-45*1000).toISOString();
@@ -145,9 +145,8 @@ Deno.serve(async(req)=>{
   if(authError||!user)return reply({error:'请先登录后导出 PDF'},401);
   const manager=['admin','owner'].includes(user.app_metadata?.role),owner=user.app_metadata?.role==='owner';
   if(endpoint.searchParams.get('admin')==='1'){
-   if(!manager)return reply({error:'not_found'},404);
+   if(!owner)return reply({error:'not_found'},404);
    if(req.method==='POST'){
-    if(!owner)return reply({error:'forbidden'},403);
     let body:any={};try{body=await req.json()}catch{return reply({error:'invalid_json'},400)}
     if(body.action!=='config')return reply({error:'invalid_action'},400);
     const incoming=body.config||{},daily=Math.max(1,Math.min(500,Math.round(Number(incoming.dailyLimit)||15))),hourly=Math.max(1,Math.min(daily,Math.min(100,Math.round(Number(incoming.hourlyLimit)||5))));
