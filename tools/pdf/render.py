@@ -1,5 +1,5 @@
 """Canonical question -> body-only XeLaTeX. No client-supplied TeX is executed."""
-import html,json,re,shutil,subprocess,urllib.request,urllib.parse
+import html,json,re,shutil,subprocess,urllib.request,urllib.parse,urllib.error
 from pathlib import Path
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[2]
@@ -34,13 +34,34 @@ def rich(s):
         out.append(escape(part).replace('\n',r'\par '))
     return ''.join(out)
 
+def evidence_rank(q):
+    if q.get('verification',{}).get('status')!='verified':return 0
+    mode=q.get('verification',{}).get('mode','').lower()
+    if re.search('original-paper|original-scan|original-question-screenshot|public-paper-transcription|table-transcription|instruction-transcription',mode):return 3
+    return 1 if 'paraphrase' in mode else 2
+
+def merge_layers(layers):
+    merged={}
+    for layer in layers:
+        for number,q in layer.get('questions',{}).items():
+            if number not in merged or evidence_rank(q)>evidence_rank(merged[number]):merged[number]=q
+    return {'questions':merged}
+
+def load_year(year):
+    layers=[json.loads(fetch(SITE+'/data/zhenti/'+year+'.json'))]
+    for suffix in [year,year+'-extra']:
+        try:layers.append(json.loads(fetch(SITE+'/data/zhenti/supplement/'+suffix+'.json')))
+        except urllib.error.HTTPError as e:
+            if e.code!=404:raise
+    return merge_layers(layers)
+
 def resolve(payload,overrides):
     cache={}; patches={(r['bank'],r['entity_id']):r['patch'] for r in overrides}; out=[]
     for ref in payload['questions']:
         source,id=ref['source'],ref['id']
         if source=='zhenti':
             year,number=id.split('-'); key='/data/zhenti/'+year+'.json'
-            if key not in cache:cache[key]=json.loads(fetch(SITE+key))
+            if key not in cache:cache[key]=load_year(year)
             q=cache[key]['questions'].get(number)
             if not q or q.get('verification',{}).get('status')!='verified':raise ValueError('Unverified question '+id)
             q={**q,**patches.get(('zhenti',id),{})}

@@ -199,7 +199,7 @@ let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',t
 const exportBusy=()=>['queued','preparing','compiling','storing'].includes(exportJob.status);
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 let exportManager=false;
-let exportRequestId='',exportPollFailures=0,exportOwner='';
+let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=false;
 const exportLayout=$('[data-export-layout]');
 function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'}
 function renderExportPriority(user,enabled=true){
@@ -227,7 +227,7 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   if(els.exportWorker)els.exportWorker.textContent=workers?('编译节点 '+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌'):status==='queued'?'等待可用编译节点':status==='compiling'?'XeLaTeX 正在排版':status==='completed'?'文件已准备好':'编译节点状态将在提交后显示';
   if(message&&els.exportMessage)els.exportMessage.textContent=message;
   if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
-  if(els.exportStart){els.exportStart.disabled=['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=status==='completed'}
+  if(els.exportStart){els.exportStart.disabled=['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
   if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
   exportJob.updatedAt=Date.now();persistExportJob();
 }
@@ -241,8 +241,8 @@ function closeExportDialog(){if(!els.exportLayer)return;els.exportLayer.hidden=t
 async function openExportDialog(){
   if(!paper.length&&!exportJob.id&&!exportJob.downloadUrl){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
   if(!els.exportLayer)return;els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');
-  try{const user=await window.EveraCloud?.getUser?.();renderExportPriority(user,false)}catch{exportManager=false;if(els.exportAdmin){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren()}}
-  if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
+  try{const user=await window.EveraCloud?.getUser?.();if(exportOwner&&user?.id!==exportOwner)resetExportUi();renderExportPriority(user,false);if(exportJob.id)void pollExportJob()}catch{exportManager=false;if(els.exportAdmin){els.exportAdmin.hidden=true;els.exportAdmin.replaceChildren()}}
+  if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':exportJob.status==='failed'?'生成失败':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
   setTimeout(()=>els.exportStart?.focus(),40);
 }
 function exportPayload(){
@@ -279,7 +279,7 @@ function applyExportUpdate(data={}){
   const rawStatus=String(data.status||exportJob.status||'queued');const status=({processing:'compiling',ready:'completed'})[rawStatus]||rawStatus;
   if(data.title)exportJob.title=data.title;if(data.count)exportJob.count=data.count;
   if(data.layout&&exportLayout)exportLayout.value=data.layout;setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});
-  if(status==='completed'||status==='failed')stopExportStream();
+  if(status==='completed'||status==='failed'){stopExportStream();exportRequestId='';persistExportJob()}
 }
 async function pollExportJob(){
   if(!exportJob.id)return;
@@ -302,9 +302,10 @@ async function restoreExportJob(){
   if(exportJob.id){if(exportBusy())watchExportJob();else void pollExportJob();}
 }
 async function startPdfExport(){
-  if(!paper.length||exportBusy())return;
+  if(!paper.length||exportBusy()||exportSubmitting)return;
+  exportSubmitting=true;
   const user=await window.EveraCloud?.getUser?.().catch(()=>null);
-  if(!user){setExportState('failed',{message:'请先在账户页面登录，再导出 PDF。'});return}
+  if(!user){exportSubmitting=false;setExportState('failed',{message:'请先在账户页面登录，再导出 PDF。'});return}
   exportOwner=user.id;stopExportStream();exportJob.id='';exportJob.downloadUrl='';
   for(const link of [els.exportDownload,els.exportPreview])if(link){link.hidden=true;link.removeAttribute('href')}
   const payload=exportPayload();exportJob.title=payload.title;exportJob.count=payload.questions.length;
@@ -321,7 +322,7 @@ async function startPdfExport(){
     console.error('PDF export failed',error);
     setExportState('failed',{message:/404|Failed to fetch|HTTP 404/i.test(String(error?.message||error))?'暂时无法连接 PDF 服务，请稍后重试。':String(error?.message||error||'PDF 生成失败')});
     if(els.exportStart){els.exportStart.disabled=false;els.exportStart.textContent='重新尝试'}
-  }
+  }finally{exportSubmitting=false}
 }
 
 function showLoadError(error){
@@ -334,7 +335,7 @@ $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{i
 els.builderExport?.addEventListener('click',()=>{void prepareExportFromBuilder()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});$$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
 exportLayout?.addEventListener('change',()=>{if(!exportBusy())resetExportUi()});
 els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventListener('click',()=>{if(index>0){index--;renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder()});
-document.addEventListener('keydown',e=>{if(!els.exportLayer?.hidden&&e.key!=='Escape')return;if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
+document.addEventListener('keydown',e=>{if(!els.exportLayer?.hidden&&e.key!=='Escape'){if(e.key==='Tab'){const nodes=[...els.exportLayer.querySelectorAll('button:not([disabled]),a[href],select:not([disabled])')].filter(n=>!n.hidden&&n.tabIndex>=0&&n.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){last?.focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===last){first?.focus();e.preventDefault()}}return;}if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 window.addEventListener('storage',event=>{if(event.key===ZHENTI_KEY)zhentiRecordsCache=null});
 
 try{await withLoading(()=>ensureSource(source));loading=false;syncBuilder();restoreExportJob()}catch(error){showLoadError(error)}
