@@ -8,7 +8,9 @@ export default async function handler(req,res){
  const authorization=String(req.headers.authorization||'');
  if(!authorization.startsWith('Bearer '))return json(req,res,401,{error:'请先登录后导出 PDF'});
  try{
-  const id=String(req.query?.id||''),availability=String(req.query?.availability||''),admin=String(req.query?.admin||''),rawCount=String(req.query?.count||'40'),count=Math.max(1,Math.min(100,parseInt(rawCount,10)||40));
+  // Parse the URL with the WHATWG API instead of touching Vercel's legacy req.query parser.
+  const search=new URL(req.url||'/','https://api.evera.top').searchParams;
+  const id=String(search.get('id')||''),availability=String(search.get('availability')||''),admin=String(search.get('admin')||''),rawCount=String(search.get('count')||'40'),count=Math.max(1,Math.min(100,parseInt(rawCount,10)||40));
   const query=id?'?id='+encodeURIComponent(id):admin==='1'?'?admin=1':availability==='1'?('?availability=1&count='+count):'';
   const response=await fetch(EDGE+query,{
    method:req.method,headers:{Authorization:authorization,'Content-Type':'application/json'},
