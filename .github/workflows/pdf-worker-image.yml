@@ -5,7 +5,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tools/pdf/**'
+      - 'tools/pdf/Dockerfile.worker'
+      - 'tools/pdf/worker_daemon.py'
+      - 'tools/pdf/worker.py'
+      - 'tools/pdf/render.py'
+      - 'tools/pdf/template/**'
+      - 'tools/pdf/test_render.py'
+      - 'tools/pdf/test_worker.py'
       - '.github/workflows/pdf-worker-image.yml'
 
 permissions:
