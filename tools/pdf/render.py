@@ -85,7 +85,8 @@ def asset_url(src,source):
 
 def render(payload,questions,dest):
     dest=Path(dest);shutil.copytree(ROOT/'tools/pdf/template',dest,dirs_exist_ok=True)
-    gap='0.45\\baselineskip' if payload['layout']=='compact' else '25mm'
+    gap='0.45\\baselineskip'
+    answer_space='' if payload['layout']=='compact' else r'\par\vspace*{25mm}'
     (dest/'settings.tex').write_text(r'\def\PaperTitle{'+escape(payload['title'])+'}\n'+r'\def\EverflowExamQuestionGap{'+gap+'}\n',encoding='utf8')
     chunks=[];nimage=0
     def figure(src,source):
@@ -119,7 +120,7 @@ def render(payload,questions,dest):
         if not fallback and options:
             body+='\n'+r'\fourchoices'+''.join('{'+rich(options.get(k,''))+option_figs.get(k,'')+'}' for k in 'ABCD')
         if not body.strip():raise ValueError('Empty question '+q['_id'])
-        chunks.append(r'\begin{bbox}\qitem '+body+'\n'+r'\end{bbox}')
+        chunks.append(r'\begin{bbox}\qitem '+body+answer_space+'\n'+r'\end{bbox}')
     (dest/'questions.tex').write_text('\n\n'.join(chunks),encoding='utf8')
     for _ in range(2):
         result=subprocess.run(['xelatex','-no-shell-escape','-halt-on-error','-interaction=nonstopmode','paper.tex'],cwd=dest,env={**__import__('os').environ,'openin_any':'p','openout_any':'p'},capture_output=True,timeout=120)
