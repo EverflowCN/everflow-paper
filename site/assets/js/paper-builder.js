@@ -194,7 +194,8 @@ function handIn(){
   els.result.querySelector('[data-again]')?.addEventListener('click',()=>{els.result.hidden=true;els.builder.hidden=false;syncBuilder();window.scrollTo({top:0,behavior:'smooth'})});window.scrollTo({top:0,behavior:'smooth'});
 }
 const EXPORT_API='https://api.evera.top/api/pdf/export';
-let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0};
+const EXPORT_JOB_KEY='everflow-pdf-export-job-v1';
+let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
 const exportBusy=()=>['queued','preparing','compiling','storing'].includes(exportJob.status);
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'||role==='super_admin'}
@@ -202,6 +203,10 @@ function setExportSteps(status='queued'){
   const normalized=status==='processing'?'compiling':status==='ready'?'completed':status,current=Math.max(0,exportOrder.indexOf(normalized));
   els.exportSteps?.querySelectorAll('[data-export-step]').forEach((node,i)=>{node.classList.toggle('active',i===current);node.classList.toggle('done',i<current||normalized==='completed')});
 }
+function persistExportJob(){
+  try{if(!exportJob.id&&!exportJob.downloadUrl){localStorage.removeItem(EXPORT_JOB_KEY);return}localStorage.setItem(EXPORT_JOB_KEY,JSON.stringify({id:exportJob.id,status:exportJob.status,downloadUrl:exportJob.downloadUrl,title:exportJob.title,count:exportJob.count,updatedAt:Date.now()}))}catch{}
+}
+function clearPersistedExportJob(){try{localStorage.removeItem(EXPORT_JOB_KEY)}catch{}}
 function setExportState(status,{position=null,workers=null,message='',downloadUrl=''}={}){
   exportJob.status=status;setExportSteps(status);
   els.exportLayer?.classList.toggle('is-busy',['queued','preparing','compiling','storing'].includes(status));
@@ -214,16 +219,17 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
   if(els.exportStart){els.exportStart.disabled=['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=status==='completed'}
   if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
+  exportJob.updatedAt=Date.now();persistExportJob();
 }
 function resetExportUi(){
-  stopExportStream();exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0};
+  stopExportStream();clearPersistedExportJob();exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
   if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
   if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
   setExportState('idle',{message:'当前试卷将按 exam-A4 紧凑版生成，并为需要书写的题目保留答题空间。'});
 }
 function closeExportDialog(){if(!els.exportLayer)return;els.exportLayer.hidden=true;document.body.classList.remove('paper-export-open')}
 async function openExportDialog(){
-  if(!paper.length){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
+  if(!paper.length&&!exportJob.id&&!exportJob.downloadUrl){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
   if(!els.exportLayer)return;els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');
   try{const user=await window.EveraCloud?.getUser?.();if(els.exportAdmin)els.exportAdmin.hidden=!exportRole(user)}catch{if(els.exportAdmin)els.exportAdmin.hidden=true}
   if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
@@ -251,6 +257,14 @@ async function pollExportJob(){
   try{const res=await fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),credentials:'include',cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)}catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
 }
 function watchExportJob(){stopExportStream();pollExportJob();}
+function restoreExportJob(){
+  let saved=null;try{saved=JSON.parse(localStorage.getItem(EXPORT_JOB_KEY)||'null')}catch{}
+  if(!saved||(!saved.id&&!saved.downloadUrl))return;
+  const age=Date.now()-Number(saved.updatedAt||0);if(age>24*60*60*1000){clearPersistedExportJob();return}
+  exportJob={id:String(saved.id||''),status:String(saved.status||'queued'),pollTimer:0,eventSource:null,downloadUrl:String(saved.downloadUrl||''),title:String(saved.title||''),count:Number(saved.count)||0,updatedAt:Number(saved.updatedAt)||Date.now()};
+  setExportState(exportJob.status,{downloadUrl:exportJob.downloadUrl,message:exportJob.title?`${exportJob.status==='completed'?'已生成':'正在恢复'}「${exportJob.title}」· ${exportJob.count} 题`:''});
+  if(exportBusy()&&exportJob.id)watchExportJob();
+}
 async function startPdfExport(){
   if(!paper.length||exportBusy())return;
   const payload=exportPayload();exportJob.title=payload.title;exportJob.count=payload.questions.length;
@@ -259,7 +273,7 @@ async function startPdfExport(){
     const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),credentials:'include',body:JSON.stringify(payload)});
     let data={};try{data=await res.json()}catch{}
     if(!res.ok)throw new Error(data?.message||data?.error||('PDF 服务 HTTP '+res.status));
-    exportJob.id=String(data.jobId||data.id||'');
+    exportJob.id=String(data.jobId||data.id||'');persistExportJob();
     if(!exportJob.id&&data.downloadUrl){applyExportUpdate({...data,status:'completed'});return}
     if(!exportJob.id)throw new Error('PDF 服务未返回任务编号');
     applyExportUpdate({...data,status:data.status||'queued'});watchExportJob(data.eventUrl||data.event_url||'');
@@ -282,4 +296,4 @@ els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventLi
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 window.addEventListener('storage',event=>{if(event.key===ZHENTI_KEY)zhentiRecordsCache=null});
 
-try{await withLoading(()=>ensureSource(source));loading=false;syncBuilder()}catch(error){showLoadError(error)}
+try{await withLoading(()=>ensureSource(source));loading=false;syncBuilder();restoreExportJob()}catch(error){showLoadError(error)}
