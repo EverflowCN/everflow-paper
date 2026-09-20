@@ -48,9 +48,12 @@ async function sharedWorker(req:Request){
  const provided=req.headers.get('X-Everflow-Worker-Key')||'';
  if(!provided||provided.length<32||provided.length>256)return false;
  const hash=[...(await digest(provided))].map(v=>v.toString(16).padStart(2,'0')).join('');
- const {data,error}=await db.from('pdf_worker_tokens').select('id').eq('token_hash',hash).eq('enabled',true).maybeSingle();
+ const {data,error}=await db.from('pdf_worker_tokens').select('id,last_used_at').eq('token_hash',hash).eq('enabled',true).maybeSingle();
  if(error||!data)return false;
- const {error:touchError}=await db.from('pdf_worker_tokens').update({last_used_at:new Date().toISOString()}).eq('id',data.id);if(touchError)console.warn('pdf worker token touch failed',touchError.message);
+ // Keep revocation checks on every request, but avoid rewriting an audit timestamp every 1.5s idle poll.
+ if(!data.last_used_at||Date.parse(data.last_used_at)<Date.now()-60_000){
+  const {error:touchError}=await db.from('pdf_worker_tokens').update({last_used_at:new Date().toISOString()}).eq('id',data.id);if(touchError)console.warn('pdf worker token touch failed',touchError.message);
+ }
  return true;
 }
 async function worker(req:Request){
