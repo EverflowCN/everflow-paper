@@ -167,8 +167,9 @@ async function generate(){
   els.builder.hidden=true;els.result.hidden=true;els.paper.hidden=false;els.paperTitle.textContent=currentPaperTitle();renderPaper();window.scrollTo({top:0,behavior:'smooth'});
 }
 async function prepareExportFromBuilder(){
+  if(exportBusy()){await openExportDialog();return}
   const next=await buildPaperSelection();if(!next)return;
-  paper=next;if(!['queued','preparing','compiling','storing'].includes(exportJob.status))resetExportUi();els.paperTitle.textContent=currentPaperTitle();
+  paper=next;resetExportUi();els.paperTitle.textContent=currentPaperTitle();
   await openExportDialog();
 }
 
@@ -193,7 +194,8 @@ function handIn(){
   els.result.querySelector('[data-again]')?.addEventListener('click',()=>{els.result.hidden=true;els.builder.hidden=false;syncBuilder();window.scrollTo({top:0,behavior:'smooth'})});window.scrollTo({top:0,behavior:'smooth'});
 }
 const EXPORT_API='https://api.evera.top/api/pdf/export';
-let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:''};
+let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0};
+const exportBusy=()=>['queued','preparing','compiling','storing'].includes(exportJob.status);
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'||role==='super_admin'}
 function setExportSteps(status='queued'){
@@ -214,7 +216,7 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
 }
 function resetExportUi(){
-  stopExportStream();exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:''};
+  stopExportStream();exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0};
   if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
   if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
   setExportState('idle',{message:'当前试卷将按 exam-A4 紧凑版生成，并为需要书写的题目保留答题空间。'});
@@ -224,6 +226,7 @@ async function openExportDialog(){
   if(!paper.length){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
   if(!els.exportLayer)return;els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');
   try{const user=await window.EveraCloud?.getUser?.();if(els.exportAdmin)els.exportAdmin.hidden=!exportRole(user)}catch{if(els.exportAdmin)els.exportAdmin.hidden=true}
+  if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
   setTimeout(()=>els.exportStart?.focus(),40);
 }
 function exportPayload(){
@@ -245,10 +248,11 @@ async function pollExportJob(){
 }
 function watchExportJob(){stopExportStream();pollExportJob();}
 async function startPdfExport(){
-  if(!paper.length||['queued','preparing','compiling','storing'].includes(exportJob.status))return;
-  setExportState('queued',{message:'正在提交到 PDF 生成队列…'});if(els.exportStart)els.exportStart.disabled=true;
+  if(!paper.length||exportBusy())return;
+  const payload=exportPayload();exportJob.title=payload.title;exportJob.count=payload.questions.length;
+  setExportState('queued',{message:`正在提交「${exportJob.title}」· ${exportJob.count} 题到 PDF 生成队列…`});if(els.exportStart)els.exportStart.disabled=true;
   try{
-    const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),credentials:'include',body:JSON.stringify(exportPayload())});
+    const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),credentials:'include',body:JSON.stringify(payload)});
     let data={};try{data=await res.json()}catch{}
     if(!res.ok)throw new Error(data?.message||data?.error||('PDF 服务 HTTP '+res.status));
     exportJob.id=String(data.jobId||data.id||'');
