@@ -370,7 +370,7 @@ function renderExportQuota(quota=null){
   if(els.exportQuotaHourly)els.exportQuotaHourly.textContent=unlimited?'不限次数':Math.max(0,remainingHourly)+' / '+hourlyLimit;
   if(els.exportQuotaNote)els.exportQuotaNote.textContent=unlimited?'管理账号不计导出次数上限':quota.enabled===false?'PDF 导出当前已暂停':'每日 00:00（UTC+8）自动恢复';
   if(els.exportStart&&!exportBusy())els.exportStart.disabled=!exportAccessAllowed||exportQuotaBlocked;
-  if(exportQuotaBlocked&&els.exportMessage)els.exportMessage.textContent=quota.enabled===false?'PDF 导出当前由管理员暂停。':remainingDaily<=0?'今日 PDF 导出次数已用完，明日 00:00 自动恢复。':'本小时 PDF 导出次数已用完，请稍后再试。';
+  if(exportQuotaBlocked&&els.exportMessage)els.exportMessage.textContent=quota.enabled===false?'PDF 导出当前由管理员暂停。':remainingDaily<=0?'今日 PDF 导出次数已用完，明日 00:00 自动恢复。':'近 60 分钟 PDF 导出次数已用完，请稍后再试。';
 }
 function renderExportAvailability(data={}){
   const min=Number(data.etaMinSeconds),max=Number(data.etaMaxSeconds);

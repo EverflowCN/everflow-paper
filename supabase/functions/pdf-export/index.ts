@@ -207,7 +207,7 @@ Deno.serve(async(req)=>{
     if(message.includes('PDF_DISABLED'))return reply({error:'pdf_disabled',message:'PDF 导出当前由管理员暂停。'},403);
     if(/PDF_DAILY_LIMIT|PDF_HOURLY_LIMIT/.test(message)){
      const quota=await quotaSnapshot(user.id,manager,cfg),daily=message.includes('PDF_DAILY_LIMIT');
-     const limitMessage=daily?('今日 PDF 导出次数已用完（'+quota.dailyLimit+'/'+quota.dailyLimit+'），明日 00:00 自动恢复。'):('本小时 PDF 导出次数已用完（'+quota.hourlyLimit+'/'+quota.hourlyLimit+'），请稍后再试。');
+     const limitMessage=daily?('今日 PDF 导出次数已用完（'+quota.dailyLimit+'/'+quota.dailyLimit+'），明日 00:00 自动恢复。'):('近 60 分钟 PDF 导出次数已用完（'+quota.hourlyLimit+'/'+quota.hourlyLimit+'），请稍后再试。');
      return reply({error:daily?'daily_limit':'hourly_limit',message:limitMessage,quota},429);
     }
     throw error;
