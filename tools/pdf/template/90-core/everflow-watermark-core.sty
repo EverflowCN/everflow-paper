@@ -1,0 +1,131 @@
+% =============================================================================
+% Everflow 右下角图片水印内核
+% =============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesFile{90-core/everflow-watermark-core.sty}[2026/08/22 v10 corner image watermark]
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{etoolbox}
+\RequirePackage{eso-pic}
+\RequirePackage{tikz}
+\RequirePackage{xfp}
+
+\definecolor{EverflowWatermarkFrameColor}{HTML}{\EverflowWatermarkFrameColorHTML}
+
+\newif\ifEverflowWatermarkActive
+\EverflowWatermarkActivetrue
+\newcommand\EverflowWatermarkSuspend{\global\EverflowWatermarkActivefalse}
+\newcommand\EverflowWatermarkResume{\global\EverflowWatermarkActivetrue}
+
+\newif\ifEverflowWatermarkComponentWasActive
+\newcommand\EverflowWatermarkComponentBegin{%
+  \ifdefstring{\EverflowWatermarkScope}{body}{%
+    \ifEverflowWatermarkActive
+      \global\EverflowWatermarkComponentWasActivetrue
+    \else
+      \global\EverflowWatermarkComponentWasActivefalse
+    \fi
+    \EverflowWatermarkSuspend
+  }{}%
+}
+\newcommand\EverflowWatermarkComponentEnd{%
+  \ifdefstring{\EverflowWatermarkScope}{body}{%
+    \ifEverflowWatermarkComponentWasActive
+      \EverflowWatermarkResume
+    \else
+      \EverflowWatermarkSuspend
+    \fi
+  }{}%
+}
+
+\newif\ifEverflowWatermarkBlankWasActive
+\newcommand\EverflowWatermarkBlankPageBegin{%
+  \ifEverflowWatermarkActive
+    \global\EverflowWatermarkBlankWasActivetrue
+  \else
+    \global\EverflowWatermarkBlankWasActivefalse
+  \fi
+  \EverflowWatermarkSuspend
+}
+\newcommand\EverflowWatermarkBlankPageEnd{%
+  \ifEverflowWatermarkBlankWasActive
+    \EverflowWatermarkResume
+  \else
+    \EverflowWatermarkSuspend
+  \fi
+}
+
+\newif\ifEverflowWatermarkPartWasActive
+\newcommand\EverflowWatermarkPartPageBegin{%
+  \ifdefstring{\EverflowWatermarkOnPartPages}{false}{%
+    \ifEverflowWatermarkActive
+      \global\EverflowWatermarkPartWasActivetrue
+    \else
+      \global\EverflowWatermarkPartWasActivefalse
+    \fi
+    \EverflowWatermarkSuspend
+  }{}%
+}
+\newcommand\EverflowWatermarkPartPageEnd{%
+  \ifdefstring{\EverflowWatermarkOnPartPages}{false}{%
+    \ifEverflowWatermarkPartWasActive\EverflowWatermarkResume\fi
+  }{}%
+}
+
+\newsavebox{\EverflowWatermarkBox}
+\newcommand\EverflowWatermarkBuildBox{%
+  \edef\EverflowWatermarkOpacityDecimal{\fpeval{max(0,min(100,\EverflowWatermarkOpacity))/100}}%
+  \IfFileExists{\EverflowWatermarkImage}{%
+    \global\setbox\EverflowWatermarkBox=\hbox{%
+      \begin{tikzpicture}[baseline=(wmframe.base)]
+        \ifdefstring{\EverflowWatermarkFrameEnabled}{true}{%
+          \node[
+            draw=EverflowWatermarkFrameColor,
+            line width=\EverflowWatermarkFrameLineWidth,
+            minimum width=\EverflowWatermarkFrameWidth,
+            minimum height=\EverflowWatermarkFrameHeight,
+            inner sep=0pt,
+            outer sep=0pt
+          ] (wmframe) {};
+        }{%
+          \node[
+            minimum width=\EverflowWatermarkFrameWidth,
+            minimum height=\EverflowWatermarkFrameHeight,
+            inner sep=0pt,
+            outer sep=0pt
+          ] (wmframe) {};
+        }%
+        \node[
+          inner sep=0pt,
+          outer sep=0pt,
+          opacity=\EverflowWatermarkOpacityDecimal
+        ] at (wmframe.center) {\includegraphics[height=\EverflowWatermarkImageHeight]{\EverflowWatermarkImage}};
+      \end{tikzpicture}%
+    }%
+  }{%
+    \PackageWarning{everflow-watermark}{Watermark image not found: \EverflowWatermarkImage}%
+    \global\setbox\EverflowWatermarkBox=\hbox{}%
+  }%
+}
+
+\newcommand\EverflowWatermarkPlace{%
+  \ifEverflowWatermarkActive
+    \ifdefstring{\EverflowWatermarkEnabled}{true}{%
+      \AtPageLowerLeft{%
+        \smash{%
+          \makebox[\paperwidth][r]{%
+            \raisebox{\EverflowWatermarkBottomInset}[0pt][0pt]{\copy\EverflowWatermarkBox}%
+            \hspace*{\EverflowWatermarkRightInset}%
+          }%
+        }%
+      }%
+    }{}%
+  \fi
+}
+
+\AtBeginDocument{%
+  \ifdefstring{\EverflowWatermarkEnabled}{true}{%
+    \EverflowWatermarkBuildBox
+    \AddToShipoutPictureFG{\EverflowWatermarkPlace}%
+  }{}%
+}
