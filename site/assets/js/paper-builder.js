@@ -369,7 +369,7 @@ function renderExportAvailability(data={}){
 async function refreshExportAvailability(){
   if(!exportAccessAllowed||exportBusy()||exportJob.id)return;
   try{
-    const res=await fetch(EXPORT_API+'?availability=1',{headers:await exportHeaders(),credentials:'include',cache:'no-store',signal:AbortSignal.timeout(12000)});
+    const count=Math.max(1,Math.min(100,paper.length||40));const res=await fetch(EXPORT_API+'?availability=1&count='+count,{headers:await exportHeaders(),credentials:'include',cache:'no-store',signal:AbortSignal.timeout(12000)});
     if(!res.ok)return;
     renderExportAvailability(await res.json());
   }catch{}
