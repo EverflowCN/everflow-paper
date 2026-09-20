@@ -1,0 +1,39 @@
+% !TeX root = ../../Everflow-Book.tex
+% =============================================================================
+% 右下角图片水印配置（Book / Exam / Public 共用）
+% 日常只改本文件；渲染逻辑位于 90-core/everflow-watermark-core.sty。
+% =============================================================================
+\RequirePackage{etoolbox}
+
+\providecommand{\EverflowBookWatermarkEnabled}{true}
+\providecommand{\EverflowExamWatermarkEnabled}{true}
+\providecommand{\EverflowPublicWatermarkEnabled}{true}
+
+\providecommand{\EverflowWatermarkImage}{assets/watermark/water.png}
+\providecommand{\EverflowWatermarkImageHeight}{34mm}
+\providecommand{\EverflowWatermarkOpacity}{9}
+
+\providecommand{\EverflowWatermarkFrameEnabled}{false}
+\providecommand{\EverflowWatermarkFrameWidth}{27mm}
+\providecommand{\EverflowWatermarkFrameHeight}{70mm}
+\providecommand{\EverflowWatermarkFrameLineWidth}{0.55pt}
+\providecommand{\EverflowWatermarkFrameColorHTML}{000000}
+
+\providecommand{\EverflowWatermarkRightInset}{13mm}
+\providecommand{\EverflowWatermarkBottomInset}{30mm}
+
+\providecommand{\EverflowWatermarkScope}{body}
+\providecommand{\EverflowWatermarkOnPartPages}{true}
+
+\providecommand{\EverflowOutputKind}{book}
+\ifdefstring{\EverflowOutputKind}{exam}{%
+  \let\EverflowWatermarkEnabled\EverflowExamWatermarkEnabled
+}{%
+  \ifdefstring{\EverflowOutputKind}{public}{%
+    \let\EverflowWatermarkEnabled\EverflowPublicWatermarkEnabled
+  }{%
+    \let\EverflowWatermarkEnabled\EverflowBookWatermarkEnabled
+  }%
+}
+
+\edef\EverflowPublicationWatermark{\EverflowPublicWatermarkEnabled}
