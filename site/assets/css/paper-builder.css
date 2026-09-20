@@ -74,3 +74,17 @@ body.paper-export-open{overflow:hidden}
 .paper-export-eta{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--relax-line);border-radius:14px;background:var(--relax-card)}
 .paper-export-eta>div{padding:9px 10px;border-radius:10px;background:var(--relax-soft)}.paper-export-eta span,.paper-export-eta strong{display:block}.paper-export-eta span{font-size:9px;color:var(--relax-muted);font-weight:700}.paper-export-eta strong{margin-top:4px;font-size:14px;letter-spacing:-.02em}.paper-export-eta>small{grid-column:1/-1;padding:0 2px;color:var(--relax-muted);font-size:9px;line-height:1.45}
 @media(max-width:700px){.paper-layout-option{grid-template-columns:36px 1fr auto;padding:11px}.paper-layout-option i{font-size:8px}.paper-export-access{grid-template-columns:26px 1fr}.paper-export-access a{grid-column:2;justify-self:start}.paper-export-eta{grid-template-columns:1fr 1fr}}
+
+/* Floating PDF background task */
+.paper-export-task{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,calc(env(safe-area-inset-bottom) + 12px));z-index:77;max-width:min(360px,calc(100vw - 28px))}
+.paper-export-task[hidden]{display:none}
+.paper-export-task-button{width:100%;min-width:260px;display:grid;grid-template-columns:12px minmax(0,1fr) auto 16px;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--relax-line);border-radius:16px;background:color-mix(in srgb,var(--relax-card) 92%,transparent);color:inherit;box-shadow:0 14px 38px rgba(0,0,0,.13);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);cursor:pointer;text-align:left;transition:.18s}
+.paper-export-task-button:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--relax-accent) 45%,var(--relax-line))}
+.paper-export-task-dot{width:9px;height:9px;border-radius:50%;background:var(--relax-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--relax-accent) 12%,transparent)}
+.paper-export-task.is-busy .paper-export-task-dot{animation:paper-task-pulse 1.25s ease-in-out infinite}
+.paper-export-task.is-complete .paper-export-task-dot{box-shadow:none}
+.paper-export-task.is-error .paper-export-task-dot{background:#b24a4a;box-shadow:0 0 0 4px color-mix(in srgb,#b24a4a 12%,transparent)}
+.paper-export-task-copy{min-width:0}.paper-export-task-copy b,.paper-export-task-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.paper-export-task-copy b{font-size:12px}.paper-export-task-copy small{margin-top:2px;font-size:9px;color:var(--relax-muted)}
+.paper-export-task-button>strong{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}.paper-export-task-button>svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--relax-muted)}
+@keyframes paper-task-pulse{50%{opacity:.45;transform:scale(.82)}}
+@media(max-width:700px){.paper-export-task{left:14px;right:14px;bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px));max-width:none}.paper-export-task-button{min-width:0;border-radius:15px;padding:10px 11px}.paper-export-task-copy small{max-width:52vw}}
