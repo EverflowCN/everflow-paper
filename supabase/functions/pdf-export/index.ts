@@ -34,6 +34,33 @@ async function membershipActive(userId:string){
  }
  return Boolean(membership&&['member','pro'].includes(membership.plan)&&membership.status==='active'&&(!effectiveExpiresAt||Date.parse(effectiveExpiresAt)>Date.now()));
 }
+type PdfExportConfig={enabled:boolean;dailyLimit:number;hourlyLimit:number;adminUnlimited:boolean};
+async function exportConfig():Promise<PdfExportConfig>{
+ const {data,error}=await db.from('membership_config').select('pdf_export_enabled,pdf_export_daily_limit,pdf_export_hourly_limit,pdf_export_admin_unlimited').eq('id','default').single();if(error)throw error;
+ return{
+  enabled:data?.pdf_export_enabled!==false,
+  dailyLimit:Math.max(1,Math.min(500,Number(data?.pdf_export_daily_limit)||15)),
+  hourlyLimit:Math.max(1,Math.min(100,Number(data?.pdf_export_hourly_limit)||5)),
+  adminUnlimited:data?.pdf_export_admin_unlimited!==false
+ };
+}
+function shanghaiDayWindow(nowMs=Date.now()){
+ const offset=8*60*60*1000,shifted=new Date(nowMs+offset);
+ const start=Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),shifted.getUTCDate())-offset;
+ return{startIso:new Date(start).toISOString(),resetAt:new Date(start+24*60*60*1000).toISOString()};
+}
+async function quotaSnapshot(userId:string,isManager:boolean,cfg?:PdfExportConfig){
+ const config=cfg||await exportConfig(),{startIso,resetAt}=shanghaiDayWindow();
+ if(isManager&&config.adminUnlimited)return{enabled:config.enabled,unlimited:true,dailyLimit:config.dailyLimit,hourlyLimit:config.hourlyLimit,usedDaily:0,usedHourly:0,remainingDaily:null,remainingHourly:null,resetAt,timezone:'Asia/Shanghai'};
+ const hourSince=new Date(Date.now()-60*60*1000).toISOString();
+ const [dayResult,hourResult]=await Promise.all([
+  db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('user_id',userId).gte('created_at',startIso),
+  db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('user_id',userId).gte('created_at',hourSince)
+ ]);
+ if(dayResult.error)throw dayResult.error;if(hourResult.error)throw hourResult.error;
+ const usedDaily=dayResult.count||0,usedHourly=hourResult.count||0;
+ return{enabled:config.enabled,unlimited:false,dailyLimit:config.dailyLimit,hourlyLimit:config.hourlyLimit,usedDaily,usedHourly,remainingDaily:Math.max(0,config.dailyLimit-usedDaily),remainingHourly:Math.max(0,config.hourlyLimit-usedHourly),resetAt,timezone:'Asia/Shanghai'};
+}
 async function workerSnapshot(){
  const freshSince=new Date(Date.now()-45*1000).toISOString();
  const {data:nodes,error:nodesError}=await db.from('pdf_worker_nodes').select('capacity,active').eq('kind','persistent').gt('updated_at',freshSince);if(nodesError)throw nodesError;
@@ -116,18 +143,30 @@ Deno.serve(async(req)=>{
   const token=(req.headers.get('Authorization')||'').replace(/^Bearer /,'');
   const {data:{user},error:authError}=await db.auth.getUser(token);
   if(authError||!user)return reply({error:'请先登录后导出 PDF'},401);
-  const manager=['admin','owner'].includes(user.app_metadata?.role);
-  if(req.method==='GET'&&endpoint.searchParams.get('admin')==='1'){
+  const manager=['admin','owner'].includes(user.app_metadata?.role),owner=user.app_metadata?.role==='owner';
+  if(endpoint.searchParams.get('admin')==='1'){
    if(!manager)return reply({error:'not_found'},404);
-   const now=new Date().toISOString(),freshSince=new Date(Date.now()-45*1000).toISOString(),dayAgo=new Date(Date.now()-24*60*60*1000).toISOString();
+   if(req.method==='POST'){
+    if(!owner)return reply({error:'forbidden'},403);
+    let body:any={};try{body=await req.json()}catch{return reply({error:'invalid_json'},400)}
+    if(body.action!=='config')return reply({error:'invalid_action'},400);
+    const incoming=body.config||{},daily=Math.max(1,Math.min(500,Math.round(Number(incoming.dailyLimit)||15))),hourly=Math.max(1,Math.min(daily,Math.min(100,Math.round(Number(incoming.hourlyLimit)||5))));
+    const row={pdf_export_enabled:incoming.enabled!==false,pdf_export_daily_limit:daily,pdf_export_hourly_limit:hourly,pdf_export_admin_unlimited:incoming.adminUnlimited!==false,updated_at:new Date().toISOString()};
+    const {data,error}=await db.from('membership_config').update(row).eq('id','default').select('pdf_export_enabled,pdf_export_daily_limit,pdf_export_hourly_limit,pdf_export_admin_unlimited').single();if(error)throw error;
+    await db.from('admin_audit').insert({actor_user_id:user.id,action:'pdf_export_config_update',detail:{enabled:row.pdf_export_enabled,daily_limit:daily,hourly_limit:hourly,admin_unlimited:row.pdf_export_admin_unlimited}});
+    return reply({ok:true,config:{enabled:data.pdf_export_enabled!==false,dailyLimit:Number(data.pdf_export_daily_limit)||15,hourlyLimit:Number(data.pdf_export_hourly_limit)||5,adminUnlimited:data.pdf_export_admin_unlimited!==false,timezone:'Asia/Shanghai'}});
+   }
+   if(req.method!=='GET')return reply({error:'Method not allowed'},405);
+   const now=new Date().toISOString(),freshSince=new Date(Date.now()-45*1000).toISOString(),dayAgo=new Date(Date.now()-24*60*60*1000).toISOString(),cfg=await exportConfig(),{startIso:todayStart}=shanghaiDayWindow();
    const statuses=['queued','preparing','compiling','storing','completed','failed'];
-   const [nodesResult,tokensResult,recentResult,...countResults]=await Promise.all([
+   const [nodesResult,tokensResult,recentResult,todayResult,...countResults]=await Promise.all([
     db.from('pdf_worker_nodes').select('id,kind,capacity,active,updated_at').order('updated_at',{ascending:false}).limit(20),
     db.from('pdf_worker_tokens').select('id,enabled,last_used_at').order('created_at',{ascending:true}).limit(20),
     db.from('pdf_export_jobs').select('id,status,priority,payload,created_at,updated_at,attempts,error,lease_until').gte('created_at',dayAgo).order('created_at',{ascending:false}).limit(40),
+    db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).gte('created_at',todayStart),
     ...statuses.map(status=>db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('status',status).gt('expires_at',now))
    ]);
-   if(nodesResult.error)throw nodesResult.error;if(tokensResult.error)throw tokensResult.error;if(recentResult.error)throw recentResult.error;
+   if(nodesResult.error)throw nodesResult.error;if(tokensResult.error)throw tokensResult.error;if(recentResult.error)throw recentResult.error;if(todayResult.error)throw todayResult.error;
    for(const result of countResults)if(result.error)throw result.error;
    const counts=Object.fromEntries(statuses.map((status,index)=>[status,countResults[index].count||0]));
    const nodes=(nodesResult.data||[]).map((node:any)=>({...node,healthy:Date.parse(node.updated_at)>Date.parse(freshSince)}));
@@ -141,16 +180,20 @@ Deno.serve(async(req)=>{
      elapsedSeconds:Math.max(0,Math.round((elapsedEnd-Date.parse(job.created_at))/100)/10)
     };
    });
-   return reply({workers:nodes,tokens:(tokensResult.data||[]).map((token:any)=>({id:token.id,enabled:token.enabled,lastUsedAt:token.last_used_at})),counts,recent,fallback:{enabled:true,kind:'github-actions',scheduleMinutes:5}});
+   return reply({workers:nodes,tokens:(tokensResult.data||[]).map((token:any)=>({id:token.id,enabled:token.enabled,lastUsedAt:token.last_used_at})),counts,recent,config:{...cfg,timezone:'Asia/Shanghai'},usage:{todayStarted:todayResult.count||0},fallback:{enabled:true,kind:'github-actions',scheduleMinutes:5}});
   }
   if(req.method==='GET'&&endpoint.searchParams.get('availability')==='1'){
    if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
+   const cfg=await exportConfig(),quota=await quotaSnapshot(user.id,manager,cfg);
+   if(!cfg.enabled)return reply({error:'pdf_disabled',message:'PDF 导出当前由管理员暂停。',quota},403);
    const snap=await workerSnapshot(),questionCount=Math.max(1,Math.min(100,Number(endpoint.searchParams.get('count'))||40)),eta=etaFor('queued',1,snap.fast,snap.workers.total,questionCount,snap.workers.busy);
-   return reply({...eta,workers:snap.workers,questionCount});
+   return reply({...eta,workers:snap.workers,questionCount,quota});
   }
   let job:any;
   if(req.method==='POST'){
    if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
+   const cfg=await exportConfig();
+   if(!cfg.enabled)return reply({error:'pdf_disabled',message:'PDF 导出当前由管理员暂停。',quota:await quotaSnapshot(user.id,manager,cfg)},403);
    const raw=await req.text();if(raw.length>50000)return reply({error:'试卷数据过大'},413);
    const body=JSON.parse(raw);
    if(body.schema!=='everflow-pdf-export-v1'||body.template!=='exam-A4'||!['compact','spacious'].includes(body.layout)||!uuid.test(body.requestId||'')||!Array.isArray(body.questions)||body.questions.length<1||body.questions.length>100)return reply({error:'试卷参数无效'},400);
@@ -158,7 +201,17 @@ Deno.serve(async(req)=>{
    if(questions.some((q:any)=>q.source==='zhenti'?!/^20\d{2}-(?:[1-9]|[1-3]\d|4[0-7])$/.test(q.id):q.source==='relax'?!/^[a-z]{2,4}-\d{1,3}-\d{1,4}$/.test(q.id):true)||new Set(questions.map((q:any)=>q.source+':'+q.id)).size!==questions.length)return reply({error:'题号无效或重复'},400);
    const payload={schema:body.schema,template:'exam-A4',layout:body.layout,title:String(body.title||'408 组卷').slice(0,100),questions};
    const {data,error}=await db.rpc('pdf_export_enqueue',{p_user:user.id,p_key:body.requestId,p_payload:payload,p_priority:manager?10:0});
-   if(error){if(/PDF_RATE_LIMIT|PDF_ACTIVE_JOB/.test(error.message))return reply({error:error.message.includes('PDF_ACTIVE_JOB')?'已有导出任务正在处理，请等待完成':'导出次数较多，请稍后重试'},429);throw error;}
+   if(error){
+    const message=String(error.message||'');
+    if(message.includes('PDF_ACTIVE_JOB'))return reply({error:'active_job',message:'已有导出任务正在处理，请等待完成'},429);
+    if(message.includes('PDF_DISABLED'))return reply({error:'pdf_disabled',message:'PDF 导出当前由管理员暂停。'},403);
+    if(/PDF_DAILY_LIMIT|PDF_HOURLY_LIMIT/.test(message)){
+     const quota=await quotaSnapshot(user.id,manager,cfg),daily=message.includes('PDF_DAILY_LIMIT');
+     const limitMessage=daily?('今日 PDF 导出次数已用完（'+quota.dailyLimit+'/'+quota.dailyLimit+'），明日 00:00 自动恢复。'):('本小时 PDF 导出次数已用完（'+quota.hourlyLimit+'/'+quota.hourlyLimit+'），请稍后再试。');
+     return reply({error:daily?'daily_limit':'hourly_limit',message:limitMessage,quota},429);
+    }
+    throw error;
+   }
    job=data;
   }else if(req.method==='GET'){
    const id=endpoint.searchParams.get('id')||'';if(!uuid.test(id))return reply({error:'任务编号无效'},400);
@@ -167,6 +220,7 @@ Deno.serve(async(req)=>{
   }else return reply({error:'Method not allowed'},405);
   if(Date.parse(job.expires_at)<=Date.now())return reply({error:'任务已过期，请重新生成'},410);
   const result:any={id:job.id,jobId:job.id,status:job.status,title:job.payload.title,count:job.payload.questions.length,layout:job.payload.layout,expiresAt:job.expires_at};
+  if(req.method==='POST')result.quota=await quotaSnapshot(user.id,manager);
   const snap=await workerSnapshot(),fastWorker=snap.fast;
   result.workers=snap.workers;
   if(manager)result.priorityEnabled=job.priority>0;

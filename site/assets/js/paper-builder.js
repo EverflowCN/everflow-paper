@@ -6,7 +6,7 @@ const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
 
 const $=s=>app.querySelector(s),$$=s=>[...app.querySelectorAll(s)];
-const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]'),exportTask:$('[data-export-task]'),exportTaskOpen:$('[data-export-task-open]'),exportTaskLabel:$('[data-export-task-label]'),exportTaskDetail:$('[data-export-task-detail]'),exportTaskTime:$('[data-export-task-time]')};
+const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]'),exportQuota:$('[data-export-quota]'),exportQuotaDaily:$('[data-export-quota-daily]'),exportQuotaHourly:$('[data-export-quota-hourly]'),exportQuotaNote:$('[data-export-quota-note]'),exportTask:$('[data-export-task]'),exportTaskOpen:$('[data-export-task-open]'),exportTaskLabel:$('[data-export-task-label]'),exportTaskDetail:$('[data-export-task-detail]'),exportTaskTime:$('[data-export-task-time]')};
 
 const YEARS=Array.from({length:18},(_,i)=>2009+i);
 const SUBJECT_ORDER=['ds','co','os','cn'];
@@ -205,7 +205,7 @@ let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=fals
 const exportLayoutInputs=$$('[data-export-layout-input]');
 const selectedExportLayout=()=>exportLayoutInputs.find(input=>input.checked)?.value==='spacious'?'spacious':'compact';
 function setSelectedExportLayout(value){exportLayoutInputs.forEach(input=>{input.checked=input.value===(value==='spacious'?'spacious':'compact')})}
-let exportAccessAllowed=false,exportAccessCache=null,exportEtaDeadline=0,exportEtaKey='',exportEtaTimer=0;
+let exportAccessAllowed=false,exportAccessCache=null,exportEtaDeadline=0,exportEtaKey='',exportEtaTimer=0,exportQuotaBlocked=false;
 async function checkPdfAccess(force=false){
   if(!force&&exportAccessCache&&Date.now()-exportAccessCache.checkedAt<30000)return exportAccessCache;
   await window.EveraCloud?.ready;
@@ -231,7 +231,8 @@ function renderPdfAccess(access){
     }
   }
   exportLayoutInputs.forEach(input=>{input.disabled=!exportAccessAllowed||exportBusy()});
-  if(els.exportStart)els.exportStart.disabled=!exportAccessAllowed||exportBusy();
+  if(!exportAccessAllowed&&els.exportQuota)els.exportQuota.hidden=true;
+  if(els.exportStart)els.exportStart.disabled=!exportAccessAllowed||exportBusy()||exportQuotaBlocked;
 }
 function fallbackEta(status,position=1){
   const p=Math.max(1,Number(position)||1);
@@ -305,12 +306,12 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   if(els.exportWorker)els.exportWorker.textContent=workers?((workers.mode==='persistent'?'常驻编译节点 ':'编译节点 ')+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌'):status==='queued'?'等待可用编译节点':status==='compiling'?'XeLaTeX 正在排版':status==='completed'?'文件已准备好':'编译节点状态将在提交后显示';
   if(message&&els.exportMessage)els.exportMessage.textContent=message;
   if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
-  if(els.exportStart){els.exportStart.disabled=!exportAccessAllowed||['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
+  if(els.exportStart){els.exportStart.disabled=!exportAccessAllowed||exportQuotaBlocked||['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
   if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
   exportJob.updatedAt=Date.now();syncExportTask();persistExportJob();
 }
 function resetExportUi(){
-  stopExportStream();clearPersistedExportJob();exportRequestId='';exportPollFailures=0;exportFastPolling=false;exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
+  stopExportStream();clearPersistedExportJob();exportRequestId='';exportPollFailures=0;exportFastPolling=false;exportQuotaBlocked=false;exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
   if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
   if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
   setExportState('idle',{message:'仅生成题目页，不含封面、前言、目录、答案与解析。'});updateExportEta({},'idle');
@@ -359,19 +360,34 @@ async function exportHeaders(){
   try{const client=await window.EveraCloud?.getClient?.(),session=(await client?.auth?.getSession?.())?.data?.session;if(session?.access_token)headers.Authorization='Bearer '+session.access_token}catch{}
   return headers;
 }
+function renderExportQuota(quota=null){
+  if(!els.exportQuota)return;
+  if(!quota){els.exportQuota.hidden=true;exportQuotaBlocked=false;return}
+  els.exportQuota.hidden=false;
+  const unlimited=Boolean(quota.unlimited),dailyLimit=Number(quota.dailyLimit)||0,hourlyLimit=Number(quota.hourlyLimit)||0,remainingDaily=Number(quota.remainingDaily),remainingHourly=Number(quota.remainingHourly);
+  exportQuotaBlocked=quota.enabled===false||(!unlimited&&((Number.isFinite(remainingDaily)&&remainingDaily<=0)||(Number.isFinite(remainingHourly)&&remainingHourly<=0)));
+  if(els.exportQuotaDaily)els.exportQuotaDaily.textContent=unlimited?'不限次数':Math.max(0,remainingDaily)+' / '+dailyLimit;
+  if(els.exportQuotaHourly)els.exportQuotaHourly.textContent=unlimited?'不限次数':Math.max(0,remainingHourly)+' / '+hourlyLimit;
+  if(els.exportQuotaNote)els.exportQuotaNote.textContent=unlimited?'管理账号不计导出次数上限':quota.enabled===false?'PDF 导出当前已暂停':'每日 00:00（UTC+8）自动恢复';
+  if(els.exportStart&&!exportBusy())els.exportStart.disabled=!exportAccessAllowed||exportQuotaBlocked;
+  if(exportQuotaBlocked&&els.exportMessage)els.exportMessage.textContent=quota.enabled===false?'PDF 导出当前由管理员暂停。':remainingDaily<=0?'今日 PDF 导出次数已用完，明日 00:00 自动恢复。':'本小时 PDF 导出次数已用完，请稍后再试。';
+}
 function renderExportAvailability(data={}){
   const min=Number(data.etaMinSeconds),max=Number(data.etaMaxSeconds);
   if(Number.isFinite(min)&&Number.isFinite(max)&&els.exportEtaRange)els.exportEtaRange.textContent=etaRangeText(min,max);
   if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';
   const workers=data.workers;if(workers?.mode)exportFastPolling=workers.mode==='persistent';
   if(workers&&els.exportWorker)els.exportWorker.textContent=(workers.mode==='persistent'?'常驻编译节点 ':'编译节点 ')+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌';
+  renderExportQuota(data.quota||null);
 }
 async function refreshExportAvailability(){
   if(!exportAccessAllowed||exportBusy()||exportJob.id)return;
   try{
     const count=Math.max(1,Math.min(100,paper.length||40));const res=await fetch(EXPORT_API+'?availability=1&count='+count,{headers:await exportHeaders(),credentials:'include',cache:'no-store',signal:AbortSignal.timeout(12000)});
-    if(!res.ok)return;
-    renderExportAvailability(await res.json());
+    let data={};try{data=await res.json()}catch{}
+    if(data?.quota)renderExportQuota(data.quota);
+    if(!res.ok){if(data?.message&&els.exportMessage)els.exportMessage.textContent=data.message;return}
+    renderExportAvailability(data);
   }catch{}
 }
 function stopExportStream(){clearTimeout(exportJob.pollTimer);exportJob.pollTimer=0;if(exportJob.eventSource){exportJob.eventSource.close();exportJob.eventSource=null}}
@@ -379,7 +395,7 @@ function applyExportUpdate(data={}){
   if(exportManager&&('priorityEnabled'in data||'priority'in data))renderExportPriority({app_metadata:{role:'owner'}},Boolean(data.priorityEnabled??data.priority));
   const rawStatus=String(data.status||exportJob.status||'queued');const status=({processing:'compiling',ready:'completed'})[rawStatus]||rawStatus;
   if(data.title)exportJob.title=data.title;if(data.count)exportJob.count=data.count;if(data.workers?.mode)exportFastPolling=data.workers.mode==='persistent';
-  if(data.layout)setSelectedExportLayout(data.layout);setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});updateExportEta(data,status,data.position);
+  if(data.layout)setSelectedExportLayout(data.layout);if(data.quota)renderExportQuota(data.quota);setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});updateExportEta(data,status,data.position);
   if(status==='completed'||status==='failed'){stopExportStream();exportRequestId='';persistExportJob()}
 }
 async function pollExportJob(){
@@ -416,6 +432,7 @@ async function startPdfExport(){
   try{
     const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),credentials:'include',body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
     let data={};try{data=await res.json()}catch{}
+    if(data?.quota)renderExportQuota(data.quota);
     if(!res.ok)throw new Error(data?.message||data?.error||('PDF 服务 HTTP '+res.status));
     exportJob.id=String(data.jobId||data.id||'');persistExportJob();
     if(!exportJob.id&&data.downloadUrl){applyExportUpdate({...data,status:'completed'});return}

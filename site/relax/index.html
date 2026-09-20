@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="../assets/css/site.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/responsive.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/relax1000-practice.css?v=20260825-bank1">
-  <link rel="stylesheet" href="../assets/css/paper-builder.css?v=20260920-pdf-task1">
+  <link rel="stylesheet" href="../assets/css/paper-builder.css?v=20260921-pdf-quota1">
   <link rel="stylesheet" href="../assets/css/question-content-v1.css?v=20260904-question2">
 </head>
 <body data-view="relax">
@@ -93,6 +93,11 @@
         <a data-export-access-action href="../membership/">查看会员</a>
       </div>
       <div class="paper-export-admin" data-export-admin hidden aria-live="polite"></div>
+      <div class="paper-export-quota" data-export-quota hidden>
+        <div><span>今日剩余</span><strong data-export-quota-daily>--</strong></div>
+        <div><span>本小时剩余</span><strong data-export-quota-hourly>--</strong></div>
+        <small data-export-quota-note>每日 00:00（UTC+8）自动恢复</small>
+      </div>
       <ol class="paper-export-steps" data-export-steps>
         <li class="active" data-export-step="queued"><i></i><span><b>提交任务</b><small>准备进入生成队列</small></span></li>
         <li data-export-step="preparing"><i></i><span><b>准备排版</b><small>整理题目与留白设置</small></span></li>
@@ -131,6 +136,6 @@
 <script src="../assets/js/cloud-config.js"></script>
 <script type="module" src="../assets/js/cloud.js"></script>
 <script src="../assets/js/zhenti-data-overlay.js?v=20260904-editor1"></script>
-<script type="module" src="../assets/js/paper-builder.js?v=20260920-pdf-task4"></script>
+<script type="module" src="../assets/js/paper-builder.js?v=20260921-pdf-quota1"></script>
 </body>
 </html>

@@ -41,5 +41,13 @@ async function pdfCompiler(){
   if(!response.ok)throw new Error(body?.message||body?.error||('pdf_admin_http_'+response.status));
   return body;
 }
+async function savePdfCompilerConfig(input={}){
+  await requireOwner();
+  const {data,error}=await client.auth.getSession();if(error||!data?.session?.access_token)throw new Error('login_required');
+  const response=await fetch('https://api.evera.top/api/pdf/export?admin=1',{method:'POST',headers:{Authorization:'Bearer '+data.session.access_token,'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'config',config:input}),cache:'no-store'});
+  let body={};try{body=await response.json()}catch{}
+  if(!response.ok)throw new Error(body?.message||body?.error||('pdf_admin_save_http_'+response.status));
+  return body;
+}
 async function audit(limit=100){await requireOwner();const {data,error}=await client.from('admin_audit').select('*').order('created_at',{ascending:false}).limit(Math.max(1,Math.min(200,Number(limit)||100)));if(error)throw error;return data||[]}
-window.EveraAdminCloud={enabled,ready,getUser,requireOwner,ownerUsers,membership,oxygen,insights,quality,feedback,questions,snapshot,dashboard,getMembershipConfig,saveMembershipConfig,listNotices,saveNotice,deleteNotice,getResourceSettings,listResourceItems,saveResourceSettings,saveResourceItem,deleteResourceItem,pdfCompiler,audit};init();
+window.EveraAdminCloud={enabled,ready,getUser,requireOwner,ownerUsers,membership,oxygen,insights,quality,feedback,questions,snapshot,dashboard,getMembershipConfig,saveMembershipConfig,listNotices,saveNotice,deleteNotice,getResourceSettings,listResourceItems,saveResourceSettings,saveResourceItem,deleteResourceItem,pdfCompiler,savePdfCompilerConfig,audit};init();

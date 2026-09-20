@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/css/app-ui.css">
 <link rel="stylesheet" href="../assets/css/workspace-v3.css?v=20260904-editor1">
 <link rel="stylesheet" href="../assets/css/workspace-tabler-v1.css?v=20260904-tabler1">
-<link rel="stylesheet" href="../assets/css/workspace-questions-v2.css?v=20260904-qwb2">\n<link rel="stylesheet" href="../assets/css/workspace-pdf-v1.css?v=20260920-pdf1">
+<link rel="stylesheet" href="../assets/css/workspace-questions-v2.css?v=20260904-qwb2">\n<link rel="stylesheet" href="../assets/css/workspace-pdf-v1.css?v=20260921-quota1">
 </head>
 <body class="ws3">
 <div class="ws-gate" data-ws-gate>
@@ -709,6 +709,17 @@
 <article><span>排队任务</span><strong data-pdf-admin-queued>--</strong><small>等待领取</small></article>
 <article><span>24h 失败</span><strong data-pdf-admin-failed>--</strong><small>需要检查</small></article>
 </div>
+<section class="ws-card pdf-admin-policy">
+<div class="ws-card-head"><div><span class="eyebrow">EXPORT QUOTA</span><h3>用户导出额度</h3></div><span class="pill" data-pdf-admin-today>今日 -- 次</span></div>
+<div class="ws-form pdf-admin-policy-form">
+<label class="ws-check wide"><input type="checkbox" data-pdf-config-enabled checked>开启会员 PDF 导出</label>
+<label class="ws-field">每日上限<input type="number" min="1" max="500" step="1" value="15" data-pdf-config-daily></label>
+<label class="ws-field">每小时上限<input type="number" min="1" max="100" step="1" value="5" data-pdf-config-hourly></label>
+<label class="ws-check wide"><input type="checkbox" data-pdf-config-admin-unlimited checked>Owner / Admin 不计次数上限</label>
+<div class="pdf-admin-policy-note wide"><strong>重置规则</strong><span>每日 00:00（UTC+8 / Asia/Shanghai）自动恢复；同一用户同时仍只允许 1 个生成任务。</span></div>
+</div>
+<div class="ws-form-actions"><span class="pdf-admin-policy-state" data-pdf-config-state>配置由服务端强制执行</span><button class="ws-btn primary" type="button" data-pdf-config-save>保存额度设置</button></div>
+</section>
 <div class="ws-grid two pdf-admin-grid">
 <section class="ws-card">
 <div class="ws-card-head"><div><span class="eyebrow">WORKERS</span><h3>编译节点</h3></div><span class="pill" data-pdf-admin-mode>--</span></div>
@@ -850,7 +861,7 @@
 </div>
 <script src="../assets/js/cloud-config.js?v=20260904-editor1">
 </script>
-<script type="module" src="../assets/js/admin-cloud.js?v=20260920-pdf1">
+<script type="module" src="../assets/js/admin-cloud.js?v=20260921-quota1">
 </script>
 <script type="module" src="../assets/js/workspace-v3.js?v=20260920-pdf1">
 </script>
@@ -858,6 +869,6 @@
 </script>
 <script type="module" src="../assets/js/workspace-shell-v1.js?v=20260920-pdf1">
 </script>
-<script type="module" src="../assets/js/workspace-pdf-v1.js?v=20260920-pdf1"></script>
+<script type="module" src="../assets/js/workspace-pdf-v1.js?v=20260921-quota1"></script>
 </body>
 </html>

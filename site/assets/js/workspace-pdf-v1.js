@@ -2,7 +2,7 @@
   'use strict';
   const $=s=>document.querySelector(s);
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let timer=0,active=location.hash==='#pdf',loading=false;
+  let timer=0,active=location.hash==='#pdf',loading=false,configDirty=false,saving=false;
   const statusLabel={queued:'排队',preparing:'准备',compiling:'编译',storing:'保存',completed:'完成',failed:'失败'};
   const layoutLabel=value=>value==='spacious'?'留空':'紧凑';
   const fmt=value=>value?new Date(value).toLocaleString('zh-CN',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'--';
@@ -18,6 +18,15 @@
     $('[data-pdf-admin-mode]').textContent=healthy.length?'常驻节点在线':'仅兜底节点';
     $('[data-pdf-admin-mode]').className='pill '+(healthy.length?'ok':'bad');
     $('[data-pdf-admin-updated]').textContent=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const cfg=data.config||{};
+    const today=$('[data-pdf-admin-today]');if(today)today.textContent='今日 '+(Number(data.usage?.todayStarted)||0)+' 次';
+    if(!configDirty){
+      const enabled=$('[data-pdf-config-enabled]'),daily=$('[data-pdf-config-daily]'),hourly=$('[data-pdf-config-hourly]'),adminUnlimited=$('[data-pdf-config-admin-unlimited]');
+      if(enabled)enabled.checked=cfg.enabled!==false;
+      if(daily)daily.value=String(Number(cfg.dailyLimit)||15);
+      if(hourly)hourly.value=String(Number(cfg.hourlyLimit)||5);
+      if(adminUnlimited)adminUnlimited.checked=cfg.adminUnlimited!==false;
+    }
     const tokenMap=new Map((data.tokens||[]).map(token=>[token.id,token]));
     const workerRoot=$('[data-pdf-admin-workers]');
     workerRoot.innerHTML=nodes.length?nodes.map(node=>{
@@ -37,6 +46,24 @@
     const row=$('[data-pdf-admin-recent]');if(row)row.innerHTML='<tr><td colspan="6">暂时无法读取编译任务。</td></tr>';
     const mode=$('[data-pdf-admin-mode]');if(mode){mode.textContent='连接异常';mode.className='pill bad'}
   }
+  async function saveConfig(){
+    if(saving)return;
+    const enabled=$('[data-pdf-config-enabled]'),daily=$('[data-pdf-config-daily]'),hourly=$('[data-pdf-config-hourly]'),adminUnlimited=$('[data-pdf-config-admin-unlimited]'),button=$('[data-pdf-config-save]'),state=$('[data-pdf-config-state]');
+    const dailyLimit=Math.max(1,Math.min(500,Math.round(Number(daily?.value)||15))),hourlyLimit=Math.max(1,Math.min(dailyLimit,Math.min(100,Math.round(Number(hourly?.value)||5))));
+    if(daily)daily.value=String(dailyLimit);if(hourly)hourly.value=String(hourlyLimit);
+    saving=true;if(button){button.disabled=true;button.textContent='保存中…'}if(state){state.textContent='正在保存到服务端';state.className='pdf-admin-policy-state'}
+    try{
+      const c=await cloud();await c.savePdfCompilerConfig({enabled:enabled?.checked!==false,dailyLimit,hourlyLimit,adminUnlimited:adminUnlimited?.checked!==false});
+      configDirty=false;
+      if(state){state.textContent='已保存 · 服务端立即生效';state.className='pdf-admin-policy-state ok'}
+      window.EveraUI?.toast?.('PDF 导出额度已更新',{type:'success'});
+      await refresh();
+    }catch(error){
+      console.error('PDF quota save',error);
+      if(state){state.textContent='保存失败：'+String(error?.message||error);state.className='pdf-admin-policy-state bad'}
+      window.EveraUI?.toast?.('PDF 额度保存失败',{type:'error'});
+    }finally{saving=false;if(button){button.disabled=false;button.textContent='保存额度设置'}}
+  }
   async function refresh(){
     if(!active||loading||document.hidden)return;loading=true;
     try{const c=await cloud();render(await c.pdfCompiler())}catch(error){console.error('PDF compiler center',error);renderError(error)}finally{loading=false}
@@ -47,6 +74,8 @@
   }
   document.addEventListener('everflow:workspace-section',event=>{active=event.detail?.id==='pdf';schedule()});
   $('[data-pdf-admin-refresh]')?.addEventListener('click',()=>void refresh());
+  for(const selector of ['[data-pdf-config-enabled]','[data-pdf-config-daily]','[data-pdf-config-hourly]','[data-pdf-config-admin-unlimited]']){const node=$(selector);if(node)node.addEventListener('input',()=>{configDirty=true;const state=$('[data-pdf-config-state]');if(state){state.textContent='有未保存更改';state.className='pdf-admin-policy-state'}})}
+  $('[data-pdf-config-save]')?.addEventListener('click',()=>void saveConfig());
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&active)void refresh()});
   if(active)schedule();
 })();

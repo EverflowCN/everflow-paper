@@ -14,7 +14,7 @@ GitHub Actions `.github/workflows/pdf-export-worker.yml` remains as a durable fa
 
 PDF export requires both a valid Supabase login and an active `member` or `pro` membership. The Edge Function enforces this server-side; the browser check is only UX.
 
-Regular users receive only their own task status, queue position and worker state. Manager priority is derived from verified `app_metadata.role` and is returned only to manager accounts. Request UUIDs make retries idempotent. Each user is limited to one active export and 20 starts per hour. Jobs expire after 24 hours.
+Regular users receive only their own task status, queue position and worker state. Manager priority is derived from verified `app_metadata.role` and is returned only to manager accounts. Request UUIDs make retries idempotent. Each user is limited to one active export. Daily/hourly quotas are configured by the Owner in the PDF compiler workspace and enforced atomically in Postgres; defaults are 15/day and 5/hour with a UTC+8 midnight reset. Owner/Admin accounts can be configured to bypass count quotas. Jobs expire after 24 hours.
 
 Claims are atomic and lease based. Persistent workers report heartbeats to `pdf_worker_nodes`; the UI uses live node capacity to choose a fast ETA when a persistent node is healthy, otherwise it automatically falls back to the scheduled-worker ETA.
 
