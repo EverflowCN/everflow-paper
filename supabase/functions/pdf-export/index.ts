@@ -36,12 +36,12 @@ async function membershipActive(userId:string){
 }
 type PdfExportConfig={enabled:boolean;dailyLimit:number;hourlyLimit:number;adminUnlimited:boolean};
 async function exportConfig():Promise<PdfExportConfig>{
- const {data,error}=await db.from('membership_config').select('pdf_export_enabled,pdf_export_daily_limit,pdf_export_hourly_limit,pdf_export_admin_unlimited').eq('id','default').single();if(error)throw error;
+ const {data,error}=await db.from('pdf_export_config').select('enabled,daily_limit,hourly_limit,admin_unlimited').eq('id','default').single();if(error)throw error;
  return{
-  enabled:data?.pdf_export_enabled!==false,
-  dailyLimit:Math.max(1,Math.min(500,Number(data?.pdf_export_daily_limit)||15)),
-  hourlyLimit:Math.max(1,Math.min(100,Number(data?.pdf_export_hourly_limit)||5)),
-  adminUnlimited:data?.pdf_export_admin_unlimited!==false
+  enabled:data?.enabled!==false,
+  dailyLimit:Math.max(1,Math.min(500,Number(data?.daily_limit)||15)),
+  hourlyLimit:Math.max(1,Math.min(100,Number(data?.hourly_limit)||5)),
+  adminUnlimited:data?.admin_unlimited!==false
  };
 }
 function shanghaiDayWindow(nowMs=Date.now()){
@@ -151,10 +151,10 @@ Deno.serve(async(req)=>{
     let body:any={};try{body=await req.json()}catch{return reply({error:'invalid_json'},400)}
     if(body.action!=='config')return reply({error:'invalid_action'},400);
     const incoming=body.config||{},daily=Math.max(1,Math.min(500,Math.round(Number(incoming.dailyLimit)||15))),hourly=Math.max(1,Math.min(daily,Math.min(100,Math.round(Number(incoming.hourlyLimit)||5))));
-    const row={pdf_export_enabled:incoming.enabled!==false,pdf_export_daily_limit:daily,pdf_export_hourly_limit:hourly,pdf_export_admin_unlimited:incoming.adminUnlimited!==false,updated_at:new Date().toISOString()};
-    const {data,error}=await db.from('membership_config').update(row).eq('id','default').select('pdf_export_enabled,pdf_export_daily_limit,pdf_export_hourly_limit,pdf_export_admin_unlimited').single();if(error)throw error;
-    await db.from('admin_audit').insert({actor_user_id:user.id,action:'pdf_export_config_update',detail:{enabled:row.pdf_export_enabled,daily_limit:daily,hourly_limit:hourly,admin_unlimited:row.pdf_export_admin_unlimited}});
-    return reply({ok:true,config:{enabled:data.pdf_export_enabled!==false,dailyLimit:Number(data.pdf_export_daily_limit)||15,hourlyLimit:Number(data.pdf_export_hourly_limit)||5,adminUnlimited:data.pdf_export_admin_unlimited!==false,timezone:'Asia/Shanghai'}});
+    const row={enabled:incoming.enabled!==false,daily_limit:daily,hourly_limit:hourly,admin_unlimited:incoming.adminUnlimited!==false,updated_at:new Date().toISOString()};
+    const {data,error}=await db.from('pdf_export_config').update(row).eq('id','default').select('enabled,daily_limit,hourly_limit,admin_unlimited').single();if(error)throw error;
+    await db.from('admin_audit').insert({actor_user_id:user.id,action:'pdf_export_config_update',detail:{enabled:row.enabled,daily_limit:daily,hourly_limit:hourly,admin_unlimited:row.admin_unlimited}});
+    return reply({ok:true,config:{enabled:data.enabled!==false,dailyLimit:Number(data.daily_limit)||15,hourlyLimit:Number(data.hourly_limit)||5,adminUnlimited:data.admin_unlimited!==false,timezone:'Asia/Shanghai'}});
    }
    if(req.method!=='GET')return reply({error:'Method not allowed'},405);
    const now=new Date().toISOString(),freshSince=new Date(Date.now()-45*1000).toISOString(),dayAgo=new Date(Date.now()-24*60*60*1000).toISOString(),cfg=await exportConfig(),{startIso:todayStart}=shanghaiDayWindow();

@@ -21,11 +21,20 @@ with check (false);
 create index if not exists pdf_export_queue_order on public.pdf_export_jobs(priority desc,created_at) where status='queued';
 create index if not exists pdf_export_user on public.pdf_export_jobs(user_id,created_at desc);
 create index if not exists pdf_export_expiry on public.pdf_export_jobs(expires_at);
-alter table public.membership_config
- add column if not exists pdf_export_enabled boolean not null default true,
- add column if not exists pdf_export_daily_limit integer not null default 15 check (pdf_export_daily_limit between 1 and 500),
- add column if not exists pdf_export_hourly_limit integer not null default 5 check (pdf_export_hourly_limit between 1 and 100),
- add column if not exists pdf_export_admin_unlimited boolean not null default true;
+create table if not exists public.pdf_export_config (
+ id text primary key default 'default' check(id='default'),
+ enabled boolean not null default true,
+ daily_limit integer not null default 15 check(daily_limit between 1 and 500),
+ hourly_limit integer not null default 5 check(hourly_limit between 1 and 100),
+ admin_unlimited boolean not null default true,
+ updated_at timestamptz not null default now()
+);
+insert into public.pdf_export_config(id) values('default') on conflict(id) do nothing;
+alter table public.pdf_export_config enable row level security;
+revoke all on public.pdf_export_config from public,anon,authenticated;
+grant all on public.pdf_export_config to service_role;
+drop policy if exists "pdf_export_config_deny_client_access" on public.pdf_export_config;
+create policy "pdf_export_config_deny_client_access" on public.pdf_export_config for all to anon,authenticated using(false) with check(false);
 
 create or replace function public.pdf_export_enqueue(p_user uuid,p_key uuid,p_payload jsonb,p_priority integer)
 returns public.pdf_export_jobs language plpgsql security invoker set search_path='' as $$
@@ -40,12 +49,12 @@ begin
  perform pg_advisory_xact_lock(hashtextextended(p_user::text,1));
  select * into j from public.pdf_export_jobs where user_id=p_user and request_key=p_key;
  if found then return j; end if;
- select coalesce(pdf_export_enabled,true),
-        greatest(1,least(500,coalesce(pdf_export_daily_limit,15))),
-        greatest(1,least(100,coalesce(pdf_export_hourly_limit,5))),
-        coalesce(pdf_export_admin_unlimited,true)
+ select coalesce(enabled,true),
+        greatest(1,least(500,coalesce(daily_limit,15))),
+        greatest(1,least(100,coalesce(hourly_limit,5))),
+        coalesce(admin_unlimited,true)
  into cfg_enabled,cfg_daily,cfg_hourly,cfg_admin_unlimited
- from public.membership_config where id='default';
+ from public.pdf_export_config where id='default';
  if cfg_enabled is not true then raise exception 'PDF_DISABLED'; end if;
  if exists(select 1 from public.pdf_export_jobs where user_id=p_user and status in ('queued','preparing','compiling','storing') and expires_at>now()) then raise exception 'PDF_ACTIVE_JOB'; end if;
  if not (cfg_admin_unlimited and p_priority>0) then
