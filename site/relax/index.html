@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="../assets/css/site.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/responsive.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/relax1000-practice.css?v=20260825-bank1">
-  <link rel="stylesheet" href="../assets/css/paper-builder.css?v=20260825-bank1">
+  <link rel="stylesheet" href="../assets/css/paper-builder.css?v=20260920-export1">
   <link rel="stylesheet" href="../assets/css/question-content-v1.css?v=20260904-question2">
 </head>
 <body data-view="relax">
@@ -63,17 +63,50 @@
   </section>
 
   <section class="relax-paper" data-paper hidden>
-    <header class="relax-paper-head"><div><button type="button" data-exit>← 返回组卷</button><h1 data-paper-title>408 练习卷</h1><p><span data-progress>1 / 40</span> · <span data-answered>已答 0</span></p></div><div><strong data-timer>00:00</strong><button type="button" data-submit>交卷</button></div></header>
+    <header class="relax-paper-head"><div><button type="button" data-exit>← 返回组卷</button><h1 data-paper-title>408 练习卷</h1><p><span data-progress>1 / 40</span> · <span data-answered>已答 0</span></p></div><div class="relax-paper-actions"><strong data-timer>00:00</strong><button class="paper-export-trigger" type="button" data-pdf-export aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v4M14 3v5h5M8 17h8M8 13h5M6 21h12a2 2 0 0 0 2-2V8.5L14.5 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z"/></svg><span>导出 PDF</span></button><button type="button" data-submit>交卷</button></div></header>
     <div class="relax-answer-grid" data-answer-grid></div>
     <article class="relax-question-card" data-question-card></article>
     <footer class="relax-paper-nav"><button type="button" data-prev>← 上一题</button><button type="button" data-next>下一题 →</button></footer>
   </section>
 
   <section class="relax-result" data-result hidden></section>
+
+  <div class="paper-export-layer" data-export-layer hidden>
+    <button class="paper-export-backdrop" type="button" data-export-close tabindex="-1" aria-label="关闭导出窗口"></button>
+    <section class="paper-export-dialog" role="dialog" aria-modal="true" aria-labelledby="paper-export-title">
+      <header class="paper-export-head">
+        <div><span class="paper-export-kicker">EVERFLOW PDF</span><h2 id="paper-export-title">生成试卷 PDF</h2><p>使用当前试卷直接排版，不影响正在进行的答题。</p></div>
+        <button class="paper-export-close" type="button" data-export-close aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      </header>
+      <div class="paper-export-preset">
+        <div class="paper-export-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM14 3v5h4"/></svg></div>
+        <div><b>exam-A4</b><span>紧凑 · 留空</span></div><em>PDF</em>
+      </div>
+      <div class="paper-export-admin" data-export-admin hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 3 3 4-6 4 6 3-3-1 9H6L5 8ZM6 20h12"/></svg>
+        <span><b>管理员优先导出</b><small>进入下一可用编译节点，不中断正在运行的普通任务。</small></span>
+      </div>
+      <ol class="paper-export-steps" data-export-steps>
+        <li class="active" data-export-step="queued"><i></i><span><b>提交任务</b><small>准备进入生成队列</small></span></li>
+        <li data-export-step="preparing"><i></i><span><b>准备排版</b><small>整理题目与留白设置</small></span></li>
+        <li data-export-step="compiling"><i></i><span><b>LaTeX 排版</b><small>exam-A4 · XeLaTeX</small></span></li>
+        <li data-export-step="storing"><i></i><span><b>保存 PDF</b><small>生成下载文件</small></span></li>
+        <li data-export-step="completed"><i></i><span><b>完成</b><small>可预览或下载</small></span></li>
+      </ol>
+      <div class="paper-export-status"><div><span data-export-status-label>准备生成</span><small data-export-worker>编译节点状态将在提交后显示</small></div><strong data-export-position>—</strong></div>
+      <p class="paper-export-message" data-export-message>当前试卷将按 exam-A4 紧凑版生成，并为需要书写的题目保留答题空间。</p>
+      <footer class="paper-export-footer">
+        <button class="paper-export-secondary" type="button" data-export-background hidden>后台生成</button>
+        <button class="paper-export-primary" type="button" data-export-start>开始生成</button>
+        <a class="paper-export-secondary" data-export-preview target="_blank" rel="noopener" hidden>在线预览</a>
+        <a class="paper-export-primary" data-export-download download hidden>下载 PDF</a>
+      </footer>
+    </section>
+  </div>
 </main>
 
 <footer class="footer"><div class="wrap footer-inner"><span>© 2026 Everflow · 彼时流年若水</span><span>408 真题 · Relax1000 · 错题组卷</span></div></footer>
 <script src="../assets/js/site-runtime-v2.js?v=20260904-stable2"></script>
-<script type="module" src="../assets/js/paper-builder.js?v=20260904-editor1"></script>
+<script type="module" src="../assets/js/paper-builder.js?v=20260920-export1"></script>
 </body>
 </html>
