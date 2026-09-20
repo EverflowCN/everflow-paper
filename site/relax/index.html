@@ -82,10 +82,7 @@
         <div class="paper-export-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM14 3v5h4"/></svg></div>
         <div><b>exam-A4</b><span>紧凑 · 留空</span></div><em>PDF</em>
       </div>
-      <div class="paper-export-admin" data-export-admin hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 3 3 4-6 4 6 3-3-1 9H6L5 8ZM6 20h12"/></svg>
-        <span><b>管理员优先导出</b><small>进入下一可用编译节点，不中断正在运行的普通任务。</small></span>
-      </div>
+      <div class="paper-export-admin" data-export-admin hidden aria-live="polite"></div>
       <ol class="paper-export-steps" data-export-steps>
         <li class="active" data-export-step="queued"><i></i><span><b>提交任务</b><small>准备进入生成队列</small></span></li>
         <li data-export-step="preparing"><i></i><span><b>准备排版</b><small>整理题目与留白设置</small></span></li>
