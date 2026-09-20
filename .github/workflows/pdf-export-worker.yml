@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Validate worker syntax
         run: python3 -m py_compile tools/pdf/worker.py tools/pdf/render.py
       - name: Cleanup expired exports and check queue
@@ -53,7 +55,7 @@ jobs:
         if: steps.pending.outputs.count != '0'
         run: python3 tools/pdf/worker.py
       - uses: actions/upload-artifact@v4
-        if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        if: always() && (steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch')
         with:
           name: exam-A4-verification
           path: /tmp/pdf-verification/
