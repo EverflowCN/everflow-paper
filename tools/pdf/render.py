@@ -33,10 +33,10 @@ def rich(s):
             if all(c in MATH_COMMANDS for c in commands) and '^^' not in part and '%' not in part and all(e in {'cases','matrix','pmatrix','bmatrix','vmatrix','Vmatrix','aligned','array'} for e in re.findall(r'\\(?:begin|end)\{([^}]+)\}',part)):
                 out.append(part);continue
         plain=[]
-        for token in re.split(r'(（[ \t\u3000]*）|\([ \t\u3000]*\))',part):
+        for token in re.split(r'(（[ \t\u3000]*）)',part):
             if token is None:
                 continue
-            if re.fullmatch(r'（[ \t\u3000]*）|\([ \t\u3000]*\)',token):
+            if re.fullmatch(r'（[ \t\u3000]*）',token):
                 plain.append(r'\blank{}')
             else:
                 plain.append(escape(token).replace('\n',r'\par '))

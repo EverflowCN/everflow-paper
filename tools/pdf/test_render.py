@@ -20,7 +20,7 @@ class Safety(unittest.TestCase):
   self.assertTrue(any(q.get('figures') for q in questions))
   render(payload,questions,Path('/tmp/pdf-verification/canonical'))
  def test_compile(self):
-  questions=[{'_source':'zhenti','_id':str(i),'stem':r'验证题。答案位置（ ）数据，另一处（ ），已知 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$，请判断 $2^{10}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
+  questions=[{'_source':'zhenti','_id':str(i),'stem':r'验证题。调用 wait()/signal()，答案位置（ ）数据，另一处（ ），已知 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$，请判断 $2^{10}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
   for layout in ['compact','spacious']:
    dest=Path('/tmp/pdf-verification')/layout
    pdf=render({'title':'408 组卷排版验证','layout':layout},questions,dest)
@@ -36,7 +36,8 @@ class Safety(unittest.TestCase):
    self.assertTrue((dest/'assets/watermark/water.png').is_file())
    self.assertIn(r'\providecommand{\EverflowExamWatermarkEnabled}{true}',(dest/'00-user-config/05-watermark-config.tex').read_text(encoding='utf8'))
    tex=(dest/'questions.tex').read_text(encoding='utf8')
-   self.assertIn(r'答案位置\blank{}数据，另一处\blank{}，',tex)
+   self.assertIn(r'调用 wait()/signal()，答案位置\blank{}数据，另一处\blank{}，',tex)
+   self.assertNotIn(r'wait\blank{}',tex)
    self.assertNotIn(r'\\blank',tex)
    self.assertNotIn(r'\blank数据',tex)
    self.assertNotIn('blankNone',tex)
