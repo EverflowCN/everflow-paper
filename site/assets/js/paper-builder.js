@@ -230,6 +230,7 @@ function renderPdfAccess(access){
       if(els.exportAccessAction){els.exportAccessAction.href=login?'../account/':'../membership/';els.exportAccessAction.textContent=login?'去登录':error?'查看账户':'开通会员'}
     }
   }
+  exportLayoutInputs.forEach(input=>{input.disabled=!exportAccessAllowed||exportBusy()});
   if(els.exportStart)els.exportStart.disabled=!exportAccessAllowed||exportBusy();
 }
 function fallbackEta(status,position=1){
