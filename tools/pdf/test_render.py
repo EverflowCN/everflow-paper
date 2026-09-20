@@ -12,6 +12,17 @@ class Safety(unittest.TestCase):
   self.assertIn('wait()/signal()',text)
   self.assertEqual(text.count(r'\blank{}'),2)
   self.assertNotIn(r'wait\blank{}',text)
+ def test_subitem_markers_start_paragraphs(self):
+  roman=rich('关于栈：I 第一项；II 第二项；III 第三项；IV 第四项。')
+  self.assertEqual(roman.count(r'\par '),4)
+  self.assertIn('：'+r'\par '+'I 第一项；'+r'\par '+'II 第二项；'+r'\par '+'III 第三项；'+r'\par '+'IV 第四项。',roman)
+  circled=rich('步骤包括：①第一步；②第二步；③第三步；④第四步。')
+  self.assertEqual(circled.count(r'\par '),4)
+  self.assertIn('：'+r'\par '+'①第一步；'+r'\par '+'②第二步；'+r'\par '+'③第三步；'+r'\par '+'④第四步。',circled)
+ def test_subitem_markers_do_not_break_protocol_or_option_summary(self):
+  text=rich('I/O 指令；答案仅 I、II、III；PCIe。')
+  self.assertNotIn(r'\par I/O',text)
+  self.assertNotIn('、'+r'\par ',text)
  def test_escape(self):self.assertEqual(r'a\_b\%',escape('a_b%'))
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}

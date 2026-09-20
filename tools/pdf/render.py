@@ -41,7 +41,14 @@ def rich(s):
             plain.append(escape(token) if function_like else r'\blank{}')
             cursor=match.end()
         plain.append(escape(part[cursor:]).replace('\n',r'\par '))
-        out.append(''.join(plain))
+        rendered=''.join(plain)
+        # Canonical exam subitems should start their own paragraphs even when the
+        # source stores them inline, e.g. “：I ...；II ...” or “：①...；②...”.
+        # Restrict the trigger to sentence/list boundaries so I/O and option
+        # summaries such as “仅 I、II、III” remain inline.
+        marker=r'(?:I|II|III|IV|V|VI|VII|VIII|IX|X)(?=[、.．:： \t\u3000])|[①②③④⑤⑥⑦⑧⑨⑩]'
+        rendered=re.sub(r'(^|[：:；;。！？!?])([ \t\u3000]*)(?='+marker+r')',lambda m:m.group(1)+r'\par ',rendered)
+        out.append(rendered)
     return ''.join(out)
 
 def evidence_rank(q):
