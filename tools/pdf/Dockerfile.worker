@@ -1,0 +1,39 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    git \
+    python3 \
+    python3-pil \
+    python3-cairosvg \
+    poppler-utils \
+    texlive-xetex \
+    texlive-plain-generic \
+    texlive-lang-chinese \
+    texlive-latex-extra \
+    texlive-science \
+    texlive-fonts-recommended \
+    fonts-texgyre \
+    fonts-texgyre-math \
+    fonts-oflb-asana-math \
+    fonts-noto-cjk \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY tools/pdf /app/tools/pdf
+
+RUN python3 -m py_compile tools/pdf/worker.py tools/pdf/render.py \
+ && python3 - <<'PY'
+import shutil
+for cmd in ('xelatex','pdftotext'):
+    assert shutil.which(cmd), f'{cmd} missing'
+print('Everflow PDF worker image ready')
+PY
+
+EXPOSE 8080
+CMD ["python3","tools/pdf/worker_daemon.py"]
