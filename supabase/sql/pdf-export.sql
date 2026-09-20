@@ -34,17 +34,22 @@ begin
  return j;
 end $$;
 create or replace function public.pdf_export_claim()
-returns setof public.pdf_export_jobs language plpgsql security invoker set search_path='' as $$
-declare picked uuid;
+returns setof public.pdf_export_jobs language plpgsql security invoker set search_path='' as $
+declare
+ picked uuid;
+ capacity_limit integer;
 begin
  perform pg_advisory_xact_lock(748309112);
  update public.pdf_export_jobs set status='failed',error='任务超时，请重新生成',updated_at=now() where status in ('queued','preparing','compiling','storing') and (expires_at<=now() or (attempts>=3 and lease_until<now()));
  update public.pdf_export_jobs set status='queued',lease_token=null,lease_until=null,updated_at=now() where status in ('preparing','compiling','storing') and lease_until<now() and attempts<3;
- if (select count(*) from public.pdf_export_jobs where status in ('preparing','compiling','storing') and lease_until>now())>=2 then return; end if;
+ select greatest(2,coalesce(sum(capacity),0)::integer) into capacity_limit
+   from public.pdf_worker_nodes
+  where kind='persistent' and updated_at>now()-interval '45 seconds';
+ if (select count(*) from public.pdf_export_jobs where status in ('preparing','compiling','storing') and lease_until>now())>=capacity_limit then return; end if;
  select id into picked from public.pdf_export_jobs where status='queued' and expires_at>now() order by (priority + floor(extract(epoch from(now()-created_at))/600)) desc,created_at,id for update skip locked limit 1;
  if picked is null then return; end if;
  return query update public.pdf_export_jobs set status='preparing',attempts=attempts+1,lease_token=gen_random_uuid(),lease_until=now()+interval '10 minutes',updated_at=now() where id=picked returning *;
-end $$;
+end $;
 revoke all on function public.pdf_export_enqueue(uuid,uuid,jsonb,integer) from public,anon,authenticated;
 revoke all on function public.pdf_export_claim() from public,anon,authenticated;
 grant execute on function public.pdf_export_enqueue(uuid,uuid,jsonb,integer) to service_role;
