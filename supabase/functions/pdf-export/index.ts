@@ -136,8 +136,8 @@ Deno.serve(async(req)=>{
   }
   if(req.method==='GET'&&endpoint.searchParams.get('availability')==='1'){
    if(!(await membershipActive(user.id)))return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
-   const snap=await workerSnapshot(),eta=etaFor('queued',1,snap.fast,snap.workers.total,40);
-   return reply({...eta,workers:snap.workers});
+   const snap=await workerSnapshot(),questionCount=Math.max(1,Math.min(100,Number(endpoint.searchParams.get('count'))||40)),eta=etaFor('queued',1,snap.fast,snap.workers.total,questionCount);
+   return reply({...eta,workers:snap.workers,questionCount});
   }
   let job:any;
   if(req.method==='POST'){
