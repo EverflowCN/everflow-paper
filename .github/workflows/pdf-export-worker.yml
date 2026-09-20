@@ -1,0 +1,46 @@
+name: PDF export worker
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/pdf/**', '.github/workflows/pdf-export-worker.yml', 'supabase/functions/pdf-export/**', 'supabase/sql/pdf-export.sql']
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: pdf-export-worker
+  cancel-in-progress: false
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for pending jobs
+        id: pending
+        run: |
+          PYTHONPATH=tools/pdf python3 - <<'PY'
+          import os
+          from worker import call
+          pending=call("pending")["pending"]
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:f.write(f"count={pending}\n")
+          PY
+      - name: Install XeLaTeX and CJK fonts
+        if: steps.pending.outputs.count != '0' || github.event_name != 'schedule'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends texlive-xetex texlive-lang-chinese texlive-latex-extra texlive-science texlive-fonts-recommended fonts-texgyre fonts-texgyre-math fonts-oflb-asana-math python3-pil
+      - name: Test body-only layouts
+        if: steps.pending.outputs.count != '0' || github.event_name != 'schedule'
+        run: python3 tools/pdf/test_render.py
+      - name: Process queued exports
+        if: steps.pending.outputs.count != '0'
+        run: python3 tools/pdf/worker.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exam-A4-verification
+          path: /tmp/pdf-verification/
+          retention-days: 3

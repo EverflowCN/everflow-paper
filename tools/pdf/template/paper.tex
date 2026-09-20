@@ -1,0 +1,21 @@
+% Body-only entry derived from the user's mixed-A4 template and 85-paper edition.
+\documentclass{core/examzh/exam-zh}
+\usepackage{graphicx,etoolbox}
+\def\EverflowOutputKind{exam}
+\newif\ifEverflowExamZH\EverflowExamZHtrue
+\providecommand{\publicationunittitle}[1]{}
+\providecommand{\questiongroup}[1]{}
+\providecommand{\examsectionnote}[1]{\par\noindent\textbf{#1}\par}
+\input{settings.tex}
+\input{00-user-config/04-question-layout.tex}
+\input{90-core/everflow-question-core.sty}
+\ExplSyntaxOn
+\int_if_exist:NF \l__examzh_tmp_int {\int_new:N \l__examzh_tmp_int}
+\ExplSyntaxOff
+\examsetup{page/size=a4paper,font=termes,math-font=termes,page/head-content={Everflow·彼时流年若水},page/foot-content={第;页（共;页）}}
+\AtEndPreamble{\geometry{paper=a4paper,top=16mm,bottom=12mm,left=20mm,right=20mm,headheight=14pt,headsep=2.5mm,footskip=5.3mm}}
+\begin{document}
+\begin{center}\heiti\large\PaperTitle\end{center}
+\setcounter{QuestionCounter}{0}
+\input{questions.tex}
+\end{document}

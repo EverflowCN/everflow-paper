@@ -1,0 +1,44 @@
+-- Private durable queue. Only the authenticated Edge Function's service role accesses it.
+create table if not exists public.pdf_export_jobs (
+ id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
+ request_key uuid not null, payload jsonb not null, priority integer not null default 0,
+ status text not null default 'queued' check(status in ('queued','preparing','compiling','storing','completed','failed')),
+ created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+ lease_token uuid, lease_until timestamptz, attempts integer not null default 0,
+ object_path text, error text, expires_at timestamptz not null default now()+interval '24 hours',
+ unique(user_id,request_key)
+);
+alter table public.pdf_export_jobs enable row level security;
+revoke all on public.pdf_export_jobs from anon,authenticated;
+grant all on public.pdf_export_jobs to service_role;
+create index if not exists pdf_export_queue_order on public.pdf_export_jobs(priority desc,created_at) where status='queued';
+create index if not exists pdf_export_user on public.pdf_export_jobs(user_id,created_at desc);
+create or replace function public.pdf_export_enqueue(p_user uuid,p_key uuid,p_payload jsonb,p_priority integer)
+returns public.pdf_export_jobs language plpgsql security invoker set search_path='' as $$
+declare j public.pdf_export_jobs;
+begin
+ perform pg_advisory_xact_lock(hashtextextended(p_user::text,1));
+ select * into j from public.pdf_export_jobs where user_id=p_user and request_key=p_key;
+ if found then return j; end if;
+ if (select count(*) from public.pdf_export_jobs where user_id=p_user and created_at>now()-interval '1 hour')>=20 then raise exception 'PDF_RATE_LIMIT'; end if;
+ if exists(select 1 from public.pdf_export_jobs where user_id=p_user and status in ('queued','preparing','compiling','storing') and expires_at>now()) then raise exception 'PDF_ACTIVE_JOB'; end if;
+ insert into public.pdf_export_jobs(user_id,request_key,payload,priority) values(p_user,p_key,p_payload,p_priority) returning * into j;
+ return j;
+end $$;
+create or replace function public.pdf_export_claim()
+returns setof public.pdf_export_jobs language plpgsql security invoker set search_path='' as $$
+declare picked uuid;
+begin
+ perform pg_advisory_xact_lock(748309112);
+ update public.pdf_export_jobs set status='failed',error='任务超时，请重新生成',updated_at=now() where status in ('queued','preparing','compiling','storing') and (expires_at<=now() or (attempts>=3 and lease_until<now()));
+ update public.pdf_export_jobs set status='queued',lease_token=null,lease_until=null,updated_at=now() where status in ('preparing','compiling','storing') and lease_until<now() and attempts<3;
+ if (select count(*) from public.pdf_export_jobs where status in ('preparing','compiling','storing') and lease_until>now())>=2 then return; end if;
+ select id into picked from public.pdf_export_jobs where status='queued' and expires_at>now() order by (priority + floor(extract(epoch from(now()-created_at))/600)) desc,created_at,id for update skip locked limit 1;
+ if picked is null then return; end if;
+ return query update public.pdf_export_jobs set status='preparing',attempts=attempts+1,lease_token=gen_random_uuid(),lease_until=now()+interval '10 minutes',updated_at=now() where id=picked returning *;
+end $$;
+revoke all on function public.pdf_export_enqueue(uuid,uuid,jsonb,integer) from public,anon,authenticated;
+revoke all on function public.pdf_export_claim() from public,anon,authenticated;
+grant execute on function public.pdf_export_enqueue(uuid,uuid,jsonb,integer) to service_role;
+grant execute on function public.pdf_export_claim() to service_role;
+insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('exam-pdfs','exam-pdfs',false,20971520,array['application/pdf']) on conflict(id) do nothing;

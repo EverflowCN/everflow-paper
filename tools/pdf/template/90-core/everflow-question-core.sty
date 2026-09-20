@@ -1,0 +1,820 @@
+% =============================================================================
+% Everflow unified ExBook question core
+% =============================================================================
+% 唯一职责：题号、bbox、选项、标题分页保护、图片、表格与解析。
+% Book / Exam / Public 只提供页面外观，不再各自重定义题目。
+% =============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesFile{90-core/everflow-question-core.sty}[2026/08/05 v3.2 continuous heading groups and first-content protection]
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+\RequirePackage{enumitem}
+\RequirePackage{needspace}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{graphicx}
+\RequirePackage{xkeyval}
+\RequirePackage{calc}
+\RequirePackage{pifont}
+\RequirePackage{newunicodechar}
+\RequirePackage{pgffor}
+
+% -------------------- 配置缺省值 --------------------
+\providecommand{\EverflowQuestionGapCompact}{0.35\baselineskip}
+\providecommand{\EverflowQuestionGapStandard}{2.5cm}
+\providecommand{\EverflowQuestionGapLoose}{7.5cm}
+\providecommand{\EverflowExamQuestionGap}{0.45\baselineskip}
+\providecommand{\EverflowKeepQuestionWithChoices}{true}
+\providecommand{\EverflowOversizeQuestionPolicy}{warn-break}
+\providecommand{\EverflowQuestionLabelWidth}{2.25em}
+\providecommand{\EverflowQuestionLabelSep}{0.55em}
+\providecommand{\EverflowQuestionLeftIndent}{0pt}
+\providecommand{\EverflowQuestionRightIndent}{0pt}
+\providecommand{\EverflowChoiceLabelWidth}{2.25em}
+\providecommand{\EverflowChoiceColumnGap}{1.2em}
+\providecommand{\EverflowChoiceFourColumnThreshold}{0.22}
+\providecommand{\EverflowChoiceTwoColumnThreshold}{0.46}
+\providecommand{\EverflowChoiceBeforeSkip}{0.45\baselineskip}
+\providecommand{\EverflowChoiceRowGap}{0.22em}
+\providecommand{\EverflowHeadingKeepWithNextControl}{true}
+\providecommand{\EverflowHeadingConsecutiveGroupControl}{true}
+\providecommand{\EverflowHeadingMinimumFollowLines}{3}
+\providecommand{\EverflowHeadingFollowMode}{question}
+\providecommand{\EverflowExamAThreeHeadingAdvance}{column}
+\providecommand{\EverflowQuestionGroupForceNewPage}{false}
+\providecommand{\EverflowPartForceNewPage}{false}
+\providecommand{\EverflowChapterForceNewPage}{false}
+\providecommand{\EverflowBookSectionForceNewPage}{true}
+\providecommand{\EverflowExamSectionForceNewPage}{false}
+\providecommand{\EverflowPublicSectionForceNewPage}{true}
+\providecommand{\EverflowSectionForceNewPage}{mode}
+\providecommand{\EverflowSubsectionForceNewPage}{false}
+\providecommand{\EverflowSubsubsectionForceNewPage}{false}
+\providecommand{\EverflowPublicationUnitTitleForceNewPage}{false}
+\providecommand{\EverflowExamSectionNoteForceNewPage}{false}
+\providecommand{\EverflowQuestionGroupKeepWithNext}{true}
+\providecommand{\EverflowPartKeepWithNext}{true}
+\providecommand{\EverflowChapterKeepWithNext}{true}
+\providecommand{\EverflowSectionKeepWithNext}{true}
+\providecommand{\EverflowSubsectionKeepWithNext}{true}
+\providecommand{\EverflowSubsubsectionKeepWithNext}{true}
+\providecommand{\EverflowPublicationUnitTitleKeepWithNext}{true}
+\providecommand{\EverflowExamSectionNoteKeepWithNext}{true}
+\providecommand{\EverflowQuestionGroupAutoPageBreak}{\EverflowQuestionGroupKeepWithNext}
+\providecommand{\EverflowQuestionGroupOrphanControl}{\EverflowQuestionGroupKeepWithNext}
+\providecommand{\EverflowPartAutoPageBreak}{\EverflowPartKeepWithNext}
+\providecommand{\EverflowPartOrphanControl}{\EverflowPartKeepWithNext}
+\providecommand{\EverflowChapterAutoPageBreak}{\EverflowChapterKeepWithNext}
+\providecommand{\EverflowChapterOrphanControl}{\EverflowChapterKeepWithNext}
+\providecommand{\EverflowSectionAutoPageBreak}{\EverflowSectionKeepWithNext}
+\providecommand{\EverflowSectionOrphanControl}{\EverflowSectionKeepWithNext}
+\providecommand{\EverflowSubsectionAutoPageBreak}{\EverflowSubsectionKeepWithNext}
+\providecommand{\EverflowSubsectionOrphanControl}{\EverflowSubsectionKeepWithNext}
+\providecommand{\EverflowSubsubsectionAutoPageBreak}{\EverflowSubsubsectionKeepWithNext}
+\providecommand{\EverflowSubsubsectionOrphanControl}{\EverflowSubsubsectionKeepWithNext}
+\providecommand{\EverflowPublicationUnitTitleAutoPageBreak}{\EverflowPublicationUnitTitleKeepWithNext}
+\providecommand{\EverflowPublicationUnitTitleOrphanControl}{\EverflowPublicationUnitTitleKeepWithNext}
+\providecommand{\EverflowExamSectionNoteAutoPageBreak}{\EverflowExamSectionNoteKeepWithNext}
+\providecommand{\EverflowExamSectionNoteOrphanControl}{\EverflowExamSectionNoteKeepWithNext}
+\providecommand{\EverflowQuestionGroupNeedSpace}{10\baselineskip}
+\providecommand{\EverflowPartNeedSpace}{10\baselineskip}
+\providecommand{\EverflowChapterNeedSpace}{8\baselineskip}
+\providecommand{\EverflowSectionNeedSpace}{9\baselineskip}
+\providecommand{\EverflowSubsectionNeedSpace}{6\baselineskip}
+\providecommand{\EverflowSubsubsectionNeedSpace}{5\baselineskip}
+\providecommand{\EverflowPublicationUnitTitleNeedSpace}{9\baselineskip}
+\providecommand{\EverflowSectionNoteNeedSpace}{4\baselineskip}
+\providecommand{\EverflowOutputKind}{book}
+\providecommand{\EverflowExamQuestionGroupMode}{inline}
+\providecommand{\EverflowExamMergeQuestionGroupWithFirstSection}{true}
+\providecommand{\EverflowExamPartImageEnabled}{false}
+\providecommand{\EverflowExamQuestionGroupShowImage}{\EverflowExamPartImageEnabled}
+
+\makeatletter
+
+% section 的最终换页值只在这里解析一次，避免三版共享一个默认来源。
+% 旧全局值 true/false 的优先级最高；mode 或其他值表示按当前输出模式选择。
+\def\Everflow@ResolvedSectionForceNewPage{false}
+\newcommand{\Everflow@ResolveSectionForceNewPage}{%
+  \ifdefstring{\EverflowSectionForceNewPage}{true}{%
+    \def\Everflow@ResolvedSectionForceNewPage{true}%
+  }{\ifdefstring{\EverflowSectionForceNewPage}{false}{%
+    \def\Everflow@ResolvedSectionForceNewPage{false}%
+  }{%
+    \ifdefstring{\EverflowOutputKind}{public}{%
+      \edef\Everflow@ResolvedSectionForceNewPage{\EverflowPublicSectionForceNewPage}%
+    }{\ifdefstring{\EverflowOutputKind}{exam}{%
+      \edef\Everflow@ResolvedSectionForceNewPage{\EverflowExamSectionForceNewPage}%
+    }{%
+      \edef\Everflow@ResolvedSectionForceNewPage{\EverflowBookSectionForceNewPage}%
+    }}%
+  }}%
+}
+\Everflow@ResolveSectionForceNewPage
+% -------------------- 当前版式只决定题间空白 --------------------
+\def\Everflow@QuestionLayoutMode{standard}
+\def\Everflow@QuestionGap{\EverflowQuestionGapStandard}
+\newif\ifEverflow@QuestionPageBreak
+\Everflow@QuestionPageBreakfalse
+\newcommand{\Everflow@ResolveQuestionMode}{%
+  \def\Everflow@QuestionLayoutMode{standard}%
+  \def\Everflow@QuestionGap{\EverflowQuestionGapStandard}%
+  \Everflow@QuestionPageBreakfalse
+  \ifdefstring{\EverflowOutputKind}{exam}{%
+    \def\Everflow@QuestionLayoutMode{exam}%
+    \def\Everflow@QuestionGap{\EverflowExamQuestionGap}%
+  }{%
+    \ifdefstring{\EverflowOutputKind}{public}{%
+      \ifcsdef{EverflowPublicationLayout}{\edef\Everflow@QuestionLayoutMode{\csuse{EverflowPublicationLayout}}}{}%
+    }{%
+      % Book 直接读取类选项的字符串，避免数字映射顺序导致模式错位。
+      \@ifundefined{@pageformat}{}{\edef\Everflow@QuestionLayoutMode{\@pageformat}}%
+    }%
+    \ifdefstring{\Everflow@QuestionLayoutMode}{compact}{\def\Everflow@QuestionGap{\EverflowQuestionGapCompact}}{}%
+    \ifdefstring{\Everflow@QuestionLayoutMode}{standard}{\def\Everflow@QuestionGap{\EverflowQuestionGapStandard}}{}%
+    \ifdefstring{\Everflow@QuestionLayoutMode}{loose}{\def\Everflow@QuestionGap{\EverflowQuestionGapLoose}}{}%
+    \ifdefstring{\Everflow@QuestionLayoutMode}{single}{\def\Everflow@QuestionGap{0pt}\Everflow@QuestionPageBreaktrue}{}%
+    \ifdefstring{\Everflow@QuestionLayoutMode}{padl}{\def\Everflow@QuestionGap{0pt}\Everflow@QuestionPageBreaktrue}{}%
+    \ifdefstring{\Everflow@QuestionLayoutMode}{padp}{\def\Everflow@QuestionGap{0pt}\Everflow@QuestionPageBreaktrue}{}%
+  }%
+}
+
+% -------------------- 题号与 qitems --------------------
+\@ifundefined{c@QuestionCounter}{\newcounter{QuestionCounter}}{}
+\newif\ifEverflow@QReset
+\newif\ifEverflow@QShow
+\def\Everflow@QPrefix{}
+\def\Everflow@QSuffix{.}
+\def\Everflow@QOptPrefix{(}
+\def\Everflow@QOptSuffix{)}
+\def\Everflow@QStartNum{0}
+\define@key{qitems}{unreset}[true]{\Everflow@QResetfalse}
+\define@key{qitems}{unshow}[true]{\Everflow@QShowfalse}
+\define@key{qitems}{prefix}{\def\Everflow@QPrefix{#1}}
+\define@key{qitems}{suffix}{\def\Everflow@QSuffix{#1}}
+\define@key{qitems}{optprefix}{\def\Everflow@QOptPrefix{#1}}
+\define@key{qitems}{optsuffix}{\def\Everflow@QOptSuffix{#1}}
+\define@key{qitems}{startnum}{\def\Everflow@QStartNum{#1}}
+
+\newlength\Everflow@QuestionListLeft
+\newlength\Everflow@QuestionListRight
+\newcommand{\Everflow@SetQuestionGrid}{%
+  \setlength\Everflow@QuestionListLeft{\EverflowQuestionLeftIndent}%
+  \setlength\Everflow@QuestionListRight{\EverflowQuestionRightIndent}%
+  % Public 保留现有出版内容安全区，但不改变题目内部行距和选项距离。
+  \ifdefstring{\EverflowOutputKind}{public}{%
+    \ifcsdef{EverflowPublicationContentIndent}{\addtolength\Everflow@QuestionListLeft{\csuse{EverflowPublicationContentIndent}}}{}%
+    \ifcsdef{EverflowPublicationContentRightIndent}{\addtolength\Everflow@QuestionListRight{\csuse{EverflowPublicationContentRightIndent}}}{}%
+  }{}%
+}
+
+\newcommand{\Everflow@QItemsBegin}[1]{%
+  \begingroup
+  \Everflow@QResettrue \Everflow@QShowtrue
+  \def\Everflow@QPrefix{}\def\Everflow@QSuffix{.}%
+  \def\Everflow@QOptPrefix{(}\def\Everflow@QOptSuffix{)}\def\Everflow@QStartNum{0}%
+  \setkeys{qitems}{#1}%
+  \ifEverflow@QReset\setcounter{QuestionCounter}{0}\fi
+  \ifnum\Everflow@QStartNum>0\relax
+    \setcounter{QuestionCounter}{\Everflow@QStartNum}\addtocounter{QuestionCounter}{-1}%
+  \fi
+  \Everflow@SetQuestionGrid
+}
+\newcommand{\Everflow@QItemsEnd}{\endgroup}
+\@ifundefined{qitems}{%
+  \NewDocumentEnvironment{qitems}{O{}}{\Everflow@QItemsBegin{#1}}{\Everflow@QItemsEnd}%
+}{%
+  \RenewDocumentEnvironment{qitems}{O{}}{\Everflow@QItemsBegin{#1}}{\Everflow@QItemsEnd}%
+}
+
+\newcommand{\Everflow@QuestionLabel}[1]{\makebox[\EverflowQuestionLabelWidth][r]{#1}}
+\newif\ifEverflow@QuestionItemOpen
+\newcommand{\Everflow@OpenQuestionItem}[1]{%
+  \ifEverflow@QuestionItemOpen\end{list}\fi
+  \begin{list}{}{%
+    \setlength{\leftmargin}{\dimexpr\Everflow@QuestionListLeft+\EverflowQuestionLabelWidth+\EverflowQuestionLabelSep\relax}%
+    \setlength{\rightmargin}{\Everflow@QuestionListRight}%
+    \setlength{\labelwidth}{\EverflowQuestionLabelWidth}%
+    \setlength{\labelsep}{\EverflowQuestionLabelSep}%
+    \setlength{\itemindent}{0pt}\setlength{\listparindent}{0pt}%
+    \setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}%
+    \setlength{\topsep}{0pt}\setlength{\partopsep}{0pt}%
+  }%
+  \item[\Everflow@QuestionLabel{#1}]\Everflow@QuestionItemOpentrue
+}
+\@ifundefined{qitem}{%
+  \NewDocumentCommand{\qitem}{O{} O{}}{%
+    \stepcounter{QuestionCounter}%
+    \ifEverflow@QShow
+      \Everflow@OpenQuestionItem{#1\Everflow@QPrefix\arabic{QuestionCounter}\Everflow@QSuffix#2}%
+    \else
+      \Everflow@OpenQuestionItem{#1\Everflow@QPrefix\Everflow@QSuffix#2}%
+    \fi\ignorespaces}
+}{%
+  \RenewDocumentCommand{\qitem}{O{} O{}}{%
+    \stepcounter{QuestionCounter}%
+    \ifEverflow@QShow
+      \Everflow@OpenQuestionItem{#1\Everflow@QPrefix\arabic{QuestionCounter}\Everflow@QSuffix#2}%
+    \else
+      \Everflow@OpenQuestionItem{#1\Everflow@QPrefix\Everflow@QSuffix#2}%
+    \fi\ignorespaces}
+}
+
+% -------------------- bbox：单次装箱、测量、直接复用 --------------------
+\newbox\Everflow@QuestionBox
+\newdimen\Everflow@QuestionHeight
+\newif\ifEverflow@KeepCurrentQuestion
+\Everflow@KeepCurrentQuestiontrue
+\newif\ifEverflow@ThisQuestionBoxed
+\newcommand{\Everflow@QuestionAfter}{%
+  \ifEverflow@QuestionPageBreak\newpage\else\par\addvspace{\Everflow@QuestionGap}\fi}
+\newcommand{\Everflow@BBoxBegin}[1]{%
+  \Everflow@HeadingFirstBlockBegin
+  \par\begingroup
+  \Everflow@QuestionItemOpenfalse
+  \Everflow@ResolveQuestionMode
+  \Everflow@ThisQuestionBoxedfalse
+  \ifdefstring{\EverflowKeepQuestionWithChoices}{true}{%
+    \ifEverflow@KeepCurrentQuestion\Everflow@ThisQuestionBoxedtrue\fi}{}%
+  \ifEverflow@ThisQuestionBoxed
+    \setbox\Everflow@QuestionBox=\vbox\bgroup
+      \hsize=\linewidth\linewidth=\hsize\columnwidth=\hsize
+      \setlength{\parindent}{0pt}\setlength{\emergencystretch}{2em}\ignorespaces
+  \else
+    \setlength{\emergencystretch}{2em}\ignorespaces
+  \fi
+}
+\newcommand{\Everflow@BBoxEnd}{%
+  \ifEverflow@QuestionItemOpen\end{list}\Everflow@QuestionItemOpenfalse\fi
+  \ifEverflow@ThisQuestionBoxed
+    \par\egroup
+    \Everflow@QuestionHeight=\ht\Everflow@QuestionBox
+    \advance\Everflow@QuestionHeight by \dp\Everflow@QuestionBox
+    \ifdim\Everflow@QuestionHeight>\dimexpr\textheight-2\baselineskip\relax
+      \PackageWarning{everflow-question-core}{Question \arabic{QuestionCounter} exceeds one page/column; policy=\EverflowOversizeQuestionPolicy; using safe breakable output}%
+      \par\nobreak\unvbox\Everflow@QuestionBox
+    \else
+      \ifnum\Everflow@HeadingCaptureDepth>0\relax
+        \par\nobreak\noindent\box\Everflow@QuestionBox
+      \else
+        \needspace{\dimexpr\Everflow@QuestionHeight+1pt\relax}%
+        \noindent\box\Everflow@QuestionBox
+      \fi
+    \fi
+  \else
+    \par
+  \fi
+  \Everflow@HeadingFirstBlockEnd
+  \Everflow@QuestionAfter
+  \endgroup
+}
+\@ifundefined{bbox}{%
+  \NewDocumentEnvironment{bbox}{O{}}{\Everflow@BBoxBegin{#1}}{\Everflow@BBoxEnd}%
+}{%
+  \RenewDocumentEnvironment{bbox}{O{}}{\Everflow@BBoxBegin{#1}}{\Everflow@BBoxEnd}%
+}
+\NewDocumentEnvironment{breakablebbox}{O{}}{%
+  \begingroup\Everflow@KeepCurrentQuestionfalse\begin{bbox}[#1]
+}{\end{bbox}\endgroup}
+\newcommand{\EverflowKeepQuestionsOn}{\global\Everflow@KeepCurrentQuestiontrue}
+\newcommand{\EverflowKeepQuestionsOff}{\global\Everflow@KeepCurrentQuestionfalse}
+
+% -------------------- 陈述、小问与表格 --------------------
+\@ifundefined{statements}{\newlist{statements}{enumerate}{1}}{}
+\setlist[statements,1]{label=\textcircled{\scriptsize\arabic*},align=right,labelwidth=2.2em,labelsep=.38em,leftmargin=2.58em,itemindent=0pt,listparindent=0pt,itemsep=.15em,topsep=.3em,parsep=0pt,partopsep=0pt}
+\@ifundefined{romanstatements}{\newlist{romanstatements}{enumerate}{1}}{}
+\setlist[romanstatements,1]{label=\Roman*.,align=right,labelwidth=2.15em,labelsep=.35em,leftmargin=2.50em,itemindent=0pt,listparindent=0pt,itemsep=.15em,topsep=.3em,parsep=0pt,partopsep=0pt}
+\@ifundefined{subqitems}{\newlist{subqitems}{enumerate}{2}}{}
+\setlist[subqitems,1]{label=(\Roman*),leftmargin=2.5em,labelsep=.6em,itemsep=.2em,topsep=.35em,parsep=0pt,partopsep=0pt}
+\setlist[subqitems,2]{label=(\roman*),leftmargin=2.5em,labelsep=.6em,itemsep=.2em,topsep=.35em,parsep=0pt,partopsep=0pt}
+\providecommand{\subqitem}{\item}
+\@ifundefined{qtable}{%
+  \NewDocumentEnvironment{qtable}{m}{\par\smallskip\begin{center}\begingroup\renewcommand{\arraystretch}{1.25}\setlength{\tabcolsep}{8pt}\begin{tabular}{#1}}{\end{tabular}\endgroup\end{center}\par\smallskip\noindent\ignorespacesafterend}
+}{}
+
+% -------------------- 选项：每个选项只测量一次 --------------------
+\newlength\Everflow@ChoiceA \newlength\Everflow@ChoiceB \newlength\Everflow@ChoiceC
+\newlength\Everflow@ChoiceD \newlength\Everflow@ChoiceE \newlength\Everflow@ChoiceF \newlength\Everflow@ChoiceMax
+\newcommand{\Everflow@ChoiceCell}[2]{%
+  \parbox[t]{\hsize}{\raggedright\arraybackslash
+    \hangindent=\EverflowChoiceLabelWidth\hangafter=1
+    \makebox[\EverflowChoiceLabelWidth][l]{\Everflow@QOptPrefix#1\Everflow@QOptSuffix}#2\strut}}
+\newcommand{\Everflow@MeasureChoice}[3]{%
+  \settowidth{#1}{\normalfont\Everflow@QOptPrefix#2\Everflow@QOptSuffix\ #3}%
+  \ifdim#1>\Everflow@ChoiceMax\setlength\Everflow@ChoiceMax{#1}\fi}
+\newcommand{\Everflow@ChoicesOne}[1]{%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X@{}}#1\end{tabularx}\endgroup\par}
+\newcommand{\Everflow@ChoicesTwo}[1]{%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X@{\hspace{\EverflowChoiceColumnGap}}>{\raggedright\arraybackslash}X@{}}#1\end{tabularx}\endgroup\par}
+\newcommand{\Everflow@ChoicesThree}[1]{%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X@{\hspace{0.8em}}>{\raggedright\arraybackslash}X@{\hspace{0.8em}}>{\raggedright\arraybackslash}X@{}}#1\end{tabularx}\endgroup\par}
+\newcommand{\Everflow@ChoicesFour}[1]{%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X@{\hspace{0.55em}}>{\raggedright\arraybackslash}X@{\hspace{0.55em}}>{\raggedright\arraybackslash}X@{\hspace{0.55em}}>{\raggedright\arraybackslash}X@{}}#1\end{tabularx}\endgroup\par}
+\newcommand{\Everflow@MeasureReset}{\setlength\Everflow@ChoiceMax{0pt}}
+
+\newcommand{\Everflow@ThreeChoices}[3]{%
+  \Everflow@MeasureReset
+  \Everflow@MeasureChoice{\Everflow@ChoiceA}{A}{#1}\Everflow@MeasureChoice{\Everflow@ChoiceB}{B}{#2}\Everflow@MeasureChoice{\Everflow@ChoiceC}{C}{#3}%
+  \ifdim\Everflow@ChoiceMax<\EverflowChoiceFourColumnThreshold\linewidth
+    \Everflow@ChoicesThree{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}&\Everflow@ChoiceCell{C}{#3}}
+  \else\ifdim\Everflow@ChoiceMax<\EverflowChoiceTwoColumnThreshold\linewidth
+    \Everflow@ChoicesTwo{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}&}
+  \else
+    \Everflow@ChoicesOne{\Everflow@ChoiceCell{A}{#1}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}}
+  \fi\fi}
+\newcommand{\Everflow@FourChoices}[4]{%
+  \Everflow@MeasureReset
+  \Everflow@MeasureChoice{\Everflow@ChoiceA}{A}{#1}\Everflow@MeasureChoice{\Everflow@ChoiceB}{B}{#2}\Everflow@MeasureChoice{\Everflow@ChoiceC}{C}{#3}\Everflow@MeasureChoice{\Everflow@ChoiceD}{D}{#4}%
+  \ifdim\Everflow@ChoiceMax<\EverflowChoiceFourColumnThreshold\linewidth
+    \Everflow@ChoicesFour{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}&\Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}}
+  \else\ifdim\Everflow@ChoiceMax<\EverflowChoiceTwoColumnThreshold\linewidth
+    \Everflow@ChoicesTwo{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}}
+  \else
+    \Everflow@ChoicesOne{\Everflow@ChoiceCell{A}{#1}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{D}{#4}}
+  \fi\fi}
+\newcommand{\Everflow@FiveChoices}[5]{%
+  \Everflow@MeasureReset
+  \Everflow@MeasureChoice{\Everflow@ChoiceA}{A}{#1}\Everflow@MeasureChoice{\Everflow@ChoiceB}{B}{#2}\Everflow@MeasureChoice{\Everflow@ChoiceC}{C}{#3}\Everflow@MeasureChoice{\Everflow@ChoiceD}{D}{#4}\Everflow@MeasureChoice{\Everflow@ChoiceE}{E}{#5}%
+  \ifdim\Everflow@ChoiceMax<\EverflowChoiceTwoColumnThreshold\linewidth
+    \Everflow@ChoicesTwo{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{E}{#5}&}
+  \else
+    \Everflow@ChoicesOne{\Everflow@ChoiceCell{A}{#1}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{D}{#4}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{E}{#5}}
+  \fi}
+\newcommand{\Everflow@SixChoices}[6]{%
+  \Everflow@MeasureReset
+  \Everflow@MeasureChoice{\Everflow@ChoiceA}{A}{#1}\Everflow@MeasureChoice{\Everflow@ChoiceB}{B}{#2}\Everflow@MeasureChoice{\Everflow@ChoiceC}{C}{#3}\Everflow@MeasureChoice{\Everflow@ChoiceD}{D}{#4}\Everflow@MeasureChoice{\Everflow@ChoiceE}{E}{#5}\Everflow@MeasureChoice{\Everflow@ChoiceF}{F}{#6}%
+  \ifdim\Everflow@ChoiceMax<\EverflowChoiceFourColumnThreshold\linewidth
+    \Everflow@ChoicesThree{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}&\Everflow@ChoiceCell{C}{#3}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{D}{#4}&\Everflow@ChoiceCell{E}{#5}&\Everflow@ChoiceCell{F}{#6}}
+  \else\ifdim\Everflow@ChoiceMax<\EverflowChoiceTwoColumnThreshold\linewidth
+    \Everflow@ChoicesTwo{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{E}{#5}&\Everflow@ChoiceCell{F}{#6}}
+  \else
+    \Everflow@ChoicesOne{\Everflow@ChoiceCell{A}{#1}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{D}{#4}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{E}{#5}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{F}{#6}}
+  \fi\fi}
+% 在线固定列数入口：列数已用同一在线字体离线测量。
+% 这里用等宽 p 列直接渲染，避免 tabularx 的重复试排；列宽公式与原 X 列完全对应。
+\newlength\Everflow@FastChoiceTwoWidth
+\newlength\Everflow@FastChoiceFourWidth
+\NewDocumentCommand{\fourchoicesone}{m m m m}{%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}%
+  \begin{tabular}{@{}p{\linewidth}@{}}
+  \Everflow@ChoiceCell{A}{#1}\\[\EverflowChoiceRowGap]
+  \Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]
+  \Everflow@ChoiceCell{C}{#3}\\[\EverflowChoiceRowGap]
+  \Everflow@ChoiceCell{D}{#4}
+  \end{tabular}\endgroup\par}
+\NewDocumentCommand{\fourchoicesfour}{m m m m}{%
+  \setlength{\Everflow@FastChoiceFourWidth}{\dimexpr(\linewidth-1.65em)/4\relax}%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}%
+  \begin{tabular}{@{}p{\Everflow@FastChoiceFourWidth}@{\hspace{0.55em}}p{\Everflow@FastChoiceFourWidth}@{\hspace{0.55em}}p{\Everflow@FastChoiceFourWidth}@{\hspace{0.55em}}p{\Everflow@FastChoiceFourWidth}@{}}
+  \Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}&\Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}
+  \end{tabular}\endgroup\par}
+% 显式两列：等价于原 two-X 列宽，避免在线 tabularx 再试排。
+\NewDocumentCommand{\fourchoicestwo}{m m m m}{%
+  \setlength{\Everflow@FastChoiceTwoWidth}{\dimexpr(\linewidth-\EverflowChoiceColumnGap)/2\relax}%
+  \par\vspace{\EverflowChoiceBeforeSkip}\noindent
+  \begingroup\setlength{\tabcolsep}{0pt}%
+  \begin{tabular}{@{}p{\Everflow@FastChoiceTwoWidth}@{\hspace{\EverflowChoiceColumnGap}}p{\Everflow@FastChoiceTwoWidth}@{}}
+  \Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]
+  \Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}
+  \end{tabular}\endgroup\par}
+\@ifundefined{threechoices}{\NewDocumentCommand{\threechoices}{m m m}{\Everflow@ThreeChoices{#1}{#2}{#3}}}{\RenewDocumentCommand{\threechoices}{m m m}{\Everflow@ThreeChoices{#1}{#2}{#3}}}
+\@ifundefined{fourchoices}{\NewDocumentCommand{\fourchoices}{m m m m}{\Everflow@FourChoices{#1}{#2}{#3}{#4}}}{\RenewDocumentCommand{\fourchoices}{m m m m}{\Everflow@FourChoices{#1}{#2}{#3}{#4}}}
+\@ifundefined{fivechoices}{\NewDocumentCommand{\fivechoices}{m m m m m}{\Everflow@FiveChoices{#1}{#2}{#3}{#4}{#5}}}{\RenewDocumentCommand{\fivechoices}{m m m m m}{\Everflow@FiveChoices{#1}{#2}{#3}{#4}{#5}}}
+\@ifundefined{fivechoicescompact}{\NewDocumentCommand{\fivechoicescompact}{m m m m m}{\Everflow@FiveChoices{#1}{#2}{#3}{#4}{#5}}}{\RenewDocumentCommand{\fivechoicescompact}{m m m m m}{\Everflow@FiveChoices{#1}{#2}{#3}{#4}{#5}}}
+\@ifundefined{sixchoices}{\NewDocumentCommand{\sixchoices}{m m m m m m}{\Everflow@SixChoices{#1}{#2}{#3}{#4}{#5}{#6}}}{\RenewDocumentCommand{\sixchoices}{m m m m m m}{\Everflow@SixChoices{#1}{#2}{#3}{#4}{#5}{#6}}}
+
+% -------------------- 所有标题统一防孤立 --------------------
+% 算法说明：
+% 1. 第一条受保护标题建立“标题链”；连续出现的其他标题继续加入同一条链。
+% 2. 标题链结束前不允许在标题之间分页。
+% 3. 第一项 bbox 会先完成装箱与高度测量，再与标题链无断点输出。
+% 4. 第一项是普通正文时，使用 club penalties 至少保护指定行数。
+% 5. Exam A3 的 column 模式使用 TeX 原生下一栏；page 模式在基础预留不足时
+%    直接 clearpage，进入下一张 A3 物理页。
+\newif\ifEverflow@InsideQuestionGroup
+\Everflow@InsideQuestionGroupfalse
+\newif\ifEverflow@SkipNextSectionForcePage
+\Everflow@SkipNextSectionForcePagefalse
+\newif\ifEverflow@HeadingChainActive
+\Everflow@HeadingChainActivefalse
+\newif\ifEverflow@HeadingParagraphProtected
+\Everflow@HeadingParagraphProtectedfalse
+\newcount\Everflow@HeadingRenderDepth
+\Everflow@HeadingRenderDepth=0\relax
+\newcount\Everflow@HeadingCaptureDepth
+\Everflow@HeadingCaptureDepth=0\relax
+\newcount\Everflow@SavedClubPenalty
+\newdimen\Everflow@HeadingRemainingSpace
+
+% 根据 A3 前进模式应用基础空间预留。
+\newcommand{\Everflow@ReserveHeadingSpace}[1]{%
+  \ifdefstring{\EverflowOutputKind}{exam}{%
+    \ifdefstring{\EverflowPaper}{a3paper}{%
+      \ifdefstring{\EverflowExamAThreeHeadingAdvance}{page}{%
+        \par
+        \ifdim\pagegoal<\maxdimen
+          \Everflow@HeadingRemainingSpace=\pagegoal
+          \advance\Everflow@HeadingRemainingSpace by -\pagetotal
+          \ifdim\Everflow@HeadingRemainingSpace<#1\relax
+            \clearpage
+          \fi
+        \else
+          \needspace{#1}%
+        \fi
+      }{\needspace{#1}}%
+    }{\needspace{#1}}%
+  }{\needspace{#1}}%
+}
+
+% 开始一个新标题组，或者把当前标题并入已经存在的连续标题组。
+\newcommand{\Everflow@HeadingPolicyStart}[3]{%
+  \ifnum\Everflow@HeadingRenderDepth=0\relax
+    \ifEverflow@HeadingChainActive
+      \ifdefstring{\EverflowHeadingConsecutiveGroupControl}{true}{%
+        \ifdefstring{\EverflowHeadingKeepWithNextControl}{true}{%
+          \ifdefstring{#2}{true}{}{\global\Everflow@HeadingChainActivefalse}%
+        }{\global\Everflow@HeadingChainActivefalse}%
+      }{\global\Everflow@HeadingChainActivefalse}%
+    \fi
+    \ifEverflow@HeadingChainActive
+      \par\nobreak
+    \else
+      \ifdefstring{#1}{true}{\clearpage}{}%
+      \ifdefstring{\EverflowHeadingKeepWithNextControl}{true}{%
+        \ifdefstring{#2}{true}{%
+          \ifdefstring{#1}{true}{}{\Everflow@ReserveHeadingSpace{#3}}%
+          \global\Everflow@HeadingChainActivetrue
+        }{}%
+      }{}%
+    \fi
+  \fi
+  \global\advance\Everflow@HeadingRenderDepth by 1\relax
+}
+
+% 完成一条标题命令。最外层标题完成后，禁止在下一项标题或内容前断开。
+\newcommand{\Everflow@HeadingPolicyFinish}{%
+  \global\advance\Everflow@HeadingRenderDepth by -1\relax
+  \ifnum\Everflow@HeadingRenderDepth<0\relax
+    \global\Everflow@HeadingRenderDepth=0\relax
+  \fi
+  \ifnum\Everflow@HeadingRenderDepth=0\relax
+    \ifEverflow@HeadingChainActive
+      \par\nobreak
+    \fi
+  \fi
+}
+
+% 第一项完整内容块开始与结束。嵌套图片或表格使用计数器，避免过早结束标题链。
+\newcommand{\Everflow@HeadingFirstBlockBegin}{%
+  \ifnum\Everflow@HeadingRenderDepth=0\relax
+    \ifEverflow@HeadingChainActive
+      \global\advance\Everflow@HeadingCaptureDepth by 1\relax
+      \par\nobreak
+    \fi
+  \fi
+}
+\newcommand{\Everflow@HeadingFirstBlockEnd}{%
+  \ifnum\Everflow@HeadingCaptureDepth>0\relax
+    \global\advance\Everflow@HeadingCaptureDepth by -1\relax
+    \ifnum\Everflow@HeadingCaptureDepth=0\relax
+      \global\Everflow@HeadingChainActivefalse
+    \fi
+  \fi
+}
+
+% 普通正文使用 1--5 行保护。超出范围时按 3 行处理。
+\newcommand{\Everflow@SetHeadingClubPenalties}{%
+  \ifcase\EverflowHeadingMinimumFollowLines\relax
+    \clubpenalties 3 10000 10000 0\relax
+  \or
+    \clubpenalties 1 10000\relax
+  \or
+    \clubpenalties 2 10000 0\relax
+  \or
+    \clubpenalties 3 10000 10000 0\relax
+  \or
+    \clubpenalties 4 10000 10000 10000 0\relax
+  \or
+    \clubpenalties 5 10000 10000 10000 10000 0\relax
+  \else
+    \clubpenalties 3 10000 10000 0\relax
+  \fi
+}
+\newcommand{\Everflow@ProtectFirstOrdinaryParagraph}{%
+  \ifnum\Everflow@HeadingRenderDepth=0\relax
+    \ifnum\Everflow@HeadingCaptureDepth=0\relax
+      \ifEverflow@HeadingChainActive
+        \global\Everflow@SavedClubPenalty=\clubpenalty
+        \global\Everflow@HeadingParagraphProtectedtrue
+        \Everflow@SetHeadingClubPenalties
+        \global\Everflow@HeadingChainActivefalse
+      \fi
+    \fi
+  \fi
+}
+\newcommand{\Everflow@RestoreFirstOrdinaryParagraph}{%
+  \ifEverflow@HeadingParagraphProtected
+    \clubpenalty=\Everflow@SavedClubPenalty
+    \global\Everflow@HeadingParagraphProtectedfalse
+  \fi
+}
+
+% 各标题类型的入口。questiongroup 内部调用 chapter 时通过深度计数自动合并。
+\newcommand{\Everflow@QuestionGroupBegin}{%
+  \Everflow@HeadingPolicyStart{\EverflowQuestionGroupForceNewPage}{\EverflowQuestionGroupKeepWithNext}{\EverflowQuestionGroupNeedSpace}%
+  \global\Everflow@InsideQuestionGrouptrue
+}
+\newcommand{\Everflow@QuestionGroupEnd}{%
+  \global\Everflow@InsideQuestionGroupfalse
+  \ifdefstring{\EverflowOutputKind}{exam}{%
+    \ifdefstring{\EverflowExamMergeQuestionGroupWithFirstSection}{true}{%
+      \ifdefstring{\EverflowExamQuestionGroupMode}{standalone}{}{\global\Everflow@SkipNextSectionForcePagetrue}%
+    }{}%
+  }{}%
+  \Everflow@HeadingPolicyFinish
+}
+\newcommand{\Everflow@PartHeadingBegin}{\Everflow@HeadingPolicyStart{\EverflowPartForceNewPage}{\EverflowPartKeepWithNext}{\EverflowPartNeedSpace}}
+\newcommand{\Everflow@ChapterHeadingBegin}{\Everflow@HeadingPolicyStart{\EverflowChapterForceNewPage}{\EverflowChapterKeepWithNext}{\EverflowChapterNeedSpace}}
+\newcommand{\Everflow@SectionHeadingBegin}{%
+  \ifEverflow@SkipNextSectionForcePage
+    \global\Everflow@SkipNextSectionForcePagefalse
+    \Everflow@HeadingPolicyStart{false}{\EverflowSectionKeepWithNext}{\EverflowSectionNeedSpace}%
+  \else
+    \Everflow@HeadingPolicyStart{\Everflow@ResolvedSectionForceNewPage}{\EverflowSectionKeepWithNext}{\EverflowSectionNeedSpace}%
+  \fi
+}
+\newcommand{\Everflow@SubsectionHeadingBegin}{\Everflow@HeadingPolicyStart{\EverflowSubsectionForceNewPage}{\EverflowSubsectionKeepWithNext}{\EverflowSubsectionNeedSpace}}
+\newcommand{\Everflow@SubsubsectionHeadingBegin}{\Everflow@HeadingPolicyStart{\EverflowSubsubsectionForceNewPage}{\EverflowSubsubsectionKeepWithNext}{\EverflowSubsubsectionNeedSpace}}
+\newcommand{\Everflow@PublicationUnitTitleBegin}{\Everflow@HeadingPolicyStart{\EverflowPublicationUnitTitleForceNewPage}{\EverflowPublicationUnitTitleKeepWithNext}{\EverflowPublicationUnitTitleNeedSpace}}
+\newcommand{\Everflow@ExamSectionNoteBegin}{\Everflow@HeadingPolicyStart{\EverflowExamSectionNoteForceNewPage}{\EverflowExamSectionNoteKeepWithNext}{\EverflowSectionNoteNeedSpace}}
+
+% Public 独立页面可使用这两个公开命令，把自定义页面标题接入同一套保护。
+\newcommand{\EverflowProtectedPageTitleBegin}{%
+  \Everflow@HeadingPolicyStart{false}{true}{\EverflowSectionNeedSpace}%
+}
+\newcommand{\EverflowProtectedPageTitleEnd}{\Everflow@HeadingPolicyFinish}
+
+% 标准标题命令通常会被 ctex、titlesec 或上游类再次包装。
+% 这里不使用 LaTeX 的通用 cmd/... 钩子，而是在文档开始时保存最终版本的原命令，
+% 再按其公开参数形式做一层安全包装，避免目录、星号标题和可选短标题发生参数冲突。
+\newcommand{\Everflow@InstallHeadingWrappers}{%
+  \ifcsdef{part}{%
+    \NewCommandCopy{\Everflow@OriginalPart}{\part}
+    \RenewDocumentCommand{\part}{s o m}{%
+      \Everflow@PartHeadingBegin
+      \IfBooleanTF{##1}{%
+        \Everflow@OriginalPart*{##3}%
+      }{%
+        \IfNoValueTF{##2}{\Everflow@OriginalPart{##3}}{\Everflow@OriginalPart[##2]{##3}}%
+      }%
+      \ifcsname EverflowDynamicHeadingUpdate\endcsname\EverflowDynamicHeadingUpdate{part}{##3}\fi
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+  \ifcsdef{chapter}{%
+    \NewCommandCopy{\Everflow@OriginalChapter}{\chapter}
+    \RenewDocumentCommand{\chapter}{s o m}{%
+      \Everflow@ChapterHeadingBegin
+      \IfBooleanTF{##1}{%
+        \Everflow@OriginalChapter*{##3}%
+      }{%
+        \IfNoValueTF{##2}{\Everflow@OriginalChapter{##3}}{\Everflow@OriginalChapter[##2]{##3}}%
+      }%
+      \ifcsname EverflowDynamicHeadingUpdate\endcsname\EverflowDynamicHeadingUpdate{chapter}{##3}\fi
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+  \ifcsdef{section}{%
+    \NewCommandCopy{\Everflow@OriginalSection}{\section}
+    \RenewDocumentCommand{\section}{s o m}{%
+      \Everflow@SectionHeadingBegin
+      \IfBooleanTF{##1}{%
+        \Everflow@OriginalSection*{##3}%
+      }{%
+        \IfNoValueTF{##2}{\Everflow@OriginalSection{##3}}{\Everflow@OriginalSection[##2]{##3}}%
+      }%
+      \ifcsname EverflowDynamicHeadingUpdate\endcsname\EverflowDynamicHeadingUpdate{section}{##3}\fi
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+  \ifcsdef{subsection}{%
+    \NewCommandCopy{\Everflow@OriginalSubsection}{\subsection}
+    \RenewDocumentCommand{\subsection}{s o m}{%
+      \Everflow@SubsectionHeadingBegin
+      \IfBooleanTF{##1}{%
+        \Everflow@OriginalSubsection*{##3}%
+      }{%
+        \IfNoValueTF{##2}{\Everflow@OriginalSubsection{##3}}{\Everflow@OriginalSubsection[##2]{##3}}%
+      }%
+      \ifcsname EverflowDynamicHeadingUpdate\endcsname\EverflowDynamicHeadingUpdate{subsection}{##3}\fi
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+  \ifcsdef{subsubsection}{%
+    \NewCommandCopy{\Everflow@OriginalSubsubsection}{\subsubsection}
+    \RenewDocumentCommand{\subsubsection}{s o m}{%
+      \Everflow@SubsubsectionHeadingBegin
+      \IfBooleanTF{##1}{%
+        \Everflow@OriginalSubsubsection*{##3}%
+      }{%
+        \IfNoValueTF{##2}{\Everflow@OriginalSubsubsection{##3}}{\Everflow@OriginalSubsubsection[##2]{##3}}%
+      }%
+      \ifcsname EverflowDynamicHeadingUpdate\endcsname\EverflowDynamicHeadingUpdate{subsubsection}{##3}\fi
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+  \ifcsdef{questiongroup}{%
+    \NewCommandCopy{\Everflow@OriginalQuestionGroup}{\questiongroup}
+    \RenewDocumentCommand{\questiongroup}{o m O{} O{4.5cm}}{%
+      % Exam: ship out the previous paper before updating the running question-group title.
+      % This prevents the final page of one paper from receiving the next paper's footer title.
+      \ifdefstring{\EverflowOutputKind}{exam}{\clearpage}{}%
+      \Everflow@QuestionGroupBegin
+      \IfNoValueTF{##1}{\Everflow@OriginalQuestionGroup{##2}[##3][##4]}{\Everflow@OriginalQuestionGroup[##1]{##2}[##3][##4]}%
+      \Everflow@QuestionGroupEnd
+    }%
+  }{}%
+  \ifcsdef{EverflowRenderPublicationUnitTitle}{%
+    \NewCommandCopy{\Everflow@OriginalRenderPublicationUnitTitle}{\EverflowRenderPublicationUnitTitle}
+    \RenewDocumentCommand{\EverflowRenderPublicationUnitTitle}{m}{%
+      \Everflow@PublicationUnitTitleBegin
+      \Everflow@OriginalRenderPublicationUnitTitle{##1}%
+      \ifcsname EverflowDynamicHeadingUpdate\endcsname\EverflowDynamicHeadingUpdate{publicationunittitle}{##1}\fi
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+  \ifcsdef{examsectionnote}{%
+    \NewCommandCopy{\Everflow@OriginalExamSectionNote}{\examsectionnote}
+    \RenewDocumentCommand{\examsectionnote}{m}{%
+      \Everflow@ExamSectionNoteBegin
+      \Everflow@OriginalExamSectionNote{##1}%
+      \Everflow@HeadingPolicyFinish
+    }%
+  }{}%
+}
+
+\AtBeginDocument{%
+  \Everflow@InstallHeadingWrappers
+
+  % 第一项非浮动图片、表格、代码和公式块使用完整内容块保护。
+  \forcsvlist{\Everflow@InstallHeadingCommandBlockHooks}{qimage,qimagecaption,qimagepair,qsideimage,qtwoimages,qthreeimages,imgin}%
+  \forcsvlist{\Everflow@InstallHeadingEnvironmentBlockHooks}{qtable,figure,table,lstlisting,verbatim,equation,equation*,displaymath,align,align*,gather,gather*,multline,multline*}%
+
+  % 普通正文至少保护 HeadingMinimumFollowLines 指定的开头行数。
+  \AddToHook{para/begin}{\Everflow@ProtectFirstOrdinaryParagraph}%
+  \AddToHook{para/end}{\Everflow@RestoreFirstOrdinaryParagraph}%
+}
+
+% 批量安装内容命令与内容环境钩子。
+\newcommand{\Everflow@InstallHeadingCommandBlockHooks}[1]{%
+  \ifcsdef{#1}{%
+    \AddToHook{cmd/#1/before}{\Everflow@HeadingFirstBlockBegin}%
+    \AddToHook{cmd/#1/after}{\Everflow@HeadingFirstBlockEnd}%
+  }{}%
+}
+\newcommand{\Everflow@InstallHeadingEnvironmentBlockHooks}[1]{%
+  \AddToHook{env/#1/before}{\Everflow@HeadingFirstBlockBegin}%
+  \AddToHook{env/#1/after}{\Everflow@HeadingFirstBlockEnd}%
+}
+
+
+% -------------------- 非浮动图片接口 --------------------
+\newlength\Everflow@QImgWidth \newlength\Everflow@QImgHeight
+\newlength\Everflow@QImgBefore \newlength\Everflow@QImgAfter
+\def\Everflow@QImgAlign{center}
+\define@key{EverflowQImage}{width}{\setlength\Everflow@QImgWidth{#1}}
+\define@key{EverflowQImage}{height}{\setlength\Everflow@QImgHeight{#1}}
+\define@key{EverflowQImage}{align}{\def\Everflow@QImgAlign{#1}}
+\define@key{EverflowQImage}{before-skip}{\setlength\Everflow@QImgBefore{#1}}
+\define@key{EverflowQImage}{after-skip}{\setlength\Everflow@QImgAfter{#1}}
+\newcommand{\Everflow@QImageBody}[2]{%
+  \begingroup\setlength\Everflow@QImgWidth{.55\linewidth}\setlength\Everflow@QImgHeight{.80\textheight}%
+  \setlength\Everflow@QImgBefore{.45\baselineskip}\setlength\Everflow@QImgAfter{.55\baselineskip}\def\Everflow@QImgAlign{center}%
+  \def\Everflow@QImgOpt{#1}\ifx\Everflow@QImgOpt\@empty\else\in@{=}{#1}\ifin@\setkeys{EverflowQImage}{#1}\else\setlength\Everflow@QImgWidth{#1}\fi\fi
+  \par\vspace{\Everflow@QImgBefore}\noindent
+  \ifdefstring{\Everflow@QImgAlign}{right}{\hfill}{\ifdefstring{\Everflow@QImgAlign}{center}{\centering}{}}%
+  \includegraphics[width=\Everflow@QImgWidth,height=\Everflow@QImgHeight,keepaspectratio]{#2}%
+  \ifdefstring{\Everflow@QImgAlign}{left}{\hfill}{}\par\vspace{\Everflow@QImgAfter}\endgroup}
+\@ifundefined{qimage}{\NewDocumentCommand{\qimage}{O{} m}{\Everflow@QImageBody{#1}{#2}}}{\RenewDocumentCommand{\qimage}{O{} m}{\Everflow@QImageBody{#1}{#2}}}
+\NewDocumentCommand{\qimagecaption}{O{} m m}{\begingroup\qimage[#1]{#2}\par\nobreak\centering\small #3\par\medskip\endgroup}
+\@ifundefined{qimagepair}{\NewDocumentCommand{\qimagepair}{m m m m}{\par\medskip\noindent\begin{minipage}[t]{#1}\centering\includegraphics[width=\linewidth,height=.31\textheight,keepaspectratio]{#2}\end{minipage}\hfill\begin{minipage}[t]{#3}\centering\includegraphics[width=\linewidth,height=.31\textheight,keepaspectratio]{#4}\end{minipage}\par\medskip}}{}
+\newlength\Everflow@SideImgWidth \newlength\Everflow@SideTextWidth \newlength\Everflow@SideGap
+\def\Everflow@Side{right}
+\define@key{EverflowSideImage}{side}{\def\Everflow@Side{#1}}
+\define@key{EverflowSideImage}{image-width}{\setlength\Everflow@SideImgWidth{#1}}
+\define@key{EverflowSideImage}{text-width}{\setlength\Everflow@SideTextWidth{#1}}
+\define@key{EverflowSideImage}{gap}{\setlength\Everflow@SideGap{#1}}
+\NewDocumentCommand{\qsideimage}{O{} m +m}{%
+  \begingroup\setlength\Everflow@SideImgWidth{.32\linewidth}\setlength\Everflow@SideTextWidth{.64\linewidth}\setlength\Everflow@SideGap{.03\linewidth}\def\Everflow@Side{right}\setkeys{EverflowSideImage}{#1}%
+  \par\noindent
+  \ifdefstring{\Everflow@Side}{left}{\begin{minipage}[t]{\Everflow@SideImgWidth}\vspace{0pt}\centering\includegraphics[width=\linewidth,keepaspectratio]{#2}\end{minipage}\hspace{\Everflow@SideGap}\begin{minipage}[t]{\Everflow@SideTextWidth}\vspace{0pt}#3\end{minipage}}{\begin{minipage}[t]{\Everflow@SideTextWidth}\vspace{0pt}#3\end{minipage}\hspace{\Everflow@SideGap}\begin{minipage}[t]{\Everflow@SideImgWidth}\vspace{0pt}\centering\includegraphics[width=\linewidth,keepaspectratio]{#2}\end{minipage}}%
+  \par\medskip\endgroup}
+\NewDocumentCommand{\choiceimage}{O{} m}{\includegraphics[width=.90\linewidth,height=28mm,keepaspectratio,#1]{#2}}
+\NewDocumentCommand{\fourimagechoices}{m m m m}{\Everflow@ChoicesTwo{\Everflow@ChoiceCell{A}{#1}&\Everflow@ChoiceCell{B}{#2}\\[\EverflowChoiceRowGap]\Everflow@ChoiceCell{C}{#3}&\Everflow@ChoiceCell{D}{#4}}}
+\newlength\Everflow@ChoiceImgWidth \def\Everflow@ChoiceImgSide{right}
+\define@key{EverflowChoiceImage}{image-width}{\setlength\Everflow@ChoiceImgWidth{#1}}
+\define@key{EverflowChoiceImage}{image-side}{\def\Everflow@ChoiceImgSide{#1}}
+\NewDocumentCommand{\choicewithimage}{O{} m m}{\begingroup\setlength\Everflow@ChoiceImgWidth{18mm}\def\Everflow@ChoiceImgSide{right}\setkeys{EverflowChoiceImage}{#1}\ifdefstring{\Everflow@ChoiceImgSide}{left}{\includegraphics[width=\Everflow@ChoiceImgWidth,keepaspectratio]{#3}\hspace{.6em}#2}{#2\hfill\includegraphics[width=\Everflow@ChoiceImgWidth,keepaspectratio]{#3}}\endgroup}
+\newlength\Everflow@MultiImgWidth
+\newlength\Everflow@MultiImgGap
+\newlength\Everflow@MultiImgHeight
+\define@key{EverflowMultiImage}{image-width}{\setlength\Everflow@MultiImgWidth{#1}}
+\define@key{EverflowMultiImage}{gap}{\setlength\Everflow@MultiImgGap{#1}}
+\define@key{EverflowMultiImage}{height}{\setlength\Everflow@MultiImgHeight{#1}}
+\NewDocumentCommand{\qtwoimages}{O{} m m}{%
+  \begingroup
+  \setlength\Everflow@MultiImgWidth{.46\linewidth}%
+  \setlength\Everflow@MultiImgGap{.04\linewidth}%
+  \setlength\Everflow@MultiImgHeight{.31\textheight}%
+  \setkeys{EverflowMultiImage}{#1}%
+  \par\noindent\centering
+  \includegraphics[width=\Everflow@MultiImgWidth,height=\Everflow@MultiImgHeight,keepaspectratio]{#2}%
+  \hspace{\Everflow@MultiImgGap}%
+  \includegraphics[width=\Everflow@MultiImgWidth,height=\Everflow@MultiImgHeight,keepaspectratio]{#3}%
+  \par\medskip\endgroup
+}
+\NewDocumentCommand{\qthreeimages}{O{} m m m}{%
+  \begingroup
+  \setlength\Everflow@MultiImgWidth{.30\linewidth}%
+  \setlength\Everflow@MultiImgGap{.03\linewidth}%
+  \setlength\Everflow@MultiImgHeight{.31\textheight}%
+  \setkeys{EverflowMultiImage}{#1}%
+  \par\noindent\centering
+  \includegraphics[width=\Everflow@MultiImgWidth,height=\Everflow@MultiImgHeight,keepaspectratio]{#2}%
+  \hspace{\Everflow@MultiImgGap}%
+  \includegraphics[width=\Everflow@MultiImgWidth,height=\Everflow@MultiImgHeight,keepaspectratio]{#3}%
+  \hspace{\Everflow@MultiImgGap}%
+  \includegraphics[width=\Everflow@MultiImgWidth,height=\Everflow@MultiImgHeight,keepaspectratio]{#4}%
+  \par\medskip\endgroup
+}
+
+% -------------------- ExBook 旧题源兼容辅助命令 --------------------
+% 这些命令从 ExBook.cls 移入唯一题目内核，Book / Exam / Public 行为一致。
+\providecommand{\blankbox}{（\hspace{1.5em}）}
+\providecommand{\eblankbox}{(\hspace{1.5em})}
+\providecommand{\blankline}{\underline{\hspace{3em}}}
+\providecommand{\circnum}[1]{\ding{\numexpr191+#1\relax}}
+\newunicodechar{①}{\ding{192}}
+\newunicodechar{②}{\ding{193}}
+\newunicodechar{③}{\ding{194}}
+\newunicodechar{④}{\ding{195}}
+\newunicodechar{⑤}{\ding{196}}
+\newunicodechar{⑥}{\ding{197}}
+\newunicodechar{⑦}{\ding{198}}
+\newunicodechar{⑧}{\ding{199}}
+\newunicodechar{⑨}{\ding{200}}
+\newunicodechar{⑩}{\ding{201}}
+\providecommand{\circnumA}{\ding{192}}
+\providecommand{\circnumB}{\ding{193}}
+\providecommand{\circnumC}{\ding{194}}
+\providecommand{\circnumD}{\ding{195}}
+\providecommand{\circnumE}{\ding{196}}
+\providecommand{\circnumF}{\ding{197}}
+\providecommand{\circnumG}{\ding{198}}
+\providecommand{\circnumH}{\ding{199}}
+\providecommand{\circnumI}{\ding{200}}
+\providecommand{\circnumJ}{\ding{201}}
+\providecommand{\noreftitle}[1]{\par\textbf{#1}\par}
+\providecommand{\qanswerloc}[1]{%
+  \par\smallskip\noindent
+  \@ifundefined{color@themeColor}
+    {\textcolor{black!65}{\ding{226} 此部分答案见原书 P#1}}
+    {\textcolor{themeColor}{\ding{226} 此部分答案见原书 P#1}}%
+}
+% 原 ExBook 图片接口保留为兼容别名；新题源优先使用 qimage/qsideimage。
+\providecommand{\imgin}[3][0.38]{%
+  \par\noindent
+  \begingroup
+  \def\Everflow@LegacyAlign{#2}%
+  \ifx\Everflow@LegacyAlign\@empty\centering\else
+    \ifdefstring{\Everflow@LegacyAlign}{l}{\raggedright}{%
+      \ifdefstring{\Everflow@LegacyAlign}{r}{\raggedleft}{\centering}}%
+  \fi
+  \includegraphics[scale=#1]{#3}\par
+  \endgroup
+}
+\providecommand{\autotilte}[3][]{%
+  \par\noindent\begingroup
+  \def\Everflow@LegacyAlign{#1}%
+  \ifx\Everflow@LegacyAlign\@empty\centering\else
+    \ifdefstring{\Everflow@LegacyAlign}{l}{\raggedright}{%
+      \ifdefstring{\Everflow@LegacyAlign}{r}{\raggedleft}{\centering}}%
+  \fi
+  {\heiti #2}#3\par\endgroup
+}
+\providecommand{\insertimg}[5]{%
+  \foreach \n in {#1,...,#2}{%
+    \begin{bbox}\imgin[#3]{#4}{#5/\n.png}\end{bbox}%
+  }%
+}
+
+% -------------------- 解析 --------------------
+\providecommand{\solutionname}{解答}
+\@ifundefined{solution}{\NewDocumentEnvironment{solution}{O{}}{\par\smallskip\noindent\textbf{\solutionname：}\ignorespaces}{\par\smallskip}}{\RenewDocumentEnvironment{solution}{O{}}{\par\smallskip\noindent\textbf{\solutionname：}\ignorespaces}{\par\smallskip}}
+\makeatother

@@ -80,7 +80,7 @@
       </header>
       <div class="paper-export-preset">
         <div class="paper-export-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM14 3v5h4"/></svg></div>
-        <div><b>exam-A4</b><span>紧凑 · 留空</span></div><em>PDF</em>
+        <div><b>exam-A4 · 仅题目页</b><label>排版 <select data-export-layout aria-label="PDF 排版"><option value="compact">紧凑版</option><option value="spacious">留空版（题后留 25mm）</option></select></label></div><em>PDF</em>
       </div>
       <div class="paper-export-admin" data-export-admin hidden aria-live="polite"></div>
       <ol class="paper-export-steps" data-export-steps>
@@ -91,7 +91,7 @@
         <li data-export-step="completed"><i></i><span><b>完成</b><small>可预览或下载</small></span></li>
       </ol>
       <div class="paper-export-status"><div><span data-export-status-label>准备生成</span><small data-export-worker>编译节点状态将在提交后显示</small></div><strong data-export-position>—</strong></div>
-      <p class="paper-export-message" data-export-message>当前试卷将按 exam-A4 紧凑版生成，并为需要书写的题目保留答题空间。</p>
+      <p class="paper-export-message" data-export-message>仅生成题目页，不含封面、前言、目录、答案与解析。请选择紧凑版或留空版。</p>
       <footer class="paper-export-footer">
         <button class="paper-export-secondary" type="button" data-export-background hidden>后台生成</button>
         <button class="paper-export-primary" type="button" data-export-start>开始生成</button>
@@ -107,6 +107,6 @@
 <script src="../assets/js/cloud-config.js"></script>
 <script type="module" src="../assets/js/cloud.js"></script>
 <script src="../assets/js/zhenti-data-overlay.js?v=20260904-editor1"></script>
-<script type="module" src="../assets/js/paper-builder.js?v=20260920-export12"></script>
+<script type="module" src="../assets/js/paper-builder.js?v=20260920-pdf-real1-20260920-export12"></script>
 </body>
 </html>

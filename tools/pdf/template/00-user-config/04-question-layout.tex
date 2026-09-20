@@ -1,0 +1,265 @@
+% =============================================================================
+% 题目与标题分页配置（高频设置）
+% =============================================================================
+% Book 模式在 Everflow-Book.tex 顶部切换：
+%   standard / compact / loose / single / padl / padp
+% Public 模式在 Everflow-Public.tex 顶部切换：
+%   standard / compact / loose / single
+%
+% compact / standard / loose 只改变两题之间的空白；题干、选项和图片内部
+% 间距保持一致。single、padl、padp 都是一题一页。
+
+% ============================================================
+% 【两题之间的空白】
+%
+% 数值越大，两道题之间的留白越多；数值越小，排版越紧凑。
+% 所有长度必须写明单位，例如 cm、mm、pt 或 \baselineskip。
+%
+% 示例 1：把 standard 改得更紧凑。
+% \def\EverflowQuestionGapStandard{1.2cm}
+%
+% 示例 2：让 Exam 中相邻题目稍微分开。
+% \def\EverflowExamQuestionGap{0.7\baselineskip}
+% ============================================================
+\providecommand{\EverflowQuestionGapCompact}{0.35\baselineskip}
+\providecommand{\EverflowQuestionGapStandard}{2.5cm}
+\providecommand{\EverflowQuestionGapLoose}{7.5cm}
+\providecommand{\EverflowExamQuestionGap}{0.45\baselineskip}
+
+% ============================================================
+% 【题目与选项是否尽量保持在同一页或同一栏】
+%
+% true：先把整道 bbox 题目装箱测量；放得下时整题移动，避免题干与选项拆开。
+% false：允许题目自然分页，适合超过一整页的超长题目。
+%
+% OversizeQuestionPolicy 当前推荐保持 warn-break：
+% 超高题目会给出警告，并自动改用可分页输出，避免形成超出版心的死盒。
+% ============================================================
+\providecommand{\EverflowKeepQuestionWithChoices}{true}
+\providecommand{\EverflowOversizeQuestionPolicy}{warn-break}
+
+% ============================================================
+% 【题号与选项基础尺寸】
+%
+% 这些参数通常不需要修改。宽度增大后，题号或选项标签占用的横向空间增大，
+% 正文可用宽度会相应减小。
+%
+% 错误写法：\def\EverflowQuestionLabelWidth{2.5}
+% 原因：长度缺少 em、mm、pt 等单位。
+% ============================================================
+\providecommand{\EverflowQuestionLabelWidth}{2.25em}
+\providecommand{\EverflowQuestionLabelSep}{0.55em}
+\providecommand{\EverflowQuestionLeftIndent}{0pt}
+\providecommand{\EverflowQuestionRightIndent}{0pt}
+\providecommand{\EverflowChoiceLabelWidth}{2.25em}
+\providecommand{\EverflowChoiceColumnGap}{1.2em}
+\providecommand{\EverflowChoiceFourColumnThreshold}{0.22}
+\providecommand{\EverflowChoiceTwoColumnThreshold}{0.46}
+\providecommand{\EverflowChoiceBeforeSkip}{0.45\baselineskip}
+\providecommand{\EverflowChoiceRowGap}{0.22em}
+
+% =============================================================================
+% 标题强制换页与“标题不能孤立”保护
+% =============================================================================
+% 这两类功能彼此独立：
+%
+% ForceNewPage=true：该标题在开始一个新标题组时强制进入下一张物理页。
+% KeepWithNext=true：不强制换页，但标题不能单独留在页尾或栏尾。
+%
+% 推荐组合：
+% \def\EverflowBookSectionForceNewPage{true}
+% \def\EverflowExamSectionForceNewPage{false}
+% \def\EverflowPublicSectionForceNewPage{true}
+% \def\EverflowSectionKeepWithNext{true}
+%
+% 结果：Book 与 Public 的 section 默认从下一张物理页开始；Exam 保持现有
+% 连续排版。当前页或当前栏空间不足时，标题组仍会与后面的第一项有效内容一起移动。
+
+% ============================================================
+% 【全部标题防孤立总开关】
+%
+% true：启用连续标题组与首个有效内容的联合分页。
+% false：关闭全部智能跟随；各标题的 KeepWithNext 设置暂时不生效。
+%
+% 示例 1：正常启用。
+% \def\EverflowHeadingKeepWithNextControl{true}
+%
+% 示例 2：排查第三方宏包冲突时临时关闭。
+% \def\EverflowHeadingKeepWithNextControl{false}
+%
+% true 和 false 必须使用小写英文，不能写 True、TRUE、是或否。
+% ============================================================
+\providecommand{\EverflowHeadingKeepWithNextControl}{true}
+
+% ============================================================
+% 【连续标题是否合并为一个标题组】
+%
+% true：questiongroup、chapter、section、subsection、题型说明等连续标题只进行
+% 一次分页判断，不会被拆到不同页面或不同栏位。
+%
+% false：每个标题独立判断。仅用于兼容极少数特殊旧题源。
+% ============================================================
+\providecommand{\EverflowHeadingConsecutiveGroupControl}{true}
+
+% ============================================================
+% 【标题后至少保护多少行普通正文】
+%
+% 当标题后不是 bbox、图片、表格或代码块，而是普通正文时使用该参数。
+%
+% 3：至少保护正文开头约 3 行，推荐值。
+% 5：保护更强，但页尾留白可能增加。
+%
+% 合法建议范围为 1--5。不要写 3行，也不要添加长度单位。
+% ============================================================
+\providecommand{\EverflowHeadingMinimumFollowLines}{3}
+
+% ============================================================
+% 【标题后优先保护的内容模式】
+%
+% question：优先保护第一道 bbox 题目；适合试卷、题库和习题册，推荐使用。
+% block：把第一项图片、表格、代码或公式块作为完整内容块保护。
+% lines：普通正文至少保护 HeadingMinimumFollowLines 指定的行数。
+%
+% 当前统一内核会自动识别这三类内容；该参数用于表达默认偏好并保留扩展接口。
+% ============================================================
+\providecommand{\EverflowHeadingFollowMode}{question}
+
+% ============================================================
+% 【Exam A3 双栏中标题组空间不足时前进到哪里】
+%
+% column：左栏不足时先进入右栏；右栏不足时进入下一张 A3 的左栏。
+% 这是页面利用率最高的默认方式。
+%
+% page：当前栏的预留空间不足时直接进入下一张 A3 物理页。
+% 适合要求大标题尽量从新纸张开始的版式。
+%
+% 错误写法：\def\EverflowExamAThreeHeadingAdvance{right}
+% 原因：合法值只有 column 和 page。
+% ============================================================
+\providecommand{\EverflowExamAThreeHeadingAdvance}{column}
+
+% ============================================================
+% 【各种标题是否强制另起物理页】
+%
+% true：标题在开始一个新标题组时执行物理换页。
+% false：允许连续排版，再由 KeepWithNext 判断是否需要移动。
+%
+% section 使用三版独立默认值：Book/Public=true，Exam=false。
+% 旧全局参数 EverflowSectionForceNewPage 默认写 mode，表示服从三版独立值；
+% 若旧工程在主入口预设 true 或 false，则仍可一次覆盖三版，保证兼容。
+% 其他标题默认 false，避免连续标题组中途重复换页。
+% ============================================================
+\providecommand{\EverflowQuestionGroupForceNewPage}{false}
+\providecommand{\EverflowPartForceNewPage}{false}
+\providecommand{\EverflowChapterForceNewPage}{false}
+\providecommand{\EverflowBookSectionForceNewPage}{true}
+\providecommand{\EverflowExamSectionForceNewPage}{false}
+\providecommand{\EverflowPublicSectionForceNewPage}{true}
+\providecommand{\EverflowSectionForceNewPage}{mode}
+\providecommand{\EverflowSubsectionForceNewPage}{false}
+\providecommand{\EverflowSubsubsectionForceNewPage}{false}
+\providecommand{\EverflowPublicationUnitTitleForceNewPage}{false}
+\providecommand{\EverflowExamSectionNoteForceNewPage}{false}
+
+% ============================================================
+% 【各种标题是否与后面的第一项有效内容一起分页】
+%
+% true：该标题参与连续标题组，不能单独留在 A4 页尾、Exam 页尾、A3 左栏尾
+% 或 A3 右栏尾。
+%
+% false：该标题不主动建立保护链，可能按自然分页停在页尾或栏尾。
+%
+% 示例 1：只关闭 subsubsection 的保护。
+% \def\EverflowSubsubsectionKeepWithNext{false}
+%
+% 示例 2：全部保持推荐值。
+% 下列八项全部使用 true。
+% ============================================================
+% 新名称 KeepWithNext 的优先级最高；如果旧题源只预设了 OrphanControl
+% 或 AutoPageBreak，则在这里把旧值复制到新名称，保证旧入口仍然有效。
+% 这一段是兼容层，不需要手工修改。
+\newcommand{\EverflowResolveLegacyHeadingSwitch}[3]{%
+  \ifcsname #1\endcsname
+  \else
+    \ifcsname #2\endcsname
+      \expandafter\edef\csname #1\endcsname{\csname #2\endcsname}%
+    \else
+      \ifcsname #3\endcsname
+        \expandafter\edef\csname #1\endcsname{\csname #3\endcsname}%
+      \else
+        \expandafter\def\csname #1\endcsname{true}%
+      \fi
+    \fi
+  \fi
+}
+\EverflowResolveLegacyHeadingSwitch{EverflowQuestionGroupKeepWithNext}{EverflowQuestionGroupOrphanControl}{EverflowQuestionGroupAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowPartKeepWithNext}{EverflowPartOrphanControl}{EverflowPartAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowChapterKeepWithNext}{EverflowChapterOrphanControl}{EverflowChapterAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowSectionKeepWithNext}{EverflowSectionOrphanControl}{EverflowSectionAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowSubsectionKeepWithNext}{EverflowSubsectionOrphanControl}{EverflowSubsectionAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowSubsubsectionKeepWithNext}{EverflowSubsubsectionOrphanControl}{EverflowSubsubsectionAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowPublicationUnitTitleKeepWithNext}{EverflowPublicationUnitTitleOrphanControl}{EverflowPublicationUnitTitleAutoPageBreak}
+\EverflowResolveLegacyHeadingSwitch{EverflowExamSectionNoteKeepWithNext}{EverflowExamSectionNoteOrphanControl}{EverflowExamSectionNoteAutoPageBreak}
+
+% ============================================================
+% 【兼容旧版 AutoPageBreak 与 OrphanControl 名称】
+%
+% 旧工程在主入口加载前写入旧名称时仍会生效。新工程应优先使用 KeepWithNext，
+% 因为新名称更准确地表达“标题与后续内容保持在一起”的含义。
+% ============================================================
+\providecommand{\EverflowQuestionGroupAutoPageBreak}{\EverflowQuestionGroupKeepWithNext}
+\providecommand{\EverflowQuestionGroupOrphanControl}{\EverflowQuestionGroupKeepWithNext}
+\providecommand{\EverflowPartAutoPageBreak}{\EverflowPartKeepWithNext}
+\providecommand{\EverflowPartOrphanControl}{\EverflowPartKeepWithNext}
+\providecommand{\EverflowChapterAutoPageBreak}{\EverflowChapterKeepWithNext}
+\providecommand{\EverflowChapterOrphanControl}{\EverflowChapterKeepWithNext}
+\providecommand{\EverflowSectionAutoPageBreak}{\EverflowSectionKeepWithNext}
+\providecommand{\EverflowSectionOrphanControl}{\EverflowSectionKeepWithNext}
+\providecommand{\EverflowSubsectionAutoPageBreak}{\EverflowSubsectionKeepWithNext}
+\providecommand{\EverflowSubsectionOrphanControl}{\EverflowSubsectionKeepWithNext}
+\providecommand{\EverflowSubsubsectionAutoPageBreak}{\EverflowSubsubsectionKeepWithNext}
+\providecommand{\EverflowSubsubsectionOrphanControl}{\EverflowSubsubsectionKeepWithNext}
+\providecommand{\EverflowPublicationUnitTitleAutoPageBreak}{\EverflowPublicationUnitTitleKeepWithNext}
+\providecommand{\EverflowPublicationUnitTitleOrphanControl}{\EverflowPublicationUnitTitleKeepWithNext}
+\providecommand{\EverflowExamSectionNoteAutoPageBreak}{\EverflowExamSectionNoteKeepWithNext}
+\providecommand{\EverflowExamSectionNoteOrphanControl}{\EverflowExamSectionNoteKeepWithNext}
+
+% ============================================================
+% 【标题组开始时预留的基础空间】
+%
+% 这些数值是标题组尚未测量到第一项内容时使用的安全预留量。
+% 第一项 bbox 会在完成装箱后使用真实高度继续保护。
+%
+% 数值越大，防孤立越稳健，但页尾留白可能增加；数值越小，页面更紧凑，
+% 但非常高的自定义标题可能需要单独增大对应参数。
+% ============================================================
+\providecommand{\EverflowQuestionGroupNeedSpace}{10\baselineskip}
+\providecommand{\EverflowPartNeedSpace}{10\baselineskip}
+\providecommand{\EverflowChapterNeedSpace}{8\baselineskip}
+\providecommand{\EverflowSectionNeedSpace}{9\baselineskip}
+\providecommand{\EverflowSubsectionNeedSpace}{6\baselineskip}
+\providecommand{\EverflowSubsubsectionNeedSpace}{5\baselineskip}
+\providecommand{\EverflowPublicationUnitTitleNeedSpace}{9\baselineskip}
+\providecommand{\EverflowSectionNoteNeedSpace}{4\baselineskip}
+
+% =============================================================================
+% Exam 科目标题与第一个 section 的显示关系
+% =============================================================================
+% inline：科目标题和第一个 section 连续出现，并进入同一个标题组。
+% standalone：科目标题独占一页，第一个 section 再按自己的设置处理。
+% hidden：Exam 不显示科目标题，但仍写入目录。
+%
+% Merge=true 时，questiongroup 与紧随其后的第一个 section 只建立一个标题组，
+% 不会重复执行物理换页。
+% =============================================================================
+\providecommand{\EverflowExamQuestionGroupMode}{inline}
+\providecommand{\EverflowExamMergeQuestionGroupWithFirstSection}{true}
+
+% Exam Part/科目标题图片开关，只控制 questiongroup 的第三个图片参数。
+% false：隐藏 \questiongroup{数据结构}[图片路径][宽度] 中的装饰图片，标题仍显示。
+% true：显示该装饰图片。
+% 题干、选项、答案解析、普通 includegraphics、封面、Logo、二维码和水印均不受影响。
+\providecommand{\EverflowExamPartImageEnabled}{false}
+
+% 旧名称继续兼容；新工程优先修改 EverflowExamPartImageEnabled。
+\providecommand{\EverflowExamQuestionGroupShowImage}{\EverflowExamPartImageEnabled}
