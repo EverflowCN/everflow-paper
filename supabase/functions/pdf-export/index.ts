@@ -24,11 +24,13 @@ function etaFor(status:string,position=1,fast=false){
 }
 async function digest(value:string){return new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))}
 async function sharedWorker(req:Request){
- const expected=Deno.env.get('EVERFLOW_PDF_WORKER_SECRET')||'',provided=req.headers.get('X-Everflow-Worker-Key')||'';
- if(!expected||!provided)return false;
- const [a,b]=await Promise.all([digest(expected),digest(provided)]);let diff=0;
- for(let i=0;i<a.length;i++)diff|=a[i]^b[i];
- return diff===0;
+ const provided=req.headers.get('X-Everflow-Worker-Key')||'';
+ if(!provided||provided.length<32||provided.length>256)return false;
+ const hash=[...(await digest(provided))].map(v=>v.toString(16).padStart(2,'0')).join('');
+ const {data,error}=await db.from('pdf_worker_tokens').select('id').eq('token_hash',hash).eq('enabled',true).maybeSingle();
+ if(error||!data)return false;
+ void db.from('pdf_worker_tokens').update({last_used_at:new Date().toISOString()}).eq('id',data.id);
+ return true;
 }
 async function worker(req:Request){
  if(await sharedWorker(req))return;
