@@ -15,7 +15,16 @@ function etaFor(status:string,position=1){
  if(status==='storing')return{etaMinSeconds:5,etaMaxSeconds:30};
  return{etaMinSeconds:0,etaMaxSeconds:0};
 }
+async function digest(value:string){return new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))}
+async function sharedWorker(req:Request){
+ const expected=Deno.env.get('EVERFLOW_PDF_WORKER_SECRET')||'',provided=req.headers.get('X-Everflow-Worker-Key')||'';
+ if(!expected||!provided)return false;
+ const [a,b]=await Promise.all([digest(expected),digest(provided)]);let diff=0;
+ for(let i=0;i<a.length;i++)diff|=a[i]^b[i];
+ return diff===0;
+}
 async function worker(req:Request){
+ if(await sharedWorker(req))return;
  const token=(req.headers.get('Authorization')||'').replace(/^Bearer /,'');
  const {payload}=await jwtVerify(token,jwks,{issuer:'https://token.actions.githubusercontent.com',audience:'everflow-pdf-worker',maxTokenAge:'10m'});
  if(payload.repository!=='EverflowCN/everflow-paper'||payload.ref!=='refs/heads/main'||payload.workflow_ref!=='EverflowCN/everflow-paper/.github/workflows/pdf-export-worker.yml@refs/heads/main'||!['schedule','workflow_dispatch','repository_dispatch','push'].includes(String(payload.event_name)))throw new Error('worker_denied');
