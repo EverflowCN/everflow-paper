@@ -290,7 +290,7 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   const labels={idle:'准备生成',queued:'正在排队',preparing:'正在准备排版',compiling:'正在生成 PDF',processing:'正在生成 PDF',storing:'正在保存 PDF',completed:'生成完成',failed:'生成失败'};
   if(els.exportStatus)els.exportStatus.textContent=labels[status]||labels.idle;
   if(els.exportPosition)els.exportPosition.textContent=status==='completed'?'完成':status==='failed'?'失败':position!==null&&position!==undefined&&Number.isFinite(Number(position))?String(position):'—';
-  if(els.exportWorker)els.exportWorker.textContent=workers?('编译节点 '+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌'):status==='queued'?'等待可用编译节点':status==='compiling'?'XeLaTeX 正在排版':status==='completed'?'文件已准备好':'编译节点状态将在提交后显示';
+  if(els.exportWorker)els.exportWorker.textContent=workers?((workers.mode==='persistent'?'常驻编译节点 ':'编译节点 ')+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌'):status==='queued'?'等待可用编译节点':status==='compiling'?'XeLaTeX 正在排版':status==='completed'?'文件已准备好':'编译节点状态将在提交后显示';
   if(message&&els.exportMessage)els.exportMessage.textContent=message;
   if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
   if(els.exportStart){els.exportStart.disabled=!exportAccessAllowed||['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
