@@ -32,14 +32,15 @@ def rich(s):
             # Reject unsafe commands, ^^ escapes and comments even in trusted corpus patches.
             if all(c in MATH_COMMANDS for c in commands) and '^^' not in part and '%' not in part and all(e in {'cases','matrix','pmatrix','bmatrix','vmatrix','Vmatrix','aligned','array'} for e in re.findall(r'\\(?:begin|end)\{([^}]+)\}',part)):
                 out.append(part);continue
-        plain=[]
-        for token in re.split(r'(（[ \t\u3000]*）)',part):
-            if token is None:
-                continue
-            if re.fullmatch(r'（[ \t\u3000]*）',token):
-                plain.append(r'\blank{}')
-            else:
-                plain.append(escape(token).replace('\n',r'\par '))
+        plain=[];cursor=0
+        for match in re.finditer(r'（[ \t\u3000]*）|\([ \t\u3000]*\)',part):
+            plain.append(escape(part[cursor:match.start()]).replace('\n',r'\par '))
+            token=match.group(0)
+            prefix=part[:match.start()].rstrip()
+            function_like=token.startswith('(') and bool(re.search(r'(?:[A-Za-z_][A-Za-z0-9_]*)(?:\.[A-Za-z_][A-Za-z0-9_]*)*$',prefix))
+            plain.append(escape(token) if function_like else r'\blank{}')
+            cursor=match.end()
+        plain.append(escape(part[cursor:]).replace('\n',r'\par '))
         out.append(''.join(plain))
     return ''.join(out)
 

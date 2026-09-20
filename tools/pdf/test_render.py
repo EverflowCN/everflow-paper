@@ -7,6 +7,11 @@ class Safety(unittest.TestCase):
   for s in [r'\input{/etc/passwd}',r'$\input{secret}$',r'$^^5cinput{secret}$']:
    self.assertNotIn(r'\input{',rich(s))
  def test_math(self):self.assertEqual(r'$\frac{1}{2}$',rich(r'$\frac{1}{2}$'))
+ def test_ascii_blank_vs_function_call(self):
+  text=rich('调用 wait()/signal()，边是()，正确的有( )个。')
+  self.assertIn('wait()/signal()',text)
+  self.assertEqual(text.count(r'\blank{}'),2)
+  self.assertNotIn(r'wait\blank{}',text)
  def test_escape(self):self.assertEqual(r'a\_b\%',escape('a_b%'))
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}
