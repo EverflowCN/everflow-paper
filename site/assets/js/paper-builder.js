@@ -259,7 +259,7 @@ function tickExportEta(){
 function updateExportEta(data={},status=exportJob.status,position=data.position){
   if(status==='completed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='已完成';if(els.exportCountdown)els.exportCountdown.textContent='00:00';return}
   if(status==='failed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='—';if(els.exportCountdown)els.exportCountdown.textContent='—';return}
-  if(status==='idle'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='约 2–7 分钟';if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';return}
+  if(status==='idle'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='正在读取节点';if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';return}
   const fallback=fallbackEta(status,position),min=Number.isFinite(Number(data.etaMinSeconds))?Number(data.etaMinSeconds):fallback.min,max=Number.isFinite(Number(data.etaMaxSeconds))?Number(data.etaMaxSeconds):fallback.max;
   if(els.exportEtaRange)els.exportEtaRange.textContent=etaRangeText(min,max);
   const key=`${status}:${position??''}:${min}:${max}`;
@@ -315,7 +315,7 @@ async function openExportDialog(accessOverride=null){
     setExportState('idle',{message:access.kind==='login'?'PDF 导出仅对已登录用户开放。':'PDF 导出为会员权益，请先开通有效会员。'});updateExportEta({},'idle');return;
   }
   if(!paper.length&&!exportJob.id&&!exportJob.downloadUrl){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});closeExportDialog();return}
-  if(exportJob.id)void pollExportJob();
+  if(exportJob.id)void pollExportJob();else void refreshExportAvailability();
   if(exportJob.title&&exportJob.status!=='idle'&&els.exportMessage)els.exportMessage.textContent=`${exportJob.status==='completed'?'已生成':exportJob.status==='failed'?'生成失败':'正在生成'}「${exportJob.title}」· ${exportJob.count} 题`;
   setTimeout(()=>els.exportStart?.focus(),40);
 }
@@ -346,6 +346,21 @@ async function exportHeaders(){
   const headers={'Content-Type':'application/json'};
   try{const client=await window.EveraCloud?.getClient?.(),session=(await client?.auth?.getSession?.())?.data?.session;if(session?.access_token)headers.Authorization='Bearer '+session.access_token}catch{}
   return headers;
+}
+function renderExportAvailability(data={}){
+  const min=Number(data.etaMinSeconds),max=Number(data.etaMaxSeconds);
+  if(Number.isFinite(min)&&Number.isFinite(max)&&els.exportEtaRange)els.exportEtaRange.textContent=etaRangeText(min,max);
+  if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';
+  const workers=data.workers;
+  if(workers&&els.exportWorker)els.exportWorker.textContent=(workers.mode==='persistent'?'常驻编译节点 ':'编译节点 ')+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌';
+}
+async function refreshExportAvailability(){
+  if(!exportAccessAllowed||exportBusy()||exportJob.id)return;
+  try{
+    const res=await fetch(EXPORT_API+'?availability=1',{headers:await exportHeaders(),credentials:'include',cache:'no-store',signal:AbortSignal.timeout(12000)});
+    if(!res.ok)return;
+    renderExportAvailability(await res.json());
+  }catch{}
 }
 function stopExportStream(){clearTimeout(exportJob.pollTimer);exportJob.pollTimer=0;if(exportJob.eventSource){exportJob.eventSource.close();exportJob.eventSource=null}}
 function applyExportUpdate(data={}){
