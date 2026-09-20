@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="../assets/css/site.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/responsive.css?v=20260825-bank1">
   <link rel="stylesheet" href="../assets/css/relax1000-practice.css?v=20260825-bank1">
-  <link rel="stylesheet" href="../assets/css/paper-builder.css?v=20260920-export2">
+  <link rel="stylesheet" href="../assets/css/paper-builder.css?v=20260920-pdf-member1">
   <link rel="stylesheet" href="../assets/css/question-content-v1.css?v=20260904-question2">
 </head>
 <body data-view="relax">
@@ -56,7 +56,7 @@
         <label class="relax-label">题目状态</label>
         <div class="relax-filters"><label><input type="checkbox" value="all" checked>不限</label><label><input type="checkbox" value="unseen">没做过</label><label><input type="checkbox" value="wrong">未掌握错题</label><label><input type="checkbox" value="seen">已做过</label><label><input type="checkbox" value="favorite">已收藏</label></div>
         <label class="relax-switch"><span><b>随机题序</b><small>每次生成不同排列</small></span><input type="checkbox" data-shuffle checked></label>
-        <button class="relax-generate" type="button" data-generate>生成试卷 →</button><button class="paper-export-builder" type="button" data-pdf-export-builder><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v4M14 3v5h5M8 17h8M8 13h5M6 21h12a2 2 0 0 0 2-2V8.5L14.5 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z"/></svg><span>导出 exam-A4 PDF</span><small>紧凑 · 留空</small></button>
+        <button class="relax-generate" type="button" data-generate>生成试卷 →</button><button class="paper-export-builder" type="button" data-pdf-export-builder><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v4M14 3v5h5M8 17h8M8 13h5M6 21h12a2 2 0 0 0 2-2V8.5L14.5 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z"/></svg><span>导出 exam-A4 PDF</span><small>会员专属 · 紧凑 / 留空</small></button>
         <p class="relax-tip" data-builder-tip>真题组卷仅使用已核验、可自动判分的选择题。</p>
       </aside>
     </div>
@@ -80,7 +80,17 @@
       </header>
       <div class="paper-export-preset">
         <div class="paper-export-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM14 3v5h4"/></svg></div>
-        <div><b>exam-A4 · 仅题目页</b><label>排版 <select data-export-layout aria-label="PDF 排版"><option value="compact">紧凑版</option><option value="spacious">留空版（题后留 25mm）</option></select></label></div><em>PDF</em>
+        <div class="paper-export-preset-copy"><b>exam-A4 · 仅题目页</b><span>不含封面、目录、答案与解析</span></div><em>PDF</em>
+      </div>
+      <fieldset class="paper-layout-picker" data-export-layout-picker>
+        <legend>排版方式</legend>
+        <label class="paper-layout-option"><input type="radio" name="pdf-layout" value="compact" data-export-layout-input checked><span class="paper-layout-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h10M7 10h10M7 14h10M7 18h7"/></svg></span><span><b>紧凑版</b><small>减少题间距，适合刷题与节省纸张</small></span><i>推荐</i></label>
+        <label class="paper-layout-option"><input type="radio" name="pdf-layout" value="spacious" data-export-layout-input><span class="paper-layout-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h10M7 10h10M7 18h10"/></svg></span><span><b>留空版</b><small>每题后约 25mm 书写空间</small></span><i>书写</i></label>
+      </fieldset>
+      <div class="paper-export-access" data-export-access hidden>
+        <span class="paper-export-access-icon" aria-hidden="true">◆</span>
+        <div><b data-export-access-title>会员专属导出</b><small data-export-access-copy>登录并开通有效会员后可生成 PDF。</small></div>
+        <a data-export-access-action href="../membership/">查看会员</a>
       </div>
       <div class="paper-export-admin" data-export-admin hidden aria-live="polite"></div>
       <ol class="paper-export-steps" data-export-steps>
@@ -91,7 +101,12 @@
         <li data-export-step="completed"><i></i><span><b>完成</b><small>可预览或下载</small></span></li>
       </ol>
       <div class="paper-export-status"><div><span data-export-status-label>准备生成</span><small data-export-worker>编译节点状态将在提交后显示</small></div><strong data-export-position>—</strong></div>
-      <p class="paper-export-message" data-export-message>仅生成题目页，不含封面、前言、目录、答案与解析。请选择紧凑版或留空版。</p>
+      <div class="paper-export-eta" data-export-eta>
+        <div><span>预计用时</span><strong data-export-eta-range>约 2–7 分钟</strong></div>
+        <div><span>预计剩余</span><strong data-export-countdown>提交后开始</strong></div>
+        <small>按当前队列与编译节点估算，实际时间会随负载自动调整。</small>
+      </div>
+      <p class="paper-export-message" data-export-message>仅生成题目页，不含封面、前言、目录、答案与解析。</p>
       <footer class="paper-export-footer">
         <button class="paper-export-secondary" type="button" data-export-background hidden>后台生成</button>
         <button class="paper-export-primary" type="button" data-export-start>开始生成</button>
@@ -107,6 +122,6 @@
 <script src="../assets/js/cloud-config.js"></script>
 <script type="module" src="../assets/js/cloud.js"></script>
 <script src="../assets/js/zhenti-data-overlay.js?v=20260904-editor1"></script>
-<script type="module" src="../assets/js/paper-builder.js?v=20260920-pdf-real2"></script>
+<script type="module" src="../assets/js/paper-builder.js?v=20260920-pdf-member1"></script>
 </body>
 </html>
