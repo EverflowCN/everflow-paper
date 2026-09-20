@@ -1,4 +1,4 @@
-import unittest
+import re,subprocess,unittest
 from pathlib import Path
 from render import escape,rich,render,merge_layers,resolve
 
@@ -25,6 +25,8 @@ class Safety(unittest.TestCase):
    dest=Path('/tmp/pdf-verification')/layout
    pdf=render({'title':'408 组卷排版验证','layout':layout},questions,dest)
    self.assertGreater(pdf.stat().st_size,10000)
+   text=subprocess.run(['pdftotext','-layout',str(pdf),'-'],capture_output=True,text=True,check=True).stdout
+   self.assertRegex(text,r'(?m)^\s*1\.\s')
    paper_tex=(dest/'paper.tex').read_text(encoding='utf8')
    self.assertIn(r'\begin{qitems}',paper_tex)
    self.assertIn(r'\end{qitems}',paper_tex)
