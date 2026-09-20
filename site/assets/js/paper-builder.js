@@ -6,7 +6,7 @@ const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
 
 const $=s=>app.querySelector(s),$$=s=>[...app.querySelectorAll(s)];
-const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]')};
+const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]'),exportTask:$('[data-export-task]'),exportTaskOpen:$('[data-export-task-open]'),exportTaskLabel:$('[data-export-task-label]'),exportTaskDetail:$('[data-export-task-detail]'),exportTaskTime:$('[data-export-task-time]')};
 
 const YEARS=Array.from({length:18},(_,i)=>2009+i);
 const SUBJECT_ORDER=['ds','co','os','cn'];
@@ -201,7 +201,7 @@ let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',t
 const exportBusy=()=>['queued','preparing','compiling','storing'].includes(exportJob.status);
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 let exportManager=false;
-let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=false;
+let exportRequestId='',exportPollFailures=0,exportOwner='',exportSubmitting=false,exportFastPolling=false;
 const exportLayoutInputs=$$('[data-export-layout-input]');
 const selectedExportLayout=()=>exportLayoutInputs.find(input=>input.checked)?.value==='spacious'?'spacious':'compact';
 function setSelectedExportLayout(value){exportLayoutInputs.forEach(input=>{input.checked=input.value===(value==='spacious'?'spacious':'compact')})}
@@ -254,12 +254,12 @@ function stopExportEta(){clearInterval(exportEtaTimer);exportEtaTimer=0}
 function tickExportEta(){
   if(!els.exportCountdown||!exportEtaDeadline)return;
   const remain=Math.max(0,(exportEtaDeadline-Date.now())/1000);
-  els.exportCountdown.textContent=remain>0?formatCountdown(remain):'仍在处理中';
+  els.exportCountdown.textContent=remain>0?formatCountdown(remain):'仍在处理中';syncExportTask();
 }
 function updateExportEta(data={},status=exportJob.status,position=data.position){
-  if(status==='completed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='已完成';if(els.exportCountdown)els.exportCountdown.textContent='00:00';return}
-  if(status==='failed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='—';if(els.exportCountdown)els.exportCountdown.textContent='—';return}
-  if(status==='idle'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='正在读取节点';if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';return}
+  if(status==='completed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='已完成';if(els.exportCountdown)els.exportCountdown.textContent='00:00';syncExportTask();return}
+  if(status==='failed'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='—';if(els.exportCountdown)els.exportCountdown.textContent='—';syncExportTask();return}
+  if(status==='idle'){stopExportEta();exportEtaDeadline=0;exportEtaKey='';if(els.exportEtaRange)els.exportEtaRange.textContent='正在读取节点';if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';syncExportTask();return}
   const fallback=fallbackEta(status,position),min=Number.isFinite(Number(data.etaMinSeconds))?Number(data.etaMinSeconds):fallback.min,max=Number.isFinite(Number(data.etaMaxSeconds))?Number(data.etaMaxSeconds):fallback.max;
   if(els.exportEtaRange)els.exportEtaRange.textContent=etaRangeText(min,max);
   const key=`${status}:${position??''}:${min}:${max}`;
@@ -279,6 +279,18 @@ function setExportSteps(status='queued'){
   const normalized=status==='processing'?'compiling':status==='ready'?'completed':status,current=Math.max(0,exportOrder.indexOf(normalized));
   els.exportSteps?.querySelectorAll('[data-export-step]').forEach((node,i)=>{node.classList.toggle('active',i===current);node.classList.toggle('done',i<current||normalized==='completed')});
 }
+function syncExportTask(){
+  if(!els.exportTask)return;
+  const status=exportJob.status,busy=['queued','preparing','compiling','storing'].includes(status),show=busy||status==='completed'||status==='failed';
+  els.exportTask.hidden=!show;
+  els.exportTask.classList.toggle('is-busy',busy);
+  els.exportTask.classList.toggle('is-complete',status==='completed');
+  els.exportTask.classList.toggle('is-error',status==='failed');
+  const labels={queued:'PDF 正在排队',preparing:'PDF 准备排版',compiling:'PDF 正在生成',storing:'PDF 正在保存',completed:'PDF 已完成',failed:'PDF 生成失败'};
+  if(els.exportTaskLabel)els.exportTaskLabel.textContent=labels[status]||'PDF 任务';
+  if(els.exportTaskDetail)els.exportTaskDetail.textContent=exportJob.title?(exportJob.title+(exportJob.count?' · '+exportJob.count+' 题':'')):(busy?'后台任务正在处理':'点击查看详情');
+  if(els.exportTaskTime)els.exportTaskTime.textContent=busy?(els.exportCountdown?.textContent||'处理中'):status==='completed'?'完成':status==='failed'?'失败':'—';
+}
 function persistExportJob(){
   try{if(!exportJob.id&&!exportJob.downloadUrl){localStorage.removeItem(EXPORT_JOB_KEY);return}localStorage.setItem(EXPORT_JOB_KEY,JSON.stringify({id:exportJob.id,status:exportJob.status,downloadUrl:exportJob.downloadUrl,title:exportJob.title,count:exportJob.count,updatedAt:Date.now(),owner:exportOwner,requestId:exportRequestId}))}catch{}
 }
@@ -295,10 +307,10 @@ function setExportState(status,{position=null,workers=null,message='',downloadUr
   if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
   if(els.exportStart){els.exportStart.disabled=!exportAccessAllowed||['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=false;els.exportStart.textContent=status==='completed'?'重新生成':status==='failed'?'重新尝试':'开始生成'}
   if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
-  exportJob.updatedAt=Date.now();persistExportJob();
+  exportJob.updatedAt=Date.now();syncExportTask();persistExportJob();
 }
 function resetExportUi(){
-  stopExportStream();clearPersistedExportJob();exportRequestId='';exportPollFailures=0;exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
+  stopExportStream();clearPersistedExportJob();exportRequestId='';exportPollFailures=0;exportFastPolling=false;exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
   if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
   if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
   setExportState('idle',{message:'仅生成题目页，不含封面、前言、目录、答案与解析。'});updateExportEta({},'idle');
@@ -351,7 +363,7 @@ function renderExportAvailability(data={}){
   const min=Number(data.etaMinSeconds),max=Number(data.etaMaxSeconds);
   if(Number.isFinite(min)&&Number.isFinite(max)&&els.exportEtaRange)els.exportEtaRange.textContent=etaRangeText(min,max);
   if(els.exportCountdown)els.exportCountdown.textContent='提交后开始';
-  const workers=data.workers;
+  const workers=data.workers;if(workers?.mode)exportFastPolling=workers.mode==='persistent';
   if(workers&&els.exportWorker)els.exportWorker.textContent=(workers.mode==='persistent'?'常驻编译节点 ':'编译节点 ')+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌';
 }
 async function refreshExportAvailability(){
@@ -366,7 +378,7 @@ function stopExportStream(){clearTimeout(exportJob.pollTimer);exportJob.pollTime
 function applyExportUpdate(data={}){
   if(exportManager&&('priorityEnabled'in data||'priority'in data))renderExportPriority({app_metadata:{role:'owner'}},Boolean(data.priorityEnabled??data.priority));
   const rawStatus=String(data.status||exportJob.status||'queued');const status=({processing:'compiling',ready:'completed'})[rawStatus]||rawStatus;
-  if(data.title)exportJob.title=data.title;if(data.count)exportJob.count=data.count;
+  if(data.title)exportJob.title=data.title;if(data.count)exportJob.count=data.count;if(data.workers?.mode)exportFastPolling=data.workers.mode==='persistent';
   if(data.layout)setSelectedExportLayout(data.layout);setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});updateExportEta(data,status,data.position);
   if(status==='completed'||status==='failed'){stopExportStream();exportRequestId='';persistExportJob()}
 }
@@ -377,7 +389,7 @@ async function pollExportJob(){
     if([401,403].includes(res.status)){setExportState('failed',{message:'无法继续读取该导出任务，请重新登录后再生成。'});stopExportStream();return}
     if([404,410].includes(res.status)){setExportState('failed',{message:'该 PDF 导出任务已失效，请重新生成。'});stopExportStream();return}
     if(!res.ok)throw new Error('HTTP '+res.status);
-    exportPollFailures=0;applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,exportJob.status==='queued'?10000:3000)
+    exportPollFailures=0;applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,exportJob.status==='queued'?(exportFastPolling?2000:10000):(exportFastPolling?1500:3000))
   }catch{exportPollFailures++;if(els.exportMessage)els.exportMessage.textContent='暂时无法获取进度，正在重连；已提交的任务仍在后台保留。';exportJob.pollTimer=setTimeout(pollExportJob,Math.min(30000,3000*exportPollFailures))}
 }
 function watchExportJob(){stopExportStream();pollExportJob();}
@@ -423,8 +435,8 @@ function showLoadError(error){
 
 $$('[data-source]').forEach(b=>b.addEventListener('click',()=>{void setSource(b.dataset.source)}));$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{void setMode(b.dataset.mode)}));$$('[data-size]').forEach(b=>b.addEventListener('click',()=>{if(mode==='simulation')return;size=Number(b.dataset.size);syncSizeButtons()}));
 $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{if(input.value==='all'&&input.checked)$$('.relax-filters input').forEach(i=>{if(i!==input)i.checked=false});else if(input.value!=='all'&&input.checked)$('.relax-filters input[value="all"]').checked=false;if(!$$('.relax-filters input:checked').length)$('.relax-filters input[value="all"]').checked=true}));
-els.builderExport?.addEventListener('click',()=>{void prepareExportFromBuilder()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});$$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
-exportLayoutInputs.forEach(input=>input.addEventListener('change',()=>{if(!exportBusy()){resetExportUi();renderPdfAccess(exportAccessCache)}}));
+els.builderExport?.addEventListener('click',()=>{void prepareExportFromBuilder()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});els.exportTaskOpen?.addEventListener('click',()=>{void openExportDialog()});$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
+exportLayoutInputs.forEach(input=>input.addEventListener('change',()=>{if(!exportBusy()){resetExportUi();renderPdfAccess(exportAccessCache);void refreshExportAvailability()}}));
 els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventListener('click',()=>{if(index>0){index--;renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder()});
 document.addEventListener('keydown',e=>{if(!els.exportLayer?.hidden&&e.key!=='Escape'){if(e.key==='Tab'){const nodes=[...els.exportLayer.querySelectorAll('button:not([disabled]),a[href],select:not([disabled])')].filter(n=>!n.hidden&&n.tabIndex>=0&&n.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){last?.focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===last){first?.focus();e.preventDefault()}}return;}if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 window.addEventListener('storage',event=>{if(event.key===ZHENTI_KEY)zhentiRecordsCache=null});
