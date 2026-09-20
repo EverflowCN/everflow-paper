@@ -50,3 +50,16 @@ revoke all on function public.pdf_export_claim() from public,anon,authenticated;
 grant execute on function public.pdf_export_enqueue(uuid,uuid,jsonb,integer) to service_role;
 grant execute on function public.pdf_export_claim() to service_role;
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('exam-pdfs','exam-pdfs',false,20971520,array['application/pdf']) on conflict(id) do nothing;
+
+
+create table if not exists public.pdf_worker_nodes (
+ id text primary key,
+ kind text not null default 'persistent' check(kind in ('persistent','scheduled')),
+ capacity integer not null check(capacity between 1 and 32),
+ active integer not null default 0 check(active >= 0 and active <= capacity),
+ updated_at timestamptz not null default now()
+);
+alter table public.pdf_worker_nodes enable row level security;
+revoke all on public.pdf_worker_nodes from public,anon,authenticated;
+grant all on public.pdf_worker_nodes to service_role;
+create index if not exists pdf_worker_nodes_fresh on public.pdf_worker_nodes(updated_at desc);
