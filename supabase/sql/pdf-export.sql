@@ -63,3 +63,15 @@ alter table public.pdf_worker_nodes enable row level security;
 revoke all on public.pdf_worker_nodes from public,anon,authenticated;
 grant all on public.pdf_worker_nodes to service_role;
 create index if not exists pdf_worker_nodes_fresh on public.pdf_worker_nodes(updated_at desc);
+
+
+create table if not exists public.pdf_worker_tokens (
+ id text primary key,
+ token_hash text not null unique,
+ enabled boolean not null default true,
+ created_at timestamptz not null default now(),
+ last_used_at timestamptz
+);
+alter table public.pdf_worker_tokens enable row level security;
+revoke all on public.pdf_worker_tokens from public,anon,authenticated;
+grant all on public.pdf_worker_tokens to service_role;
