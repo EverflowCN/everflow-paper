@@ -6,7 +6,7 @@ const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
 
 const $=s=>app.querySelector(s),$$=s=>[...app.querySelectorAll(s)];
-const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]')};
+const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]')};
 
 const YEARS=Array.from({length:18},(_,i)=>2009+i);
 const SUBJECT_ORDER=['ds','co','os','cn'];
@@ -151,7 +151,7 @@ async function generate(){
     const shortage=SUBJECT_ORDER.find(s=>pool.filter(q=>q.subjectId===s).length<QUOTA[s]);
     if(shortage){window.EveraUI?.toast?.(`${SUBJECT_LABEL[shortage]} 可用题量不足，无法保持 11/11/10/8 仿真结构`,{type:'error'});return}
   }
-  paper=mode==='simulation'?simulationPaper(pool):choose(pool,size,true);if(!paper.length)return;if($('[data-shuffle]')?.checked)paper=shuffle(paper);answers={};index=0;seconds=0;clearInterval(timer);timer=setInterval(()=>{seconds++;els.timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`},1000);
+  paper=mode==='simulation'?simulationPaper(pool):choose(pool,size,true);if(!paper.length)return;if($('[data-shuffle]')?.checked)paper=shuffle(paper);if(!['queued','preparing','compiling','storing'].includes(exportJob.status))resetExportUi();answers={};index=0;seconds=0;clearInterval(timer);timer=setInterval(()=>{seconds++;els.timer.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`},1000);
   els.builder.hidden=true;els.result.hidden=true;els.paper.hidden=false;const label=mode==='wrong'?'双题库错题组卷':mode==='simulation'?'408 仿真组卷':mode==='quick'?'快速练习':'范围专项';const src=mode==='wrong'?'真题 + Relax1000':source==='zhenti'?'408 真题':'Relax1000';els.paperTitle.textContent=`${label} · ${src}`;renderPaper();window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -175,6 +175,85 @@ function handIn(){
   els.result.innerHTML=`<section class="relax-result-hero"><div><span>本次完成</span><h1>${correct} / ${paper.length}</h1><p>正确率 ${score}% · 用时 ${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} · 未作答不会自动记为错题</p></div><button type="button" data-again>再组一套</button></section><section class="relax-result-list"><h2>${rows.length?`错题 / 未作答复盘 · ${rows.length} 题`:'本套全对'}</h2>${rows.map(q=>{const am=analysisMedia(q);return`<article><header><b>${esc(SUBJECT_LABEL[q.subjectId])} · ${q.source==='zhenti'?`${q.year} 第${q.number}题`:`Relax1000 第${q.number}题`}</b><span>你的答案 ${esc(answers[q.uid]||'未作答')} · 正确答案 ${esc(q.answer)}</span></header><div class="question-rich-text">${richText(q.stem)}</div>${imageStack(mediaList(q))}<details><summary>查看解析</summary>${am.length?imageStack(am):`<div class="question-rich-text">${richText(q.explanation,{fallback:'暂无文字解析'})}</div>`}</details></article>`}).join('')}</section>`;
   els.result.querySelector('[data-again]')?.addEventListener('click',()=>{els.result.hidden=true;els.builder.hidden=false;syncBuilder();window.scrollTo({top:0,behavior:'smooth'})});window.scrollTo({top:0,behavior:'smooth'});
 }
+const EXPORT_API='/api/pdf/export';
+let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:''};
+const exportOrder=['queued','preparing','compiling','storing','completed'];
+function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'||role==='super_admin'}
+function setExportSteps(status='queued'){
+  const normalized=status==='processing'?'compiling':status==='ready'?'completed':status,current=Math.max(0,exportOrder.indexOf(normalized));
+  els.exportSteps?.querySelectorAll('[data-export-step]').forEach((node,i)=>{node.classList.toggle('active',i===current);node.classList.toggle('done',i<current||normalized==='completed')});
+}
+function setExportState(status,{position=null,workers=null,message='',downloadUrl=''}={}){
+  exportJob.status=status;setExportSteps(status);
+  els.exportLayer?.classList.toggle('is-busy',['queued','preparing','compiling','storing'].includes(status));
+  els.exportLayer?.classList.toggle('is-complete',status==='completed');els.exportLayer?.classList.toggle('is-error',status==='failed');
+  const labels={idle:'准备生成',queued:'正在排队',preparing:'正在准备排版',compiling:'正在生成 PDF',processing:'正在生成 PDF',storing:'正在保存 PDF',completed:'生成完成',failed:'生成失败'};
+  if(els.exportStatus)els.exportStatus.textContent=labels[status]||labels.idle;
+  if(els.exportPosition)els.exportPosition.textContent=status==='completed'?'完成':status==='failed'?'失败':Number.isFinite(Number(position))?String(position):'—';
+  if(els.exportWorker)els.exportWorker.textContent=workers?('编译节点 '+(workers.busy??0)+' / '+(workers.total??0)+' 忙碌'):status==='queued'?'等待可用编译节点':status==='compiling'?'XeLaTeX 正在排版':status==='completed'?'文件已准备好':'编译节点状态将在提交后显示';
+  if(message&&els.exportMessage)els.exportMessage.textContent=message;
+  if(downloadUrl){exportJob.downloadUrl=downloadUrl;if(els.exportDownload){els.exportDownload.href=downloadUrl;els.exportDownload.hidden=false}if(els.exportPreview){els.exportPreview.href=downloadUrl;els.exportPreview.hidden=false}}
+  if(els.exportStart){els.exportStart.disabled=['queued','preparing','compiling','storing'].includes(status);els.exportStart.hidden=status==='completed'}
+  if(els.exportBackground)els.exportBackground.hidden=!['queued','preparing','compiling','storing'].includes(status);
+}
+function resetExportUi(){
+  stopExportStream();exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:''};
+  if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
+  if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
+  setExportState('idle',{message:'当前试卷将按 exam-A4 紧凑版生成，并为需要书写的题目保留答题空间。'});
+}
+function closeExportDialog(){if(!els.exportLayer)return;els.exportLayer.hidden=true;document.body.classList.remove('paper-export-open')}
+async function openExportDialog(){
+  if(!paper.length){window.EveraUI?.toast?.('请先生成一套试卷',{type:'error'});return}
+  if(!els.exportLayer)return;els.exportLayer.hidden=false;document.body.classList.add('paper-export-open');
+  try{const user=await window.EveraCloud?.getUser?.();if(els.exportAdmin)els.exportAdmin.hidden=!exportRole(user)}catch{if(els.exportAdmin)els.exportAdmin.hidden=true}
+  setTimeout(()=>els.exportStart?.focus(),40);
+}
+function exportPayload(){
+  return{template:'exam-A4',layout:'compact',answerSpace:'auto',includeAnswers:false,title:els.paperTitle?.textContent||'408 组卷',source,mode,questions:paper.map((q,i)=>({order:i+1,uid:q.uid,id:String(q.id||''),source:q.source,year:q.year||null,number:q.number||null,subjectId:q.subjectId,chapter:q.chapter||'',stem:q.stem||'',options:Object.fromEntries(optionList(q).map(o=>[o.key,o.text||''])),figures:mediaList(q).map(x=>x.src)}))};
+}
+async function exportHeaders(){
+  const headers={'Content-Type':'application/json'};
+  try{const client=await window.EveraCloud?.getClient?.(),session=(await client?.auth?.getSession?.())?.data?.session;if(session?.access_token)headers.Authorization='Bearer '+session.access_token}catch{}
+  return headers;
+}
+function stopExportStream(){clearTimeout(exportJob.pollTimer);exportJob.pollTimer=0;if(exportJob.eventSource){exportJob.eventSource.close();exportJob.eventSource=null}}
+function applyExportUpdate(data={}){
+  const status=String(data.status||exportJob.status||'queued');setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});
+  if(status==='completed'||status==='failed')stopExportStream();
+}
+async function pollExportJob(){
+  if(!exportJob.id)return;
+  try{const res=await fetch(EXPORT_API+'/'+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)}catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
+}
+function watchExportJob(eventUrl=''){
+  stopExportStream();
+  if(eventUrl&&'EventSource'in window){
+    const stream=new EventSource(eventUrl);exportJob.eventSource=stream;
+    const read=e=>{try{applyExportUpdate(JSON.parse(e.data))}catch{}};
+    stream.onmessage=read;stream.addEventListener('status',read);stream.addEventListener('queue',e=>{try{applyExportUpdate({...JSON.parse(e.data),status:'queued'})}catch{}});stream.addEventListener('completed',e=>{try{applyExportUpdate({...JSON.parse(e.data),status:'completed'})}catch{}});
+    stream.onerror=()=>{stream.close();exportJob.eventSource=null;exportJob.pollTimer=setTimeout(pollExportJob,800)};return;
+  }
+  pollExportJob();
+}
+async function startPdfExport(){
+  if(!paper.length||['queued','preparing','compiling','storing'].includes(exportJob.status))return;
+  setExportState('queued',{message:'正在提交到 PDF 生成队列…'});if(els.exportStart)els.exportStart.disabled=true;
+  try{
+    const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),body:JSON.stringify(exportPayload())});
+    let data={};try{data=await res.json()}catch{}
+    if(!res.ok)throw new Error(data?.message||data?.error||('PDF 服务 HTTP '+res.status));
+    exportJob.id=String(data.jobId||data.id||'');
+    if(!exportJob.id&&data.downloadUrl){applyExportUpdate({...data,status:'completed'});return}
+    if(!exportJob.id)throw new Error('PDF 服务未返回任务编号');
+    applyExportUpdate({...data,status:data.status||'queued'});watchExportJob(data.eventUrl||data.event_url||'');
+  }catch(error){
+    console.error('PDF export failed',error);
+    setExportState('failed',{message:/404|Failed to fetch|HTTP 404/i.test(String(error?.message||error))?'PDF 编译服务尚未接入；导出按钮与排队窗口已就绪。':String(error?.message||error||'PDF 生成失败')});
+    if(els.exportStart){els.exportStart.disabled=false;els.exportStart.textContent='重新尝试'}
+  }
+}
+
 function showLoadError(error){
   console.error(error);loading=false;
   els.builder.innerHTML=`<section class="paper-builder-error"><h2>组卷题库载入失败</h2><p>${esc(error?.message||error)}</p><button type="button" onclick="location.reload()">重新载入</button></section>`;
@@ -182,8 +261,9 @@ function showLoadError(error){
 
 $$('[data-source]').forEach(b=>b.addEventListener('click',()=>{void setSource(b.dataset.source)}));$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{void setMode(b.dataset.mode)}));$$('[data-size]').forEach(b=>b.addEventListener('click',()=>{if(mode==='simulation')return;size=Number(b.dataset.size);syncSizeButtons()}));
 $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{if(input.value==='all'&&input.checked)$$('.relax-filters input').forEach(i=>{if(i!==input)i.checked=false});else if(input.value!=='all'&&input.checked)$('.relax-filters input[value="all"]').checked=false;if(!$$('.relax-filters input:checked').length)$('.relax-filters input[value="all"]').checked=true}));
+els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});
 els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventListener('click',()=>{if(index>0){index--;renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder()});
-document.addEventListener('keydown',e=>{if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!els.exportLayer?.hidden){closeExportDialog();e.preventDefault();return}if(els.paper.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const k=e.key.toUpperCase();if(['A','B','C','D'].includes(k)){answers[paper[index].uid]=k;renderPaper();e.preventDefault()}else if(e.key==='ArrowLeft'&&index>0){index--;renderPaper();e.preventDefault()}else if(e.key==='ArrowRight'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}else if(e.key==='Enter'){index<paper.length-1?(index++,renderPaper()):handIn();e.preventDefault()}});
 window.addEventListener('storage',event=>{if(event.key===ZHENTI_KEY)zhentiRecordsCache=null});
 
 try{await withLoading(()=>ensureSource(source));loading=false;syncBuilder()}catch(error){showLoadError(error)}
