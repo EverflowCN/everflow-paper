@@ -33,13 +33,19 @@ jobs:
           print("Cleanup",cleaned,"pending",pending)
           with open(os.environ["GITHUB_OUTPUT"],"a") as f:f.write(f"count={pending}\n")
           PY
+          renderer=0
+          if [ "${{ github.event_name }}" = "push" ]; then
+            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" | grep -Eq '^(tools/pdf/|\.github/workflows/pdf-export-worker\.yml$)' && renderer=1 || true
+          fi
+          echo "renderer=$renderer" >> "$GITHUB_OUTPUT"
+          echo "Renderer changed: $renderer"
       - name: Install XeLaTeX and CJK fonts
-        if: steps.pending.outputs.count != '0' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: steps.pending.outputs.count != '0' || steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends texlive-xetex texlive-plain-generic texlive-lang-chinese texlive-latex-extra texlive-science texlive-fonts-recommended fonts-texgyre fonts-texgyre-math fonts-oflb-asana-math python3-pil python3-cairosvg fonts-noto-cjk poppler-utils
       - name: Test body-only layouts
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch'
         run: |
           python3 tools/pdf/test_render.py
           PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py
