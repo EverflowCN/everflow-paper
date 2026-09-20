@@ -757,6 +757,8 @@
 % -------------------- ExBook 旧题源兼容辅助命令 --------------------
 % 这些命令从 ExBook.cls 移入唯一题目内核，Book / Exam / Public 行为一致。
 \providecommand{\blankbox}{（\hspace{1.5em}）}
+% 在线渲染器仅将空答案括号映射到此受控别名，保持母版固定留白。
+\providecommand{\blank}{\blankbox}
 \providecommand{\eblankbox}{(\hspace{1.5em})}
 \providecommand{\blankline}{\underline{\hspace{3em}}}
 \providecommand{\circnum}[1]{\ding{\numexpr191+#1\relax}}
