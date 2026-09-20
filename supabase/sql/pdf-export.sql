@@ -13,6 +13,7 @@ revoke all on public.pdf_export_jobs from anon,authenticated;
 grant all on public.pdf_export_jobs to service_role;
 create index if not exists pdf_export_queue_order on public.pdf_export_jobs(priority desc,created_at) where status='queued';
 create index if not exists pdf_export_user on public.pdf_export_jobs(user_id,created_at desc);
+create index if not exists pdf_export_expiry on public.pdf_export_jobs(expires_at);
 create or replace function public.pdf_export_enqueue(p_user uuid,p_key uuid,p_payload jsonb,p_priority integer)
 returns public.pdf_export_jobs language plpgsql security invoker set search_path='' as $$
 declare j public.pdf_export_jobs;
