@@ -107,7 +107,8 @@ jobs:
           if(!js.includes("const EXPORT_API='https://api.evera.top/api/pdf/export'"))throw new Error('PDF export API origin changed unexpectedly');
           if(!js.includes("EXPORT_JOB_KEY='everflow-pdf-export-job-v1'"))throw new Error('PDF export persistence missing');
           if(!js.includes("fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id)"))throw new Error('PDF job polling endpoint changed unexpectedly');
-          if(!js.includes('function exportFigureUrl(value)'))throw new Error('PDF figure URL normalization missing');
+          if(!js.includes("schema:'everflow-pdf-export-v1'"))throw new Error('PDF canonical export schema missing');
+          if(/stem:q\.stem|figures:mediaList|options:Object\.fromEntries/.test(js))throw new Error('PDF request must not trust client-supplied question content');
           console.log('Paper export regression guards OK');
           NODE
           git diff --check
