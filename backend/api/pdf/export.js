@@ -7,8 +7,9 @@ export default async function handler(req,res){
  const authorization=String(req.headers.authorization||'');
  if(!authorization.startsWith('Bearer '))return json(req,res,401,{error:'请先登录后导出 PDF'});
  try{
-  const id=String(req.query?.id||'');
-  const response=await fetch(EDGE+(id?'?id='+encodeURIComponent(id):''),{
+  const id=String(req.query?.id||''),availability=String(req.query?.availability||'');
+  const query=id?'?id='+encodeURIComponent(id):availability==='1'?'?availability=1':'';
+  const response=await fetch(EDGE+query,{
    method:req.method,headers:{Authorization:authorization,'Content-Type':'application/json'},
    ...(req.method==='POST'?{body:typeof req.body==='string'?req.body:JSON.stringify(req.body||{})}:{}),signal:AbortSignal.timeout(25000)
   });
