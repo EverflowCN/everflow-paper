@@ -192,7 +192,7 @@ function handIn(){
   els.result.innerHTML=`<section class="relax-result-hero"><div><span>本次完成</span><h1>${correct} / ${paper.length}</h1><p>正确率 ${score}% · 用时 ${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} · 未作答不会自动记为错题</p></div><button type="button" data-again>再组一套</button></section><section class="relax-result-list"><h2>${rows.length?`错题 / 未作答复盘 · ${rows.length} 题`:'本套全对'}</h2>${rows.map(q=>{const am=analysisMedia(q);return`<article><header><b>${esc(SUBJECT_LABEL[q.subjectId])} · ${q.source==='zhenti'?`${q.year} 第${q.number}题`:`Relax1000 第${q.number}题`}</b><span>你的答案 ${esc(answers[q.uid]||'未作答')} · 正确答案 ${esc(q.answer)}</span></header><div class="question-rich-text">${richText(q.stem)}</div>${imageStack(mediaList(q))}<details><summary>查看解析</summary>${am.length?imageStack(am):`<div class="question-rich-text">${richText(q.explanation,{fallback:'暂无文字解析'})}</div>`}</details></article>`}).join('')}</section>`;
   els.result.querySelector('[data-again]')?.addEventListener('click',()=>{els.result.hidden=true;els.builder.hidden=false;syncBuilder();window.scrollTo({top:0,behavior:'smooth'})});window.scrollTo({top:0,behavior:'smooth'});
 }
-const EXPORT_API='/api/pdf/export';
+const EXPORT_API='https://api.evera.top/api/pdf/export';
 let exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:''};
 const exportOrder=['queued','preparing','compiling','storing','completed'];
 function exportRole(user){const role=String(user?.app_metadata?.role||'').toLowerCase();return role==='owner'||role==='admin'||role==='super_admin'}
@@ -243,21 +243,12 @@ async function pollExportJob(){
   if(!exportJob.id)return;
   try{const res=await fetch(EXPORT_API+'/'+encodeURIComponent(exportJob.id),{headers:await exportHeaders(),cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);applyExportUpdate(await res.json());if(!['completed','failed'].includes(exportJob.status))exportJob.pollTimer=setTimeout(pollExportJob,1400)}catch{exportJob.pollTimer=setTimeout(pollExportJob,2200)}
 }
-function watchExportJob(eventUrl=''){
-  stopExportStream();
-  if(eventUrl&&'EventSource'in window){
-    const stream=new EventSource(eventUrl);exportJob.eventSource=stream;
-    const read=e=>{try{applyExportUpdate(JSON.parse(e.data))}catch{}};
-    stream.onmessage=read;stream.addEventListener('status',read);stream.addEventListener('queue',e=>{try{applyExportUpdate({...JSON.parse(e.data),status:'queued'})}catch{}});stream.addEventListener('completed',e=>{try{applyExportUpdate({...JSON.parse(e.data),status:'completed'})}catch{}});
-    stream.onerror=()=>{stream.close();exportJob.eventSource=null;exportJob.pollTimer=setTimeout(pollExportJob,800)};return;
-  }
-  pollExportJob();
-}
+function watchExportJob(){stopExportStream();pollExportJob();}
 async function startPdfExport(){
   if(!paper.length||['queued','preparing','compiling','storing'].includes(exportJob.status))return;
   setExportState('queued',{message:'正在提交到 PDF 生成队列…'});if(els.exportStart)els.exportStart.disabled=true;
   try{
-    const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),body:JSON.stringify(exportPayload())});
+    const res=await fetch(EXPORT_API,{method:'POST',headers:await exportHeaders(),credentials:'include',body:JSON.stringify(exportPayload())});
     let data={};try{data=await res.json()}catch{}
     if(!res.ok)throw new Error(data?.message||data?.error||('PDF 服务 HTTP '+res.status));
     exportJob.id=String(data.jobId||data.id||'');
