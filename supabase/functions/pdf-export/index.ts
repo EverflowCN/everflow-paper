@@ -7,6 +7,14 @@ const WORKER_CAPACITY=2;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const headers={'Content-Type':'application/json','Cache-Control':'no-store'};
 function reply(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers})}
+function etaFor(status:string,position=1){
+ const p=Math.max(1,Number(position)||1);
+ if(status==='queued')return{etaMinSeconds:90+(p-1)*20,etaMaxSeconds:420+(p-1)*60};
+ if(status==='preparing')return{etaMinSeconds:60,etaMaxSeconds:180};
+ if(status==='compiling')return{etaMinSeconds:20,etaMaxSeconds:120};
+ if(status==='storing')return{etaMinSeconds:5,etaMaxSeconds:30};
+ return{etaMinSeconds:0,etaMaxSeconds:0};
+}
 async function worker(req:Request){
  const token=(req.headers.get('Authorization')||'').replace(/^Bearer /,'');
  const {payload}=await jwtVerify(token,jwks,{issuer:'https://token.actions.githubusercontent.com',audience:'everflow-pdf-worker',maxTokenAge:'10m'});
@@ -61,6 +69,14 @@ Deno.serve(async(req)=>{
   const manager=['admin','owner'].includes(user.app_metadata?.role);
   let job:any;
   if(req.method==='POST'){
+   const {data:membership,error:membershipError}=await db.from('memberships').select('plan,status,source,expires_at').eq('user_id',user.id).maybeSingle();if(membershipError)throw membershipError;
+   let effectiveExpiresAt=membership?.expires_at||null;
+   if(membership?.source==='promo_exam_2027'&&!effectiveExpiresAt){
+    const {data:cfg,error:cfgError}=await db.from('membership_config').select('pro_free_until').eq('id','default').single();if(cfgError)throw cfgError;
+    effectiveExpiresAt=cfg?.pro_free_until||null;
+   }
+   const membershipActive=Boolean(membership&&['member','pro'].includes(membership.plan)&&membership.status==='active'&&(!effectiveExpiresAt||Date.parse(effectiveExpiresAt)>Date.now()));
+   if(!membershipActive)return reply({error:'membership_required',message:'PDF 导出为会员权益，请先开通有效会员。'},403);
    const raw=await req.text();if(raw.length>50000)return reply({error:'试卷数据过大'},413);
    const body=JSON.parse(raw);
    if(body.schema!=='everflow-pdf-export-v1'||body.template!=='exam-A4'||!['compact','spacious'].includes(body.layout)||!uuid.test(body.requestId||'')||!Array.isArray(body.questions)||body.questions.length<1||body.questions.length>100)return reply({error:'试卷参数无效'},400);
@@ -86,8 +102,10 @@ Deno.serve(async(req)=>{
    const score=(x:any)=>x.priority+Math.floor((Date.now()-Date.parse(x.created_at))/600000);
    waiting?.sort((a:any,b:any)=>score(b)-score(a)||Date.parse(a.created_at)-Date.parse(b.created_at)||a.id.localeCompare(b.id));
    result.position=(waiting?.findIndex((x:any)=>x.id===job.id)??-1)+1;
-   result.message='已进入生成队列。编译任务定时启动，通常需等待数分钟；关闭窗口后仍会继续。';
+   Object.assign(result,etaFor('queued',result.position));
+   result.message='已进入生成队列。预计时间会随当前队列与编译节点自动调整；关闭窗口后任务仍会继续。';
   }else if(job.status==='failed')result.message=job.error;
+  else Object.assign(result,etaFor(job.status,1));
   if(job.status==='completed'&&job.object_path){const {data,error}=await db.storage.from('exam-pdfs').createSignedUrl(job.object_path,600);if(error)throw error;result.downloadUrl=data.signedUrl;}
   return reply(result,req.method==='POST'?202:200);
  }catch(error){console.error('pdf-export',error instanceof Error?error.message:'error');return reply({error:'PDF 服务暂时不可用，请稍后重试'},503)}
