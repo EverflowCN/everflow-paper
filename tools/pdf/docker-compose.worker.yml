@@ -1,0 +1,13 @@
+services:
+  pdf-worker:
+    image: ghcr.io/everflowcn/everflow-pdf-worker:latest
+    restart: unless-stopped
+    environment:
+      EVERFLOW_PDF_WORKER_SECRET: ${EVERFLOW_PDF_WORKER_SECRET}
+      EVERFLOW_PDF_ENDPOINT: https://xzodetdohinktagxuwhs.supabase.co/functions/v1/pdf-export
+      PDF_WORKER_CAPACITY: "2"
+      PDF_WORKER_POLL_SECONDS: "1.5"
+      PDF_WORKER_NODE_ID: ${PDF_WORKER_NODE_ID:-everflow-pdf-1}
+      PORT: "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
