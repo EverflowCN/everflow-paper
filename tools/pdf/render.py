@@ -37,7 +37,7 @@ def rich(s):
             if token is None:
                 continue
             if re.fullmatch(r'（[ \t\u3000]*）|\([ \t\u3000]*\)',token):
-                plain.append(r'\blank')
+                plain.append(r'\blank{}')
             else:
                 plain.append(escape(token).replace('\n',r'\par '))
         out.append(''.join(plain))
