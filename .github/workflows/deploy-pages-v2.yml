@@ -96,6 +96,20 @@ jobs:
           grep -q 'workspace-questions-v2.css' site/workspace/index.html
           grep -q 'restore-version' supabase/functions/owner-questions/index.ts
           grep -Fq "const CACHE='everflow-site-v" site/sw.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('site/relax/index.html','utf8');
+          const js=fs.readFileSync('site/assets/js/paper-builder.js','utf8');
+          const overlay=html.indexOf('zhenti-data-overlay.js');
+          const builder=html.indexOf('paper-builder.js');
+          if(overlay<0||builder<0||overlay>builder)throw new Error('paper builder must load zhenti data overlay first');
+          if(!js.includes("$('[data-export-close]').forEach"))throw new Error('PDF dialog close controls must use querySelectorAll helper');
+          if(!js.includes("const EXPORT_API='https://api.evera.top/api/pdf/export'"))throw new Error('PDF export API origin changed unexpectedly');
+          if(!js.includes("EXPORT_JOB_KEY='everflow-pdf-export-job-v1'"))throw new Error('PDF export persistence missing');
+          if(!js.includes("fetch(EXPORT_API+'?id='+encodeURIComponent(exportJob.id)"))throw new Error('PDF job polling endpoint changed unexpectedly');
+          if(!js.includes('function exportFigureUrl(value)'))throw new Error('PDF figure URL normalization missing');
+          console.log('Paper export regression guards OK');
+          NODE
           git diff --check
 
   deploy:
