@@ -269,7 +269,7 @@ function restoreExportJob(){
   const age=Date.now()-Number(saved.updatedAt||0);if(age>24*60*60*1000){clearPersistedExportJob();return}
   exportJob={id:String(saved.id||''),status:String(saved.status||'queued'),pollTimer:0,eventSource:null,downloadUrl:String(saved.downloadUrl||''),title:String(saved.title||''),count:Number(saved.count)||0,updatedAt:Number(saved.updatedAt)||Date.now()};
   setExportState(exportJob.status,{downloadUrl:exportJob.downloadUrl,message:exportJob.title?`${exportJob.status==='completed'?'已生成':'正在恢复'}「${exportJob.title}」· ${exportJob.count} 题`:''});
-  if(exportBusy()&&exportJob.id)watchExportJob();
+  if(exportJob.id){if(exportBusy())watchExportJob();else void pollExportJob();}
 }
 async function startPdfExport(){
   if(!paper.length||exportBusy())return;
