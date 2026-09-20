@@ -10,6 +10,7 @@ on:
     paths: ['tools/pdf/**', '.github/workflows/pdf-export-worker.yml', 'supabase/functions/pdf-export/**', 'supabase/sql/pdf-export.sql']
 permissions:
   contents: read
+  packages: read
   id-token: write
 concurrency:
   group: pdf-export-worker
@@ -18,12 +19,14 @@ jobs:
   compile:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      PDF_WORKER_IMAGE: ghcr.io/everflowcn/everflow-pdf-worker:latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
       - name: Validate worker syntax
-        run: python3 -m py_compile tools/pdf/worker.py tools/pdf/render.py
+        run: python3 -m py_compile tools/pdf/worker.py tools/pdf/render.py tools/pdf/worker_daemon.py
       - name: Cleanup expired exports and check queue
         id: pending
         run: |
@@ -41,19 +44,35 @@ jobs:
           fi
           echo "renderer=$renderer" >> "$GITHUB_OUTPUT"
           echo "Renderer changed: $renderer"
-      - name: Install XeLaTeX and CJK fonts
+      - uses: docker/login-action@v3
         if: steps.pending.outputs.count != '0' || steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch'
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends texlive-xetex texlive-plain-generic texlive-lang-chinese texlive-latex-extra texlive-science texlive-fonts-recommended fonts-texgyre fonts-texgyre-math fonts-oflb-asana-math python3-pil python3-cairosvg fonts-noto-cjk poppler-utils
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull prebuilt XeLaTeX worker image
+        if: steps.pending.outputs.count != '0' || steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch'
+        run: docker pull "$PDF_WORKER_IMAGE"
       - name: Test body-only layouts
         if: steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch'
         run: |
-          python3 tools/pdf/test_render.py
-          PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py
+          mkdir -p /tmp/pdf-verification
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/app" \
+            -v "/tmp/pdf-verification:/tmp/pdf-verification" \
+            -w /app \
+            "$PDF_WORKER_IMAGE" \
+            bash -lc 'python3 tools/pdf/test_render.py && PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py'
       - name: Process queued exports
         if: steps.pending.outputs.count != '0'
-        run: python3 tools/pdf/worker.py
+        run: |
+          docker run --rm \
+            -e ACTIONS_ID_TOKEN_REQUEST_URL \
+            -e ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+            -v "$GITHUB_WORKSPACE:/app" \
+            -w /app \
+            "$PDF_WORKER_IMAGE" \
+            bash -lc 'PYTHONPATH=tools/pdf python3 tools/pdf/worker.py'
       - uses: actions/upload-artifact@v4
         if: always() && (steps.pending.outputs.renderer == '1' || github.event_name == 'workflow_dispatch')
         with:
