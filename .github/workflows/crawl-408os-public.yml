@@ -14,16 +14,16 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Install Playwright
+      - name: Install browser tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install playwright==1.57.0
+          python -m pip install playwright==1.57.0 crawl4ai==0.9.3
           python -m playwright install --with-deps chromium
       - name: Probe public 408os routes and requests
         run: |
@@ -31,11 +31,15 @@ jobs:
       - name: Scan public Relax1000 frontend assets
         run: |
           python scratch/408os-crawl/scan_relax_assets.py
+      - name: Verify Crawl4AI public crawl
+        run: |
+          python scratch/408os-crawl/crawl4ai_probe.py
       - name: Show probe summaries
         if: always()
         run: |
           test -f crawl-output/probe.json && cat crawl-output/probe.json || true
           test -f crawl-output/relax-static-scan.json && cat crawl-output/relax-static-scan.json || true
+          test -f crawl-output/crawl4ai-probe.json && cat crawl-output/crawl4ai-probe.json || true
       - name: Upload probe artifact
         if: always()
         uses: actions/upload-artifact@v4
