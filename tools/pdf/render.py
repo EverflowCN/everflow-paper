@@ -51,6 +51,15 @@ def rich(s):
         out.append(rendered)
     return ''.join(out)
 
+def choice_rich(s):
+    """Render one choice without paragraph tokens.
+
+    \fourchoices is a non-long macro: a literal \par inside any argument makes
+    TeX stop scanning that argument. Stems may use paragraph breaks, choices may
+    not. Keep the text but flatten generated paragraph separators to spaces.
+    """
+    return rich(s).replace(r'\par ',' ').strip()
+
 def evidence_rank(q):
     if q.get('verification',{}).get('status')!='verified':return 0
     mode=q.get('verification',{}).get('mode','').lower()
@@ -105,7 +114,7 @@ def render(payload,questions,dest):
     answer_space='' if payload['layout']=='compact' else r'\par\vspace*{25mm}'
     (dest/'settings.tex').write_text(r'\def\PaperTitle{'+escape(payload['title'])+'}\n'+r'\def\EverflowExamQuestionGap{'+gap+'}\n',encoding='utf8')
     chunks=[];nimage=0
-    def figure(src,source):
+    def figure(src,source,choice=False):
         nonlocal nimage
         data=fetch(asset_url(src,source));nimage+=1
         if b'<svg' in data[:1000]:
@@ -121,7 +130,10 @@ def render(payload,questions,dest):
         with Image.open(io.BytesIO(data)) as im:
             if im.width*im.height>40000000:raise ValueError('Image too large')
             im.convert('RGB').save(dest/f'figure-{nimage}.png')
-        return '\n'+r'\par\begin{center}\includegraphics[width=.88\linewidth,height=.48\textheight,keepaspectratio]{figure-'+str(nimage)+r'.png}\end{center}'+'\n'
+        name='figure-'+str(nimage)+'.png'
+        if choice:
+            return r'\includegraphics[width=.72\linewidth,height=.18\textheight,keepaspectratio]{'+name+'}'
+        return '\n'+r'\par\begin{center}\includegraphics[width=.88\linewidth,height=.48\textheight,keepaspectratio]{'+name+r'}\end{center}'+'\n'
     for q in questions:
         source=q['_source']; options=q.get('options',{})
         if isinstance(options,list):options={str(v.get('key','ABCD'[i])):v.get('text','') for i,v in enumerate(options)}
@@ -130,11 +142,12 @@ def render(payload,questions,dest):
         figs=q.get('figures',[]) if source=='zhenti' else [{'src':v} for v in q.get('questionImages',[])]
         option_figs={}
         for f in figs:
-            img=figure(f['src'],source)
-            if f.get('option') and f.get('option') in 'ABCD':option_figs[f['option']]=option_figs.get(f['option'],'')+img
+            is_option=bool(f.get('option') and f.get('option') in 'ABCD')
+            img=figure(f['src'],source,choice=is_option)
+            if is_option:option_figs[f['option']]=option_figs.get(f['option'],'')+img
             else:body+=img
         if not fallback and options:
-            body+='\n'+r'\fourchoices'+''.join('{'+rich(options.get(k,''))+option_figs.get(k,'')+'}' for k in 'ABCD')
+            body+='\n'+r'\fourchoices'+''.join('{'+choice_rich(options.get(k,''))+option_figs.get(k,'')+'}' for k in 'ABCD')
         if not body.strip():raise ValueError('Empty question '+q['_id'])
         chunks.append(r'\begin{bbox}\qitem '+body+answer_space+'\n'+r'\end{bbox}')
     (dest/'questions.tex').write_text('\n\n'.join(chunks),encoding='utf8')
