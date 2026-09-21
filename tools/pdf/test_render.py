@@ -1,6 +1,6 @@
 import re,subprocess,unittest
 from pathlib import Path
-from render import escape,rich,render,merge_layers,resolve
+from render import escape,rich,choice_rich,render,merge_layers,resolve
 
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
@@ -23,6 +23,18 @@ class Safety(unittest.TestCase):
   text=rich('I/O 指令；答案仅 I、II、III；PCIe。')
   self.assertNotIn(r'\par I/O',text)
   self.assertNotIn('、'+r'\par ',text)
+ def test_choice_renderer_never_emits_paragraph_tokens(self):
+  option=choice_rich('I、II、III；II、III、IV；①第一项；②第二项')
+  self.assertNotIn(r'\par',option)
+  self.assertIn('I、II、III',option)
+ def test_choice_regression_from_failed_export(self):
+  questions=[{'_source':'relax','_id':'regression','stem':'测试题。','options':{
+   'A':'I、II、III','B':'II、III、IV','C':'I、III、IV','D':'I、II、IV'}}]
+  dest=Path('/tmp/pdf-verification/choice-regression')
+  pdf=render({'title':'选择题段落回归','layout':'compact'},questions,dest)
+  self.assertGreater(pdf.stat().st_size,10000)
+  tex=(dest/'questions.tex').read_text(encoding='utf8')
+  self.assertNotIn(r'\fourchoices{\par',tex)
  def test_escape(self):self.assertEqual(r'a\_b\%',escape('a_b%'))
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}
