@@ -28,10 +28,14 @@ jobs:
       - name: Probe public 408os routes and requests
         run: |
           python scratch/408os-crawl/probe.py
-      - name: Show probe summary
+      - name: Scan public Relax1000 frontend assets
+        run: |
+          python scratch/408os-crawl/scan_relax_assets.py
+      - name: Show probe summaries
         if: always()
         run: |
           test -f crawl-output/probe.json && cat crawl-output/probe.json || true
+          test -f crawl-output/relax-static-scan.json && cat crawl-output/relax-static-scan.json || true
       - name: Upload probe artifact
         if: always()
         uses: actions/upload-artifact@v4
