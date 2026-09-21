@@ -1,53 +1,22 @@
-name: Temporary 408os public crawl probe
+name: Temporary Relax1000 final package
 
 on:
   push:
     branches:
       - crawl-408os-relax1000-20260921
-  pull_request:
-    branches:
-      - main
 
 permissions:
   contents: read
 
 jobs:
-  probe:
+  package:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - name: Checkout Everflow tools
+        uses: actions/checkout@v6
         with:
-          python-version: '3.13'
-      - name: Install browser tools
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install playwright==1.57.0 crawl4ai==0.9.3
-          python -m playwright install --with-deps chromium
-      - name: Probe public 408os routes and requests
-        run: |
-          python scratch/408os-crawl/probe.py
-      - name: Scan public Relax1000 frontend assets
-        run: |
-          python scratch/408os-crawl/scan_relax_assets.py
-      - name: Verify Crawl4AI public crawl
-        run: |
-          python scratch/408os-crawl/crawl4ai_probe.py
-      - name: Show probe summaries
-        if: always()
-        run: |
-          test -f crawl-output/probe.json && cat crawl-output/probe.json || true
-          test -f crawl-output/relax-static-scan.json && cat crawl-output/relax-static-scan.json || true
-          test -f crawl-output/crawl4ai-probe.json && cat crawl-output/crawl4ai-probe.json || true
-      - name: Upload probe artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: 408os-public-probe
-          path: crawl-output/
-          if-no-files-found: warn
-          retention-days: 3
+          ref: crawl-408os-relax1000-20260921
 
       - name: Checkout Relax1000 source
         uses: actions/checkout@v6
