@@ -1,6 +1,6 @@
 import re,subprocess,unittest
 from pathlib import Path
-from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem,render_structured_text
+from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem,render_structured_text,render_structured_text
 
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
@@ -75,6 +75,40 @@ class Safety(unittest.TestCase):
   self.assertIn('P₁ 和 P₂',second)
   self.assertIn('P₁：计算 60ms',second)
   self.assertNotIn('P₁\n和\nP₂',second)
+ def test_pipe_table_renders_as_latex_table(self):
+  text=normalize_soft_breaks('进程 | 计算时间 | I/O 时间\nP₁ | 90% | 10%\nP₂ | 50% | 50%\nP₃ | 15% | 85%')
+  rendered=render_structured_text(text)
+  self.assertIn(r'\begin{tabularx}',rendered)
+  self.assertIn(r'90\%',rendered)
+  self.assertNotIn('P₁ | 90',rendered)
+ def test_reported_pdf_layout_regression(self):
+  payload={'title':'截图问题回归','layout':'compact','questions':[
+   {'source':'zhenti','id':'2013-31'},
+   {'source':'zhenti','id':'2010-4'},
+   {'source':'zhenti','id':'2012-29'},
+   {'source':'zhenti','id':'2012-27'}
+  ]}
+  overrides=[
+   {'bank':'zhenti','entity_id':'2013-31','patch':{'stem':'某系统正在执行三个进程\nP₁\n、\nP₂\n和\nP₃\n，各进程的计算 (CPU) 时间和 I/O 时间比例如下表所示。\n\n进程 | 计算时间 | I/O 时间\nP₁ | 90% | 10%\nP₂ | 50% | 50%\nP₃ | 15% | 85%\n\n为提高系统资源利用率，合理的进程优先级设置应为（ ）。'}},
+   {'bank':'zhenti','entity_id':'2012-29','patch':{'stem':'一个多道批处理系统中仅有\nP₁\n和\nP₂\n两个作业，\nP₂\n比\nP₁\n晚 5ms 到达，它们的计算和 I/O 操作顺序如下：\n\nP₁\n：计算 60ms，I/O 80ms，计算 20ms\n\nP₂\n：计算 120ms，I/O 40ms，计算 40ms'}},
+   {'bank':'zhenti','entity_id':'2012-27','patch':{'stem':'假设 5 个进程\nP₀\n、\nP₁\n、\nP₂\n、\nP₃\n、\nP₄\n共享三类资源\nR₁\n、\nR₂\n、\nR₃\n，这些资源总数分别为 18、6、22。\n\n进程 | 已分配资源 | 资源最大需求\nR 1 | R 2 | R 3 | R 1 | R 2 | R 3\nP 0 | 3 | 2 | 3 | 5 | 5 | 10'}}
+  ]
+  questions=resolve(payload,overrides)
+  dest=Path('/tmp/pdf-verification/reported-layout')
+  pdf=render(payload,questions,dest)
+  self.assertGreater(pdf.stat().st_size,10000)
+  tex=(dest/'questions.tex').read_text(encoding='utf8')
+  self.assertEqual(tex.count(r'\begin{tabularx}'),1)
+  self.assertNotIn('P₁\\par 和\\par P₂',tex)
+  self.assertNotIn('进程 | 已分配资源',tex)
+  self.assertIn('P₁ 和 P₂',tex)
+  from PIL import Image
+  images=sorted(dest.glob('figure-*.png'))
+  self.assertGreaterEqual(len(images),2)
+  for image in images:
+   with Image.open(image) as im:
+    px=im.convert('RGB').getpixel((0,0))
+    self.assertGreaterEqual(min(px),245)
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}
   original={'stem':'original','verification':{'status':'verified','mode':'original-paper'}}
