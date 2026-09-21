@@ -35,6 +35,12 @@ def code_like_block(block):
     code_hits=sum(bool(re.search(r'[{};]|\b(?:while|for|if|return|void|int|boolean)\b|(?:==|&&|\+\+|--)',line)) for line in lines)
     return code_hits>=2
 
+def list_like_block(block):
+    lines=[line.strip() for line in str(block or '').splitlines() if line.strip()]
+    if len(lines)<2:return False
+    marker=re.compile(r'^(?:\(?\d+[）).、]|[①②③④⑤⑥⑦⑧⑨⑩]|(?:I|II|III|IV|V|VI|VII|VIII|IX|X)[、.．:：\s])')
+    return sum(bool(marker.match(line)) for line in lines)>=2
+
 def normalize_soft_breaks(value):
     """Treat single OCR/Markdown newlines as spaces, but preserve real blocks."""
     text=str(value or '').replace('\r\n','\n').replace('\r','\n').strip()
@@ -44,7 +50,7 @@ def normalize_soft_breaks(value):
     for block in blocks:
         lines=[line.strip() for line in block.split('\n') if line.strip()]
         if not lines:continue
-        if pipe_table_block(block) or code_like_block(block):
+        if pipe_table_block(block) or code_like_block(block) or list_like_block(block):
             normalized.append('\n'.join(lines))
         else:
             joined=' '.join(lines)
