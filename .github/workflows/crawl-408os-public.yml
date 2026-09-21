@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - crawl-408os-relax1000-20260921
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
