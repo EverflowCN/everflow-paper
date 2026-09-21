@@ -58,9 +58,9 @@ begin
  if cfg_enabled is not true then raise exception 'PDF_DISABLED'; end if;
  if exists(select 1 from public.pdf_export_jobs where user_id=p_user and status in ('queued','preparing','compiling','storing') and expires_at>now()) then raise exception 'PDF_ACTIVE_JOB'; end if;
  if not (cfg_admin_unlimited and p_priority>0) then
-  if (select count(*) from public.pdf_export_jobs where user_id=p_user and created_at>now()-interval '1 hour')>=cfg_hourly then raise exception 'PDF_HOURLY_LIMIT'; end if;
+  if (select count(*) from public.pdf_export_jobs where user_id=p_user and status<>'failed' and created_at>now()-interval '1 hour')>=cfg_hourly then raise exception 'PDF_HOURLY_LIMIT'; end if;
   day_start := date_trunc('day',now() at time zone 'Asia/Shanghai') at time zone 'Asia/Shanghai';
-  if (select count(*) from public.pdf_export_jobs where user_id=p_user and created_at>=day_start)>=cfg_daily then raise exception 'PDF_DAILY_LIMIT'; end if;
+  if (select count(*) from public.pdf_export_jobs where user_id=p_user and status<>'failed' and created_at>=day_start)>=cfg_daily then raise exception 'PDF_DAILY_LIMIT'; end if;
  end if;
  insert into public.pdf_export_jobs(user_id,request_key,payload,priority) values(p_user,p_key,p_payload,p_priority) returning * into j;
  return j;
