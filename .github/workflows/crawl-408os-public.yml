@@ -14,7 +14,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -48,3 +48,35 @@ jobs:
           path: crawl-output/
           if-no-files-found: warn
           retention-days: 3
+
+      - name: Checkout Relax1000 source
+        uses: actions/checkout@v6
+        with:
+          repository: EverflowCN/408-exercise-paper-generator
+          ref: main
+          path: .relax-source
+          sparse-checkout: |
+            站点/data
+            站点/question-images
+            站点/explanations
+          sparse-checkout-cone-mode: false
+
+      - name: Build audited Relax1000 package
+        run: |
+          set -euo pipefail
+          python scratch/408os-crawl/build_relax_final_package.py
+          cd package
+          zip -r -9 ../Relax1000-Everflow-Final.zip Relax1000-Everflow-Final >/dev/null
+          cd ..
+          echo "=== AUDIT ==="
+          cat package/Relax1000-Everflow-Final/data/audit_report.json
+          echo "=== ZIP ==="
+          ls -lh Relax1000-Everflow-Final.zip
+
+      - name: Upload final Relax1000 ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Relax1000-Everflow-Final
+          path: Relax1000-Everflow-Final.zip
+          if-no-files-found: error
+          retention-days: 7
