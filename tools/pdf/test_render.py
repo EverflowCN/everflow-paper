@@ -1,6 +1,6 @@
 import re,subprocess,unittest
 from pathlib import Path
-from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference
+from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem
 
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
@@ -42,6 +42,19 @@ class Safety(unittest.TestCase):
   self.assertTrue(external_css_reference('fill:url(https://example.com/a.svg#x)'))
   self.assertTrue(external_css_reference('fill:url(data:image/svg+xml;base64,AAAA)'))
   self.assertTrue(external_css_reference('@import url("https://example.com/x.css")'))
+ def test_imported_soft_linebreaks_do_not_split_tokens(self):
+  text=normalize_soft_breaks('一个系统中仅有\nP₁\n和\nP₂\n两个作业。\n\nP₁\n：计算 60ms')
+  self.assertIn('仅有 P₁ 和 P₂ 两个作业。',text)
+  self.assertIn('P₁ ：计算 60ms',text)
+  self.assertNotIn('P₁\n和\nP₂',text)
+ def test_real_zhenti_override_cleanup(self):
+  payload={'title':'真题导入格式回归','layout':'compact','questions':[{'source':'zhenti','id':'2012-27'},{'source':'zhenti','id':'2012-29'}]}
+  questions=resolve(payload,[])
+  first=prepared_stem(questions[0]);second=prepared_stem(questions[1])
+  self.assertNotIn('|',first)
+  self.assertIn('P₀ 、 P₁ 、 P₂ 、 P₃ 、 P₄',first)
+  self.assertIn('P₁ 和 P₂',second)
+  self.assertNotIn('P₁\n和\nP₂',second)
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}
   original={'stem':'original','verification':{'status':'verified','mode':'original-paper'}}
@@ -64,10 +77,19 @@ class Safety(unittest.TestCase):
   self.assertIn('sin()',rendered[3])
   self.assertIn('wait()',rendered[4])
  def test_canonical_figures(self):
-  payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2026-28'},{'source':'zhenti','id':'2026-36'},{'source':'zhenti','id':'2025-1'},{'source':'zhenti','id':'2019-38'}]}
+  payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2010-4'},{'source':'zhenti','id':'2012-27'},{'source':'zhenti','id':'2012-29'},{'source':'zhenti','id':'2019-38'}]}
   questions=resolve(payload,[])
   self.assertTrue(any(q.get('figures') for q in questions))
-  render(payload,questions,Path('/tmp/pdf-verification/canonical'))
+  dest=Path('/tmp/pdf-verification/canonical')
+  render(payload,questions,dest)
+  tex=(dest/'questions.tex').read_text(encoding='utf8')
+  self.assertNotIn('P₁\\par',tex)
+  self.assertNotIn('P₂\\par',tex)
+  self.assertNotIn('进程 | 已分配资源',tex)
+  from PIL import Image
+  with Image.open(dest/'figure-1.png') as im:
+   px=im.convert('RGB').getpixel((0,0))
+   self.assertGreaterEqual(min(px),245)
  def test_failed_zhenti_export_regression(self):
   ids=['2015-17','2024-37','2023-15','2010-27','2023-3','2012-11','2010-18','2019-38','2026-29','2009-36','2010-28','2022-26','2017-34','2018-23','2012-10','2026-33','2011-19','2026-10','2024-3','2026-18','2019-22','2019-4','2022-6','2016-21','2011-15','2024-9','2009-17','2025-9','2010-38','2016-11','2012-27','2011-36','2024-30','2018-5','2022-13','2026-14','2022-30','2015-32','2026-37','2019-23']
   payload={'title':'408 仿真组卷 · 408 真题','layout':'compact','questions':[{'source':'zhenti','id':qid} for qid in ids]}
