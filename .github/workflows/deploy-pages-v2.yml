@@ -101,6 +101,21 @@ jobs:
           grep -Fq "const CACHE='everflow-site-v" site/sw.js
           node - <<'NODE'
           const fs=require('fs');
+          const workspace=fs.readFileSync('site/workspace/index.html','utf8');
+          const workspacePdfCss=fs.readFileSync('site/assets/css/workspace-pdf-v1.css','utf8');
+          const workspaceShell=fs.readFileSync('site/assets/js/workspace-shell-v1.js','utf8');
+          if(workspace.includes('\\n<link'))throw new Error('Workspace HTML contains a literal \\n before a stylesheet link');
+          const nav=[...workspace.matchAll(/data-ws-nav="([^"]+)"/g)].map(m=>m[1]);
+          const panels=[...workspace.matchAll(/data-ws-panel="([^"]+)"/g)].map(m=>m[1]);
+          if(nav.some(id=>!panels.includes(id))||panels.some(id=>!nav.includes(id)))throw new Error('Workspace navigation and panel IDs are out of sync');
+          const pdfBase=workspacePdfCss.indexOf('.pdf-admin-policy-form{grid-template-columns:repeat(2,minmax(0,1fr))}');
+          const pdfMobile=workspacePdfCss.lastIndexOf('@media(max-width:720px)');
+          if(pdfBase<0||pdfMobile<pdfBase)throw new Error('PDF admin mobile rules must come after the base quota form rule');
+          if(!workspaceShell.includes("document.body.classList.remove('ws-sidebar-collapsed')"))throw new Error('Workspace responsive sidebar reset missing');
+          console.log('Workspace regression guards OK');
+          NODE
+          node - <<'NODE'
+          const fs=require('fs');
           const html=fs.readFileSync('site/relax/index.html','utf8');
           const js=fs.readFileSync('site/assets/js/paper-builder.js','utf8');
           const overlay=html.indexOf('zhenti-data-overlay.js');
