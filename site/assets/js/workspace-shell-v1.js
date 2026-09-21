@@ -59,6 +59,17 @@
   document.addEventListener('everflow:workspace-section',event=>{closeMobileNav();const id=event.detail?.id;$$('[data-ws-nav]').forEach(node=>node.toggleAttribute('aria-current',node.dataset.wsNav===id));document.title=`${event.detail?.title||'管理工作台'} · Everflow`});
   document.addEventListener('everflow:workspace-data',event=>{const data=event.detail||{},quality=data.quality||{};setBadge('feedback',quality.summary?.openFeedback);setBadge('risks',quality.summary?.highRisks);setBadge('quality',quality.summary?.qualityIssues)});
   document.addEventListener('everflow:question-workbench-summary',event=>{const detail=event.detail||{};setBadge('questions',(Number(detail.drafts)||0)+(Number(detail.issues)||0))});
-  addEventListener('resize',()=>{if(!isMobile())closeMobileNav()},{passive:true});
-  const initial=location.hash.slice(1)||'overview';$$('[data-ws-nav]').forEach(node=>node.toggleAttribute('aria-current',node.dataset.wsNav===initial));
+  let mobileLayout=isMobile();
+  if(mobileLayout)document.body.classList.remove('ws-sidebar-collapsed');
+  addEventListener('resize',()=>{
+    const nextMobile=isMobile();
+    if(nextMobile){
+      document.body.classList.remove('ws-sidebar-collapsed');
+    }else{
+      closeMobileNav();
+      if(mobileLayout)restoreNavigation();
+    }
+    mobileLayout=nextMobile;
+  },{passive:true});
+  const initial=location.hash.slice(1)||'overview';$('[data-ws-nav]').forEach(node=>node.toggleAttribute('aria-current',node.dataset.wsNav===initial));
 })();
