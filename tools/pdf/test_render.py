@@ -68,6 +68,14 @@ class Safety(unittest.TestCase):
   questions=resolve(payload,[])
   self.assertTrue(any(q.get('figures') for q in questions))
   render(payload,questions,Path('/tmp/pdf-verification/canonical'))
+ def test_failed_zhenti_export_regression(self):
+  ids=['2015-17','2024-37','2023-15','2010-27','2023-3','2012-11','2010-18','2019-38','2026-29','2009-36','2010-28','2022-26','2017-34','2018-23','2012-10','2026-33','2011-19','2026-10','2024-3','2026-18','2019-22','2019-4','2022-6','2016-21','2011-15','2024-9','2009-17','2025-9','2010-38','2016-11','2012-27','2011-36','2024-30','2018-5','2022-13','2026-14','2022-30','2015-32','2026-37','2019-23']
+  payload={'title':'408 仿真组卷 · 408 真题','layout':'compact','questions':[{'source':'zhenti','id':qid} for qid in ids]}
+  questions=resolve(payload,[])
+  self.assertEqual(len(questions),40)
+  self.assertTrue(all((q.get('stem') or q.get('figures')) for q in questions))
+  pdf=render(payload,questions,Path('/tmp/pdf-verification/failed-zhenti-regression'))
+  self.assertGreater(pdf.stat().st_size,10000)
  def test_compile(self):
   questions=[{'_source':'zhenti','_id':str(i),'stem':r'验证题。调用 wait()/signal()，答案位置（ ）数据，另一处（ ），已知 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$，请判断 $2^{10}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
   for layout in ['compact','spacious']:
