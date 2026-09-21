@@ -123,6 +123,40 @@ def choice_rich(s):
     """
     return rich(s).replace(r'\par ',' ').strip()
 
+def render_pipe_table(block):
+    """Render Markdown/OCR pipe tables as a real wrapping LaTeX table."""
+    rows=[]
+    for line in str(block or '').splitlines():
+        line=line.strip()
+        if line.count('|')<2:continue
+        cells=[cell.strip() for cell in line.strip('|').split('|')]
+        if len(cells)<2:continue
+        if cells and all(re.fullmatch(r':?-{2,}:?',cell or '') for cell in cells):continue
+        rows.append(cells)
+    if len(rows)<2:return rich(block)
+    columns=max(len(row) for row in rows)
+    rows=[row+['']*(columns-len(row)) for row in rows]
+    size=r'\scriptsize' if columns>=5 else r'\small'
+    preamble='|*{'+str(columns)+r'}{>{\centering\arraybackslash}X|}'
+    body=[]
+    for row in rows:
+        body.append(' & '.join(choice_rich(cell) for cell in row)+r' \\ \hline')
+    return (r'\par\noindent\begingroup '+size+
+            r'\renewcommand{\arraystretch}{1.18}\setlength{\tabcolsep}{3pt}'+
+            r'\begin{tabularx}{\linewidth}{'+preamble+r'}\hline '+
+            ' '.join(body)+r'\end{tabularx}\endgroup\par ')
+
+def render_structured_text(value):
+    """Render prose normally while converting imported pipe tables to LaTeX."""
+    text=str(value or '')
+    if not text:return ''
+    blocks=re.split(r'\n[ \t]*\n+',text)
+    rendered=[]
+    for block in blocks:
+        if not block.strip():continue
+        rendered.append(render_pipe_table(block) if pipe_table_block(block) else rich(block))
+    return r'\par '.join(rendered)
+
 def evidence_rank(q):
     if q.get('verification',{}).get('status')!='verified':return 0
     mode=q.get('verification',{}).get('mode','').lower()
@@ -208,7 +242,7 @@ def render(payload,questions,dest):
         source=q['_source']; options=q.get('options',{})
         if isinstance(options,list):options={str(v.get('key','ABCD'[i])):v.get('text','') for i,v in enumerate(options)}
         fallback=source=='relax' and q.get('questionImages') and (q.get('imageFallback') or any(re.search(r'\ufffd|\?\s*\?',str(v)) for v in [q.get('stem',''),*options.values()]))
-        body='' if fallback else rich(prepared_stem(q))
+        body='' if fallback else render_structured_text(prepared_stem(q))
         figs=q.get('figures',[]) if source=='zhenti' else [{'src':v} for v in q.get('questionImages',[])]
         option_figs={}
         for f in figs:
