@@ -47,6 +47,9 @@ class Safety(unittest.TestCase):
   self.assertIn('仅有 P₁ 和 P₂ 两个作业。',text)
   self.assertIn('P₁：计算 60ms',text)
   self.assertNotIn('P₁\n和\nP₂',text)
+ def test_imported_lists_keep_line_structure(self):
+  text=normalize_soft_breaks('(1) 第一问\n(2) 第二问\n(3) 第三问')
+  self.assertEqual(text,'(1) 第一问\n(2) 第二问\n(3) 第三问')
  def test_imported_duplicate_table_is_removed_when_figure_exists(self):
   q={'stem':'假设 5 个进程\nP₀\n、\nP₁\n共享资源。\n\n进程 | 已分配资源 | 最大需求\nP 0 | 3 | 5\nP 1 | 4 | 6',
      'options':{'A':'x','B':'y','C':'z','D':'w'},
