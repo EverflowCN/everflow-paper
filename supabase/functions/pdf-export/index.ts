@@ -54,8 +54,8 @@ async function quotaSnapshot(userId:string,isManager:boolean,cfg?:PdfExportConfi
  if(isManager&&config.adminUnlimited)return{enabled:config.enabled,unlimited:true,dailyLimit:config.dailyLimit,hourlyLimit:config.hourlyLimit,usedDaily:0,usedHourly:0,remainingDaily:null,remainingHourly:null,resetAt,timezone:'Asia/Shanghai'};
  const hourSince=new Date(Date.now()-60*60*1000).toISOString();
  const [dayResult,hourResult]=await Promise.all([
-  db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('user_id',userId).gte('created_at',startIso),
-  db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('user_id',userId).gte('created_at',hourSince)
+  db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('user_id',userId).neq('status','failed').gte('created_at',startIso),
+  db.from('pdf_export_jobs').select('id',{count:'exact',head:true}).eq('user_id',userId).neq('status','failed').gte('created_at',hourSince)
  ]);
  if(dayResult.error)throw dayResult.error;if(hourResult.error)throw hourResult.error;
  const usedDaily=dayResult.count||0,usedHourly=hourResult.count||0;
