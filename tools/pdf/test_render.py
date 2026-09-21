@@ -152,6 +152,27 @@ class Safety(unittest.TestCase):
   self.assertTrue(all((q.get('stem') or q.get('figures')) for q in questions))
   pdf=render(payload,questions,Path('/tmp/pdf-verification/failed-zhenti-regression'))
   self.assertGreater(pdf.stat().st_size,10000)
+ def test_reported_76397_export_regression(self):
+  ids=['2009-33','2016-27','2009-18','2016-16','2024-6','2009-34','2016-9','2014-21','2010-36','2013-31','2016-40','2025-4','2010-4','2018-28','2015-20','2023-36','2019-4','2020-12','2012-29','2022-32','2012-27','2023-27','2023-8','2022-1','2013-21','2024-7','2012-36','2023-21','2019-19','2020-25','2017-13','2022-8','2016-7','2021-33','2012-33','2021-16','2023-19','2021-4','2018-23','2011-24']
+  overrides=[
+   {'bank':'zhenti','entity_id':'2013-31','patch':{'stem':'某系统正在执行三个进程\nP₁\n、\nP₂\n和\nP₃\n，各进程的计算 (CPU) 时间和 I/O 时间比例如下表所示。\n\n进程 | 计算时间 | I/O 时间\nP₁ | 90% | 10%\nP₂ | 50% | 50%\nP₃ | 15% | 85%\n\n为提高系统资源利用率，合理的进程优先级设置应为（ ）。'}},
+   {'bank':'zhenti','entity_id':'2012-29','patch':{'stem':'一个多道批处理系统中仅有\nP₁\n和\nP₂\n两个作业，\nP₂\n比\nP₁\n晚 5ms 到达，它们的计算和 I/O 操作顺序如下：\n\nP₁\n：计算 60ms，I/O 80ms，计算 20ms\n\nP₂\n：计算 120ms，I/O 40ms，计算 40ms\n\n若不考虑调度和切换时间，则完成两个作业需要的时间最少是（ ）。'}},
+   {'bank':'zhenti','entity_id':'2012-27','patch':{'stem':'假设 5 个进程\nP₀\n、\nP₁\n、\nP₂\n、\nP₃\n、\nP₄\n共享三类资源\nR₁\n、\nR₂\n、\nR₃\n，这些资源总数分别为 18、6、22。T0 时刻的资源分配情况如下表所示，此时存在的一个安全序列是（ ）。\n\n进程 | 已分配资源 | 资源最大需求\nR 1 | R 2 | R 3 | R 1 | R 2 | R 3\nP 0 | 3 | 2 | 3 | 5 | 5 | 10\nP 1 | 4 | 0 | 3 | 5 | 3 | 6\nP 2 | 4 | 0 | 5 | 4 | 0 | 11\nP 3 | 2 | 0 | 4 | 4 | 2 | 5\nP 4 | 3 | 1 | 4 | 4 | 2 | 4'}}
+  ]
+  payload={'title':'408 仿真组卷 · 408 真题','layout':'compact','questions':[{'source':'zhenti','id':qid} for qid in ids]}
+  questions=resolve(payload,overrides)
+  self.assertEqual(len(questions),40)
+  dest=Path('/tmp/pdf-verification/reported-76397')
+  pdf=render(payload,questions,dest)
+  self.assertGreater(pdf.stat().st_size,10000)
+  tex=(dest/'questions.tex').read_text(encoding='utf8')
+  self.assertNotIn('P₁\\par 和\\par P₂',tex)
+  self.assertNotIn('进程 | 已分配资源',tex)
+  self.assertIn(r'\begin{tabularx}',tex)
+  figure_files=sorted(dest.glob('figure-*.png'))
+  self.assertTrue(figure_files)
+  from PIL import Image
+  self.assertTrue(any(min(Image.open(path).convert('RGB').getpixel((0,0)))>=245 for path in figure_files))
  def test_compile(self):
   questions=[{'_source':'zhenti','_id':str(i),'stem':r'验证题。调用 wait()/signal()，答案位置（ ）数据，另一处（ ），已知 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$，请判断 $2^{10}$ 的值。','options':{'A':'1024','B':'2048','C':'4096','D':'8192'}} for i in range(1,21)]
   for layout in ['compact','spacious']:
