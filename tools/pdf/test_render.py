@@ -45,15 +45,27 @@ class Safety(unittest.TestCase):
  def test_imported_soft_linebreaks_do_not_split_tokens(self):
   text=normalize_soft_breaks('一个系统中仅有\nP₁\n和\nP₂\n两个作业。\n\nP₁\n：计算 60ms')
   self.assertIn('仅有 P₁ 和 P₂ 两个作业。',text)
-  self.assertIn('P₁ ：计算 60ms',text)
+  self.assertIn('P₁：计算 60ms',text)
   self.assertNotIn('P₁\n和\nP₂',text)
+ def test_imported_duplicate_table_is_removed_when_figure_exists(self):
+  q={'stem':'假设 5 个进程\nP₀\n、\nP₁\n共享资源。\n\n进程 | 已分配资源 | 最大需求\nP 0 | 3 | 5\nP 1 | 4 | 6',
+     'options':{'A':'x','B':'y','C':'z','D':'w'},
+     'figures':[{'src':'/data/zhenti/assets/2012/q27-resource-table.svg'}]}
+  text=prepared_stem(q)
+  self.assertNotIn('|',text)
+  self.assertIn('P₀、P₁ 共享资源。',text)
  def test_real_zhenti_override_cleanup(self):
   payload={'title':'真题导入格式回归','layout':'compact','questions':[{'source':'zhenti','id':'2012-27'},{'source':'zhenti','id':'2012-29'}]}
-  questions=resolve(payload,[])
+  overrides=[
+   {'bank':'zhenti','entity_id':'2012-27','patch':{'stem':'假设 5 个进程\nP₀\n、\nP₁\n、\nP₂\n、\nP₃\n、\nP₄\n共享三类资源\nR₁\n、\nR₂\n、\nR₃\n，这些资源总数分别为 18、6、22。\n\n进程 | 已分配资源 | 资源最大需求\nR 1 | R 2 | R 3 | R 1 | R 2 | R 3\nP 0 | 3 | 2 | 3 | 5 | 5 | 10'}},
+   {'bank':'zhenti','entity_id':'2012-29','patch':{'stem':'一个多道批处理系统中仅有\nP₁\n和\nP₂\n两个作业，\nP₂\n比\nP₁\n晚 5ms 到达。\n\nP₁\n：计算 60ms，I/O 80ms，计算 20ms'}}
+  ]
+  questions=resolve(payload,overrides)
   first=prepared_stem(questions[0]);second=prepared_stem(questions[1])
   self.assertNotIn('|',first)
-  self.assertIn('P₀ 、 P₁ 、 P₂ 、 P₃ 、 P₄',first)
+  self.assertIn('P₀、P₁、P₂、P₃、P₄ 共享三类资源 R₁、R₂、R₃',first)
   self.assertIn('P₁ 和 P₂',second)
+  self.assertIn('P₁：计算 60ms',second)
   self.assertNotIn('P₁\n和\nP₂',second)
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}
