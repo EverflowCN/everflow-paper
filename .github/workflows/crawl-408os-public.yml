@@ -1,0 +1,39 @@
+name: Temporary 408os public crawl probe
+
+on:
+  push:
+    branches:
+      - crawl-408os-relax1000-20260921
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Probe public 408os routes and requests
+        run: |
+          python scratch/408os-crawl/probe.py
+      - name: Show probe summary
+        if: always()
+        run: |
+          test -f crawl-output/probe.json && cat crawl-output/probe.json || true
+      - name: Upload probe artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 408os-public-probe
+          path: crawl-output/
+          if-no-files-found: warn
+          retention-days: 3
