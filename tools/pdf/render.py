@@ -16,6 +16,15 @@ def fetch(url,limit=20000000):
     if len(data)>limit:raise ValueError('Asset too large')
     return data
 
+def external_css_reference(value):
+    """Return True when CSS/attribute text references anything outside this SVG."""
+    text=html.unescape(str(value or ''))
+    if re.search(r'@import\b',text,flags=re.I):return True
+    for match in re.finditer(r'url\(\s*([^)]+?)\s*\)',text,flags=re.I):
+        target=match.group(1).strip().strip('"\'').strip()
+        if not re.fullmatch(r'#[A-Za-z0-9_.:-]+',target):return True
+    return False
+
 def escape(s):
     table={'\\':r'\textbackslash{}','{':r'\{','}':r'\}','$':r'\$','&':r'\&','#':r'\#','%':r'\%','_':r'\_','^':r'\textasciicircum{}','~':r'\textasciitilde{}'}
     symbols={'→':r'\ensuremath{\to}','←':r'\ensuremath{\leftarrow}','×':r'\ensuremath{\times}','μ':r'\ensuremath{\mu}','−':r'\ensuremath{-}','≤':r'\ensuremath{\le}','≥':r'\ensuremath{\ge}','∞':r'\ensuremath{\infty}','∈':r'\ensuremath{\in}','≠':r'\ensuremath{\ne}','√':r'\ensuremath{\surd}','Σ':r'\ensuremath{\Sigma}','α':r'\ensuremath{\alpha}','β':r'\ensuremath{\beta}','≫':r'\ensuremath{\gg}'}
@@ -123,9 +132,9 @@ def render(payload,questions,dest):
             tree=ElementTree.fromstring(data)
             for element in tree.iter():
                 for key,value in element.attrib.items():
-                    if key.endswith('href') and not value.startswith('#'):raise ValueError('External SVG reference')
-                    if re.search(r'url\(\s*[\"\']?(?!#)',value):raise ValueError('External SVG style')
-                if element.tag.endswith('style') and re.search(r'@import|url\(',element.text or ''):raise ValueError('External SVG CSS')
+                    if key.endswith('href') and not re.fullmatch(r'#[A-Za-z0-9_.:-]+',str(value).strip()):raise ValueError('External SVG reference')
+                    if external_css_reference(value):raise ValueError('External SVG style')
+                if element.tag.endswith('style') and external_css_reference(element.text or ''):raise ValueError('External SVG CSS')
             data=cairosvg.svg2png(bytestring=data,output_width=1600)
         with Image.open(io.BytesIO(data)) as im:
             if im.width*im.height>40000000:raise ValueError('Image too large')
@@ -143,7 +152,8 @@ def render(payload,questions,dest):
         option_figs={}
         for f in figs:
             is_option=bool(f.get('option') and f.get('option') in 'ABCD')
-            img=figure(f['src'],source,choice=is_option)
+            try:img=figure(f['src'],source,choice=is_option)
+            except Exception as error:raise ValueError(q['_id']+' figure '+str(f.get('src',''))+': '+str(error)) from error
             if is_option:option_figs[f['option']]=option_figs.get(f['option'],'')+img
             else:body+=img
         if not fallback and options:
