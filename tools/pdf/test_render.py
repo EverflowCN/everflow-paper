@@ -1,6 +1,6 @@
 import re,subprocess,unittest
 from pathlib import Path
-from render import escape,rich,choice_rich,render,merge_layers,resolve
+from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference
 
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
@@ -36,6 +36,12 @@ class Safety(unittest.TestCase):
   tex=(dest/'questions.tex').read_text(encoding='utf8')
   self.assertNotIn(r'\fourchoices{\par',tex)
  def test_escape(self):self.assertEqual(r'a\_b\%',escape('a_b%'))
+ def test_svg_css_allows_local_fragments_only(self):
+  self.assertFalse(external_css_reference('marker-end:url(#arrow)'))
+  self.assertFalse(external_css_reference('fill: url("#gradient-1")'))
+  self.assertTrue(external_css_reference('fill:url(https://example.com/a.svg#x)'))
+  self.assertTrue(external_css_reference('fill:url(data:image/svg+xml;base64,AAAA)'))
+  self.assertTrue(external_css_reference('@import url("https://example.com/x.css")'))
  def test_original_supplement_wins(self):
   paraphrase={'stem':'summary','verification':{'status':'verified','mode':'cross-checked-paraphrase'}}
   original={'stem':'original','verification':{'status':'verified','mode':'original-paper'}}
@@ -58,7 +64,7 @@ class Safety(unittest.TestCase):
   self.assertIn('sin()',rendered[3])
   self.assertIn('wait()',rendered[4])
  def test_canonical_figures(self):
-  payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2026-28'},{'source':'zhenti','id':'2026-36'},{'source':'zhenti','id':'2025-1'}]}
+  payload={'title':'408 真题图片排版验证','layout':'compact','questions':[{'source':'zhenti','id':'2026-28'},{'source':'zhenti','id':'2026-36'},{'source':'zhenti','id':'2025-1'},{'source':'zhenti','id':'2019-38'}]}
   questions=resolve(payload,[])
   self.assertTrue(any(q.get('figures') for q in questions))
   render(payload,questions,Path('/tmp/pdf-verification/canonical'))
