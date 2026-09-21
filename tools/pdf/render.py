@@ -47,7 +47,10 @@ def normalize_soft_breaks(value):
         if pipe_table_block(block) or code_like_block(block):
             normalized.append('\n'.join(lines))
         else:
-            normalized.append(' '.join(lines))
+            joined=' '.join(lines)
+            joined=re.sub(r'\s+([、，。；：！？）】])',r'\1',joined)
+            joined=re.sub(r'([（【、，；：])\s+',r'\1',joined)
+            normalized.append(joined)
     return '\n\n'.join(normalized)
 
 def prepared_stem(q):
