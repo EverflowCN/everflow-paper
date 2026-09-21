@@ -1,6 +1,6 @@
 import re,subprocess,unittest
 from pathlib import Path
-from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem
+from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem,render_structured_text
 
 class Safety(unittest.TestCase):
  def test_tex_injection(self):
@@ -57,6 +57,11 @@ class Safety(unittest.TestCase):
   text=prepared_stem(q)
   self.assertNotIn('|',text)
   self.assertIn('P₀、P₁ 共享资源。',text)
+ def test_imported_pipe_table_renders_as_latex_table(self):
+  text=render_structured_text('某系统如下表。\n\n进程 | 计算时间 | I/O 时间\nP₁ | 90% | 10%\nP₂ | 50% | 50%\nP₃ | 15% | 85%\n\n请选择。')
+  self.assertIn(r'\begin{tabularx}',text)
+  self.assertIn(r'P₁ & 90\% & 10\%',text)
+  self.assertNotIn('进程 | 计算时间 | I/O 时间',text)
  def test_real_zhenti_override_cleanup(self):
   payload={'title':'真题导入格式回归','layout':'compact','questions':[{'source':'zhenti','id':'2012-27'},{'source':'zhenti','id':'2012-29'}]}
   overrides=[
