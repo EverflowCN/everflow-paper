@@ -25,6 +25,51 @@ def external_css_reference(value):
         if not re.fullmatch(r'#[A-Za-z0-9_.:-]+',target):return True
     return False
 
+def pipe_table_block(block):
+    lines=[line.strip() for line in str(block or '').splitlines() if line.strip()]
+    return len(lines)>=2 and sum(line.count('|')>=2 for line in lines)>=2
+
+def code_like_block(block):
+    lines=[line.strip() for line in str(block or '').splitlines() if line.strip()]
+    if len(lines)<2:return False
+    code_hits=sum(bool(re.search(r'[{};]|\b(?:while|for|if|return|void|int|boolean)\b|(?:==|&&|\+\+|--)',line)) for line in lines)
+    return code_hits>=2
+
+def normalize_soft_breaks(value):
+    """Treat single OCR/Markdown newlines as spaces, but preserve real blocks."""
+    text=str(value or '').replace('\r\n','\n').replace('\r','\n').strip()
+    if not text:return ''
+    blocks=re.split(r'\n[ \t]*\n+',text)
+    normalized=[]
+    for block in blocks:
+        lines=[line.strip() for line in block.split('\n') if line.strip()]
+        if not lines:continue
+        if pipe_table_block(block) or code_like_block(block):
+            normalized.append('\n'.join(lines))
+        else:
+            normalized.append(' '.join(lines))
+    return '\n\n'.join(normalized)
+
+def prepared_stem(q):
+    """Clean imported override formatting without changing semantic content."""
+    text=str(q.get('stem','') or '')
+    if q.get('figures') and q.get('options'):
+        blocks=re.split(r'\n[ \t]*\n+',text.replace('\r\n','\n').replace('\r','\n'))
+        # Single-choice imports sometimes append an OCR pipe-table while the
+        # canonical figure already contains that same table. Never print both.
+        blocks=[block for block in blocks if not pipe_table_block(block)]
+        text='\n\n'.join(blocks)
+    return normalize_soft_breaks(text)
+
+def flatten_image_white(im):
+    """Flatten alpha/transparency onto white so transparent diagrams never turn black."""
+    if im.mode in ('RGBA','LA') or 'transparency' in im.info:
+        rgba=im.convert('RGBA')
+        white=Image.new('RGBA',rgba.size,(255,255,255,255))
+        white.alpha_composite(rgba)
+        return white.convert('RGB')
+    return im.convert('RGB')
+
 def escape(s):
     table={'\\':r'\textbackslash{}','{':r'\{','}':r'\}','$':r'\$','&':r'\&','#':r'\#','%':r'\%','_':r'\_','^':r'\textasciicircum{}','~':r'\textasciitilde{}'}
     symbols={'→':r'\ensuremath{\to}','←':r'\ensuremath{\leftarrow}','×':r'\ensuremath{\times}','μ':r'\ensuremath{\mu}','−':r'\ensuremath{-}','≤':r'\ensuremath{\le}','≥':r'\ensuremath{\ge}','∞':r'\ensuremath{\infty}','∈':r'\ensuremath{\in}','≠':r'\ensuremath{\ne}','√':r'\ensuremath{\surd}','Σ':r'\ensuremath{\Sigma}','α':r'\ensuremath{\alpha}','β':r'\ensuremath{\beta}','≫':r'\ensuremath{\gg}'}
@@ -135,19 +180,26 @@ def render(payload,questions,dest):
                     if key.endswith('href') and not re.fullmatch(r'#[A-Za-z0-9_.:-]+',str(value).strip()):raise ValueError('External SVG reference')
                     if external_css_reference(value):raise ValueError('External SVG style')
                 if element.tag.endswith('style') and external_css_reference(element.text or ''):raise ValueError('External SVG CSS')
-            data=cairosvg.svg2png(bytestring=data,output_width=1600)
+            data=cairosvg.svg2png(bytestring=data,output_width=1600,background_color='#ffffff')
         with Image.open(io.BytesIO(data)) as im:
             if im.width*im.height>40000000:raise ValueError('Image too large')
-            im.convert('RGB').save(dest/f'figure-{nimage}.png')
+            ratio=im.width/max(1,im.height)
+            flatten_image_white(im).save(dest/f'figure-{nimage}.png')
         name='figure-'+str(nimage)+'.png'
         if choice:
             return r'\includegraphics[width=.72\linewidth,height=.18\textheight,keepaspectratio]{'+name+'}'
-        return '\n'+r'\par\begin{center}\includegraphics[width=.88\linewidth,height=.48\textheight,keepaspectratio]{'+name+r'}\end{center}'+'\n'
+        if ratio>=1.8:
+            geometry=r'width=.90\linewidth,height=.34\textheight'
+        elif ratio>=1.1:
+            geometry=r'width=.72\linewidth,height=.34\textheight'
+        else:
+            geometry=r'width=.58\linewidth,height=.38\textheight'
+        return '\n'+r'\par\begin{center}\includegraphics['+geometry+']{'+name+r'}\end{center}'+'\n'
     for q in questions:
         source=q['_source']; options=q.get('options',{})
         if isinstance(options,list):options={str(v.get('key','ABCD'[i])):v.get('text','') for i,v in enumerate(options)}
         fallback=source=='relax' and q.get('questionImages') and (q.get('imageFallback') or any(re.search(r'\ufffd|\?\s*\?',str(v)) for v in [q.get('stem',''),*options.values()]))
-        body='' if fallback else rich(q.get('stem',''))
+        body='' if fallback else rich(prepared_stem(q))
         figs=q.get('figures',[]) if source=='zhenti' else [{'src':v} for v in q.get('questionImages',[])]
         option_figs={}
         for f in figs:
