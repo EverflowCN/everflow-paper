@@ -363,34 +363,37 @@ async function exportHeaders(){
 function isAppleTouchDevice(){
   return /iPad|iPhone|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 }
+function isMobilePdfDevice(){
+  return isAppleTouchDevice()||/Android|Mobile|Tablet/i.test(navigator.userAgent)||navigator.maxTouchPoints>1||window.matchMedia?.('(pointer: coarse)')?.matches;
+}
 function exportPdfFilename(){
   const base=String(exportJob.title||els.paperTitle?.textContent||'Everflow-408-组卷').replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').trim().slice(0,80)||'Everflow-408-组卷';
   return base+'.pdf';
 }
 function syncExportDeviceActions(){
   if(!els.exportDownload)return;
-  const apple=isAppleTouchDevice();
-  els.exportDownload.textContent=apple?'保存 PDF':'下载 PDF';
+  const mobile=isMobilePdfDevice();
+  els.exportDownload.textContent=mobile?'保存 PDF':'下载 PDF';
   els.exportDownload.target='_blank';
   els.exportDownload.rel='noopener';
-  if(apple)els.exportDownload.removeAttribute('download');else els.exportDownload.setAttribute('download','');
+  if(mobile)els.exportDownload.removeAttribute('download');else els.exportDownload.setAttribute('download',exportPdfFilename());
 }
 async function savePdfForDevice(event){
-  if(!els.exportDownload?.href||!isAppleTouchDevice())return;
-  event.preventDefault();
+  if(!els.exportDownload?.href||!isMobilePdfDevice())return;
   const url=els.exportDownload.href,filename=exportPdfFilename();
-  if(typeof navigator.share!=='function'){location.href=url;return}
-  try{
-    const response=await fetch(url,{cache:'no-store'});
-    if(!response.ok)throw new Error('PDF fetch '+response.status);
-    const blob=await response.blob();
-    const file=new File([blob],filename,{type:'application/pdf'});
-    if(typeof navigator.canShare==='function'&&!navigator.canShare({files:[file]}))throw new Error('File share unavailable');
-    await navigator.share({files:[file],title:filename});
-  }catch(error){
-    if(error?.name==='AbortError')return;
-    location.href=url;
+  if(isAppleTouchDevice()&&typeof navigator.share==='function'){
+    event.preventDefault();
+    try{
+      await navigator.share({url,title:filename});
+      return;
+    }catch(error){
+      if(error?.name==='AbortError')return;
+      location.href=url;
+      return;
+    }
   }
+  // Android/tablet browsers reliably hand a signed PDF URL to the native PDF viewer.
+  // Leave the anchor's target=_blank navigation intact instead of relying on the desktop-only download attribute.
 }
 function renderExportQuota(quota=null){
   if(!els.exportQuota)return;
