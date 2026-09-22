@@ -146,7 +146,7 @@
   }
   function save(){storage.set(STORAGE_KEY,JSON.stringify(records))}
   function patchRecord(year,q,patch){
-    const key=recKey(year,q),latest=load(),current=latest[key]||records[key]||{},next={...current,...patch,updatedAt:new Date().toISOString()};
+    const key=recKey(year,q),latest=load(),current=latest[key]||{},next={...current,...patch,updatedAt:new Date().toISOString()};
     Object.keys(next).forEach(k=>next[k]===undefined&&delete next[k]);
     if(!meaningful(next))delete latest[key];else latest[key]=next;
     records=latest;save();
