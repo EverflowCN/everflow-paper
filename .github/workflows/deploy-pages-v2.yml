@@ -106,6 +106,8 @@ jobs:
           grep -q "everflow:zhenti-records-change',()=>{if(!applying)markDirty()" site/assets/js/question-cloud-sync-v2.js
           grep -q "SESSION_KEY='everflow-408-active-paper-session-v1'" site/assets/js/zhenti-wall.js
           grep -q 'setInterval(savePaperSession,5000)' site/assets/js/zhenti-wall.js
+          grep -q 'timerRunning:Boolean(fullStartedAt)' site/assets/js/zhenti-wall.js
+          grep -q 'restore?.timerRunning!==false' site/assets/js/zhenti-wall.js
           grep -q 'everflow:question-cloud-before-sync' site/assets/js/zhenti-wall.js
           grep -q 'pendingModalNote={year:selectedYear,q:selectedQuestion,value:els.note.value}' site/assets/js/zhenti-wall.js
           grep -q 'pendingPaperNote={year:fullYear,q:fullQuestion,value:els.paperNote.value}' site/assets/js/zhenti-wall.js
