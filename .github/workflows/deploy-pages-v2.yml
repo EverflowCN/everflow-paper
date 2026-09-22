@@ -112,6 +112,10 @@ jobs:
           grep -q 'pendingModalNote={year:selectedYear,q:selectedQuestion,value:els.note.value}' site/assets/js/zhenti-wall.js
           grep -q 'pendingPaperNote={year:fullYear,q:fullQuestion,value:els.paperNote.value}' site/assets/js/zhenti-wall.js
           grep -q 'latest=load(),current=latest\[key\]' site/assets/js/zhenti-wall.js
+          if grep -q 'latest\[key\]||records\[key\]' site/assets/js/zhenti-wall.js; then
+            echo 'Regression: stale in-memory question records must not override external reset state.'
+            exit 1
+          fi
           grep -q 'persistMergedScope' site/assets/js/question-cloud-sync-v2.js
           grep -q 'currentTrue=trueSnapshot(),currentRelax=relaxSnapshot()' site/assets/js/question-cloud-sync-v2.js
           grep -q "sessionStorage.removeItem('everflow-408-active-paper-session-v1')" site/assets/js/zhenti-ui-polish.js
