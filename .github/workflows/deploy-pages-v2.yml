@@ -101,9 +101,9 @@ jobs:
             echo 'Regression: legacy zhenti cloud writer must not be loaded alongside question-cloud-sync-v2.'
             exit 1
           fi
-          grep -q "PERIODIC_FLUSH_MS=30\*1000" site/assets/js/question-cloud-sync-v2.js
-          grep -q "CHANGE_FLUSH_MS=900" site/assets/js/question-cloud-sync-v2.js
-          grep -q "post-sync-dirty" site/assets/js/question-cloud-sync-v2.js
+          grep -q "PERIODIC_FLUSH_MS=2\*60\*1000" site/assets/js/question-cloud-sync-v2.js
+          grep -q "REMOTE_PULL_MS=30\*1000" site/assets/js/question-cloud-sync-v2.js
+          grep -q "everflow:zhenti-records-change',()=>{if(!applying)markDirty()" site/assets/js/question-cloud-sync-v2.js
           grep -q "SESSION_KEY='everflow-408-active-paper-session-v1'" site/assets/js/zhenti-wall.js
           grep -q 'setInterval(savePaperSession,5000)' site/assets/js/zhenti-wall.js
           grep -q 'everflow:question-cloud-before-sync' site/assets/js/zhenti-wall.js
