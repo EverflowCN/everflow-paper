@@ -123,7 +123,9 @@ jobs:
           grep -q 'data-question-status-filter' site/workspace/index.html
           grep -q 'workspace-questions-v2.css' site/workspace/index.html
           grep -q 'restore-version' supabase/functions/owner-questions/index.ts
-          grep -Fq "const CACHE='everflow-site-v" site/sw.js
+          grep -Fq "const CACHE='everflow-site-v74-zhenti-syncguard'" site/sw.js
+          grep -q "/assets/js/question-cloud-sync-v2.js" site/sw.js
+          grep -q "/assets/js/zhenti-wall.js" site/sw.js
           node - <<'NODE'
           const fs=require('fs');
           const workspace=fs.readFileSync('site/workspace/index.html','utf8');
