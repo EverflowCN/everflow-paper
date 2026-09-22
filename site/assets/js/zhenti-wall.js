@@ -402,6 +402,8 @@
   document.addEventListener('everflow:question-cloud-sync',applyCloudMerge);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushPendingNotes()});
   addEventListener('pagehide',flushPendingNotes);
+  setInterval(savePaperSession,5000);
+  document.addEventListener('everflow:zhenti-subject-index-ready',()=>{if(!els.paperSession.hidden){renderPaperSession();savePaperSession()}});
   window.EveraZhentiWall={openQuestion,subjectForQuestion,questionsForSubject,loadPaper,isActiveSession:()=>!els.paperSession.hidden};
 
   setupRangeSelects();installShortcutHelp();renderMode();document.querySelector('[data-wall-root]')?.setAttribute('aria-busy','false');buildSubjectIndex().catch(err=>console.warn('Everflow subject index fallback enabled',err));
