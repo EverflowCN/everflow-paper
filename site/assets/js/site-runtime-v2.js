@@ -1,7 +1,7 @@
 (()=>{
   const body=document.body;
   const root=document.documentElement;
-  const ASSET_VERSION='20260922-syncguard1';
+  const ASSET_VERSION='20260922-syncguard2';
   const asset=path=>`${path}?v=${ASSET_VERSION}`;
   const storage={get:key=>{try{return localStorage.getItem(key)}catch{return null}},set:(key,value)=>{try{localStorage.setItem(key,value)}catch{}}};
   const runIdle=(task,timeout=2500)=>'requestIdleCallback' in window?requestIdleCallback(task,{timeout}):setTimeout(task,Math.min(timeout,1200));
@@ -81,5 +81,4 @@
   const srsFlow=import(asset('/assets/js/zhenti-srs-v2.js')).then(()=>import(asset('/assets/js/zhenti-srs-error-v2.js'))).then(()=>import(asset('/assets/js/zhenti-srs-reset.js'))).catch(err=>console.error('Everflow 408 SRS failed',err));
   srsFlow.finally(async()=>{try{await import(asset('/assets/js/zhenti-favorites.js'))}catch(err){console.error('Everflow 408 favorites failed',err)}try{await import(asset('/assets/js/zhenti-srs-experience.js'))}catch(err){console.error('Everflow 408 immersive SRS failed',err)}try{await import(asset('/assets/js/zhenti-srs-mobile-immersive.js'))}catch(err){console.error('Everflow 408 mobile SRS failed',err)}});
   import(asset('/assets/js/zhenti-ui-polish.js')).catch(err=>console.error('Everflow 408 UI polish failed',err));
-  import(asset('/assets/js/cloud-config.js')).then(()=>import(asset('/assets/js/zhenti-cloud-sync.js'))).catch(err=>console.error('Everflow 408 cloud sync failed',err));
 })();
