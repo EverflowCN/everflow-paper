@@ -163,6 +163,7 @@
       localStorage.removeItem(SRS_BASELINE_KEY);
       localStorage.removeItem(GRAPH_CURRENT_KEY);
     }catch{}
+    sessionStorage.removeItem('everflow-408-active-paper-session-v1');
     sessionStorage.setItem('everflow-408-reset-toast','全部真题学习记录已重置。');
     document.dispatchEvent(new CustomEvent('everflow:zhenti-reset-all',{detail:{at}}));
     setTimeout(()=>location.reload(),180);
