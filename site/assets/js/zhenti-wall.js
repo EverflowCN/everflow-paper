@@ -170,12 +170,12 @@
       if(!value||value.kind!=='whole'||!YEARS.includes(Number(value.year)))return null;
       if(Number(value.question)<1||Number(value.question)>47)return null;
       if(Date.now()-Number(value.updatedAt||0)>12*60*60*1000){sessionStore.remove(SESSION_KEY);return null}
-      return{year:Number(value.year),question:Number(value.question),elapsedMs:Math.max(0,Number(value.elapsedMs||0)),updatedAt:Number(value.updatedAt||0)};
+      return{year:Number(value.year),question:Number(value.question),elapsedMs:Math.max(0,Number(value.elapsedMs||0)),timerRunning:value.timerRunning!==false,updatedAt:Number(value.updatedAt||0)};
     }catch{sessionStore.remove(SESSION_KEY);return null}
   }
   function savePaperSession(){
     if(fullYear==null||els.paperSession.hidden)return;
-    sessionStore.set(SESSION_KEY,JSON.stringify({kind:'whole',year:fullYear,question:fullQuestion,elapsedMs:fullElapsed(),updatedAt:Date.now()}));
+    sessionStore.set(SESSION_KEY,JSON.stringify({kind:'whole',year:fullYear,question:fullQuestion,elapsedMs:fullElapsed(),timerRunning:Boolean(fullStartedAt),updatedAt:Date.now()}));
   }
   function clearPaperSession(){sessionStore.remove(SESSION_KEY)}
   function commitPendingModalNote(){
@@ -207,10 +207,10 @@
     if(timerStartedAt){timerAccumulated+=Date.now()-timerStartedAt;timerStartedAt=0;clearInterval(timerInterval);timerInterval=null;els.timerText.textContent=formatShort(timerAccumulated);return}
     timerStartedAt=Date.now();els.timerText.textContent=formatShort(timerAccumulated);timerInterval=setInterval(()=>{els.timerText.textContent=formatShort(modalElapsed())},1000);
   }
-  function startWholeTimer(initialElapsed=0){clearInterval(fullTimerInterval);fullTimerAccumulated=Math.max(0,Number(initialElapsed)||0);fullStartedAt=Date.now();els.paperTimer.textContent=formatLong(fullTimerAccumulated);fullTimerInterval=setInterval(()=>{els.paperTimer.textContent=formatLong(fullElapsed())},1000)}
+  function startWholeTimer(initialElapsed=0,running=true){clearInterval(fullTimerInterval);fullTimerInterval=null;fullTimerAccumulated=Math.max(0,Number(initialElapsed)||0);fullStartedAt=running?Date.now():0;els.paperTimer.textContent=formatLong(fullTimerAccumulated);if(running)fullTimerInterval=setInterval(()=>{els.paperTimer.textContent=formatLong(fullElapsed())},1000)}
   function toggleWholeTimer(){
-    if(fullStartedAt){fullTimerAccumulated+=Date.now()-fullStartedAt;fullStartedAt=0;clearInterval(fullTimerInterval);fullTimerInterval=null;els.paperTimer.textContent=formatLong(fullTimerAccumulated);return}
-    fullStartedAt=Date.now();fullTimerInterval=setInterval(()=>{els.paperTimer.textContent=formatLong(fullElapsed())},1000);
+    if(fullStartedAt){fullTimerAccumulated+=Date.now()-fullStartedAt;fullStartedAt=0;clearInterval(fullTimerInterval);fullTimerInterval=null;els.paperTimer.textContent=formatLong(fullTimerAccumulated);savePaperSession();return}
+    fullStartedAt=Date.now();fullTimerInterval=setInterval(()=>{els.paperTimer.textContent=formatLong(fullElapsed())},1000);savePaperSession();
   }
   function stopWholeTimer(){clearInterval(fullTimerInterval);fullTimerInterval=null;fullStartedAt=0;fullTimerAccumulated=0}
 
@@ -366,7 +366,7 @@
     if(!qs.length)return'—';const parts=[];let start=qs[0],prev=qs[0];for(let i=1;i<=qs.length;i++){const cur=qs[i];if(cur===prev+1){prev=cur;continue}parts.push(start===prev?String(start):`${start}—${prev}`);start=prev=cur}return parts.join(' / ');
   }
   function renderPaperLegend(year){if(!els.paperSubjectLegend)return;els.paperSubjectLegend.innerHTML=Object.entries(SUBJECTS).map(([key,v])=>`<span>${compactRanges(questionsForSubject(year,key))} ${v.name}</span>`).join('')}
-  function openWholePaper(year,restore=null){commitPendingPaperNote();fullYear=year;const firstUnanswered=ALL_QUESTIONS.find(q=>!isDone(record(year,q)));const restoredQuestion=Number(restore?.question);fullQuestion=restoredQuestion>=1&&restoredQuestion<=47?restoredQuestion:(firstUnanswered||1);paperQuestionStartedAt=Date.now();els.paperSession.hidden=false;document.body.style.overflow='hidden';startWholeTimer(Number(restore?.elapsedMs||0));savePaperSession();renderPaperSession()}
+  function openWholePaper(year,restore=null){commitPendingPaperNote();fullYear=year;const firstUnanswered=ALL_QUESTIONS.find(q=>!isDone(record(year,q)));const restoredQuestion=Number(restore?.question);fullQuestion=restoredQuestion>=1&&restoredQuestion<=47?restoredQuestion:(firstUnanswered||1);paperQuestionStartedAt=Date.now();els.paperSession.hidden=false;document.body.style.overflow='hidden';startWholeTimer(Number(restore?.elapsedMs||0),restore?.timerRunning!==false);savePaperSession();renderPaperSession()}
   function closeWholePaper(){commitPendingPaperNote();els.paperSession.hidden=true;document.body.style.overflow='';stopWholeTimer();clearPaperSession();renderWholeHome()}
   function renderPaperSession(){
     if(fullYear==null)return;
