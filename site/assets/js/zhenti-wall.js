@@ -146,10 +146,10 @@
   }
   function save(){storage.set(STORAGE_KEY,JSON.stringify(records))}
   function patchRecord(year,q,patch){
-    const key=recKey(year,q),next={...record(year,q),...patch,updatedAt:new Date().toISOString()};
+    const key=recKey(year,q),latest=load(),current=latest[key]||records[key]||{},next={...current,...patch,updatedAt:new Date().toISOString()};
     Object.keys(next).forEach(k=>next[k]===undefined&&delete next[k]);
-    if(!meaningful(next))delete records[key];else records[key]=next;
-    save();
+    if(!meaningful(next))delete latest[key];else latest[key]=next;
+    records=latest;save();
     document.dispatchEvent(new CustomEvent('everflow:zhenti-records-change',{detail:{year,q}}));
     return records[key]||{};
   }
@@ -158,7 +158,7 @@
   let subject=storage.get('everflow-408-wall-subject')||'ds';
   if(!SUBJECTS[subject])subject='ds';
   let sideMode='point',selectedPoint='全部考点',range='all',display='matrix',selectedYear=null,selectedQuestion=null;
-  let noteTimer=null,fullNoteTimer=null;
+  let noteTimer=null,fullNoteTimer=null,pendingModalNote=null,pendingPaperNote=null;
   let modalQuestionStartedAt=0,paperQuestionStartedAt=0;
 
   let timerInterval=null,timerStartedAt=0,timerAccumulated=0;
@@ -178,9 +178,23 @@
     sessionStore.set(SESSION_KEY,JSON.stringify({kind:'whole',year:fullYear,question:fullQuestion,elapsedMs:fullElapsed(),updatedAt:Date.now()}));
   }
   function clearPaperSession(){sessionStore.remove(SESSION_KEY)}
+  function commitPendingModalNote(){
+    if(noteTimer){clearTimeout(noteTimer);noteTimer=null}
+    const pending=pendingModalNote;pendingModalNote=null;
+    if(!pending)return;
+    patchRecord(pending.year,pending.q,{note:pending.value});
+    if(selectedYear===pending.year&&selectedQuestion===pending.q)els.noteState.textContent='已保存';
+  }
+  function commitPendingPaperNote(){
+    if(fullNoteTimer){clearTimeout(fullNoteTimer);fullNoteTimer=null}
+    const pending=pendingPaperNote;pendingPaperNote=null;
+    if(!pending)return;
+    patchRecord(pending.year,pending.q,{note:pending.value});
+    if(fullYear===pending.year&&fullQuestion===pending.q)els.paperNoteState.textContent='已保存';
+  }
   function flushPendingNotes(){
-    if(noteTimer&&selectedYear!=null&&selectedQuestion!=null){clearTimeout(noteTimer);noteTimer=null;patchRecord(selectedYear,selectedQuestion,{note:els.note.value});els.noteState.textContent='已保存'}
-    if(fullNoteTimer&&fullYear!=null){clearTimeout(fullNoteTimer);fullNoteTimer=null;patchRecord(fullYear,fullQuestion,{note:els.paperNote.value});els.paperNoteState.textContent='已保存'}
+    commitPendingModalNote();
+    commitPendingPaperNote();
     savePaperSession();
   }
 
@@ -338,30 +352,31 @@
     const qs=scopedQuestions(selectedYear,subKey),i=qs.indexOf(selectedQuestion);els.prev.disabled=i<=0;els.next.disabled=i<0||i>=qs.length-1;renderInto(els.modalQuestionBox,selectedYear,selectedQuestion,'modal');
   }
   function openQuestion(year,q){
+    commitPendingModalNote();
     const actual=subjectForQuestion(q,year);if(subjectIndexReady&&SUBJECTS[actual]&&mode==='subject'&&subject!==actual){subject=actual;storage.set('everflow-408-wall-subject',subject);renderAll()}
     selectedYear=year;selectedQuestion=q;modalQuestionStartedAt=Date.now();els.modal.hidden=false;document.body.style.overflow='hidden';els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal();
   }
-  function closeQuestion(){els.modal.hidden=true;document.body.style.overflow='';resetTimer()}
+  function closeQuestion(){commitPendingModalNote();els.modal.hidden=true;document.body.style.overflow='';resetTimer()}
   function stepQuestion(delta){
     const subKey=subjectForQuestion(selectedQuestion,selectedYear),qs=scopedQuestions(selectedYear,subKey),i=qs.indexOf(selectedQuestion),next=qs[i+delta];
-    if(next!=null){selectedQuestion=next;modalQuestionStartedAt=Date.now();els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal()}
+    if(next!=null){commitPendingModalNote();selectedQuestion=next;modalQuestionStartedAt=Date.now();els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal()}
   }
 
   function compactRanges(qs){
     if(!qs.length)return'—';const parts=[];let start=qs[0],prev=qs[0];for(let i=1;i<=qs.length;i++){const cur=qs[i];if(cur===prev+1){prev=cur;continue}parts.push(start===prev?String(start):`${start}—${prev}`);start=prev=cur}return parts.join(' / ');
   }
   function renderPaperLegend(year){if(!els.paperSubjectLegend)return;els.paperSubjectLegend.innerHTML=Object.entries(SUBJECTS).map(([key,v])=>`<span>${compactRanges(questionsForSubject(year,key))} ${v.name}</span>`).join('')}
-  function openWholePaper(year,restore=null){fullYear=year;const firstUnanswered=ALL_QUESTIONS.find(q=>!isDone(record(year,q)));const restoredQuestion=Number(restore?.question);fullQuestion=restoredQuestion>=1&&restoredQuestion<=47?restoredQuestion:(firstUnanswered||1);paperQuestionStartedAt=Date.now();els.paperSession.hidden=false;document.body.style.overflow='hidden';startWholeTimer(Number(restore?.elapsedMs||0));savePaperSession();renderPaperSession()}
-  function closeWholePaper(){els.paperSession.hidden=true;document.body.style.overflow='';stopWholeTimer();clearPaperSession();renderWholeHome()}
+  function openWholePaper(year,restore=null){commitPendingPaperNote();fullYear=year;const firstUnanswered=ALL_QUESTIONS.find(q=>!isDone(record(year,q)));const restoredQuestion=Number(restore?.question);fullQuestion=restoredQuestion>=1&&restoredQuestion<=47?restoredQuestion:(firstUnanswered||1);paperQuestionStartedAt=Date.now();els.paperSession.hidden=false;document.body.style.overflow='hidden';startWholeTimer(Number(restore?.elapsedMs||0));savePaperSession();renderPaperSession()}
+  function closeWholePaper(){commitPendingPaperNote();els.paperSession.hidden=true;document.body.style.overflow='';stopWholeTimer();clearPaperSession();renderWholeHome()}
   function renderPaperSession(){
     if(fullYear==null)return;
     const s=wholeYearStats(fullYear),r=record(fullYear,fullQuestion),subKey=subjectForQuestion(fullQuestion,fullYear),sub=SUBJECTS[subKey];
     els.paperYear.textContent=String(fullYear);els.paperProgress.textContent=`${s.done}/47`;els.paperPercent.textContent=`${s.rate}%`;els.paperProgressBar.style.width=`${s.rate}%`;els.paperSubject.textContent=`${sub.short} ${sub.name}`;els.paperType.textContent=fullQuestion<=40?'选择题':'综合应用题';els.paperCurrent.textContent=String(fullQuestion);renderPaperLegend(fullYear);
     els.paperNote.value=r.note||'';els.paperNoteState.textContent=r.updatedAt?`已保存 · ${new Date(r.updatedAt).toLocaleString('zh-CN',{hour12:false})}`:'本机自动保存';els.paperStatuses.forEach(btn=>btn.classList.toggle('active',Boolean(btn.dataset.paperStatus)&&btn.dataset.paperStatus===r.status));els.paperPrev.disabled=fullQuestion<=1;els.paperNext.disabled=fullQuestion>=47;
     els.paperAnswerGrid.innerHTML=ALL_QUESTIONS.map(q=>{const rr=record(fullYear,q);return`<button type="button" class="paper-answer ${answerState(rr)}${masteryClass(rr)}${q===fullQuestion?' current':''}" data-paper-jump="${q}" title="第 ${q} 题 · ${SUBJECTS[subjectForQuestion(q,fullYear)].name}">${q}</button>`}).join('');
-    els.paperAnswerGrid.querySelectorAll('[data-paper-jump]').forEach(btn=>btn.addEventListener('click',()=>{fullQuestion=Number(btn.dataset.paperJump);paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}));renderInto(els.paperQuestionBox,fullYear,fullQuestion,'paper');
+    els.paperAnswerGrid.querySelectorAll('[data-paper-jump]').forEach(btn=>btn.addEventListener('click',()=>{commitPendingPaperNote();fullQuestion=Number(btn.dataset.paperJump);paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}));renderInto(els.paperQuestionBox,fullYear,fullQuestion,'paper');
   }
-  function stepWhole(delta){const next=fullQuestion+delta;if(next>=1&&next<=47){fullQuestion=next;paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}}
+  function stepWhole(delta){const next=fullQuestion+delta;if(next>=1&&next<=47){commitPendingPaperNote();fullQuestion=next;paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}}
 
   function setMastery(context,status){const year=context==='paper'?fullYear:selectedYear,q=context==='paper'?fullQuestion:selectedQuestion;if(year==null||q==null)return;patchRecord(year,q,{status});refreshAfterRecordChange(context)}
   function activeContext(){if(els.paperSession&&!els.paperSession.hidden)return'paper';if(els.modal&&!els.modal.hidden)return'modal';return null}
@@ -382,9 +397,9 @@
 
   els.modeTabs.forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.mainSubject;if(key==='all')setMode('whole');else{selectedPoint='全部考点';setMode('subject',key)}}));
   els.sideModes.forEach(btn=>btn.addEventListener('click',()=>{sideMode=btn.dataset.sideMode;renderAll()}));els.rangeButtons.forEach(btn=>btn.addEventListener('click',()=>{range=btn.dataset.range;renderAll()}));els.rangeFrom.addEventListener('change',renderAll);els.rangeTo.addEventListener('change',renderAll);els.displayButtons.forEach(btn=>btn.addEventListener('click',()=>{display=btn.dataset.display;renderToolbar()}));els.modalClose.forEach(el=>el.addEventListener('click',closeQuestion));els.modalStatuses.forEach(btn=>btn.addEventListener('click',()=>setMastery('modal',btn.dataset.modalStatus||'')));
-  els.note.addEventListener('input',()=>{if(selectedYear==null)return;els.noteState.textContent='正在保存…';clearTimeout(noteTimer);noteTimer=setTimeout(()=>{patchRecord(selectedYear,selectedQuestion,{note:els.note.value});els.noteState.textContent='已保存'},300)});
+  els.note.addEventListener('input',()=>{if(selectedYear==null||selectedQuestion==null)return;els.noteState.textContent='正在保存…';pendingModalNote={year:selectedYear,q:selectedQuestion,value:els.note.value};clearTimeout(noteTimer);noteTimer=setTimeout(commitPendingModalNote,300)});
   els.tools.forEach(btn=>btn.addEventListener('click',()=>{const tool=btn.dataset.tool;if(tool==='analysis')els.analysis.hidden=!els.analysis.hidden;if(tool==='note'){els.noteBox.hidden=!els.noteBox.hidden;if(!els.noteBox.hidden)els.note.focus()}if(tool==='timer')toggleTimer()}));els.prev.addEventListener('click',()=>stepQuestion(-1));els.next.addEventListener('click',()=>stepQuestion(1));els.paperExit.addEventListener('click',closeWholePaper);els.paperPrev.addEventListener('click',()=>stepWhole(-1));els.paperNext.addEventListener('click',()=>stepWhole(1));els.paperStatuses.forEach(btn=>btn.addEventListener('click',()=>setMastery('paper',btn.dataset.paperStatus||'')));
-  els.paperNote.addEventListener('input',()=>{if(fullYear==null)return;els.paperNoteState.textContent='正在保存…';clearTimeout(fullNoteTimer);fullNoteTimer=setTimeout(()=>{patchRecord(fullYear,fullQuestion,{note:els.paperNote.value});els.paperNoteState.textContent='已保存'},300)});if(els.paperTimer?.parentElement){els.paperTimer.parentElement.title='点击开始 / 暂停计时（T）';els.paperTimer.parentElement.style.cursor='pointer';els.paperTimer.parentElement.addEventListener('click',toggleWholeTimer)}
+  els.paperNote.addEventListener('input',()=>{if(fullYear==null||fullQuestion==null)return;els.paperNoteState.textContent='正在保存…';pendingPaperNote={year:fullYear,q:fullQuestion,value:els.paperNote.value};clearTimeout(fullNoteTimer);fullNoteTimer=setTimeout(commitPendingPaperNote,300)});if(els.paperTimer?.parentElement){els.paperTimer.parentElement.title='点击开始 / 暂停计时（T）';els.paperTimer.parentElement.style.cursor='pointer';els.paperTimer.parentElement.addEventListener('click',toggleWholeTimer)}
 
   document.addEventListener('keydown',e=>{
     const key=e.key;if(isTyping()){if(key==='Escape'){document.activeElement.blur();e.preventDefault()}return}
@@ -394,7 +409,7 @@
     const upper=key.toUpperCase();if(['A','B','C','D'].includes(upper)){e.preventDefault();shortcutOption(context,upper);return}if(key==='Enter'){e.preventDefault();shortcutEnter(context);return}if(key==='ArrowLeft'||upper==='J'){e.preventDefault();stepByContext(context,-1);return}if(key==='ArrowRight'||upper==='K'){e.preventDefault();stepByContext(context,1);return}if(key==='1'||key==='2'||key==='3'){e.preventDefault();setMastery(context,key==='1'?'mastered':key==='2'?'fuzzy':'weak');return}if(upper==='R'){e.preventDefault();shortcutReveal(context);return}if(upper==='N'){e.preventDefault();shortcutNote(context);return}if(upper==='T'){e.preventDefault();context==='paper'?toggleWholeTimer():toggleTimer();return}if(upper==='F'){e.preventDefault();shortcutFavorite(context)}
   });
 
-  window.addEventListener('storage',e=>{if(e.key!==STORAGE_KEY)return;records=load();renderMode();if(!els.modal.hidden)renderModal();if(!els.paperSession.hidden){renderPaperSession();savePaperSession()}});
+  window.addEventListener('storage',e=>{if(e.key!==STORAGE_KEY)return;flushPendingNotes();records=load();renderMode();if(!els.modal.hidden)renderModal();if(!els.paperSession.hidden){renderPaperSession();savePaperSession()}});
   document.addEventListener('everflow:zhenti-cloud-before-sync',flushPendingNotes);
   document.addEventListener('everflow:question-cloud-before-sync',flushPendingNotes);
   const applyCloudMerge=event=>{if(!event.detail?.pulledRemote)return;const paperActive=!els.paperSession.hidden,modalActive=!els.modal.hidden;records=load();renderMode();if(modalActive)renderModal();if(paperActive){renderPaperSession();savePaperSession()}};
