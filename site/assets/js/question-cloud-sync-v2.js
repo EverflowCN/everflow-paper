@@ -18,8 +18,8 @@ const emptyError=()=>({version:1,cards:{},daily:{}});
 const enabled=Boolean(cfg.url&&cfg.publishableKey&&cloud?.enabled!==false&&typeof cloud?.getClient==='function');
 const client=enabled?await cloud.getClient():null;
 const syncEnabled=Boolean(enabled&&client);
-const PERIODIC_FLUSH_MS=30*1000;
-const CHANGE_FLUSH_MS=900;
+const PERIODIC_FLUSH_MS=2*60*1000;
+const REMOTE_PULL_MS=30*1000;
 let syncPromise=null,flushTimer=0,applying=false,patched=false,dirtySeq=0,syncedSeq=0;
 const cloudStatus=document.querySelector('[data-cloud-status]');
 function setCloudStatus(kind,text,title=text){
@@ -67,7 +67,7 @@ async function writeRemote(userId,scope,payload){const row={user_id:userId,scope
 function maxIso(...values){const ms=Math.max(...values.map(isoTime),0);return ms?new Date(ms).toISOString():nowIso()}
 
 async function runSync({manual=false,reason='auto'}={}){if(!syncEnabled){setCloudStatus('','本地模式','云同步暂不可用');return{ok:false,reason:'disabled',questionRecords:0}};if(navigator.onLine===false){setCloudStatus('','离线','当前离线，恢复网络后自动同步');return{ok:false,reason:'offline',questionRecords:0}};const user=await currentUser();if(!user){setCloudStatus('','本地模式','登录账户后可自动同步题库进度');return{ok:false,reason:'guest',questionRecords:0}};if(manual)setCloudStatus('syncing','同步中…','正在同步题库进度');await ensureSession();document.dispatchEvent(new CustomEvent('everflow:question-cloud-before-sync',{detail:{manual,reason}}));const [remoteTrueRow,remoteRelaxRow]=await Promise.all([readRemote(user.id,TRUE_SCOPE),readRemote(user.id,RELAX_SCOPE)]);const previousUser=readText(LAST_USER_KEY),accountChanged=Boolean(previousUser&&previousUser!==user.id),localTrue=trueSnapshot(),localRelax=relaxSnapshot(),trueBefore=trueFingerprint(localTrue),relaxBefore=relaxFingerprint(localRelax);const mergedTrue=accountChanged?(remoteTrueRow?.payload||emptyTrue()):mergeTrue(localTrue,remoteTrueRow?.payload||null),mergedRelax=accountChanged?(remoteRelaxRow?.payload||emptyRelax()):mergeRelax(localRelax,remoteRelaxRow?.payload||null);applyTrue(mergedTrue);applyRelax(mergedRelax);const [trueAt,relaxAt]=await Promise.all([writeRemote(user.id,TRUE_SCOPE,mergedTrue),writeRemote(user.id,RELAX_SCOPE,mergedRelax)]);writeText(LAST_USER_KEY,user.id);const trueRecords=Object.keys(object(mergedTrue.wall)).length,relaxRecords=Object.keys(object(mergedRelax.records)).length,questionRecords=trueRecords+relaxRecords,pulledRemote=trueBefore!==trueFingerprint(mergedTrue)||relaxBefore!==relaxFingerprint(mergedRelax),result={ok:true,at:maxIso(trueAt,relaxAt),userId:user.id,questionScopes:2,trueRecords,relaxRecords,questionRecords,accountChanged,pulledRemote,manual,reason};writeJson(META_KEY,result);try{localStorage.setItem('everflow-last-question-cloud-sync',JSON.stringify(result))}catch{}setCloudStatus('synced','已同步',`题库已同步 · ${new Date(result.at).toLocaleString('zh-CN',{hour12:false})}`);document.dispatchEvent(new CustomEvent('everflow:question-cloud-sync',{detail:result}));if(pulledRemote&&!manual){document.dispatchEvent(new CustomEvent('everflow:question-cloud-merged',{detail:{accountChanged,reason}}))}return result}
-async function syncAll(options={}){if(syncPromise)return syncPromise;const targetSeq=dirtySeq;syncPromise=runSync(options).then(result=>{if(result?.ok)syncedSeq=Math.max(syncedSeq,targetSeq);return result}).catch(error=>{console.error('Everflow question cloud sync failed',error);setCloudStatus('error','同步失败',`同步失败：${error?.message||String(error)}`);document.dispatchEvent(new CustomEvent('everflow:question-cloud-error',{detail:{message:error?.message||String(error)}}));throw error}).finally(()=>{syncPromise=null;if(hasDirty())scheduleFlush(250,'post-sync-dirty')});return syncPromise}
+async function syncAll(options={}){if(syncPromise)return syncPromise;const targetSeq=dirtySeq;syncPromise=runSync(options).then(result=>{if(result?.ok)syncedSeq=Math.max(syncedSeq,targetSeq);return result}).catch(error=>{console.error('Everflow question cloud sync failed',error);setCloudStatus('error','同步失败',`同步失败：${error?.message||String(error)}`);document.dispatchEvent(new CustomEvent('everflow:question-cloud-error',{detail:{message:error?.message||String(error)}}));throw error}).finally(()=>{syncPromise=null});return syncPromise}
 function markDirty(){dirtySeq+=1}
 function hasDirty(){return dirtySeq>syncedSeq}
 async function flushDirty(reason='batch'){if(!hasDirty())return{ok:true,skipped:true,reason};return syncAll({reason})}
@@ -76,15 +76,16 @@ async function patchMainCloud(){if(patched||!cloud?.syncAll)return;patched=true;
 
 window.EveraQuestionCloud={enabled:syncEnabled,syncAll,flushDirty,trueSnapshot,relaxSnapshot};
 patchMainCloud();
-document.addEventListener('everflow:zhenti-records-change',()=>{if(applying)return;markDirty();scheduleFlush(CHANGE_FLUSH_MS,'zhenti-change')});
-document.addEventListener('everflow:relax-records-change',event=>{if(applying)return;const id=idKey(event.detail?.id);if(id){const clocks=object(readJson(RELAX_CLOCK_KEY,{}));clocks[id]=nowIso();writeJson(RELAX_CLOCK_KEY,clocks)}if(event.detail?.reset)writeText(RELAX_RESET_KEY,nowIso());markDirty();scheduleFlush(CHANGE_FLUSH_MS,'relax-change')});
-document.addEventListener('everflow:zhenti-reset-all',()=>{markDirty();scheduleFlush(0,'zhenti-reset')});
-addEventListener('online',()=>{if(hasDirty())scheduleFlush(1200,'online-flush');else setTimeout(()=>syncAll({reason:'online-pull'}).catch(()=>{}),1200)});
+document.addEventListener('everflow:zhenti-records-change',()=>{if(!applying)markDirty()});
+document.addEventListener('everflow:relax-records-change',event=>{if(applying)return;const id=idKey(event.detail?.id);if(id){const clocks=object(readJson(RELAX_CLOCK_KEY,{}));clocks[id]=nowIso();writeJson(RELAX_CLOCK_KEY,clocks)}if(event.detail?.reset)writeText(RELAX_RESET_KEY,nowIso());markDirty()});
+document.addEventListener('everflow:zhenti-reset-all',()=>markDirty());
+addEventListener('online',()=>{if(hasDirty())scheduleFlush(3000,'online-flush');else setTimeout(()=>syncAll({reason:'online-pull'}).catch(()=>{}),3000)});
 addEventListener('offline',()=>setCloudStatus('','离线','当前离线，恢复网络后自动同步'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&hasDirty())scheduleFlush(0,'hidden-flush');else if(document.visibilityState==='visible'&&!hasDirty())setTimeout(()=>syncAll({reason:'visible-pull'}).catch(()=>{}),350)});
 addEventListener('pagehide',()=>{if(hasDirty())flushDirty('pagehide-flush').catch(()=>{})});
-addEventListener('storage',event=>{if([...Object.values(ZHENTI_KEYS),...Object.values(RELAX_KEYS),RELAX_RESET_KEY,RELAX_CLOCK_KEY].includes(event.key)){markDirty();scheduleFlush(CHANGE_FLUSH_MS,'cross-tab-change')}});
+addEventListener('storage',event=>{if([...Object.values(ZHENTI_KEYS),...Object.values(RELAX_KEYS),RELAX_RESET_KEY,RELAX_CLOCK_KEY].includes(event.key))markDirty()});
 if(cloudStatus)cloudStatus.addEventListener('click',async()=>{const result=await syncAll({manual:true,reason:'manual-status'}).catch(()=>null);if(result?.reason==='guest'){window.EveraUI?.toast?.('登录账户后即可在电脑、平板和手机间同步题库进度。',{type:'info',title:'当前为本地模式',duration:4200});setTimeout(()=>{location.href='/account/'},650)}else if(result?.ok)window.EveraUI?.toast?.('题库进度已与云端合并。',{type:'success',title:'同步完成'})});
 client?.auth?.onAuthStateChange?.((event,session)=>{if(session?.user)setTimeout(()=>syncAll({reason:'auth-change'}).catch(()=>{}),0);else setCloudStatus('','本地模式','未登录：数据仅保存在当前设备')});
-setInterval(()=>{if(document.visibilityState!=='visible'||navigator.onLine===false)return;if(hasDirty())flushDirty('periodic-flush').catch(()=>{});else syncAll({reason:'periodic-pull'}).catch(()=>{})},PERIODIC_FLUSH_MS);
+setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false&&hasDirty())flushDirty('batch-interval').catch(()=>{})},PERIODIC_FLUSH_MS);
+setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false&&!hasDirty())syncAll({reason:'periodic-pull'}).catch(()=>{})},REMOTE_PULL_MS);
 setTimeout(()=>syncAll({reason:'boot'}).catch(()=>{}),900);
