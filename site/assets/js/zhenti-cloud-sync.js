@@ -57,6 +57,7 @@ import './cloud.js?v=20260904-stable2';
     const user=await currentUser();if(!user){setStatus('','本地模式','登录账户后可自动同步真题墙数据');return false}
     syncing=true;setStatus('syncing','同步中…','正在同步真题墙数据');
     try{
+      document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-before-sync',{detail:{manual}}));
       const local=snapshot();
       const {data:remoteRow,error:readError}=await client.from(TABLE).select('payload,updated_at,device_id').eq('user_id',user.id).eq('scope_key',SCOPE).maybeSingle();if(readError)throw readError;
       const merged=mergeSnapshot(local,remoteRow?.payload||null),localBefore=fingerprint(local),mergedPrint=fingerprint(merged),pulledRemote=mergedPrint!==localBefore;
@@ -66,7 +67,7 @@ import './cloud.js?v=20260904-stable2';
       lastSeenFingerprint=mergedPrint;saveMeta({userId:user.id,lastSyncAt:now,lastFingerprint:mergedPrint});setStatus('synced','已同步',`真题墙已同步 · ${new Date(now).toLocaleString('zh-CN',{hour12:false})}`);
       try{localStorage.setItem('everflow-last-zhenti-cloud-sync',JSON.stringify({ok:true,at:now,userId:user.id}))}catch{}
       document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-sync',{detail:{ok:true,at:now,userId:user.id,manual,pulledRemote,resetAt:merged.resetAt||null}}));
-      if(pulledRemote){sessionStorage.setItem('everflow-408-cloud-reload-toast',merged.resetAt&&isoTime(merged.resetAt)>isoTime(local.resetAt)?'已同步其他设备的真题重置状态。':'已载入云端最新真题进度。');setTimeout(()=>location.reload(),120);return true}
+      if(pulledRemote){const message=merged.resetAt&&isoTime(merged.resetAt)>isoTime(local.resetAt)?'已同步其他设备的真题重置状态。':'已载入云端最新真题进度。';window.EveraUI?.toast?.(message,{type:'success',title:'云同步',duration:3200});return true}
       return true;
     }catch(err){console.error('Everflow zhenti cloud sync failed',err);setStatus('error','同步失败',`同步失败：${err?.message||err}`);document.dispatchEvent(new CustomEvent('everflow:zhenti-cloud-error',{detail:{message:err?.message||String(err)}}));return false}
     finally{syncing=false}
@@ -84,6 +85,5 @@ import './cloud.js?v=20260904-stable2';
   setInterval(()=>{if(document.visibilityState!=='visible')return;const next=fingerprint();if(next!==lastSeenFingerprint){lastSeenFingerprint=next;schedule(900)}},WATCH_INTERVAL);
   setInterval(()=>{if(document.visibilityState==='visible')sync().catch(()=>{})},SYNC_INTERVAL);
 
-  const reloadToast=sessionStorage.getItem('everflow-408-cloud-reload-toast');if(reloadToast){sessionStorage.removeItem('everflow-408-cloud-reload-toast');setTimeout(()=>window.EveraUI?.toast?.(reloadToast,{type:'success',title:'云同步',duration:3200}),500)}
   (async()=>{const user=await currentUser();if(user)await sync();else setStatus('','本地模式','未登录：数据仅保存在当前设备')})().catch(()=>setStatus('error','同步失败'));
 })();
