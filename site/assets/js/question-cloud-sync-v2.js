@@ -18,8 +18,8 @@ const emptyError=()=>({version:1,cards:{},daily:{}});
 const enabled=Boolean(cfg.url&&cfg.publishableKey&&cloud?.enabled!==false&&typeof cloud?.getClient==='function');
 const client=enabled?await cloud.getClient():null;
 const syncEnabled=Boolean(enabled&&client);
-const PERIODIC_FLUSH_MS=2*60*1000;
-const REMOTE_PULL_MS=30*1000;
+const AUTO_SYNC_INTERVAL_MS=12*60*60*1000;
+const AUTO_SYNC_KEY='everflow-408-question-auto-sync-v1';
 let syncPromise=null,flushTimer=0,applying=false,patched=false,dirtySeq=0,syncedSeq=0;
 const cloudStatus=document.querySelector('[data-cloud-status]');
 function setCloudStatus(kind,text,title=text){
@@ -33,6 +33,8 @@ const readJson=(key,fallback)=>{try{const value=JSON.parse(localStorage.getItem(
 const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
 const readText=key=>{try{return localStorage.getItem(key)||''}catch{return''}};
 const writeText=(key,value)=>{try{if(value)localStorage.setItem(key,String(value));else localStorage.removeItem(key)}catch{}};
+const readAutoSync=()=>readJson(AUTO_SYNC_KEY,null);
+const autoSyncDue=userId=>{const last=readAutoSync(),at=Date.parse(last?.at||'');return !last||String(last.userId||'')!==String(userId||'')||!Number.isFinite(at)||Date.now()-at>=AUTO_SYNC_INTERVAL_MS};
 const isoTime=value=>{const time=new Date(value||0).getTime();return Number.isFinite(time)?time:0};
 const nowIso=()=>new Date().toISOString();
 const idKey=value=>String(value??'');
@@ -110,12 +112,14 @@ async function runSync({manual=false,reason='auto'}={}){
   const result={ok:true,at:maxIso(persistedTrue.at,persistedRelax.at),userId:user.id,questionScopes:2,trueRecords,relaxRecords,questionRecords,accountChanged,pulledRemote,manual,reason};
   writeJson(META_KEY,result);
   try{localStorage.setItem('everflow-last-question-cloud-sync',JSON.stringify(result))}catch{}
+  writeJson(AUTO_SYNC_KEY,{userId:user.id,at:nowIso()});
   setCloudStatus('synced','已同步',`题库已同步 · ${new Date(result.at).toLocaleString('zh-CN',{hour12:false})}`);
   document.dispatchEvent(new CustomEvent('everflow:question-cloud-sync',{detail:result}));
   if(pulledRemote&&!manual)document.dispatchEvent(new CustomEvent('everflow:question-cloud-merged',{detail:{accountChanged,reason}}));
   return result;
 }
 async function syncAll(options={}){if(syncPromise)return syncPromise;const targetSeq=dirtySeq;syncPromise=runSync(options).then(result=>{if(result?.ok)syncedSeq=Math.max(syncedSeq,targetSeq);return result}).catch(error=>{console.error('Everflow question cloud sync failed',error);setCloudStatus('error','同步失败',`同步失败：${error?.message||String(error)}`);document.dispatchEvent(new CustomEvent('everflow:question-cloud-error',{detail:{message:error?.message||String(error)}}));throw error}).finally(()=>{syncPromise=null});return syncPromise}
+async function maybeAutoSync(reason='auto'){if(!syncEnabled||navigator.onLine===false)return{ok:false,reason:!syncEnabled?'disabled':'offline'};const user=await currentUser();if(!user)return{ok:false,reason:'guest'};if(!autoSyncDue(user.id))return{ok:true,skipped:true,reason:'not-due'};return syncAll({reason})}
 function markDirty(){dirtySeq+=1}
 function hasDirty(){return dirtySeq>syncedSeq}
 async function flushDirty(reason='batch'){if(!hasDirty())return{ok:true,skipped:true,reason};return syncAll({reason})}
@@ -127,13 +131,11 @@ patchMainCloud();
 document.addEventListener('everflow:zhenti-records-change',()=>{if(!applying)markDirty()});
 document.addEventListener('everflow:relax-records-change',event=>{if(applying)return;const id=idKey(event.detail?.id);if(id){const clocks=object(readJson(RELAX_CLOCK_KEY,{}));clocks[id]=nowIso();writeJson(RELAX_CLOCK_KEY,clocks)}if(event.detail?.reset)writeText(RELAX_RESET_KEY,nowIso());markDirty()});
 document.addEventListener('everflow:zhenti-reset-all',()=>markDirty());
-addEventListener('online',()=>{if(hasDirty())scheduleFlush(3000,'online-flush');else setTimeout(()=>syncAll({reason:'online-pull'}).catch(()=>{}),3000)});
-addEventListener('offline',()=>setCloudStatus('','离线','当前离线，恢复网络后自动同步'));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&hasDirty())scheduleFlush(0,'hidden-flush');else if(document.visibilityState==='visible'&&!hasDirty())setTimeout(()=>syncAll({reason:'visible-pull'}).catch(()=>{}),350)});
-addEventListener('pagehide',()=>{if(hasDirty())flushDirty('pagehide-flush').catch(()=>{})});
+addEventListener('online',()=>setTimeout(()=>maybeAutoSync('online').catch(()=>{}),1000));
+addEventListener('offline',()=>setCloudStatus('','离线','当前离线，本机记录会保留'));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')maybeAutoSync('visible').catch(()=>{})});
 addEventListener('storage',event=>{if([...Object.values(ZHENTI_KEYS),...Object.values(RELAX_KEYS),RELAX_RESET_KEY,RELAX_CLOCK_KEY].includes(event.key))markDirty()});
 if(cloudStatus)cloudStatus.addEventListener('click',async()=>{const result=await syncAll({manual:true,reason:'manual-status'}).catch(()=>null);if(result?.reason==='guest'){window.EveraUI?.toast?.('登录账户后即可在电脑、平板和手机间同步题库进度。',{type:'info',title:'当前为本地模式',duration:4200});setTimeout(()=>{location.href='/account/'},650)}else if(result?.ok)window.EveraUI?.toast?.('题库进度已与云端合并。',{type:'success',title:'同步完成'})});
-client?.auth?.onAuthStateChange?.((event,session)=>{if(session?.user)setTimeout(()=>syncAll({reason:'auth-change'}).catch(()=>{}),0);else setCloudStatus('','本地模式','未登录：数据仅保存在当前设备')});
-setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false&&hasDirty())flushDirty('batch-interval').catch(()=>{})},PERIODIC_FLUSH_MS);
-setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false&&!hasDirty())syncAll({reason:'periodic-pull'}).catch(()=>{})},REMOTE_PULL_MS);
-setTimeout(()=>syncAll({reason:'boot'}).catch(()=>{}),900);
+client?.auth?.onAuthStateChange?.((event,session)=>{if(session?.user)setTimeout(()=>maybeAutoSync('auth-change').catch(()=>{}),0);else setCloudStatus('','本地模式','未登录：数据仅保存在当前设备')});
+setInterval(()=>{if(document.visibilityState==='visible'&&navigator.onLine!==false)maybeAutoSync('12h-timer').catch(()=>{})},AUTO_SYNC_INTERVAL_MS);
+setTimeout(()=>maybeAutoSync('boot').catch(()=>{}),900);
