@@ -10,7 +10,7 @@ const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const files={
   nav:'site/assets/js/site-nav-v2.js',runtime:'site/assets/js/site-runtime-v2.js',entry:'site/assets/js/zhenti-entry.js',bankSwitcher:'site/assets/js/question-bank-switch.js',
   graph:'site/graph/index.html',graphApp:'site/assets/js/graph-app.js',graphControls:'site/assets/js/graph-controls.js',graphAnswer:'site/assets/js/graph-answer-enhancements.js',graphCss:'site/assets/css/graph.css',graphAnswerCss:'site/assets/css/graph-answer-enhancements.css',zhentiStatusCss:'site/assets/css/zhenti-status.css',trueGraph:'site/assets/js/zhenti-graph.js',
-  qwer:'site/assets/js/question-choice-qwer.js',qwerCss:'site/assets/css/question-choice-qwer.css',accountPage:'site/account/index.html',accountEnh:'site/assets/js/account-auth-sync-v2.js',questionCloud:'site/assets/js/question-cloud-sync-v2.js',relaxWallStrongCss:'site/assets/css/relax1000-wall-strong.css',
+  qwer:'site/assets/js/question-choice-qwer.js',qwerCss:'site/assets/css/question-choice-qwer.css',accountPage:'site/account/index.html',accountEnh:'site/assets/js/account-auth-sync-v2.js',cloud:'site/assets/js/cloud.js',questionCloud:'site/assets/js/question-cloud-sync-v2.js',relaxWallStrongCss:'site/assets/css/relax1000-wall-strong.css',
   relaxCore:'site/assets/js/relax1000-core.js',relaxWall:'site/assets/js/relax1000-wall.js',relaxGraph:'site/assets/js/relax1000-graph.js',
   relaxReader:'site/assets/js/relax1000-reader.js',relaxReaderPage:'site/zhenti/relax-reader/index.html',relaxReaderNavCss:'site/assets/css/relax1000-reader-nav.css',relaxReaderNavV2Css:'site/assets/css/relax1000-reader-nav-v2.css',
   builder:'site/assets/js/paper-builder.js',cards:'site/assets/js/relax1000-cards.js',reset:'site/assets/js/relax1000-reset.js',
@@ -24,7 +24,7 @@ for(const p of [
 ])assert(!exists(p),`obsolete file must stay deleted: ${p}`);
 
 const text=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,read(p)]));
-const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,qwer,qwerCss,accountPage,accountEnh,questionCloud,relaxWallStrongCss,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
+const{nav,runtime,entry,bankSwitcher,graph,graphApp,graphControls,graphAnswer,graphCss,graphAnswerCss,zhentiStatusCss,trueGraph,qwer,qwerCss,accountPage,accountEnh,cloud,questionCloud,relaxWallStrongCss,relaxCore,relaxWall,relaxGraph,relaxReader,relaxReaderPage,relaxReaderNavCss,relaxReaderNavV2Css,builder,cards,reset,zhentiMedia,paper,admin,deploy}=text;
 
 assert(nav.includes("label:'题库'")&&nav.includes("label:'组卷'")&&nav.includes("label:'整体图谱'"),'top nav IA incomplete');
 assert(entry.includes("source==='zhenti'")&&entry.includes('zhenti-wall.js'),'true-paper selected-only boot missing');
@@ -62,10 +62,11 @@ assert(accountEnh.includes('cloud.signIn(user.email,oldPassword)')&&accountEnh.i
 assert(!accountEnh.includes('stopImmediatePropagation')&&!accountEnh.includes('data-sync-now')&&!accountEnh.includes('data-otp-send'),'account enhancement must not replace original login/OTP/sync button interactions');
 assert(questionCloud.includes("const TABLE='zhenti_sync_states'")&&questionCloud.includes("const TRUE_SCOPE='snapshot:v1'")&&questionCloud.includes("const RELAX_SCOPE='relax1000:v2'"),'question cloud scopes/table contract missing');
 assert(questionCloud.includes('everflow:zhenti-records-change')&&questionCloud.includes('everflow:relax-records-change'),'question auto-sync event hooks missing');
-assert(questionCloud.includes('PERIODIC_FLUSH_MS=2*60*1000')&&questionCloud.includes('dirtySeq=0')&&questionCloud.includes('function markDirty()')&&questionCloud.includes('function flushDirty('),'question cloud dirty-queue batching contract missing');
+assert(questionCloud.includes('AUTO_SYNC_INTERVAL_MS=12*60*60*1000')&&questionCloud.includes('dirtySeq=0')&&questionCloud.includes('function markDirty()')&&questionCloud.includes('function flushDirty('),'question cloud 12-hour dirty-queue contract missing');
 assert(questionCloud.includes("everflow:zhenti-records-change',()=>{if(!applying)markDirty()")&&questionCloud.includes('everflow:relax-records-change')&&questionCloud.includes('markDirty()'),'question answer changes must only mark dirty, never upload per answer');
 assert(!questionCloud.includes('CHANGE_DEBOUNCE_MS')&&!questionCloud.includes('location.reload')&&!questionCloud.includes('question-cloud-toast'),'question cloud must not restore per-answer debounce or forced refresh');
-assert(questionCloud.includes("visibilityState==='hidden'")&&questionCloud.includes('hidden-flush')&&questionCloud.includes('batch-interval'),'question cloud background/periodic batch flush missing');
+assert(questionCloud.includes("12h-timer")&&questionCloud.includes("maybeAutoSync('boot')")&&!questionCloud.includes('hidden-flush')&&!questionCloud.includes('batch-interval'),'question cloud 12-hour auto-sync throttle missing');
+assert(cloud.includes('AUTO_SYNC_INTERVAL_MS=12*60*60*1000')&&cloud.includes("12h-timer")&&!cloud.includes('everflow:study-change'),'account/course cloud 12-hour auto-sync throttle missing');
 assert(questionCloud.includes('LAST_USER_KEY')&&questionCloud.includes('accountChanged'),'question cloud account-isolation guard missing');
 assert(questionCloud.includes('cloud.syncAll=async function combinedSync'),'account syncAll question-bank upgrade missing');
 assert(qwerCss.includes('data-reader-option="A"')&&qwerCss.includes('data-graph-choice="A"')&&qwerCss.includes('content:"Q"')&&qwerCss.includes('content:"W"')&&qwerCss.includes('content:"E"')&&qwerCss.includes('content:"R"'),'shared QWER visible labels incomplete');
