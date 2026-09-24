@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <script src="/assets/js/site-boot-v1.js?v=20260904-stable2"></script>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="description" content="Everflow 英语二写作管理员训练页">
+  <title>英语二写作训练 · Everflow</title>
+  <link rel="icon" href="../../../assets/everflow-icon.svg">
+  <link rel="stylesheet" href="../../../assets/css/site.css?v=20260924-scroll1">
+  <link rel="stylesheet" href="../../../assets/css/responsive.css?v=20260824-ui5">
+  <link rel="stylesheet" href="../../../assets/css/study.css">
+  <link rel="stylesheet" href="../../../assets/css/learning-center.css?v=20260824-ui5">
+  <style>
+    body{min-height:100svh;background:var(--paper);overflow:hidden}
+    .english-private-main{height:calc(100svh - 69px);min-height:420px;position:relative;background:var(--soft)}
+    .english-frame{display:block;width:100%;height:100%;border:0;background:#f6f7f5}
+    .english-gate{position:absolute;inset:0;z-index:3;display:grid;place-items:center;padding:24px;background:var(--soft)}
+    .english-gate[hidden]{display:none}
+    .english-gate-card{width:min(560px,100%);border:1px solid var(--line);border-radius:26px;background:var(--card);box-shadow:var(--shadow);padding:28px}
+    .english-gate-card h1{font-size:30px;letter-spacing:-.035em;margin:8px 0 9px}
+    .english-gate-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+    .english-gate-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+    .english-gate-actions a,.english-gate-actions button{min-height:42px;padding:0 15px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}
+    .english-gate-actions button{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+    .english-access-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:850;color:var(--muted)}
+    .english-access-chip:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--red)}
+    @media(max-width:640px){.english-private-main{height:calc(100svh - 61px)}.english-gate{padding:12px}.english-gate-card{padding:20px;border-radius:20px}.english-gate-card h1{font-size:25px}.english-gate-actions{display:grid}.english-gate-actions>*{width:100%}}
+  </style>
+</head>
+<body>
+<header class="topbar"><div class="wrap nav"><a class="brand" href="../../../"><img src="../../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
+<div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
+<main class="english-private-main" data-english-root>
+  <section class="english-gate" id="englishGate">
+    <div class="english-gate-card">
+      <span class="english-access-chip">ADMIN ONLY</span>
+      <div class="eyebrow" style="margin-top:14px">ENGLISH II · WRITING</div>
+      <h1 id="englishGateTitle">正在验证管理员身份</h1>
+      <p id="englishGateCopy">英语写作训练内容仅管理员可见。验证通过后才会加载正文。</p>
+      <div class="english-gate-actions" id="englishGateActions" hidden>
+        <button type="button" id="englishRetry">重新验证</button>
+        <a href="../">返回刷题中心</a>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="../../../assets/js/site-runtime-v2.js?v=20260924-english1"></script>
+<script type="module" src="./gate.js?v=20260924-1"></script>
+</body>
+</html>
