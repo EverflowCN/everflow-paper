@@ -26,6 +26,8 @@
     .english-gate-actions button{background:var(--ink);color:var(--paper);border-color:var(--ink)}
     .english-access-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:999px;background:var(--soft);font-size:10px;font-weight:850;color:var(--muted)}
     .english-access-chip:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--red)}
+    .english-sync-status{position:absolute;right:14px;top:14px;z-index:5;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:0 6px 20px rgba(0,0,0,.06);backdrop-filter:blur(12px);font-size:10px;font-weight:800;color:var(--muted)}
+    .english-sync-status[hidden]{display:none}.english-sync-status:before{content:'';width:7px;height:7px;border-radius:50%;background:#b6bbb7}.english-sync-status[data-state='success']:before{background:var(--green)}.english-sync-status[data-state='syncing']:before,.english-sync-status[data-state='pending']:before{background:#d2a442}.english-sync-status[data-state='offline']:before{background:#8b9290}.english-sync-status[data-state='error']:before{background:var(--red)}
     @media(max-width:640px){.english-private-main{height:calc(100svh - 61px)}.english-gate{padding:12px}.english-gate-card{padding:20px;border-radius:20px}.english-gate-card h1{font-size:25px}.english-gate-actions{display:grid}.english-gate-actions>*{width:100%}}
   </style>
 </head>
@@ -33,6 +35,7 @@
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../../../"><img src="../../../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题">◐</button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单">☰</button></div></header>
 <div class="mobile-panel"><button class="icon-btn" data-theme>◐</button></div>
 <main class="english-private-main" data-english-root>
+  <div class="english-sync-status" id="englishSyncStatus" data-state="syncing"><span id="englishSyncText">正在连接云端…</span></div>
   <section class="english-gate" id="englishGate">
     <div class="english-gate-card">
       <span class="english-access-chip">ADMIN ONLY</span>
@@ -47,6 +50,6 @@
   </section>
 </main>
 <script src="../../../assets/js/site-runtime-v2.js?v=20260924-english1"></script>
-<script type="module" src="./gate.js?v=20260924-1"></script>
+<script type="module" src="./gate.js?v=20260924-2"></script>
 </body>
 </html>
