@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script src="/assets/js/site-boot-v1.js?v=20260904-stable2"></script>
-  <meta name="description" content="Everflow 刷题中心：408、数学及后续题单统一管理">
+  <meta name="description" content="Everflow 刷题中心：408、数学、英语及专项题单统一管理">
   <title>刷题 · 学习中心 · Everflow</title>
   <link rel="icon" href="../../assets/everflow-icon.svg">
   <link rel="stylesheet" href="../../assets/css/site.css">
@@ -20,7 +20,7 @@
     <div class="practice-category-grid">
       <article class="practice-category active"><div><strong>408</strong><div class="learning-badge live">2 个题单</div></div><span>1800题强化必刷 + 数据结构强化专项</span></article>
       <article class="practice-category active"><div><strong>数学</strong><div class="learning-badge live">1 个题单</div></div><span>李林880题 · 数学二带刷打卡</span></article>
-      <article class="practice-category"><div><strong>英语</strong></div><span>后续可扩展阅读 / 真题题单</span></article>
+      <a class="practice-category active" data-admin-english-entry hidden href="english/" style="color:inherit;text-decoration:none"><div><strong>英语</strong><div class="learning-badge live">管理员</div></div><span>英语二写作 23+ · 2010–2026 真题图表 / 母范文 / 默写训练</span></a>
       <article class="practice-category"><div><strong>政治</strong></div><span>后续可扩展选择题题单</span></article>
     </div>
   </section>
@@ -51,8 +51,20 @@
       </article>
     </div>
   </section>
+
+  <section class="learning-section" data-admin-english-section hidden>
+    <div class="learning-section-head"><div><div class="eyebrow">ENGLISH PRACTICE</div><h2>英语题单</h2></div><span class="learning-badge live">管理员可见</span></div>
+    <div class="learning-lanes" style="grid-template-columns:1fr">
+      <article class="learning-lane">
+        <div class="learning-lane-head"><div><h3>英语二写作 · 23+ 默写系统</h3><p>2010–2026 Writing 全年份：真题图表重绘、6 类母范文、主题词训练、默写、错题本与 40 分钟大小作文模拟。</p></div><div class="learning-lane-icon">EN</div></div>
+        <div class="learning-note"><strong>权限：</strong>仅管理员 / Owner 登录后显示；普通用户在刷题中心看不到入口，直接访问也不会加载作文正文。</div>
+        <div class="learning-hero-actions"><a class="learning-btn primary" href="english/">进入英语写作训练</a></div>
+      </article>
+    </div>
+  </section>
 </main>
 <footer class="footer"><div class="wrap footer-inner"><span>Everflow Study · Practice</span><span><a href="../courses/">去课程 →</a></span></div></footer>
-<script src="../../assets/js/site-runtime-v2.js?v=20260904-stable2"></script>
+<script src="../../assets/js/site-runtime-v2.js?v=20260924-english1"></script>
+<script type="module" src="../../assets/js/practice-admin-english.js?v=20260924-1"></script>
 </body>
 </html>
