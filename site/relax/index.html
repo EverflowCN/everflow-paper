@@ -29,6 +29,13 @@
   </section>
 
   <section class="relax-builder" data-builder>
+    <section class="paper-history" data-paper-history hidden aria-labelledby="paper-history-title">
+      <header class="paper-history-head">
+        <div><span>RECENT PAPERS</span><h2 id="paper-history-title">组卷历史记录</h2><p>自动保存题目、作答进度和用时，返回或刷新后可以继续。</p></div>
+        <button type="button" data-history-clear>清空历史</button>
+      </header>
+      <div class="paper-history-list" data-history-list></div>
+    </section>
     <div class="relax-section-head"><span>00</span><div><h2>选择题源</h2><p>真题与 Relax1000 共用同一套组卷器；切换题源不会清除任何答题记录。</p></div></div>
     <div class="paper-source-grid" data-source-options>
       <button class="active" type="button" data-source="zhenti"><b>408 真题</b><small>已核验历年选择题</small><em>历年真题</em></button>
@@ -136,6 +143,6 @@
 <script src="../assets/js/cloud-config.js"></script>
 <script type="module" src="../assets/js/cloud.js"></script>
 <script src="../assets/js/zhenti-data-overlay.js?v=20260904-editor1"></script>
-<script type="module" src="../assets/js/paper-builder.js?v=20260921-pdf-responsive4"></script>
+<script type="module" src="../assets/js/paper-builder.js?v=20260928-history1"></script>
 </body>
 </html>
