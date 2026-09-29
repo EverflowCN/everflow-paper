@@ -1,9 +1,19 @@
-import re,subprocess,unittest,tempfile
+import re,subprocess,unittest,tempfile,shutil
 from unittest.mock import patch
 from pathlib import Path
 from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem,render_structured_text,render_structured_text
 
 class AnswerExport(unittest.TestCase):
+ @unittest.skipUnless(shutil.which('xelatex') and shutil.which('pdftotext'), 'XeLaTeX environment unavailable')
+ def test_compiled_answer_appendix(self):
+  questions=[{'_source':'relax','_id':'ds-1-2','stem':'一加一等于（ ）。','options':{'A':'一','B':'二','C':'三','D':'四'},'answer':'B','explanation':'因为 $1+1=2$。'}]
+  with tempfile.TemporaryDirectory() as tmp:
+   for flag in (False,True):
+    pdf=render({'title':'答案分册验证','layout':'compact','includeAnswers':flag},questions,Path(tmp)/str(flag))
+    output=subprocess.check_output(['pdftotext','-layout',str(pdf),'-'],text=True)
+    self.assertIn('一加一等于',output)
+    self.assertEqual('答案与解析' in output,flag)
+    if flag:self.assertIn('因为',output)
  def test_optional_answer_pages_follow_paper_order(self):
   questions=[{'_source':'relax','_id':'ds-1-2','stem':'第一题','answer':'B','explanation':'第一题解析'},
              {'_source':'zhenti','_id':'2024-1','stem':'第二题','answer':'A','analysis':'第二题解析'}]
