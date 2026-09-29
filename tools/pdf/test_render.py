@@ -1,6 +1,23 @@
-import re,subprocess,unittest
+import re,subprocess,unittest,tempfile
+from unittest.mock import patch
 from pathlib import Path
 from render import escape,rich,choice_rich,render,merge_layers,resolve,external_css_reference,normalize_soft_breaks,prepared_stem,render_structured_text,render_structured_text
+
+class AnswerExport(unittest.TestCase):
+ def test_optional_answer_pages_follow_paper_order(self):
+  questions=[{'_source':'relax','_id':'ds-1-2','stem':'第一题','answer':'B','explanation':'第一题解析'},
+             {'_source':'zhenti','_id':'2024-1','stem':'第二题','answer':'A','analysis':'第二题解析'}]
+  with tempfile.TemporaryDirectory() as tmp, patch('render.subprocess.run') as compile_tex:
+   compile_tex.return_value.returncode=0
+   dest=Path(tmp)
+   render({'title':'测试','layout':'compact'},questions,dest)
+   self.assertFalse((dest/'answers.tex').exists())
+   render({'title':'测试','layout':'compact','includeAnswers':True},questions,dest)
+   answers=(dest/'answers.tex').read_text()
+   self.assertLess(answers.index('第 1 题'),answers.index('第 2 题'))
+   self.assertIn('答案：}B',answers)
+   self.assertIn('第一题解析',answers)
+   self.assertIn('第二题解析',answers)
 
 class Safety(unittest.TestCase):
  def test_tex_injection(self):

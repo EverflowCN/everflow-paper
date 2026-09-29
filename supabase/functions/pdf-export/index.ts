@@ -198,7 +198,8 @@ Deno.serve(async(req)=>{
    if(body.schema!=='everflow-pdf-export-v1'||body.template!=='exam-A4'||!['compact','spacious'].includes(body.layout)||!uuid.test(body.requestId||'')||!Array.isArray(body.questions)||body.questions.length<1||body.questions.length>100)return reply({error:'试卷参数无效'},400);
    const questions=body.questions.map((q:any)=>({source:q.source,id:String(q.id||'')}));
    if(questions.some((q:any)=>q.source==='zhenti'?!/^20\d{2}-(?:[1-9]|[1-3]\d|4[0-7])$/.test(q.id):q.source==='relax'?!/^[a-z]{2,4}-\d{1,3}-\d{1,4}$/.test(q.id):true)||new Set(questions.map((q:any)=>q.source+':'+q.id)).size!==questions.length)return reply({error:'题号无效或重复'},400);
-   const payload={schema:body.schema,template:'exam-A4',layout:body.layout,title:String(body.title||'408 组卷').slice(0,100),questions};
+   if(body.includeAnswers!==undefined&&typeof body.includeAnswers!=='boolean')return reply({error:'答案选项无效'},400);
+   const payload={schema:body.schema,template:'exam-A4',layout:body.layout,includeAnswers:body.includeAnswers===true,title:String(body.title||'408 组卷').slice(0,100),questions};
    const {data,error}=await db.rpc('pdf_export_enqueue',{p_user:user.id,p_key:body.requestId,p_payload:payload,p_priority:manager?10:0});
    if(error){
     const message=String(error.message||'');
@@ -218,7 +219,7 @@ Deno.serve(async(req)=>{
    if(!data)return reply({error:'任务不存在'},404);job=data;
   }else return reply({error:'Method not allowed'},405);
   if(Date.parse(job.expires_at)<=Date.now())return reply({error:'任务已过期，请重新生成'},410);
-  const result:any={id:job.id,jobId:job.id,status:job.status,title:job.payload.title,count:job.payload.questions.length,layout:job.payload.layout,expiresAt:job.expires_at};
+  const result:any={id:job.id,jobId:job.id,status:job.status,title:job.payload.title,count:job.payload.questions.length,layout:job.payload.layout,includeAnswers:job.payload.includeAnswers===true,expiresAt:job.expires_at};
   if(req.method==='POST')result.quota=await quotaSnapshot(user.id,manager);
   const snap=await workerSnapshot(),fastWorker=snap.fast;
   result.workers=snap.workers;

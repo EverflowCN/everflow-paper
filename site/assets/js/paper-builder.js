@@ -6,7 +6,7 @@ const app=document.querySelector('[data-paper-builder]');
 if(!app)throw new Error('408 paper builder root missing');
 
 const $=s=>app.querySelector(s),$$=s=>[...app.querySelectorAll(s)];
-const els={builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),history:$('[data-paper-history]'),historyList:$('[data-history-list]'),historyClear:$('[data-history-clear]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]'),exportQuota:$('[data-export-quota]'),exportQuotaDaily:$('[data-export-quota-daily]'),exportQuotaHourly:$('[data-export-quota-hourly]'),exportQuotaNote:$('[data-export-quota-note]'),exportTask:$('[data-export-task]'),exportTaskOpen:$('[data-export-task-open]'),exportTaskLabel:$('[data-export-task-label]'),exportTaskDetail:$('[data-export-task-detail]'),exportTaskTime:$('[data-export-task-time]')};
+const els={exportAnswers:$('[data-export-answers]'),builder:$('[data-builder]'),paper:$('[data-paper]'),result:$('[data-result]'),history:$('[data-paper-history]'),historyList:$('[data-history-list]'),historyClear:$('[data-history-clear]'),subjects:$('[data-subjects]'),ranges:$('[data-ranges]'),generate:$('[data-generate]'),tip:$('[data-builder-tip]'),rangeTitle:$('[data-range-title]'),rangeNote:$('[data-range-note]'),paperTitle:$('[data-paper-title]'),progress:$('[data-progress]'),answered:$('[data-answered]'),timer:$('[data-timer]'),grid:$('[data-answer-grid]'),card:$('[data-question-card]'),prev:$('[data-prev]'),next:$('[data-next]'),submit:$('[data-submit]'),exit:$('[data-exit]'),bankTotal:$('[data-bank-total]'),seenTotal:$('[data-seen-total]'),wrongTotal:$('[data-wrong-total]'),builderExport:$('[data-pdf-export-builder]'),exportTrigger:$('[data-pdf-export]'),exportLayer:$('[data-export-layer]'),exportAdmin:$('[data-export-admin]'),exportSteps:$('[data-export-steps]'),exportStatus:$('[data-export-status-label]'),exportWorker:$('[data-export-worker]'),exportPosition:$('[data-export-position]'),exportMessage:$('[data-export-message]'),exportStart:$('[data-export-start]'),exportBackground:$('[data-export-background]'),exportPreview:$('[data-export-preview]'),exportDownload:$('[data-export-download]'),exportAccess:$('[data-export-access]'),exportAccessTitle:$('[data-export-access-title]'),exportAccessCopy:$('[data-export-access-copy]'),exportAccessAction:$('[data-export-access-action]'),exportEta:$('[data-export-eta]'),exportEtaRange:$('[data-export-eta-range]'),exportCountdown:$('[data-export-countdown]'),exportQuota:$('[data-export-quota]'),exportQuotaDaily:$('[data-export-quota-daily]'),exportQuotaHourly:$('[data-export-quota-hourly]'),exportQuotaNote:$('[data-export-quota-note]'),exportTask:$('[data-export-task]'),exportTaskOpen:$('[data-export-task-open]'),exportTaskLabel:$('[data-export-task-label]'),exportTaskDetail:$('[data-export-task-detail]'),exportTaskTime:$('[data-export-task-time]')};
 
 const YEARS=Array.from({length:18},(_,i)=>2009+i);
 const SUBJECT_ORDER=['ds','co','os','cn'];
@@ -252,7 +252,7 @@ function renderPdfAccess(access){
       if(els.exportAccessAction){els.exportAccessAction.href=login?'../account/':'../membership/';els.exportAccessAction.textContent=login?'去登录':error?'查看账户':'开通会员'}
     }
   }
-  exportLayoutInputs.forEach(input=>{input.disabled=!exportAccessAllowed||exportBusy()});
+  exportLayoutInputs.forEach(input=>{input.disabled=!exportAccessAllowed||exportBusy()});if(els.exportAnswers)els.exportAnswers.disabled=!exportAccessAllowed||exportBusy();
   if(!exportAccessAllowed&&els.exportQuota)els.exportQuota.hidden=true;
   if(els.exportStart)els.exportStart.disabled=!exportAccessAllowed||exportBusy()||exportQuotaBlocked;
 }
@@ -319,7 +319,7 @@ function persistExportJob(){
 }
 function clearPersistedExportJob(){try{localStorage.removeItem(EXPORT_JOB_KEY)}catch{}}
 function setExportState(status,{position=null,workers=null,message='',downloadUrl=''}={}){
-  exportJob.status=status;setExportSteps(status);exportLayoutInputs.forEach(input=>{input.disabled=exportBusy()||!exportAccessAllowed});
+  exportJob.status=status;setExportSteps(status);if(els.exportAnswers)els.exportAnswers.disabled=exportBusy()||!exportAccessAllowed;exportLayoutInputs.forEach(input=>{input.disabled=exportBusy()||!exportAccessAllowed});
   els.exportLayer?.classList.toggle('is-busy',['queued','preparing','compiling','storing'].includes(status));
   els.exportLayer?.classList.toggle('is-complete',status==='completed');els.exportLayer?.classList.toggle('is-error',status==='failed');
   const labels={idle:'准备生成',queued:'正在排队',preparing:'正在准备排版',compiling:'正在生成 PDF',processing:'正在生成 PDF',storing:'正在保存 PDF',completed:'生成完成',failed:'生成失败'};
@@ -336,7 +336,7 @@ function resetExportUi(){
   stopExportStream();clearPersistedExportJob();exportRequestId='';exportPollFailures=0;exportFastPolling=false;exportQuotaBlocked=false;exportJob={id:'',status:'idle',pollTimer:0,eventSource:null,downloadUrl:'',title:'',count:0,updatedAt:0};
   if(els.exportStart){els.exportStart.hidden=false;els.exportStart.disabled=false;els.exportStart.textContent='开始生成'}
   if(els.exportDownload){els.exportDownload.hidden=true;els.exportDownload.removeAttribute('href')}if(els.exportPreview){els.exportPreview.hidden=true;els.exportPreview.removeAttribute('href')}
-  setExportState('idle',{message:'仅生成题目页，不含封面、前言、目录、答案与解析。'});updateExportEta({},'idle');
+  setExportState('idle',{message:'默认仅生成题目页；可选择在末尾附带答案与解析。'});updateExportEta({},'idle');
 }
 function closeExportDialog(){if(!els.exportLayer)return;els.exportLayer.hidden=true;document.body.classList.remove('paper-export-open')}
 async function openExportDialog(accessOverride=null){
@@ -362,7 +362,7 @@ function exportPayload(){
     templateVersion:'everflow-exam-online-v1',
     layout:selectedExportLayout(),
     answerSpace:selectedExportLayout()==='spacious'?'25mm':'none',
-    includeAnswers:false,
+    includeAnswers:Boolean(els.exportAnswers?.checked),
     title:els.paperTitle?.textContent||'408 组卷',
     source,
     mode,
@@ -452,7 +452,7 @@ function applyExportUpdate(data={}){
   if(exportManager&&('priorityEnabled'in data||'priority'in data))renderExportPriority({app_metadata:{role:'owner'}},Boolean(data.priorityEnabled??data.priority));
   const rawStatus=String(data.status||exportJob.status||'queued');const status=({processing:'compiling',ready:'completed'})[rawStatus]||rawStatus;
   if(data.title)exportJob.title=data.title;if(data.count)exportJob.count=data.count;if(data.workers?.mode)exportFastPolling=data.workers.mode==='persistent';
-  if(data.layout)setSelectedExportLayout(data.layout);if(data.quota)renderExportQuota(data.quota);setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});updateExportEta(data,status,data.position);
+  if(data.layout)setSelectedExportLayout(data.layout);if(typeof data.includeAnswers==='boolean'&&els.exportAnswers)els.exportAnswers.checked=data.includeAnswers;if(data.quota)renderExportQuota(data.quota);setExportState(status,{position:data.position,workers:data.workers,message:data.message||'',downloadUrl:data.downloadUrl||data.download_url||''});updateExportEta(data,status,data.position);
   if(status==='completed'||status==='failed'){stopExportStream();exportRequestId='';persistExportJob()}
 }
 async function pollExportJob(){
@@ -510,6 +510,7 @@ function showLoadError(error){
 $$('[data-source]').forEach(b=>b.addEventListener('click',()=>{void setSource(b.dataset.source)}));$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{void setMode(b.dataset.mode)}));$$('[data-size]').forEach(b=>b.addEventListener('click',()=>{if(mode==='simulation')return;size=Number(b.dataset.size);syncSizeButtons()}));
 $$('.relax-filters input').forEach(input=>input.addEventListener('change',()=>{if(input.value==='all'&&input.checked)$$('.relax-filters input').forEach(i=>{if(i!==input)i.checked=false});else if(input.value!=='all'&&input.checked)$('.relax-filters input[value="all"]').checked=false;if(!$$('.relax-filters input:checked').length)$('.relax-filters input[value="all"]').checked=true}));
 els.builderExport?.addEventListener('click',()=>{void prepareExportFromBuilder()});els.exportTrigger?.addEventListener('click',()=>{void openExportDialog()});els.exportTaskOpen?.addEventListener('click',()=>{void openExportDialog()});$$('[data-export-close]').forEach(btn=>btn.addEventListener('click',closeExportDialog));els.exportBackground?.addEventListener('click',closeExportDialog);els.exportStart?.addEventListener('click',()=>{void startPdfExport()});els.exportDownload?.addEventListener('click',event=>{void savePdfForDevice(event)});syncExportDeviceActions();
+els.exportAnswers?.addEventListener('change',()=>{if(!exportBusy()){resetExportUi();renderPdfAccess(exportAccessCache)}});
 exportLayoutInputs.forEach(input=>input.addEventListener('change',()=>{if(!exportBusy()){resetExportUi();renderPdfAccess(exportAccessCache);void refreshExportAvailability()}}));
 els.generate.addEventListener('click',()=>{void generate()});els.prev.addEventListener('click',()=>{if(index>0){index--;saveCurrentPaper();renderPaper()}});els.next.addEventListener('click',()=>{if(index<paper.length-1){index++;saveCurrentPaper();renderPaper()}else handIn()});els.submit.addEventListener('click',handIn);els.exit.addEventListener('click',()=>{saveCurrentPaper();clearInterval(timer);timer=null;els.paper.hidden=true;els.builder.hidden=false;syncBuilder();window.scrollTo({top:0,behavior:'smooth'})});
 els.historyList?.addEventListener('click',event=>{const open=event.target.closest('[data-history-open]'),remove=event.target.closest('[data-history-delete]');if(open){void restoreHistory(open.dataset.historyOpen);return}if(remove){writeHistory(readHistory().filter(row=>row.id!==remove.dataset.historyDelete));if(activeHistoryId===remove.dataset.historyDelete){activeHistoryId='';paper=[];answers={}}}});

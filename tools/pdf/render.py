@@ -256,6 +256,13 @@ def render(payload,questions,dest):
         if not body.strip():raise ValueError('Empty question '+q['_id'])
         chunks.append(r'\begin{bbox}\qitem '+body+answer_space+'\n'+r'\end{bbox}')
     (dest/'questions.tex').write_text('\n\n'.join(chunks),encoding='utf8')
+    if payload.get('includeAnswers') is True:
+        answers=[r'\clearpage\begin{center}\heiti\large 答案与解析\end{center}']
+        for index,q in enumerate(questions,1):
+            answer=render_structured_text(q.get('answer')) or '暂无答案'
+            analysis=render_structured_text(q.get('analysis') or q.get('explanation')) or '暂无解析'
+            answers.append(r'\par\noindent\textbf{第 '+str(index)+r' 题　答案：}'+answer+r'\par '+analysis+r'\par\medskip')
+        (dest/'answers.tex').write_text('\n'.join(answers),encoding='utf8')
     for _ in range(2):
         result=subprocess.run(['xelatex','-no-shell-escape','-halt-on-error','-interaction=nonstopmode','paper.tex'],cwd=dest,env={**__import__('os').environ,'openin_any':'p','openout_any':'p'},capture_output=True,timeout=120)
         if result.returncode:
