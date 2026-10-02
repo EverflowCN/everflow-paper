@@ -19,15 +19,18 @@ function isVerified(question) {
   return question?.verification?.status === 'verified';
 }
 
-// Base-year JSON is authoritative. A supplement is a whole-question fallback only
-// when base does not yet contain a verified version of that question. Extra is the
-// final fallback. This mirrors the frontend loader and prevents stale supplements
-// from overriding newer verified base entries.
+// Match the frontend's evidence ranking and preserve source order for ties.
+function evidenceRank(question) {
+  if (!isVerified(question)) return 0;
+  const mode = String(question.verification?.mode || '').toLowerCase();
+  if (/original-paper|original-scan|original-question-screenshot|public-paper-transcription|table-transcription|instruction-transcription/.test(mode)) return 3;
+  if (/paraphrase/.test(mode)) return 1;
+  return 2;
+}
 function resolveQuestion(baseQuestion, supplementQuestion, extraQuestion) {
-  if (isVerified(baseQuestion)) return baseQuestion;
-  if (isVerified(supplementQuestion)) return supplementQuestion;
-  if (isVerified(extraQuestion)) return extraQuestion;
-  return baseQuestion || supplementQuestion || extraQuestion || null;
+  const candidates = [baseQuestion, supplementQuestion, extraQuestion].filter(isVerified);
+  return candidates.reduce((best, item) => evidenceRank(item) > evidenceRank(best) ? item : best, null)
+    || baseQuestion || supplementQuestion || extraQuestion || null;
 }
 
 function mergeQuestionSets(base, supplement, extra) {

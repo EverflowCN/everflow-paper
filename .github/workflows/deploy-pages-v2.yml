@@ -44,6 +44,7 @@ jobs:
           node site/tools/build-zhenti-subject-index.mjs --check
           node site/tools/audit-question-banks.mjs --skip-relax
           node site/tools/audit-question-content.mjs --site-root=site
+          node site/tools/test-question-content.mjs
           grep -q 'relax-reader-nav-group' site/assets/js/relax1000-reader.js
           grep -q 'chapterOrder' site/assets/js/relax1000-reader.js
           grep -q "event.key==='1'" site/assets/js/relax1000-reader.js

@@ -65,6 +65,7 @@ function auditRelax(){
     ids.add(id);
     if(!validSubject.has(question.subjectId))fail('relax',id,'invalid-subject',question.subjectId);
     if(!String(question.stem||'').trim()&&!question.questionImages?.length)fail('relax',id,'empty-stem-without-image');
+    if(!String(question.explanation||'').trim()&&!question.explanationImages?.length)fail('relax',id,'empty-explanation-without-image');
     const options=Array.isArray(question.options)?question.options:[];
     if(options.length!==4)fail('relax',id,'invalid-option-count',String(options.length));
     const keys=options.map(item=>String(item?.key||''));

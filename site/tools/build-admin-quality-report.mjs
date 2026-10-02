@@ -43,6 +43,7 @@ function scanRelax(){
     const id=String(question.id||index);if(ids.has(id))issues.push(`${id}: ID 重复`);ids.add(id);
     const keys=(question.options||[]).map(item=>String(item?.key||''));
     if(!validSubjects.has(question.subjectId)||keys.join('')!=='ABCD'||!keys.includes(String(question.answer||'')))issues.push(`${id}: 结构或答案异常`);
+    if(!String(question.explanation||'').trim()&&!question.explanationImages?.length)issues.push(`${id}: 缺少解析文字和图片`);
   }
   banks.push({id:'relax1000',label:'Relax1000',status:issues.length?'error':'pass',note:issues.length?`${issues.length} 项需要处理`:'私有强化题库已通过完整性审计',checks:['结构','重复 ID','答案','图片'],issues:issues.slice(0,20)});
 }

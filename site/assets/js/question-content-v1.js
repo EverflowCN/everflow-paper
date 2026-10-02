@@ -6,10 +6,10 @@ const ITEM_MARKER=/^(?:（\d{1,2}）|\(\d{1,2}\)|[IVX]{1,4}[.．、]|[①②③�
 
 function structuredText(value){
   let text=String(value??'').replace(/\r\n?/g,'\n').trim();
-  const fullNumbers=text.match(/(?:^|[：:；;。？！?\s])（\d{1,2}）/g)||[];
-  if(fullNumbers.length>=2&&/（1）/.test(text)&&/（2）/.test(text))text=text.replace(/([：:；;。？！?])[ \t]*(（\d{1,2}）)/g,'$1\n$2');
-  const halfNumbers=text.match(/(?:^|[：:；;。？！?\s])\(\d{1,2}\)/g)||[];
-  if(halfNumbers.length>=2&&/\(1\)/.test(text)&&/\(2\)/.test(text))text=text.replace(/([：:；;。？！?])[ \t]*(\(\d{1,2}\))/g,'$1\n$2');
+  const fullNumbers=text.match(/（\d{1,2}）/g)||[];
+  if(fullNumbers.length>=2&&/（1）/.test(text)&&/（2）/.test(text))text=text.replace(/([^\n])[ \t]*(（\d{1,2}）)/g,'$1\n$2');
+  const halfNumbers=text.match(/(?<![A-Za-z0-9_])\(\d{1,2}\)(?!\s*[=+*/])/g)||[];
+  if(halfNumbers.length>=2&&halfNumbers.includes('(1)')&&halfNumbers.includes('(2)'))text=text.replace(/([^A-Za-z0-9_\n])[ \t]*(\(\d{1,2}\))(?!\s*[=+*/])/g,'$1\n$2');
   const romans=text.match(/(?:^|[：:；;。？！?\s])(?:IV|IX|V?I{1,3}|X)[.．、]/g)||[];
   if(romans.length>=2){
     text=text.replace(/([：:；;。？！?])[ \t]*((?:IV|IX|V?I{1,3}|X)[.．、])/g,'$1\n$2');
