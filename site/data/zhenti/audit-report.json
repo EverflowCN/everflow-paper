@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T01:53:17.261Z",
+  "generatedAt": "2026-10-02T10:57:25.242Z",
   "range": "2009-2026",
   "expectedQuestions": 846,
   "checkedQuestions": 846,
@@ -30,7 +30,7 @@
       "mergedCount": 47,
       "verified": 47,
       "healthy": 47,
-      "figures": 4,
+      "figures": 3,
       "failureCount": 0,
       "manifestFailureCount": 0,
       "badQuestions": []
