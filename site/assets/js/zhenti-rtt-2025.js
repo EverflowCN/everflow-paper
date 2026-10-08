@@ -100,7 +100,7 @@ function mount(host){
   svgAt(ms);
  }
  box.querySelectorAll('[data-rtt-mode]').forEach(button=>button.addEventListener('click',()=>{stop();mode=button.dataset.rttMode;ms=0;renderEvents();render();}));
- $('[data-rtt-play]').addEventListener('click',()=>{if(timer!==null){stop();return;}const end=plans[mode].end;if(ms>=end)ms=0;$('[data-rtt-play]').textContent='Ⅱ 暂停';activeAnimations.add(stop);timer=setInterval(()=>{if(!box.isConnected){stop();return;}ms=Math.min(plans[mode].end,ms+.25);if(ms>=plans[mode].end)stop();render();},90);render();});
+ $('[data-rtt-play]').addEventListener('click',()=>{if(timer!==null){stop();return;}const end=plans[mode].end;if(ms>=end)ms=0;$('[data-rtt-play]').textContent='Ⅱ 暂停';activeAnimations.add(stop);timer=setInterval(()=>{if(!box.isConnected||!box.getClientRects().length){stop();return;}ms=Math.min(plans[mode].end,ms+.25);if(ms>=plans[mode].end)stop();render();},90);render();});
  $('[data-rtt-next]').addEventListener('click',()=>{stop();ms=Math.min(plans[mode].end,(Math.floor(ms/4)+1)*4);render();});
  $('[data-rtt-reset]').addEventListener('click',()=>{stop();ms=0;render();});
  $('[data-rtt-range]').addEventListener('input',e=>{stop();ms=Number(e.target.value)||0;render();});
