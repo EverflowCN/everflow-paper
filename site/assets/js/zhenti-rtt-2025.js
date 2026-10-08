@@ -34,6 +34,8 @@ if(!document.getElementById(sheetId)){
  @media(prefers-reduced-motion:reduce){.evera-rtt-demo button{transition:none}}
  `;document.head.appendChild(style);
 }
+const activeAnimations=new Set();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')for(const stop of [...activeAnimations])stop();});
 const plans={
  UDP:{end:8,events:[
  {start:0,end:4,from:'c',name:'① UDP 时间请求',title:'客户端发送时间查询',body:'0 ms：UDP 不需要先建立连接。客户端直接发送请求，4 ms 时服务器收到。'},
@@ -60,7 +62,7 @@ function mount(host){
  host.appendChild(box);
  const $=s=>box.querySelector(s);
  let mode='TCP',ms=0,timer=null;
- const stop=()=>{if(timer!==null){clearInterval(timer);timer=null;} $('[data-rtt-play]').textContent='▶ 播放';};
+ const stop=()=>{if(timer!==null){clearInterval(timer);timer=null;}activeAnimations.delete(stop); $('[data-rtt-play]').textContent='▶ 播放';};
  function renderEvents(){
   $('[data-rtt-events]').innerHTML=plans[mode].events.map((e,i)=>'<button type="button" data-rtt-index="'+i+'"><b>'+safeText(e.name)+'</b><small>'+e.start+' → '+e.end+' ms</small></button>').join('');
  }
@@ -90,7 +92,7 @@ function mount(host){
   $('[data-rtt-time]').textContent=(Number.isInteger(ms)?ms:ms.toFixed(2))+' / '+plan.end+' ms';
   $('[data-rtt-name]').textContent=mode==='UDP'?'UDP 直接查询（1 RTT）':'TCP 先握手再查询（2 RTT）';
   box.querySelectorAll('[data-rtt-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rttMode===mode)));
-  const current=plan.events[Math.min(plan.events.length-1,Math.floor(Math.max(0,ms-.001)/4))];
+  const current=plan.events[Math.min(plan.events.length-1,Math.floor(ms/4))];
   $('[data-rtt-detail-title]').textContent=ms>=plan.end?'✓ 查询完成：'+plan.end+' ms':current.title;
   $('[data-rtt-detail]').textContent=ms>=plan.end?'客户端已收到服务器返回的时间。总耗时 '+(mode==='UDP'?'1 RTT':'2 RTT')+' = '+plan.end+' ms。':current.body;
   $('[data-rtt-note]').innerHTML=mode==='TCP'?'<b>关键：</b>第三次握手的 ACK 可以携带时间查询请求；3 次握手并不等于 3 RTT。':'<b>关键：</b>UDP 无连接，直接发送请求并收到响应，共一个往返。';
@@ -98,13 +100,13 @@ function mount(host){
   svgAt(ms);
  }
  box.querySelectorAll('[data-rtt-mode]').forEach(button=>button.addEventListener('click',()=>{stop();mode=button.dataset.rttMode;ms=0;renderEvents();render();}));
- $('[data-rtt-play]').addEventListener('click',()=>{if(timer!==null){stop();return;}const end=plans[mode].end;if(ms>=end)ms=0;$('[data-rtt-play]').textContent='Ⅱ 暂停';timer=setInterval(()=>{if(!box.isConnected){stop();return;}ms=Math.min(plans[mode].end,ms+.25);if(ms>=plans[mode].end)stop();render();},90);render();});
+ $('[data-rtt-play]').addEventListener('click',()=>{if(timer!==null){stop();return;}const end=plans[mode].end;if(ms>=end)ms=0;$('[data-rtt-play]').textContent='Ⅱ 暂停';activeAnimations.add(stop);timer=setInterval(()=>{if(!box.isConnected){stop();return;}ms=Math.min(plans[mode].end,ms+.25);if(ms>=plans[mode].end)stop();render();},90);render();});
  $('[data-rtt-next]').addEventListener('click',()=>{stop();ms=Math.min(plans[mode].end,(Math.floor(ms/4)+1)*4);render();});
  $('[data-rtt-reset]').addEventListener('click',()=>{stop();ms=0;render();});
  $('[data-rtt-range]').addEventListener('input',e=>{stop();ms=Number(e.target.value)||0;render();});
  $('[data-rtt-events]').addEventListener('click',e=>{const btn=e.target.closest('[data-rtt-index]');if(!btn)return;const item=plans[mode].events[Number(btn.dataset.rttIndex)];if(!item)return;stop();ms=item.end;render();});
  box.addEventListener('keydown',e=>{if(['Enter','ArrowLeft','ArrowRight',' ','a','b','c','d','A','B','C','D'].includes(e.key))e.stopPropagation();});
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')stop();},{signal:undefined});
+
  renderEvents();render();
 }
 window.EveraRtt2025={mount};
