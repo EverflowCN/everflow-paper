@@ -77,6 +77,7 @@ jobs:
             site/assets/js/zhenti-media.js \
             site/assets/js/zhenti-wall.js \
             site/assets/js/zhenti-entry.js \
+            site/assets/js/zhenti-rtt-2025.js \
             site/assets/js/zhenti-cloud-sync.js \
             site/assets/js/question-cloud-sync-v2.js \
             site/assets/js/site-boot-v1.js \
@@ -91,6 +92,9 @@ jobs:
           do
             node --check "$file"
           done
+          test -s site/assets/js/zhenti-rtt-2025.js
+          grep -q 'zhenti-rtt-2025.js' site/assets/js/zhenti-entry.js
+          grep -q 'year===2025&&q===39' site/assets/js/zhenti-wall.js
           grep -q 'data-resource-search' site/links/index.html
           grep -q 'site-boot-v1.js?v=20260904-stable2' site/index.html
           grep -q 'has-srs-groups' site/assets/js/site-boot-v1.js
