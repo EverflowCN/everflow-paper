@@ -268,6 +268,18 @@
       if(item?.verification?.status==='verified')els.analysis.innerHTML=`<strong>参考答案：${esc(item.answer)}</strong><div class="question-rich-text">${window.EveraQuestionContent.richText(item.analysis,{fallback:'暂无解析'})}</div><div class="question-source-note">来源核验：${esc(sourceText(item))}</div>`;
       else els.analysis.innerHTML='<strong>解析</strong><p>该题尚未核验，因此不展示答案和解析。</p>';
     }
+    // The Time-service RTT animation belongs to the verified 2025 Q39 answer (not Q36 DHCP).
+    // Mount only in the answer surface; leave question records and answer grading unchanged.
+    if(year===2025&&q===39&&item?.verification?.status==='verified'){
+      const demo=window.EveraRtt2025;
+      if(context==='modal'){
+        const rr=record(year,q);
+        const inlineAnswer=hasSubmitted(rr)||Boolean(rr.reviewed);
+        demo?.mount(inlineAnswer?box.querySelector('.live-answer'):els.analysis);
+      }else{
+        demo?.mount(box.querySelector('.live-answer'));
+      }
+    }
   }
 
   function refreshAfterRecordChange(context){
