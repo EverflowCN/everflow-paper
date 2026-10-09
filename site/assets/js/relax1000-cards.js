@@ -1,4 +1,4 @@
-import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,questionState,optionEntries,questionImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20260904-editor1';
+import{loadRelaxData,loadRecords,patchRecord,syncAnswerCompatibility,questionState,optionEntries,questionImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20261010-osstem1';
 
 const bankRoot=document.querySelector('.relax-wall-root');
 const sourceBar=document.querySelector('.bank-source-shell');
