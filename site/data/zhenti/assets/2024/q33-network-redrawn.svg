@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 375" role="img" aria-labelledby="title desc">
+<title id="title">2024年408第33题：分组交换网络和每段链路带宽</title>
+<desc id="desc">H1经10Mb/s连接左路由器，左路由器通过上方1000Mb/s两段链路、中间1Mb/s链路和下方100Mb/s两段链路连接右路由器，右路由器经10Mb/s连接H2。</desc>
+<rect width="960" height="375" rx="12" fill="#fff"/>
+<g stroke="#334155" stroke-width="4" stroke-linecap="round" fill="none">
+<path d="M115 191H249"/><path d="M311 178L454 76"/><path d="M505 76L667 178"/><path d="M311 191H666"/><path d="M311 205L454 307"/><path d="M505 307L667 205"/><path d="M731 191H847"/>
+</g>
+<g fill="#fff" stroke="#0f172a" stroke-width="3">
+<circle cx="280" cy="191" r="30"/><circle cx="480" cy="65" r="30"/><circle cx="480" cy="317" r="30"/><circle cx="699" cy="191" r="30"/>
+</g>
+<g stroke="#0f172a" stroke-linecap="round" stroke-width="3" fill="none">
+<path d="M265 184l27 14m-5-12 5 12-12 1M266 201l27-19m-13 0h13v12"/>
+<path d="M465 58l27 14m-5-12 5 12-12 1M466 75l27-19m-13 0h13v12"/>
+<path d="M465 309l27 14m-5-12 5 12-12 1M466 326l27-19m-13 0h13v12"/>
+<path d="M684 184l27 14m-5-12 5 12-12 1M685 201l27-19m-13 0h13v12"/>
+</g>
+<g font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="18" fill="#172033" text-anchor="middle">
+<text x="280" y="242">路由器</text><text x="480" y="23">路由器</text><text x="480" y="371">路由器</text><text x="699" y="242">路由器</text>
+</g>
+<g fill="#fff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round">
+<rect x="45" y="162" width="70" height="49" rx="7"/><rect x="56" y="171" width="48" height="30" rx="3"/><path d="M67 211h27v10H67z"/>
+<rect x="847" y="162" width="70" height="49" rx="7"/><rect x="858" y="171" width="48" height="30" rx="3"/><path d="M869 211h27v10h-27z"/>
+</g>
+<g font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" text-anchor="middle" font-size="21" font-weight="700" fill="#172033">
+<text x="80" y="150">H1</text><text x="882" y="150">H2</text>
+</g>
+<g font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="19" font-weight="700" fill="#0f172a" text-anchor="middle">
+<g><rect x="134" y="154" width="98" height="27" rx="7" fill="white"/><text x="183" y="174">10 Mb/s</text></g>
+<g><rect x="336" y="101" width="129" height="27" rx="7" fill="white"/><text x="400" y="121">1000 Mb/s</text></g>
+<g><rect x="520" y="101" width="129" height="27" rx="7" fill="white"/><text x="584" y="121">1000 Mb/s</text></g>
+<g><rect x="422" y="162" width="116" height="27" rx="7" fill="white"/><text x="480" y="182">1 Mb/s</text></g>
+<g><rect x="332" y="260" width="118" height="27" rx="7" fill="white"/><text x="391" y="280">100 Mb/s</text></g>
+<g><rect x="515" y="260" width="118" height="27" rx="7" fill="white"/><text x="574" y="280">100 Mb/s</text></g>
+<g><rect x="748" y="154" width="97" height="27" rx="7" fill="white"/><text x="796" y="174">10 Mb/s</text></g>
+</g>
+</svg>
