@@ -2,7 +2,7 @@ import{
   loadRelaxData,loadRecords as loadRelaxRecords,patchRecord as patchRelaxRecord,
   questionState,questionNumber,questionImages,explanationImages,optionEntries,
   imageMarkup,usesQuestionImageFallback,esc as coreEsc,subjectName,idKey
-}from'./relax1000-core.js?v=20260904-editor1';
+}from'./relax1000-core.js?v=20261010-osstem1';
 import{applyZhentiOverrides,safeQuestionImageUrl}from'./question-overrides-v1.js?v=20260904-editor1';
 
 const root=document.querySelector('[data-atlas-root]');
