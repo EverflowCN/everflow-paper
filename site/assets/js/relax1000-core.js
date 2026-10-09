@@ -1,5 +1,5 @@
 const RELAX_ASSET_BASE='/data/relax1000';
-const DATA_VERSION='20260911-images1';
+const DATA_VERSION='20261010-osstem1';
 export const DATA_URL=`${RELAX_ASSET_BASE}/data/questions.json?v=${DATA_VERSION}`;
 export const RECORD_KEY='everflow-408-relax1000-records-v1';
 export const SRS_KEY='everflow-408-relax-srs-v1';
