@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1150 620" role="img" aria-labelledby="title desc">
+<title id="title">2024年408第43题图(b)：ALU部分数据通路及控制信号</title>
+<desc id="desc">A作为32位数据输入ALU；B与IR[31:20]经过扩展器形成的32位数据通过MUX选择后作为ALU的第二输入。Ext控制零扩展或符号扩展，ALUBsrc控制MUX，ALUctr为3位控制信号，ALU输出32位F及OF、SF、ZF、CF。</desc>
+<rect width="1150" height="620" fill="#fff"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L10 5L0 10Z" fill="#0f172a"/></marker><marker id="control" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L9 4.5L0 9Z" fill="#475569"/></marker></defs>
+<g font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" fill="#0f172a" font-size="26" text-anchor="start">
+<text x="55" y="130">A</text><text x="55" y="269">B</text><text x="36" y="445">IR[31:20]</text>
+</g>
+<g stroke="#0f172a" stroke-width="3.4" fill="none" marker-end="url(#arrow)">
+<path d="M88 120H741"/><path d="M88 259H413"/><path d="M550 308H741"/><path d="M186 437H255"/><path d="M383 437H413"/>
+<path d="M935 202H1068"/>
+<path d="M935 243H1049"/><path d="M935 281H1049"/><path d="M935 319H1049"/><path d="M935 356H1049"/>
+</g>
+<g font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="20" fill="#0f172a">
+<text x="372" y="107">32</text><text x="296" y="246">32</text><text x="212" y="423">12</text><text x="398" y="423">32</text><text x="631" y="296">32</text><text x="995" y="186">32</text>
+</g>
+<g stroke="#0f172a" stroke-width="2" fill="none">
+<path d="M368 108l13 22M291 248l13 22M207 425l13 22M393 425l13 22M627 295l13 22M990 185l13 22"/>
+</g>
+<rect x="255" y="405" width="128" height="68" fill="#fff" stroke="#0f172a" stroke-width="3"/>
+<text x="319" y="446" font-size="25" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" fill="#0f172a" text-anchor="middle">扩展器</text>
+<path d="M414 226L550 259V355L414 389Z" fill="#fff" stroke="#0f172a" stroke-width="3.2" stroke-linejoin="round"/>
+<text x="446" y="268" font-size="28" fill="#0f172a" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif">0</text><text x="446" y="363" font-size="28" fill="#0f172a" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif">1</text><text x="499" y="322" font-size="35" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" fill="#0f172a" text-anchor="middle" transform="rotate(90 499 322)">MUX</text>
+<path d="M740 85L935 152V253L883 283L935 321V414L740 479Z" fill="#fff" stroke="#0f172a" stroke-width="3.2" stroke-linejoin="round"/>
+<text x="826" y="279" font-size="58" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" fill="#0f172a" text-anchor="middle" transform="rotate(90 826 279)">ALU</text>
+<g font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="24" fill="#0f172a">
+<text x="1060" y="252">OF</text><text x="1060" y="290">SF</text><text x="1060" y="327">ZF</text><text x="1060" y="366">CF</text><text x="1077" y="209">F</text>
+</g>
+<g stroke="#475569" stroke-width="2.3" stroke-dasharray="6 6" fill="none" marker-end="url(#control)">
+<path d="M319 550V475"/><path d="M481 550V365"/><path d="M829 550V442"/>
+</g>
+<g fill="#0f172a" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="20">
+<text x="286" y="576">Ext</text><text x="420" y="576">ALUBsrc</text><text x="787" y="576">ALUctr</text>
+<text x="60" y="498">0：零扩展</text><text x="60" y="528">1：符号扩展</text>
+<text x="958" y="428">000：加</text><text x="958" y="457">001：减</text><text x="958" y="486">010：逻辑左移</text>
+</g>
+<text x="852" y="519" fill="#334155" font-size="19" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif">3 位控制</text>
+</svg>
