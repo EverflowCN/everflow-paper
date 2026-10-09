@@ -9,7 +9,7 @@
 <rect x="12" y="67" width="1136" height="66"/><rect x="12" y="134" width="1136" height="66"/><rect x="12" y="201" width="1136" height="66"/>
 </g>
 <g stroke="#94a3b8" stroke-width="1.4">
-<path d="M144 67v200M371 67v200M486 67v200M566 67v200M672 67v200M764 67v200M254 67v133M254 267v-66"/>
+<path d="M144 67v200M371 67v200M486 67v200M566 67v200M672 67v200M764 67v200M254 67v133"/>
 </g>
 <g fill="#0f172a" font-family="Inter,Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="22" text-anchor="middle">
 <g font-weight="750"><text x="78" y="108">add</text><text x="78" y="175">slli</text><text x="78" y="242">lw</text></g>
