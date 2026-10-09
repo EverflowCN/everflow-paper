@@ -1,4 +1,4 @@
-import{loadRelaxData,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20260904-editor1';
+import{loadRelaxData,patchRecord,syncAnswerCompatibility,toggleBookmark,questionState,optionEntries,assetUrl,questionImages,explanationImages,imageMarkup,usesQuestionImageFallback,questionNumber,subjectName,esc}from'./relax1000-core.js?v=20261010-osstem1';
 import{richText,inlineText,verification}from'./question-content-v1.js?v=20260904-question2';
 import{applyZhentiOverrides}from'./question-overrides-v1.js?v=20260904-editor1';
 
