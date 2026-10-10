@@ -1,0 +1,28 @@
+{
+  "schema": "everflow.math-papers.active-collections.v1",
+  "subject": "math2",
+  "categories": [
+    {
+      "id": "past",
+      "title": "历年真题",
+      "order": 1
+    },
+    {
+      "id": "simulation",
+      "title": "模拟卷",
+      "order": 2
+    }
+  ],
+  "collections": [
+    {
+      "id": "zhangyu-2027-math2",
+      "category": "simulation",
+      "year": 2027,
+      "title": "张宇预测八套卷",
+      "shortTitle": "张宇八套卷",
+      "dataUrl": "/data/math-papers/zhangyu-2027-math2.json",
+      "storageKey": "everflow-math2-2027-simulation-v1",
+      "enabled": true
+    }
+  ]
+}
