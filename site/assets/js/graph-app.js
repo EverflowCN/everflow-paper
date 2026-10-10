@@ -3,7 +3,7 @@ if(body.dataset.view!=='graph')throw new Error('graph-app loaded outside graph p
 
 await import('/assets/js/question-content-v1.js?v=20260904-editor1');
 
-const APP_VERSION='20261010-feedback1';
+const APP_VERSION='20261010-resume1';
 const RELAX_VERSION='20261010-osstem1';
 const SOURCE_KEY='everflow-408-graph-source-v1';
 const shell=document.querySelector('[data-graph-shell]');
