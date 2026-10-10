@@ -1,6 +1,6 @@
 import {typeset} from './math-2027-mathjax.js?v=20261010-heatmap4';
 import * as mathCloud from './math-paper-cloud.js?v=20261011-overview1';
-const REGISTRY_URL='/data/math-papers/active-collections.json?v=20261011-compact1';
+const REGISTRY_URL='/data/math-papers/active-collections.json?v=20261011-math2-past1';
 let storageKey='everflow-math2-2027-simulation-v1';
 let registry=null,currentCollection=null;
 const $=s=>document.querySelector(s);
@@ -10,8 +10,8 @@ let doc=null,paper=null,at=0,started=0,timer=null;
 function record(){return mathCloud.read(currentCollection||{storageKey})}
 function currentRecord(){return record()[paper.id]||{answers:{},judgements:{},elapsed:0,visited:[]}}
 function save(patch){if(paper&&currentCollection)mathCloud.update(currentCollection,paper.id,patch)}
-function countAnswers(id,items){const answers=record()[id]?.answers||{};return items.filter(q=>q.verification==='proofread'&&String(answers[q.id]||'').trim()).length}
-function qualified(q){return q?.verification==='proofread'&&Boolean(q.stem)}
+function countAnswers(id,items){const answers=record()[id]?.answers||{};return items.filter(q=>qualified(q)&&String(answers[q.id]||'').trim()).length}
+function qualified(q){return ['proofread','source-transcription'].includes(q?.verification)&&Boolean(q.stem)}
 function readableCount(p){return p.questions.filter(qualified).length}
 const HEAT_CLASSES=['unseen','visited','answered','correct','wrong','locked'];
 const HEAT_LABELS={unseen:'未做',visited:'已浏览',answered:'已作答，待自评',correct:'自评正确',wrong:'自评错误',locked:'暂未开放'};
@@ -84,10 +84,11 @@ function drawIndex(){
  const records=record();
  const html=papers.map((p,i)=>{
   const counts=heatCounts(p,records[p.id]||{});
-  const digits=String(i+1).padStart(2,'0');
+  const digits=currentCollection.category==='past'?String(p.year):String(i+1).padStart(2,'0');
+  const unit=currentCollection.category==='past'?'年':' / 套';
   return `<article class="card" aria-label="第 ${i+1} 套，${counts.done}/${counts.total} 题已答">
    <header class="card-compact-head">
-    <button class="card-name" type="button" data-open="${i}" aria-label="打开第 ${i+1} 套试卷">${digits}<small> / 套</small></button>
+    <button class="card-name" type="button" data-open="${i}" aria-label="打开${esc(p.name)}">${digits}<small>${unit}</small></button>
     <span class="card-fraction" title="已答题数 / 总题数">${counts.done}<em>/${counts.total}</em></span>
    </header>
    ${heatmapHtml(p)}
@@ -106,7 +107,7 @@ function drawIndex(){
   ${collectionTabHtml()}
   <section class="library-tools" aria-label="热力图标记说明">
     ${heatLegend()}
-    <details class="library-help"><summary>使用说明</summary><p>点击方格直接进入对应题目。✓ 蓝色为自评正确；× 橙色为自评错误；? 灰色为作答待判断。数据仅保存于当前设备，试题未提供标准答案，不自动判分。未完成核验的题目不会以截图代替。</p></details>
+    <details class="library-help"><summary>使用说明</summary><p>点击色块可直接进入对应题目；✓ 蓝色表示自评正确、× 橙色表示自评错误、? 灰色表示待判断。登录后沿用主站账号云同步，未登录时保存在本机。历年真题来自公开仓库文本，未逐题核对；仅收录数学二，不包含数学一、数学三或截图解析。未核对的题目暂不开放作答。</p></details>
   </section>
   <section class="cards" aria-label="${esc(title)} 的试卷热力图">${html}</section>`;
  root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.open))));
@@ -147,13 +148,13 @@ function renderReader({keepFocus=false}={}){
  return `<button data-jump="${i}" class="${at===i?'current ':''}heat-${status}" type="button" title="第 ${x.number} 题 · ${HEAT_LABELS[status]}" aria-label="第 ${x.number} 题 · ${HEAT_LABELS[status]}">${x.number}<span aria-hidden="true">${HEAT_SYMBOLS[status]}</span></button>`;
  }).join('');
  root.innerHTML=`<div class="paper-shell">
- <aside class="sidebar"><h3>${esc(currentCollection.title)}</h3><p>选取试卷，题目保留原卷顺序。</p><nav class="paper-index">${doc.papers.map((p,i)=>`<button data-select-paper="${i}" class="${i===doc.papers.indexOf(paper)?'active':''}" type="button"><span>第 ${i+1} 套</span><small>${readableCount(p)}/${p.questions.length}</small></button>`).join('')}</nav></aside>
+ <aside class="sidebar"><h3>${esc(currentCollection.title)}</h3><p>选取试卷，题目保留原卷顺序。</p><nav class="paper-index">${doc.papers.map((p,i)=>`<button data-select-paper="${i}" class="${i===doc.papers.indexOf(paper)?'active':''}" type="button"><span>${currentCollection.category==='past'?p.year+' 年真题':'第 '+(i+1)+' 套'}</span><small>${readableCount(p)}/${p.questions.length}</small></button>`).join('')}</nav></aside>
  <main class="viewer">
-  <header class="viewer-head"><div><div class="eyebrow">${esc(currentCollection.year)} · MATH II · PAPER ${doc.papers.indexOf(paper)+1}</div><h2>${esc(currentCollection.title)} · 第 ${doc.papers.indexOf(paper)+1} 套</h2><p>第 ${q.number} / ${allCorrect} 题 · ${title(q)}</p></div><button class="btn" data-exit>← 返回目录</button></header>
-  <div class="type-label">${title(q)} ${qualified(q)?'· 已人工转录':'· 数学公式待人工核对'}</div>
+  <header class="viewer-head"><div><div class="eyebrow">${esc(currentCollection.year)} · MATH II · PAPER ${doc.papers.indexOf(paper)+1}</div><h2>${esc(paper.name)}</h2><p>第 ${q.number} / ${allCorrect} 题 · ${title(q)}</p></div><button class="btn" data-exit>← 返回目录</button></header>
+  <div class="type-label">${title(q)} ${q.verification==='proofread'?'· 已录入':q.verification==='source-transcription'?'· 来源文字（待复核）':'· 题干待核对'}</div>
   ${qualified(q)?`<div class="stem" data-math-display>${esc(q.stem).replace(/\n/g,'<br>')}</div>${diagram(q.diagram)}${q.type==='choice'?`<div class="choices" data-math-display>${Object.entries(q.options).map(([letter,value])=>`<button type="button" class="choice ${mine===letter?'selected':''}" data-answer-choice="${letter}"><b>${letter}</b><span>${esc(value).replace(/\n/g,'<br>')}</span></button>`).join('')}</div>`:`<label class="inputlabel" for="math-draft">${q.type==='fill'?'填写答案（可输入 LaTeX）':'作答草稿与演算思路（本机保存）'}</label><textarea id="math-draft" class="draft" data-draft placeholder="${q.type==='fill'?'填写你的答案':'写下推导过程、最终结论或留作复盘…'}">${esc(mine)}</textarea>`}`:
- `<div class="status-warning"><strong>第 ${q.number} 题尚未完成数学公式复核</strong><p>原始 PDF 的自动文字层存在积分上下限、根号、指数、矩阵等缺损。为避免错误题干误导学习，本站暂不展示未核实的 OCR 文本，也不会以整页截图代替转录。</p><p>此题已经建立序号与卷内位置，待逐字校对后开放。</p></div>`}
-  ${qualified(q)?`<section class="judge"><strong>手动判定与复盘</strong><p>上传文件仅包含试题，不包含标准答案。本区不自动判对错；可在自行核对后标记。</p><div class="judge-buttons"><button class="btn" data-judge="correct" aria-pressed="${rec.judgements?.[q.id]==='correct'}">✓ 标记正确（蓝）</button><button class="btn" data-judge="wrong" aria-pressed="${rec.judgements?.[q.id]==='wrong'}">× 标记错误（橙）</button><button class="btn" data-judge="" aria-pressed="${!rec.judgements?.[q.id]}">清除判定</button></div></section>`:''}
+ `<div class="status-warning"><strong>第 ${q.number} 题暂未完成可靠的文字转录</strong><p>原仓库没有可用的完整文字，暂不以截图冒充数字题干。</p>${q.provenanceUrl?`<a href="${esc(q.provenanceUrl)}" target="_blank" rel="noopener noreferrer">查看来源仓库中的原题 ↗</a>`:''}</div>`}
+  ${qualified(q)?`<section class="judge"><strong>手动判定与复盘</strong><p>${q.referenceAnswer?'原仓库提供选择题参考答案，可按需查看；本站仍由你手动标记正误。':'本题未提供可核对的文本答案，完成后请自行核对并标记。'}${q.verification==='source-transcription'?' 来源文字尚未逐题核对。':''}</p>${q.referenceAnswer?`<button type="button" class="btn math-reference-answer" data-show-reference data-ref="${esc(q.referenceAnswer)}">查看本题参考答案</button> <span class="math-reference-value" data-ref-value hidden>参考答案：${esc(q.referenceAnswer)}</span>`:''}${q.knowledgePoint?`<p class="math-knowledge-point">考点：${esc(q.knowledgePoint)}</p>`:''}${q.provenanceUrl?`<a class="math-origin-link" href="${esc(q.provenanceUrl)}" target="_blank" rel="noopener noreferrer">来源核对 ↗</a>`:''}<div class="judge-buttons"><button class="btn" data-judge="correct" aria-pressed="${rec.judgements?.[q.id]==='correct'}">✓ 标记正确（蓝）</button><button class="btn" data-judge="wrong" aria-pressed="${rec.judgements?.[q.id]==='wrong'}">× 标记错误（橙）</button><button class="btn" data-judge="" aria-pressed="${!rec.judgements?.[q.id]}">清除判定</button></div></section>`:''}
   <div class="viewer-nav"><button class="btn" data-prev ${at===0?'disabled':''}>← 上一题</button><span class="spacer"></span><button class="btn primary" data-next ${at===paper.questions.length-1?'disabled':''}>下一题 →</button></div>
  </main>
  <aside class="answer-sheet">
@@ -163,7 +164,7 @@ function renderReader({keepFocus=false}={}){
  <details class="sheet-details"><summary>展开数字答题卡</summary><div class="sheet">${buttons}</div></details>
  <div class="mini-stats"><span data-heat-stats>已答 ${heatCounts(paper,rec).done}/${paper.questions.length} · 自评对 ${heatCounts(paper,rec).correct} · 自评错 ${heatCounts(paper,rec).wrong}</span></div>
  <div class="progress-strip"><i data-heat-progress style="width:${Math.round(heatCounts(paper,rec).done/paper.questions.length*100)}%"></i></div>
- <p class="heat-local-note">✓ 蓝色代表自评对，× 橙色代表自评错；灰色问号表示待自评。颜色与符号双重标记，记录仅保存在本机。</p>
+ <p class="heat-local-note">✓ 蓝色代表自评对，× 橙色代表自评错；灰色问号表示待自评。颜色与符号双重标记，已登录可同步云端，未登录记录保存在本机。</p>
  </aside></div>`;
  window.scrollTo({top:0,behavior:'instant'});
  setTimeout(()=>{root.querySelectorAll('[data-math-display]').forEach(node=>typeset(node).catch(()=>{}))},0);
@@ -198,6 +199,11 @@ function bindReader(){
  root.querySelector('[data-next]')?.addEventListener('click',()=>changeQ(at+1));
  root.querySelectorAll('[data-answer-choice]').forEach(b=>b.addEventListener('click',()=>{saveAnswer(b.dataset.answerChoice);renderReader()}));
  const draft=root.querySelector('[data-draft]');if(draft){let debounce=0;draft.addEventListener('input',()=>{const text=draft.value;clearTimeout(debounce);debounce=setTimeout(()=>{saveAnswer(text);refreshReaderHeatmap()},180)});draft.addEventListener('blur',()=>{saveAnswer(draft.value);refreshReaderHeatmap()})}
+ root.querySelector('[data-show-reference]')?.addEventListener('click',()=>{
+  const node=root.querySelector('[data-ref-value]');if(!node)return;
+  node.hidden=!node.hidden;
+  root.querySelector('[data-show-reference]').textContent=node.hidden?'查看本题参考答案':'收起参考答案';
+ });
  root.querySelectorAll('[data-judge]').forEach(b=>b.addEventListener('click',()=>{const q=paper.questions[at],r=currentRecord();const j={...r.judgements};if(b.dataset.judge)j[q.id]=b.dataset.judge;else delete j[q.id];save({judgements:j});renderReader()}));
 }
 document.addEventListener('keydown',event=>{
