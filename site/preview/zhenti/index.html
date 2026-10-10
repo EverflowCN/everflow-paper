@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="description" content="Everflow独立测试页面；不影响正式版题库和答题记录"><title>真题工作台 · Everflow 设计测试</title><link rel="icon" href="/assets/everflow-icon.svg"><link rel="stylesheet" href="/preview/assets/lab.css?v=20261010-lab1"></head><body>
+<header class="lab-topbar"><a class="lab-brand" href="/preview/zhenti/"><img src="/assets/everflow-icon.svg" alt=""><span>Everflow<small>彼时流年若水</small></span></a><span class="lab-badge">设计实验室 · TEST</span><nav class="lab-toplinks"><a href="/preview/zhenti/" class="active">真题工作台</a><a href="/preview/graph/" class="">整体图谱</a></nav><div class="lab-production-link"><a href="/zhenti/" target="_blank" rel="noopener">正式版 ↗</a></div></header>
+<div class="lab-wrap"><div class="lab-intro"><div><div class="lab-eyebrow">EVERFLOW / QUESTION WORKSPACE</div><h1>真题学习工作台</h1><p>以做题为中心，先选择年份或科目，再专注答题。原题库数据只读；本页答题记录独立保存在当前设备。</p></div><div class="lab-intro-note">测试版 · 数据隔离已启用</div></div>
+<div class="lab-layout">
+<aside class="lab-sidebar lab-panel" aria-label="模式和学习导航">
+ <div class="lab-sidebar-group" data-mode-list><h3>学习模式</h3>
+ <button class="lab-side-button active" data-mode="paper">整套真题 <small>年份</small></button>
+ <button class="lab-side-button" data-mode="subject">分科练习 <small>四科</small></button>
+ <button class="lab-side-button" data-mode="topic">考点练习 <small>章节</small></button></div>
+ <div class="lab-sidebar-group" data-subject-list hidden><h3>选择科目</h3>
+ <button class="lab-side-button active" data-subject="ds">数据结构 <small>DS</small></button><button class="lab-side-button" data-subject="co">组成原理 <small>CO</small></button>
+ <button class="lab-side-button" data-subject="os">操作系统 <small>OS</small></button><button class="lab-side-button" data-subject="cn">计算机网络 <small>CN</small></button></div>
+ <div class="lab-sidebar-group" data-topic-list hidden><h3>考点范围</h3><div data-topic-buttons></div></div>
+ <div class="lab-sidebar-group"><h3>测试说明</h3><div style="font-size:10px;color:var(--muted);line-height:1.8">打卡、答案、标记及笔记只存于 <b>独立测试空间</b>。不连接云同步，不更新正式网站的任何做题记录。</div></div>
+</aside>
+<main class="lab-workspace">
+ <div class="lab-stats" data-stats><div class="lab-panel lab-stat"><strong data-stat-done>0</strong><span>测试已完成</span></div><div class="lab-panel lab-stat"><strong data-stat-mastered>0</strong><span>标记熟练</span></div><div class="lab-panel lab-stat"><strong data-stat-weak>0</strong><span>薄弱题目</span></div><div class="lab-panel lab-stat"><strong data-stat-rate>0%</strong><span>测试完成率</span></div></div>
+ <section class="lab-panel lab-view-card" data-landing aria-labelledby="lab-list-heading">
+  <header class="lab-view-head"><div><div class="lab-eyebrow" data-land-eyebrow>PAST PAPERS / 2009 — 2026</div><h2 id="lab-list-heading" data-land-title>按年份开始练习</h2><p data-land-desc>18 年真题一目了然，不必从一整页复杂的统计卡片中寻找入口。</p></div><div class="lab-view-head-actions"><button class="lab-btn small" type="button" data-go-graph>查看整体图谱 ↗</button></div></header>
+  <div class="lab-resume-strip" data-resume hidden></div>
+  <div class="lab-filter-bar" data-landing-filters><span class="lab-filter-label">年份</span><select class="lab-select" data-year-filter aria-label="选择年份范围"><option value="all">2009—2026 全部年份</option><option value="recent">近十年</option></select><span class="lab-filter-label">做题记录</span><button class="lab-chip active" type="button" data-record-filter="all">全部</button><button class="lab-chip" type="button" data-record-filter="unmarked">未做</button><button class="lab-chip" type="button" data-record-filter="weak">薄弱</button></div>
+  <div class="lab-year-list" data-year-list><div class="lab-loading">读取年份目录…</div></div>
+ </section>
+ <section class="lab-focus" data-focus hidden>
+   <div class="lab-primary-pane">
+     <div class="lab-panel lab-paper-stage">
+       <div class="lab-paper-top"><div><div class="lab-kicker">FOCUS MODE</div><div class="lab-breadcrumb" data-focus-breadcrumb>年份 · 科目 · 题号</div></div><button class="lab-btn small" data-exit-focus>← 返回目录</button></div>
+       <div data-question-content><div class="lab-loading">正在载入试题…</div></div>
+       <div class="lab-paper-actions" data-paper-actions>
+         <button class="lab-btn" type="button" data-prev-question>← 上一题</button>
+         <button class="lab-btn" type="button" data-show-answer>查看答案与解析</button>
+         <button class="lab-btn primary" type="button" data-submit-answer>提交答案</button>
+         <span class="lab-spacer"></span>
+         <button class="lab-btn" type="button" data-next-question>下一题 →</button>
+       </div>
+       <div class="lab-separator"></div>
+       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:7px"><span class="lab-filter-label">掌握状态</span><button class="lab-chip" data-mark="mastered">熟练</button><button class="lab-chip" data-mark="fuzzy">模糊</button><button class="lab-chip" data-mark="weak">不会</button><button class="lab-chip" data-mark="">清除</button></div>
+       <div style="margin-top:15px"><label class="lab-filter-label" for="lab-note">本题复盘笔记（测试独立保存）</label><textarea id="lab-note" class="lab-notearea" data-question-note placeholder="记录易错点、知识点、第二次复习要注意的事项……"></textarea></div>
+     </div>
+   </div>
+   <aside class="lab-panel lab-sheet"><h3>答题导航</h3><p data-sheet-subtitle>按题号选择，当前进度高亮。</p><div class="lab-sheet-grid" data-answer-sheet></div><div class="lab-sheet-meta"><span data-sheet-count>0 / 47</span><span data-sheet-current>第 1 题</span></div><div class="lab-separator"></div><div class="lab-legend"><span><i class="lab-dot mastered"></i>熟练</span><span><i class="lab-dot fuzzy"></i>模糊</span><span><i class="lab-dot weak"></i>不会</span><span><i class="lab-dot unmarked"></i>未标记</span></div></aside>
+ </section>
+ <div class="lab-soft-warning">此页面属于独立的视觉与交互测试：引用正式题库中的公开静态题目，但所有操作记录完全隔离，不会与正式版同步。</div>
+</main></div></div>
+<script type="module" src="/preview/assets/zhenti.js?v=20261010-lab1"></script>
+<footer class="lab-footer">Everflow · 彼时流年若水 &nbsp; / &nbsp; 设计测试环境，仅用于验收，不影响正式学习记录</footer></body></html>
