@@ -25,6 +25,9 @@ function normalizeRaw(s){return s&&typeof s==='object'&&!Array.isArray(s)?s:{}}
 export function state(){
  try{const x=JSON.parse(localStorage.getItem(KEY)||'{}');return normalizeRaw(x)}catch{return{}}
 }
+export function clearPreview(){
+  try{localStorage.removeItem(KEY);sessionStorage.removeItem('everflow-preview-graph-scroll-zhenti');sessionStorage.removeItem('everflow-preview-graph-scroll-relax')}catch{}
+}
 export function getRecord(source,id){
  return normalizeRaw(state()?.[source]?.records?.[id]);
 }
