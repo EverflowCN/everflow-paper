@@ -36,8 +36,21 @@ assert.match(reader,/data-heatmap-paper/);
 assert.match(reader,/data-heatmap-jump/);
 assert.match(reader,/heatmapHtml\(paper,\{inReader:true\}\)/);
 assert.match(style,/\.heatmap-grid/);
+assert.match(reader,/HEAT_SYMBOLS=\{unseen:'',visited:'·',answered:'\?',correct:'✓',wrong:'×'/);
+assert.match(reader,/蓝色 · 正确/);
+assert.match(reader,/橙色 · 错误/);
+assert.match(reader,/灰色 · 待判断\/未做/);
+assert.match(style,/\.heat-cell\.heat-correct,\.heat-swatch\.heat-correct\{background:#1d4ed8/);
+assert.match(style,/\.heat-cell\.heat-wrong,\.heat-swatch\.heat-wrong\{background:#9a3412/);
+assert.match(style,/\.heat-cell\.heat-unseen,\.heat-swatch\.heat-unseen\{background:#e5e7eb/);
+assert.match(style,/\.sheet button\.heat-correct\{background:#1d4ed8/);
+assert.match(style,/\.sheet button\.heat-wrong\{background:#9a3412/);
+assert.match(style,/\.judge-buttons button\[data-judge="correct"\]\[aria-pressed="true"\]\{border-color:#1d4ed8/);
+assert.match(style,/\.judge-buttons button\[data-judge="wrong"\]\[aria-pressed="true"\]\{border-color:#9a3412/);
+assert.doesNotMatch(reader,/绿色、红色/);
+
 assert.match(style,/repeat\(11,minmax\(0,1fr\)\)/);
-assert.match(html,/20261010-heatmap4/);
+assert.match(html,/20261011-tricolor1/);
 assert.match(mathjax,/export async function typeset\(node\)/);
 // No active navigation or imports for the legacy 107-paper catalogue.
 assert.match(switcher,/27模拟卷/);
@@ -50,4 +63,4 @@ assert.doesNotMatch(reader,/math-papers-core\.js/);
 assert.match(reader,/everflow-math2-2027-simulation-v1/);
 // Published 2027 paper collection is the only available simulation collection.
 assert.deepEqual(new Set(data.papers.map(p=>p.year)),new Set([2027]));
-console.log('Math II 2027: eight independent 22-cell GitHub-style heatmaps and legacy bank disabled.');
+console.log('Math II 2027: eight accessible blue/orange/gray heatmaps with symbols; legacy bank disabled.');
