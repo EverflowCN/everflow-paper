@@ -47,6 +47,8 @@ jobs:
           node site/tools/test-question-content.mjs
           node site/tools/test-study-resume.mjs
           node site/tools/test-math-2027-papers.mjs
+          node site/tools/test-math-2027-heatmap.mjs
+          node --check site/assets/js/math-2027-mathjax.js
           node --check site/assets/js/math-2027-reader.js
           grep -q 'relax-reader-nav-group' site/assets/js/relax1000-reader.js
           grep -q 'chapterOrder' site/assets/js/relax1000-reader.js
