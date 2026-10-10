@@ -8,13 +8,16 @@ const SOURCE_LABELS={
   'manual':'手动补录'
 };
 const MONTH_COLORS=['#f36b75','#e99842','#d8a94f','#58a96d','#4db3a5','#52b8d4','#5a9be6','#ff5a68','#9b7fd6','#bb8b65','#61adba','#e36e91'];
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)];
+// The study landing page uses a continuous GitHub-like yearly calendar.
+// The standalone /study/heatmap/ page retains its existing month/year controls.
+const githubHome=Boolean(document.querySelector('[data-github-heatmap]'));
 const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const timeMs=v=>{const n=Date.parse(v||'');return Number.isFinite(n)?n:0};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let supa=null,user=null,events=[],mode='month',subject1800Map=null;
+let supa=null,user=null,events=[],mode=githubHome?'year':'month',subject1800Map=null;
 const today=new Date();today.setHours(12,0,0,0);
 let cursorYear=today.getFullYear(),cursorMonth=today.getMonth();
 
@@ -123,12 +126,79 @@ function renderMonth(){
 function renderYear(){
   $('[data-jump-year]').textContent=`${cursorYear} 年`;const root=$('[data-year-grid]');root.innerHTML=Array.from({length:12},(_,m)=>{let cells='';for(let i=0;i<monthOffset(cursorYear,m);i++)cells+='<i class="heatmap-mini-day"></i>';for(let d=1;d<=daysInMonth(cursorYear,m);d++)cells+=`<i class="heatmap-mini-day" data-level="${level(eventsForDay(cursorYear,m,d).length)}" title="${cursorYear}-${m+1}-${d}"></i>`;return `<article class="heatmap-mini-month"><h3>${m+1}月</h3><div class="heatmap-mini-grid">${cells}</div></article>`}).join('')
 }
-function renderAll(){renderMonth();renderYear();toggleMode(mode)}
+
+function renderGithub(){
+  const grid=$('[data-gh-grid]'),months=$('[data-gh-months]');
+  if(!grid||!months)return;
+  const first=new Date(cursorYear,0,1,12),last=new Date(cursorYear,11,31,12);
+  const start=new Date(first);
+  start.setDate(start.getDate()-((start.getDay()+6)%7)); // Monday
+  const end=new Date(last);
+  end.setDate(end.getDate()+(7-end.getDay())%7); // Sunday
+  const weeks=Math.round((end-start)/86400000/7)+1;
+  const yearly=events.filter(e=>new Date(e.occurred_at).getFullYear()===cursorYear);
+  const counts=new Map();
+  const yearDays=new Set(),monthDays=new Set();
+  let monthCount=0;
+  for(const e of events){
+    const d=new Date(e.occurred_at);
+    if(!Number.isFinite(d.getTime()))continue;
+    const key=dateKey(d);
+    if(d.getFullYear()===cursorYear){
+      counts.set(key,(counts.get(key)||0)+1);
+      yearDays.add(key);
+    }
+    if(d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()){
+      monthCount++;
+      monthDays.add(key);
+    }
+  }
+  const html=[];
+  for(let i=0;i<weeks*7;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    const isInYear=d.getFullYear()===cursorYear;
+    const isFuture=d.getTime()>today.getTime();
+    if(!isInYear||isFuture){html.push('<span class="gh-day-placeholder" aria-hidden="true"></span>');continue}
+    const key=dateKey(d),count=counts.get(key)||0;
+    const label=`${key}，${count} 次打卡`;
+    html.push(`<button type="button" class="gh-day" data-gh-date="${key}" data-level="${level(count)}" data-today="${key===dateKey(today)}" title="${label}" aria-label="${label}"></button>`);
+  }
+  grid.innerHTML=html.join('');
+  grid.style.setProperty('--gh-weeks',String(weeks));
+  const monthsHtml=[];
+  for(let m=0;m<12;m++){
+    const firstOfMonth=new Date(cursorYear,m,1,12);
+    const offset=Math.round((firstOfMonth-start)/86400000);
+    const col=Math.floor(offset/7)+1;
+    monthsHtml.push(`<span style="grid-column:${col}">${m+1}月</span>`);
+  }
+  months.innerHTML=monthsHtml.join('');
+  months.style.setProperty('--gh-weeks',String(weeks));
+  $('[data-gh-year-label]').textContent=`${cursorYear} 年`;
+  $('[data-next-year]').disabled=cursorYear>=today.getFullYear();
+  $('[data-gh-active]').textContent=yearDays.size;
+  $('[data-gh-streak]').textContent=calcStreak();
+  $('[data-gh-total]').textContent=yearly.length;
+  $('[data-gh-month-days]').textContent=monthDays.size;
+  $('[data-gh-year-summary]').textContent=`${cursorYear} 年已记录 ${yearDays.size} 个学习日 · ${yearly.length} 次打卡`;
+  const scroll=$('[data-gh-scroll]');
+  if(scroll&&scroll.dataset.year!==String(cursorYear)){
+    scroll.dataset.year=String(cursorYear);
+    if(matchMedia('(max-width:650px)').matches){
+      requestAnimationFrame(()=>{
+        const todayCell=grid.querySelector('[data-today="true"]');
+        scroll.scrollLeft=todayCell?Math.max(0,todayCell.offsetLeft-scroll.clientWidth+72):0;
+      });
+    }else scroll.scrollLeft=0;
+  }
+}
+
+function renderAll(){if(githubHome){renderGithub();return}renderMonth();renderYear();toggleMode(mode)}
 function toggleMode(next){mode=next;$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===mode));$('[data-month-view]').hidden=mode!=='month';$('[data-year-view]').hidden=mode!=='year'}
 function sourceName(e){return SOURCE_LABELS[e.source_id]||SOURCES[e.event_type]?.label||'学习打卡'}
 function eventTitle(e){if(e.event_type==='manual')return e.metadata?.note||'手动补录';if(e.event_type==='course')return `${sourceName(e)} · ${e.subject||'课程'}`;return `${sourceName(e)} · ${e.subject||'刷题'}`}
-function showDay(d){
-  const list=eventsForDay(cursorYear,cursorMonth,d).sort((a,b)=>timeMs(a.occurred_at)-timeMs(b.occurred_at));$('[data-day-label]').textContent=`${cursorYear}年${cursorMonth+1}月${d}日`;$('[data-day-count]').textContent=`${list.length} 次打卡`;$('[data-day-events]').innerHTML=list.length?list.map(e=>{const time=new Date(e.occurred_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});return `<article class="heatmap-event"><span class="heatmap-event-icon">${SOURCES[e.event_type]?.icon||'•'}</span><div><strong>${esc(eventTitle(e))}</strong><small>${time} · ${SOURCES[e.event_type]?.label||'学习'}${e.item_id?` · ${esc(String(e.item_id).slice(0,48))}`:''}</small></div></article>`}).join(''):'<div class="heatmap-empty">当天还没有打卡记录。</div>';$('[data-day-dialog]').showModal();
+function showDay(d,year=cursorYear,month=cursorMonth){
+  const list=eventsForDay(year,month,d).sort((a,b)=>timeMs(a.occurred_at)-timeMs(b.occurred_at));$('[data-day-label]').textContent=`${year}年${month+1}月${d}日`;$('[data-day-count]').textContent=`${list.length} 次打卡`;$('[data-day-events]').innerHTML=list.length?list.map(e=>{const time=new Date(e.occurred_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});return `<article class="heatmap-event"><span class="heatmap-event-icon">${SOURCES[e.event_type]?.icon||'•'}</span><div><strong>${esc(eventTitle(e))}</strong><small>${time} · ${SOURCES[e.event_type]?.label||'学习'}${e.item_id?` · ${esc(String(e.item_id).slice(0,48))}`:''}</small></div></article>`}).join(''):'<div class="heatmap-empty">当天还没有打卡记录。</div>';$('[data-day-dialog]').showModal();
 }
 function localDatetimeValue(date=new Date()){const d=new Date(date.getTime()-date.getTimezoneOffset()*60000);return d.toISOString().slice(0,16)}
 function openManual(){const input=$('[data-manual-time]');if(input)input.value=localDatetimeValue();const hint=$('[data-manual-hint]');hint.textContent=user?'已登录，补录会直接写入云端并显示在热力图。':'手动补录需要登录；未登录时仍可查看本机已有打卡。';$('[data-manual-dialog]').showModal()}
@@ -139,11 +209,12 @@ async function saveManual(event){
   $('[data-manual-dialog]').close();$('[data-manual-note]').value='';await loadEvents();
 }
 function bind(){
-  document.addEventListener('click',e=>{const day=e.target.closest('[data-day]');if(day){showDay(Number(day.dataset.day));return}const view=e.target.closest('[data-view]');if(view){toggleMode(view.dataset.view);return}if(e.target.closest('[data-prev-month]')){cursorMonth--;if(cursorMonth<0){cursorMonth=11;cursorYear--}renderAll();return}if(e.target.closest('[data-next-month]')){cursorMonth++;if(cursorMonth>11){cursorMonth=0;cursorYear++}renderAll();return}if(e.target.closest('[data-prev-year]')){cursorYear--;renderAll();return}if(e.target.closest('[data-next-year]')){cursorYear++;renderAll();return}if(e.target.closest('[data-jump-current]')){cursorYear=today.getFullYear();cursorMonth=today.getMonth();renderAll();return}if(e.target.closest('[data-jump-year]')){cursorYear=today.getFullYear();renderAll();return}if(e.target.closest('[data-manual-open]')){openManual();return}if(e.target.closest('[data-manual-close]')){$('[data-manual-dialog]').close();return}});
+  document.addEventListener('click',e=>{const gh=e.target.closest('[data-gh-date]');if(gh){const [year,month,day]=gh.dataset.ghDate.split('-').map(Number);showDay(day,year,month-1);return}const day=e.target.closest('[data-day]');if(day){showDay(Number(day.dataset.day));return}const view=e.target.closest('[data-view]');if(view){toggleMode(view.dataset.view);return}if(e.target.closest('[data-prev-month]')){cursorMonth--;if(cursorMonth<0){cursorMonth=11;cursorYear--}renderAll();return}if(e.target.closest('[data-next-month]')){cursorMonth++;if(cursorMonth>11){cursorMonth=0;cursorYear++}renderAll();return}if(e.target.closest('[data-prev-year]')){cursorYear--;renderAll();return}if(e.target.closest('[data-next-year]')){if(!githubHome||cursorYear<today.getFullYear()){cursorYear++;renderAll()}return}if(e.target.closest('[data-jump-current]')){cursorYear=today.getFullYear();cursorMonth=today.getMonth();renderAll();return}if(e.target.closest('[data-jump-year]')){cursorYear=today.getFullYear();renderAll();return}if(e.target.closest('[data-manual-open]')){openManual();return}if(e.target.closest('[data-manual-close]')){$('[data-manual-dialog]').close();return}});
   $('[data-manual-form]')?.addEventListener('submit',saveManual);
   document.addEventListener('everflow:auth-change',()=>loadEvents());
   document.addEventListener('everflow:cloud-sync',()=>loadEvents());
   document.addEventListener('everflow:practice-change',()=>loadEvents());
+  document.addEventListener('everflow:study-change',()=>loadEvents());
   document.addEventListener('everflow:practice-batch-change',()=>loadEvents());
   addEventListener('online',()=>loadEvents());
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadEvents()});
