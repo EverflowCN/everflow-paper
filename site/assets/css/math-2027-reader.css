@@ -233,3 +233,29 @@ footer{text-align:center;padding:18px;color:var(--muted);font-size:11px}
  .card-compact-head .card-name{font-size:19px}
  .card-results{gap:10px}
 }
+
+/* Cross-series graph and homepage-compatible cloud controls */
+.library-heading-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:11px}
+.library-overview-link{display:inline-flex;align-items:center;gap:7px;color:#fff;background:#295c87;border:1px solid #244f76;min-height:35px;padding:7px 12px;border-radius:9px;font-size:12px;font-weight:840;white-space:nowrap}
+.library-overview-link:hover{background:#1e456a}
+.library-overview-link span{font-size:13px}
+.math-cloud-caption{font-size:10px;color:#64748b;font-weight:670;white-space:nowrap}
+.math-sync-btn{border:1px solid #c9d6e5;background:#f2f6fb;color:#295c87;padding:7px 11px;border-radius:9px;min-height:32px;font-size:11px;font-weight:810;white-space:nowrap}
+.math-sync-btn:hover:not(:disabled){background:#e4effa;border-color:#9fb7d1}
+.math-sync-btn[disabled]{opacity:.65}
+.math-cloud-caption[data-status="error"]{color:#9a3412}
+.math-cloud-caption[data-status="ok"]{color:#295c87}
+@media(max-width:850px){
+ .math-cloud-caption{display:none}
+ .top-actions{gap:7px}
+ .math-sync-btn{padding:6px 8px}
+ .library-heading-actions{gap:8px}
+}
+@media(max-width:540px){
+ .topbar .badge{display:none}
+ .topbar .text-back{display:none}
+ .library-heading{align-items:start}
+ .library-heading-actions{flex-direction:column;align-items:end;gap:4px}
+ .library-overview-link{font-size:11px;min-height:33px;padding:6px 8px}
+ .library-summary{font-size:10px}
+}
