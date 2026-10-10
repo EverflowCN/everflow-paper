@@ -222,3 +222,11 @@ button,.lab-btn,.lab-chip{transition:background .15s,color .15s,border-color .15
 
 .lab-clear-btn{display:inline-flex;align-items:center;margin-left:12px;padding:5px 9px;border:1px solid #e9d7bc;border-radius:7px;background:#fffdf6;color:#906b3c;font-size:10px;font-weight:760;cursor:pointer;white-space:nowrap}
 .lab-clear-btn:hover{background:#fff3dc}
+
+/* Mobile graph detail is a true bottom sheet. Desktop remains a split-pane. */
+@media(max-width:680px){
+ .lab-graph-layout.has-detail::before{content:"";position:fixed;inset:0;background:rgba(23,34,28,.32);z-index:54}
+ .lab-graph-layout .lab-graph-detail:not([hidden]){position:fixed;left:8px;right:8px;bottom:8px;top:auto;width:auto;height:min(76dvh,680px);max-height:calc(100dvh - 22px);z-index:55;border-radius:20px;box-shadow:0 22px 60px rgba(20,34,25,.24);background:var(--surface)}
+ .lab-graph-detail-body{max-height:none!important}
+ .lab-graph-detail .lab-paper-actions{flex-wrap:nowrap}
+}
