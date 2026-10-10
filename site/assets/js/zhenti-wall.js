@@ -363,7 +363,16 @@
     els.modalStatuses.forEach(btn=>btn.classList.toggle('active',Boolean(btn.dataset.modalStatus)&&btn.dataset.modalStatus===r.status));els.note.value=r.note||'';els.noteState.textContent=r.updatedAt?`已保存 · ${new Date(r.updatedAt).toLocaleString('zh-CN',{hour12:false})}`:'本机自动保存';
     const qs=scopedQuestions(selectedYear,subKey),i=qs.indexOf(selectedQuestion);els.prev.disabled=i<=0;els.next.disabled=i<0||i>=qs.length-1;renderInto(els.modalQuestionBox,selectedYear,selectedQuestion,'modal');
   }
+  function rememberQuestion(year,q,paper=false){
+    if(!Number.isInteger(year)||year<2009||year>2026||!Number.isInteger(q)||q<1||q>47)return;
+    window.EveraStudyRecent?.mark('zhenti',{
+      id:`${year}-${q}`,title:'408 历年真题',
+      detail:`${year} 年 · 第 ${q} 题${paper?' · 整套试卷':''}`,
+      href:paper?`/zhenti/?source=zhenti&resume=paper&year=${year}&q=${q}`:window.EveraStudyRecent.zhentiHref(year,q)
+    });
+  }
   function openQuestion(year,q){
+    rememberQuestion(year,q);
     commitPendingModalNote();
     const actual=subjectForQuestion(q,year);if(subjectIndexReady&&SUBJECTS[actual]&&mode==='subject'&&subject!==actual){subject=actual;storage.set('everflow-408-wall-subject',subject);renderAll()}
     selectedYear=year;selectedQuestion=q;modalQuestionStartedAt=Date.now();els.modal.hidden=false;document.body.style.overflow='hidden';els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal();
@@ -371,14 +380,14 @@
   function closeQuestion(){commitPendingModalNote();els.modal.hidden=true;document.body.style.overflow='';resetTimer()}
   function stepQuestion(delta){
     const subKey=subjectForQuestion(selectedQuestion,selectedYear),qs=scopedQuestions(selectedYear,subKey),i=qs.indexOf(selectedQuestion),next=qs[i+delta];
-    if(next!=null){commitPendingModalNote();selectedQuestion=next;modalQuestionStartedAt=Date.now();els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal()}
+    if(next!=null){rememberQuestion(selectedYear,next);commitPendingModalNote();selectedQuestion=next;modalQuestionStartedAt=Date.now();els.analysis.hidden=true;els.noteBox.hidden=true;resetTimer();renderModal()}
   }
 
   function compactRanges(qs){
     if(!qs.length)return'—';const parts=[];let start=qs[0],prev=qs[0];for(let i=1;i<=qs.length;i++){const cur=qs[i];if(cur===prev+1){prev=cur;continue}parts.push(start===prev?String(start):`${start}—${prev}`);start=prev=cur}return parts.join(' / ');
   }
   function renderPaperLegend(year){if(!els.paperSubjectLegend)return;els.paperSubjectLegend.innerHTML=Object.entries(SUBJECTS).map(([key,v])=>`<span>${compactRanges(questionsForSubject(year,key))} ${v.name}</span>`).join('')}
-  function openWholePaper(year,restore=null){commitPendingPaperNote();fullYear=year;const firstUnanswered=ALL_QUESTIONS.find(q=>!isDone(record(year,q)));const restoredQuestion=Number(restore?.question);fullQuestion=restoredQuestion>=1&&restoredQuestion<=47?restoredQuestion:(firstUnanswered||1);paperQuestionStartedAt=Date.now();els.paperSession.hidden=false;document.body.style.overflow='hidden';startWholeTimer(Number(restore?.elapsedMs||0),restore?.timerRunning!==false);savePaperSession();renderPaperSession()}
+  function openWholePaper(year,restore=null){rememberQuestion(year,Number(restore?.question)||ALL_QUESTIONS.find(q=>!isDone(record(year,q)))||1,true);commitPendingPaperNote();fullYear=year;const firstUnanswered=ALL_QUESTIONS.find(q=>!isDone(record(year,q)));const restoredQuestion=Number(restore?.question);fullQuestion=restoredQuestion>=1&&restoredQuestion<=47?restoredQuestion:(firstUnanswered||1);paperQuestionStartedAt=Date.now();els.paperSession.hidden=false;document.body.style.overflow='hidden';startWholeTimer(Number(restore?.elapsedMs||0),restore?.timerRunning!==false);savePaperSession();renderPaperSession()}
   function closeWholePaper(){commitPendingPaperNote();els.paperSession.hidden=true;document.body.style.overflow='';stopWholeTimer();clearPaperSession();renderWholeHome()}
   function renderPaperSession(){
     if(fullYear==null)return;
@@ -386,9 +395,9 @@
     els.paperYear.textContent=String(fullYear);els.paperProgress.textContent=`${s.done}/47`;els.paperPercent.textContent=`${s.rate}%`;els.paperProgressBar.style.width=`${s.rate}%`;els.paperSubject.textContent=`${sub.short} ${sub.name}`;els.paperType.textContent=fullQuestion<=40?'选择题':'综合应用题';els.paperCurrent.textContent=String(fullQuestion);renderPaperLegend(fullYear);
     els.paperNote.value=r.note||'';els.paperNoteState.textContent=r.updatedAt?`已保存 · ${new Date(r.updatedAt).toLocaleString('zh-CN',{hour12:false})}`:'本机自动保存';els.paperStatuses.forEach(btn=>btn.classList.toggle('active',Boolean(btn.dataset.paperStatus)&&btn.dataset.paperStatus===r.status));els.paperPrev.disabled=fullQuestion<=1;els.paperNext.disabled=fullQuestion>=47;
     els.paperAnswerGrid.innerHTML=ALL_QUESTIONS.map(q=>{const rr=record(fullYear,q);return`<button type="button" class="paper-answer ${answerState(rr)}${masteryClass(rr)}${q===fullQuestion?' current':''}" data-paper-jump="${q}" title="第 ${q} 题 · ${SUBJECTS[subjectForQuestion(q,fullYear)].name}">${q}</button>`}).join('');
-    els.paperAnswerGrid.querySelectorAll('[data-paper-jump]').forEach(btn=>btn.addEventListener('click',()=>{commitPendingPaperNote();fullQuestion=Number(btn.dataset.paperJump);paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}));renderInto(els.paperQuestionBox,fullYear,fullQuestion,'paper');
+    els.paperAnswerGrid.querySelectorAll('[data-paper-jump]').forEach(btn=>btn.addEventListener('click',()=>{commitPendingPaperNote();fullQuestion=Number(btn.dataset.paperJump);rememberQuestion(fullYear,fullQuestion,true);paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}));renderInto(els.paperQuestionBox,fullYear,fullQuestion,'paper');
   }
-  function stepWhole(delta){const next=fullQuestion+delta;if(next>=1&&next<=47){commitPendingPaperNote();fullQuestion=next;paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}}
+  function stepWhole(delta){const next=fullQuestion+delta;if(next>=1&&next<=47){commitPendingPaperNote();fullQuestion=next;rememberQuestion(fullYear,fullQuestion,true);paperQuestionStartedAt=Date.now();savePaperSession();renderPaperSession()}}
 
   function setMastery(context,status){const year=context==='paper'?fullYear:selectedYear,q=context==='paper'?fullQuestion:selectedQuestion;if(year==null||q==null)return;patchRecord(year,q,{status});refreshAfterRecordChange(context)}
   function activeContext(){if(els.paperSession&&!els.paperSession.hidden)return'paper';if(els.modal&&!els.modal.hidden)return'modal';return null}
@@ -435,5 +444,13 @@
 
   setupRangeSelects();installShortcutHelp();renderMode();document.querySelector('[data-wall-root]')?.setAttribute('aria-busy','false');buildSubjectIndex().catch(err=>console.warn('Everflow subject index fallback enabled',err));
   buildTopicIndex();
-  const savedPaperSession=readPaperSession();if(savedPaperSession)queueMicrotask(()=>openWholePaper(savedPaperSession.year,savedPaperSession));
+  const resumeParams=new URLSearchParams(location.search);
+  const resumeYear=Number(resumeParams.get('year')),resumeQuestion=Number(resumeParams.get('q'));
+  const validDeepLink=resumeYear>=2009&&resumeYear<=2026&&Number.isInteger(resumeQuestion)&&resumeQuestion>=1&&resumeQuestion<=47;
+  const resumeWhole=validDeepLink&&resumeParams.get('resume')==='paper';
+  const savedPaperSession=readPaperSession();
+  if(resumeWhole){
+    const samePaper=savedPaperSession?.year===resumeYear;
+    queueMicrotask(()=>openWholePaper(resumeYear,{...(samePaper?savedPaperSession:{}),question:resumeQuestion,timerRunning:samePaper?savedPaperSession.timerRunning:false}));
+  }else if(savedPaperSession&&!validDeepLink)queueMicrotask(()=>openWholePaper(savedPaperSession.year,savedPaperSession));
 })();
