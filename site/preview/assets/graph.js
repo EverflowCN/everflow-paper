@@ -1,4 +1,4 @@
-import {YEARS,SUBJECTS,SUBSHORT,esc,yearData,subjectIndex,relaxData,getRecord,getRecords,getNav,saveNav,patchRecord,statusOf,questionHtml,optionsFor,grade,progressOf} from './core.js';
+import {YEARS,SUBJECTS,SUBSHORT,esc,yearData,subjectIndex,relaxData,getRecord,getRecords,getNav,saveNav,patchRecord,statusOf,questionHtml,optionsFor,grade,progressOf,clearPreview} from './core.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const els={layout:$('[data-graph-layout]'),matrix:$('[data-graph-matrix]'),scroll:$('[data-graph-scroll]'),
  detail:$('[data-graph-detail]'),body:$('[data-detail-body]'),filter:$('[data-graph-filter]'),subject:$('[data-graph-subject]'),
@@ -165,6 +165,7 @@ function jumpWeak(){
 }
 async function handleClick(e){
  const btn=e.target.closest('button,[data-open-workspace]');if(!btn)return;
+ if(btn.dataset.clearPreview!==undefined){if(confirm('仅清空两个测试页面的答题与图谱记录？正式学习记录不会改变。')){clearPreview();location.reload()}return;}
  if(btn.dataset.graphSource){switchSource(btn.dataset.graphSource);return}
  if(btn.dataset.zoom){const action=btn.dataset.zoom;if(action==='in')size=Math.min(35,size+3);else if(action==='out')size=Math.max(13,size-3);else if(action==='standard')size=23;else if(action==='fit'){fitGrid();return}renderGrid();return}
  if(btn.dataset.resetFilters!==undefined){filter='all';subject='all';updateFilters();renderGrid();return}
