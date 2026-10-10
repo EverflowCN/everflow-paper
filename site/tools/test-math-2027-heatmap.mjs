@@ -36,6 +36,21 @@ assert.match(reader,/data-heatmap-paper/);
 assert.match(reader,/data-heatmap-jump/);
 assert.match(reader,/heatmapHtml\(paper,\{inReader:true\}\)/);
 assert.match(style,/\.heatmap-grid/);
+const registry=JSON.parse(read('data/math-papers/active-collections.json'));
+assert.equal(registry.collections.filter(c=>c.enabled).length,1);
+assert.equal(registry.collections[0].id,'zhangyu-2027-math2');
+assert.equal(registry.collections[0].storageKey,'everflow-math2-2027-simulation-v1');
+assert.match(reader,/library-collections/);
+assert.match(reader,/data-collection-id/);
+assert.match(reader,/categoryLabel\(id\)/);
+assert.match(reader,/heatmapHtml\(p\)/);
+assert.match(reader,/history\.replaceState\(null,'',`\?collection=/);
+assert.match(reader,/paper\.questions\.length-1/);
+assert.match(style,/\.main:has\(\.library-heading\) \.cards/);
+assert.match(style,/\.main:has\(\.library-heading\) \.heatmap-wrap\.is-card \.heatmap-grid/);
+assert.match(style,/@media\(max-width:620px\)/);
+assert.doesNotMatch(reader,/math-papers\/catalog\.json/);
+
 assert.match(reader,/HEAT_SYMBOLS=\{unseen:'',visited:'·',answered:'\?',correct:'✓',wrong:'×'/);
 assert.match(reader,/蓝色 · 正确/);
 assert.match(reader,/橙色 · 错误/);
@@ -50,7 +65,7 @@ assert.match(style,/\.judge-buttons button\[data-judge="wrong"\]\[aria-pressed="
 assert.doesNotMatch(reader,/绿色、红色/);
 
 assert.match(style,/repeat\(11,minmax\(0,1fr\)\)/);
-assert.match(html,/20261011-tricolor1/);
+assert.match(html,/20261011-compact1/);
 assert.match(mathjax,/export async function typeset\(node\)/);
 // No active navigation or imports for the legacy 107-paper catalogue.
 assert.match(switcher,/27模拟卷/);
