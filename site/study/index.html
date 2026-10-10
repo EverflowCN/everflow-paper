@@ -12,106 +12,62 @@
   <link rel="stylesheet" href="../assets/css/learning-center.css?v=20260824-ui5">
   <link rel="stylesheet" href="../assets/css/app-ui.css">
   <link rel="stylesheet" href="../assets/css/study-heatmap.css?v=20261010-home1">
-  <link rel="stylesheet" href="../assets/css/study-home.css?v=20261010-home1">
+  <link rel="stylesheet" href="../assets/css/study-home.css?v=20261010-github2">
 </head>
 <body>
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
 <div class="mobile-panel"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></div>
 <main class="wrap learning-shell study-home-shell">
   <header class="study-home-lead">
-    <div>
-      <div class="eyebrow">EVERFLOW · LEARNING CENTER</div>
-      <h1>学习中心<span aria-hidden="true">.</span></h1>
-    </div>
-    <div class="study-home-lead-side">
-      <p>记录每天的学习节奏，接着上次的课程继续。</p>
-      <a class="study-home-mobile-jump" href="#courses">进入课程 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    </div>
+    <div><div class="eyebrow">EVERFLOW / STUDY</div><h1>学习中心</h1></div>
+    <p>每天的进步，看得见。课程与刷题记录会自动汇总到热力图。</p>
   </header>
   <div class="study-home-grid">
-    <section class="study-home-heatmap heatmap-shell" id="heatmap" data-heatmap-root aria-labelledby="study-home-heat-title">
-      <div class="study-home-panel-top">
-        <div>
-          <div class="eyebrow">LEARNING ACTIVITY</div>
-          <h2 id="study-home-heat-title">学习热力图</h2>
-          <p>每日完成记录直接呈现，无需进入其他页面。</p>
-        </div>
-        <button type="button" class="study-home-manual learning-btn" data-manual-open aria-label="手动补录学习记录">+ 手动补录</button>
+    <section class="study-home-heatmap heatmap-shell" id="heatmap" data-heatmap-root data-github-heatmap aria-labelledby="study-home-heat-title">
+      <header class="study-home-panel-top">
+        <div><div class="eyebrow">LEARNING ACTIVITY</div><h2 id="study-home-heat-title">学习热力图</h2><p>参考 GitHub 贡献图，按天展示全年学习记录。</p></div>
+        <button type="button" class="study-home-manual learning-btn" data-manual-open>+ 手动补录</button>
+      </header>
+      <div class="study-home-metrics" aria-label="学习记录统计">
+        <div><strong data-gh-active>0</strong><span>年度活跃天数</span></div>
+        <div><strong data-gh-streak>0</strong><span>当前连续天数</span></div>
+        <div><strong data-gh-total>0</strong><span>年度打卡次数</span></div>
+        <div><strong data-gh-month-days>0</strong><span>本月活跃天数</span></div>
       </div>
-      <section class="heatmap-metrics" aria-label="学习热力图统计">
-    <article><span>本月打卡次数</span><strong data-kpi-total>0</strong><small>课程 + 刷题 + 手动</small></article>
-    <article><span>本月打卡天数</span><strong data-kpi-days>0</strong><small>至少 1 次即计一天</small></article>
-    <article><span>当前连续</span><strong data-kpi-streak>0 天</strong><small>从今天或昨天开始计算</small></article>
-    <article><span>单日最高</span><strong data-kpi-max>0</strong><small>本月最高打卡次数</small></article>
-  </section>
-      <article class="heatmap-panel">
-      <div class="heatmap-panel-head">
-        <div>
-          <div class="eyebrow">CHECK-IN HEATMAP</div>
-          <h2>每日打卡次数</h2>
-          <p data-source-status>正在读取学习记录…</p>
-        </div>
-        <div class="heatmap-segment" role="tablist" aria-label="热力图视图">
-          <button type="button" class="active" data-view="month">月视图</button>
-          <button type="button" data-view="year">年视图</button>
+      <div class="study-home-chart-header">
+        <div><h3>全年学习日历</h3><p data-source-status role="status" aria-live="polite">正在读取学习记录…</p></div>
+        <div class="study-home-year-select" aria-label="热力图年份">
+          <button type="button" data-prev-year aria-label="查看上一年"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button type="button" data-jump-year data-gh-year-label title="返回今年">2026 年</button>
+          <button type="button" data-next-year aria-label="查看下一年"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
         </div>
       </div>
-
-      <section data-month-view>
-        <div class="heatmap-calendar-head">
-          <button type="button" class="heatmap-nav-btn ui-icon-only" data-prev-month aria-label="上个月"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
-          <button type="button" class="heatmap-month-label" data-jump-current title="返回本月">2026年8月</button>
-          <button type="button" class="heatmap-nav-btn ui-icon-only" data-next-month aria-label="下个月"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      <div class="study-gh-scroll" data-gh-scroll tabindex="0" aria-label="全年热力图，手机可横向滚动">
+        <div class="study-gh-canvas">
+          <div class="study-gh-months" data-gh-months aria-hidden="true"></div>
+          <div class="study-gh-chart">
+            <div class="study-gh-weekdays" aria-hidden="true"><span>周一</span><span></span><span>周三</span><span></span><span>周五</span><span></span><span>周日</span></div>
+            <div class="study-gh-grid" data-gh-grid aria-label="学习打卡日历"></div>
+          </div>
         </div>
-        <div class="heatmap-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
-        <div class="heatmap-month-grid" data-month-grid></div>
-        <div class="heatmap-legend"><span>少</span><i data-lv="0"></i><i data-lv="1"></i><i data-lv="2"></i><i data-lv="3"></i><i data-lv="4"></i><span>多</span></div>
-        <div class="heatmap-summary">
-          <div><span>本月活跃率</span><strong data-summary-rate>0%</strong></div>
-          <div><b data-summary-title>开始记录</b><p data-summary-desc>每天完成一点，就会留下颜色。</p></div>
-        </div>
-      </section>
-
-      <section data-year-view hidden>
-        <div class="heatmap-calendar-head heatmap-year-head">
-          <button type="button" class="heatmap-nav-btn ui-icon-only" data-prev-year aria-label="上一年"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
-          <button type="button" class="heatmap-month-label" data-jump-year title="返回今年">2026 年</button>
-          <button type="button" class="heatmap-nav-btn ui-icon-only" data-next-year aria-label="下一年"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
-        </div>
-        <div class="heatmap-year-grid" data-year-grid></div>
-      </section>
-    </article>
-      <div class="study-home-sources" aria-label="学习记录来源">
-        <section class="study-home-source">
-          <div class="study-home-source-heading"><span>今天</span><strong><span data-today-count>0</span> 次打卡</strong></div>
-          <div class="heatmap-source-bars" data-today-sources></div>
-        </section>
-        <section class="study-home-source">
-          <div class="study-home-source-heading"><span>本月来源</span><strong>课程 / 刷题 / 补录</strong></div>
-          <div class="heatmap-source-list" data-month-sources></div>
-        </section>
       </div>
+      <div class="study-gh-summary">
+        <span data-gh-year-summary>正在统计学习天数…</span>
+        <div class="study-gh-legend" aria-label="打卡次数由少到多"><span>少</span><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i><span>多</span></div>
+      </div>
+      <div class="study-gh-note">点击任意日期可查看当天课程、刷题及手动补录的打卡明细。方块颜色越深，当天打卡次数越多。</div>
     </section>
     <aside class="study-home-courses" id="courses" aria-labelledby="study-home-course-title">
-      <div class="study-home-courses-top">
-        <div class="study-home-courses-index">02 <span>/ COURSE</span></div>
-        <div class="eyebrow">KEEP LEARNING</div>
-        <h2 id="study-home-course-title">继续你的<br>课程进度。</h2>
-        <p>课程、视频、课时打卡统一管理。已完成的学习记录会保留，回来就能接着学。</p>
-        <a class="study-home-course-cta" href="courses/" aria-label="进入所有课程">
-          <span>进入课程</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
+      <div class="study-home-courses-header">
+        <div><div class="eyebrow">COURSE CENTER</div><h2 id="study-home-course-title">进入课程</h2><p>选择课程，继续已有的学习进度。</p></div>
+        <a class="study-home-course-manage" href="courses/">全部课程 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-      <div class="study-home-courses-bottom">
-        <div class="study-home-course-group-title">常用课程 <span>QUICK ACCESS</span></div>
-        <a class="study-home-course-link" href="../408/?course=oxygen-past-papers">
-          <span class="study-home-course-link-icon">01</span><span><strong>历年 408 真题讲解</strong><small>课程视频与课时打卡</small></span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a class="study-home-course-link" href="../408/?course=oxygen-reinforcement">
-          <span class="study-home-course-link-icon">02</span><span><strong>408 四科强化</strong><small>DS / CO / OS / CN</small></span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <div class="study-home-practice-link"><span>想先做题？</span><a href="practice/">进入刷题 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="study-home-course-items" data-home-course-list aria-label="可选课程">
+        <a class="study-home-course-item" href="../408/?course=oxygen-past-papers"><span class="study-home-course-icon">408</span><span class="study-home-course-copy"><strong>历年 408 真题讲解</strong><small>进入课时与视频打卡</small></span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="study-home-course-item" href="../408/?course=oxygen-reinforcement"><span class="study-home-course-icon">4科</span><span class="study-home-course-copy"><strong>408 四科强化</strong><small>数据结构 · 组成原理 · 操作系统 · 计网</small></span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
+      <a class="study-home-course-cta" href="courses/"><span>进入课程中心</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <div class="study-home-practice-link"><span>需要做题训练？</span><a href="practice/">进入刷题 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
     </aside>
   </div>
 </main>
@@ -138,6 +94,8 @@
 <script src="../assets/js/study-store.js"></script>
 <script src="../assets/js/pretty-select.js"></script>
 <script type="module" src="../assets/js/cloud.js"></script>
-<script type="module" src="../assets/js/study-heatmap.js?v=20261010-home1"></script>
+<script src="../assets/js/course-catalog-public.js?v=20260828-course3"></script>
+<script defer src="../assets/js/study-home-courses.js?v=20261010-github2"></script>
+<script type="module" src="../assets/js/study-heatmap.js?v=20261010-github2"></script>
 </body>
 </html>
