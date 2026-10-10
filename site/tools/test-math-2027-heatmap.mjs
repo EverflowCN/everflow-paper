@@ -65,7 +65,7 @@ assert.match(style,/\.judge-buttons button\[data-judge="wrong"\]\[aria-pressed="
 assert.doesNotMatch(reader,/绿色、红色/);
 
 assert.match(style,/repeat\(11,minmax\(0,1fr\)\)/);
-assert.match(html,/20261011-overview1/);
+assert.match(html,/20261011-math2-past1/);
 assert.match(html,/data-math-sync/);
 assert.match(mathjax,/export async function typeset\(node\)/);
 // No active navigation or imports for the legacy 107-paper catalogue.
