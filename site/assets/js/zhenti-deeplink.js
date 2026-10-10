@@ -5,6 +5,7 @@
   document.head.appendChild(arrowScript);
 
   const params=new URLSearchParams(location.search);
+  if(params.get('resume')==='paper')return; // Whole-paper resume is handled by zhenti-wall
   const year=Number(params.get('year'));
   const q=Number(params.get('q'));
   if(year<2009||year>2026||q<1||q>47)return;
