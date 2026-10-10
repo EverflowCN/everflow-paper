@@ -1,17 +1,18 @@
 import {typeset} from './math-2027-mathjax.js?v=20261010-heatmap4';
-const DATA_URL='/data/math-papers/zhangyu-2027-math2.json?v=20261010-2';
-const STORAGE='everflow-math2-2027-simulation-v1';
+const REGISTRY_URL='/data/math-papers/active-collections.json?v=20261011-compact1';
+let storageKey='everflow-math2-2027-simulation-v1';
+let registry=null,currentCollection=null;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const root=$('#math-app');
 let doc=null,paper=null,at=0,started=0,timer=null;
 function record(){
- try{const r=JSON.parse(localStorage.getItem(STORAGE)||'{}');return r&&typeof r==='object'&&!Array.isArray(r)?r:{}}catch{return{}}
+ try{const r=JSON.parse(localStorage.getItem(storageKey)||'{}');return r&&typeof r==='object'&&!Array.isArray(r)?r:{}}catch{return{}}
 }
 function currentRecord(){return record()[paper.id]||{answers:{},judgements:{},elapsed:0,visited:[]}}
 function save(patch){
  if(!paper)return;
- try{const all=record();all[paper.id]={...currentRecord(),...patch,updatedAt:new Date().toISOString()};localStorage.setItem(STORAGE,JSON.stringify(all))}catch(error){console.warn('数学二2027本机记录存储失败',error)}
+ try{const all=record();all[paper.id]={...currentRecord(),...patch,updatedAt:new Date().toISOString()};localStorage.setItem(storageKey,JSON.stringify(all))}catch(error){console.warn('数学二2027本机记录存储失败',error)}
 }
 function countAnswers(id,items){const answers=record()[id]?.answers||{};return items.filter(q=>q.verification==='proofread'&&String(answers[q.id]||'').trim()).length}
 function qualified(q){return q?.verification==='proofread'&&Boolean(q.stem)}
@@ -71,24 +72,49 @@ function bindHeatmap(container=root){
  }));
  container.querySelectorAll('[data-heatmap-jump]').forEach(b=>b.addEventListener('click',()=>changeQ(Number(b.dataset.heatmapJump))));
 }
+function categoryLabel(id){return registry?.categories?.find(c=>c.id===id)?.title||'卷库'}
+function collectionTabHtml(){
+ const enabled=registry.collections;
+ const categories=[...new Set(enabled.map(c=>c.category))];
+ return `<nav class="library-collections" aria-label="选择数学二试卷系列">${categories.map(category=>{
+  const collections=enabled.filter(x=>x.category===category);
+  return `<div class="library-series-group"><span class="library-series-label">${esc(categoryLabel(category))}</span>
+   <div class="library-series-list">${collections.map(c=>`<button type="button" data-collection-id="${esc(c.id)}" class="library-series-btn ${c.id===currentCollection.id?'active':''}" aria-pressed="${c.id===currentCollection.id}">${esc(c.year)} · ${esc(c.shortTitle||c.title)} <span>${c.id===currentCollection.id?'当前':''}</span></button>`).join('')}</div></div>`;
+ }).join('')}</nav>`;
+}
 function drawIndex(){
  closeTimer();
- const html=doc.papers.map((p,i)=>{
- const n=readableCount(p),counts=heatCounts(p,record()[p.id]||{}),rate=Math.round(counts.done/22*100);
- return `<article class="card" aria-label="第${i+1}套试卷，包含22题热力图">
-  <header><span>${p.year} · 张宇八套卷</span><span class="pill ${n<22?'pending':''}">${n===22?'已收录':'校核中'}</span></header>
-  <h2>第 ${i+1} 套</h2><div class="stats">10 道选择 · 6 道填空 · 6 道解答</div>
-  ${heatmapHtml(p)}
-  <div class="bar" aria-label="完成率 ${rate}%"><i style="width:${rate}%"></i></div>
-  <div class="heat-card-stats"><span>已答 ${counts.done}</span><span>自评对 ${counts.correct}</span><span>自评错 ${counts.wrong}</span></div>
-  <footer><span>已练习 ${rate}%</span><button type="button" class="heat-open-btn" data-open="${i}">${counts.done?'继续做题':'开始做题'} →</button></footer>
- </article>`;
-}).join('');
- root.innerHTML=`<section class="hero"><div><div class="eyebrow">EVERFLOW / 2027 MATH II</div><h1>27模拟卷</h1><p>张宇考研数学预测八套卷 · 数学二。逐题转为可选择、可填写的文字与数学公式，不使用整页截图；适合电脑与手机作答。</p></div><div class="pill">共 8 套 · 176 题</div></section>
- <div class="notice">资料为试题分册，未提供参考答案与解析，因此不自动判分。处于「校核中」的试题禁止将残缺公式当作正式题干显示；校核完成后自动开放。当前已校核 ${doc.verificationSummary.proofread} 道，待校核 ${doc.verificationSummary.pending} 道。</div>
- <section class="cards" aria-label="八套模拟卷">${html}</section>
- <section class="heatmap-index-footer">${heatLegend()}<p>每套独立 22 格：✓ 蓝色为自评正确，× 橙色为自评错误；灰色中 ? 表示已答待判、· 表示已浏览、空白表示未做。除了颜色还用符号区分，不需要辨别红绿。</p></section>`;
+ const papers=doc.papers||[];
+ const records=record();
+ const html=papers.map((p,i)=>{
+  const counts=heatCounts(p,records[p.id]||{});
+  const digits=String(i+1).padStart(2,'0');
+  return `<article class="card" aria-label="第 ${i+1} 套，${counts.done}/${counts.total} 题已答">
+   <header class="card-compact-head">
+    <button class="card-name" type="button" data-open="${i}" aria-label="打开第 ${i+1} 套试卷">${digits}<small> / 套</small></button>
+    <span class="card-fraction" title="已答题数 / 总题数">${counts.done}<em>/${counts.total}</em></span>
+   </header>
+   ${heatmapHtml(p)}
+   <div class="card-compact-foot">
+    <div class="card-results"><span><b>✓</b> ${counts.correct}</span><span><b>×</b> ${counts.wrong}</span><span><b>?</b> ${counts.answered}</span></div>
+    <button type="button" class="heat-open-btn" data-open="${i}">${counts.done?'继续':'开始'} ↗</button>
+   </div>
+  </article>`;
+ }).join('');
+ const title=currentCollection?.title||doc.title||'模拟卷';
+ const total=papers.reduce((n,p)=>n+p.questions.length,0);
+ root.innerHTML=`<section class="library-heading" aria-labelledby="library-title">
+    <div><div class="library-breadcrumb">数学二 <span>/</span> ${esc(categoryLabel(currentCollection.category))}</div><h1 id="library-title">${esc(title)}</h1></div>
+    <div class="library-summary">${papers.length} 套 · ${total} 题</div>
+  </section>
+  ${collectionTabHtml()}
+  <section class="library-tools" aria-label="热力图标记说明">
+    ${heatLegend()}
+    <details class="library-help"><summary>使用说明</summary><p>点击方格直接进入对应题目。✓ 蓝色为自评正确；× 橙色为自评错误；? 灰色为作答待判断。数据仅保存于当前设备，试题未提供标准答案，不自动判分。未完成核验的题目不会以截图代替。</p></details>
+  </section>
+  <section class="cards" aria-label="${esc(title)} 的试卷热力图">${html}</section>`;
  root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.open))));
+ root.querySelectorAll('[data-collection-id]').forEach(b=>b.addEventListener('click',()=>selectCollection(b.dataset.collectionId)));
  bindHeatmap(root);
 }
 function diagram(name){
