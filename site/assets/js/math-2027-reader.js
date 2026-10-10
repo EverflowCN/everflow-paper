@@ -158,7 +158,7 @@ function renderReader({keepFocus=false}={}){
   ${qualified(q)?`<div class="stem" data-math-display>${esc(q.stem).replace(/\n/g,'<br>')}</div>${diagram(q.diagram)}${q.type==='choice'?`<div class="choices" data-math-display>${Object.entries(q.options).map(([letter,value])=>`<button type="button" class="choice ${mine===letter?'selected':''}" data-answer-choice="${letter}"><b>${letter}</b><span>${esc(value).replace(/\n/g,'<br>')}</span></button>`).join('')}</div>`:`<label class="inputlabel" for="math-draft">${q.type==='fill'?'填写答案（可输入 LaTeX）':'作答草稿与演算思路（本机保存）'}</label><textarea id="math-draft" class="draft" data-draft placeholder="${q.type==='fill'?'填写你的答案':'写下推导过程、最终结论或留作复盘…'}">${esc(mine)}</textarea>`}`:
  `<div class="status-warning"><strong>第 ${q.number} 题尚未完成数学公式复核</strong><p>原始 PDF 的自动文字层存在积分上下限、根号、指数、矩阵等缺损。为避免错误题干误导学习，本站暂不展示未核实的 OCR 文本，也不会以整页截图代替转录。</p><p>此题已经建立序号与卷内位置，待逐字校对后开放。</p></div>`}
   ${qualified(q)?`<section class="judge"><strong>手动判定与复盘</strong><p>上传文件仅包含试题，不包含标准答案。本区不自动判对错；可在自行核对后标记。</p><div class="judge-buttons"><button class="btn" data-judge="correct" aria-pressed="${rec.judgements?.[q.id]==='correct'}">✓ 标记正确（蓝）</button><button class="btn" data-judge="wrong" aria-pressed="${rec.judgements?.[q.id]==='wrong'}">× 标记错误（橙）</button><button class="btn" data-judge="" aria-pressed="${!rec.judgements?.[q.id]}">清除判定</button></div></section>`:''}
-  <div class="viewer-nav"><button class="btn" data-prev ${at===0?'disabled':''}>← 上一题</button><span class="spacer"></span><button class="btn primary" data-next ${at===21?'disabled':''}>下一题 →</button></div>
+  <div class="viewer-nav"><button class="btn" data-prev ${at===0?'disabled':''}>← 上一题</button><span class="spacer"></span><button class="btn primary" data-next ${at===paper.questions.length-1?'disabled':''}>下一题 →</button></div>
  </main>
  <aside class="answer-sheet">
  <div data-reader-heatmap>${heatmapHtml(paper,{inReader:true})}</div>
@@ -167,7 +167,7 @@ function renderReader({keepFocus=false}={}){
  <h3>快速答题卡</h3><p>点击题号快速跳转</p>
  <div class="sheet">${buttons}</div>
  <div class="mini-stats"><span data-heat-stats>已答 ${heatCounts(paper,rec).done}/22 · 自评对 ${heatCounts(paper,rec).correct} · 自评错 ${heatCounts(paper,rec).wrong}</span></div>
- <div class="progress-strip"><i data-heat-progress style="width:${Math.round(heatCounts(paper,rec).done/22*100)}%"></i></div>
+ <div class="progress-strip"><i data-heat-progress style="width:${Math.round(heatCounts(paper,rec).done/paper.questions.length*100)}%"></i></div>
  <p class="heat-local-note">✓ 蓝色代表自评对，× 橙色代表自评错；灰色问号表示待自评。颜色与符号双重标记，记录仅保存在本机。</p>
  </aside></div>`;
  window.scrollTo({top:0,behavior:'instant'});
@@ -178,8 +178,8 @@ function renderReader({keepFocus=false}={}){
 function openPaper(index,q=null){
  closeTimer();paper=doc.papers[index];if(!paper)return;
  const last=Number(currentRecord().lastQuestion||1);
- at=Math.max(0,Math.min(21,Number(q||last)-1));
- started=Date.now();history.replaceState(null,'',`?paper=${index+1}&q=${at+1}`);renderReader();timer=setInterval(tick,1000);
+ at=Math.max(0,Math.min(paper.questions.length-1,Number(q||last)-1));
+ started=Date.now();history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}&paper=${index+1}&q=${at+1}`);renderReader();timer=setInterval(tick,1000);
 }
 function persistTime(){
  if(!paper||!started)return;
@@ -189,13 +189,13 @@ function persistTime(){
 }
 function tick(){if(paper&&Date.now()-started>30000)persistTime()}
 function closeTimer(){if(timer)clearInterval(timer);timer=null;if(paper)persistTime();started=0}
-function changeQ(index){if(index<0||index>=22)return;persistTime();at=index;save({lastQuestion:at+1});history.replaceState(null,'',`?paper=${doc.papers.indexOf(paper)+1}&q=${at+1}`);renderReader()}
+function changeQ(index){if(index<0||index>=paper.questions.length)return;persistTime();at=index;save({lastQuestion:at+1});history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}&paper=${doc.papers.indexOf(paper)+1}&q=${at+1}`);renderReader()}
 function saveAnswer(value){
  const q=paper?.questions[at];if(!qualified(q))return;
  const rec=currentRecord();save({answers:{...rec.answers,[q.id]:value},lastQuestion:at+1});
 }
 function bindReader(){
- root.querySelector('[data-exit]')?.addEventListener('click',()=>{closeTimer();paper=null;history.replaceState(null,'',location.pathname);drawIndex()});
+ root.querySelector('[data-exit]')?.addEventListener('click',()=>{closeTimer();paper=null;history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}`);drawIndex()});
  root.querySelectorAll('[data-select-paper]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.selectPaper))));
  root.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>changeQ(Number(b.dataset.jump))));
  bindHeatmap(root);
@@ -210,16 +210,45 @@ document.addEventListener('keydown',event=>{
  if(event.key==='ArrowLeft')changeQ(at-1);
  if(event.key==='ArrowRight')changeQ(at+1);
  if(/^[A-Da-d]$/.test(event.key)&&paper.questions[at]?.type==='choice'&&qualified(paper.questions[at])){saveAnswer(event.key.toUpperCase());renderReader()}
- if(event.key==='Escape'){closeTimer();paper=null;history.replaceState(null,'',location.pathname);drawIndex()}
+ if(event.key==='Escape'){closeTimer();paper=null;history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}`);drawIndex()}
 });
 window.addEventListener('pagehide',()=>{if(paper)closeTimer()});
+async function selectCollection(id,{paperNumber=0,questionNumber=0}={}){
+ const entry=registry?.collections.find(c=>c.id===id&&c.enabled);
+ if(!entry)throw Error('系列不存在或未启用');
+ const prefix='/data/math-papers/';
+ const file=String(entry.dataUrl||'');
+ const filename=file.slice(prefix.length);
+ if(!file.startsWith(prefix)||!filename.endsWith('.json')||!filename||!/^[a-z0-9.-]+$/.test(filename)||filename.includes('..')||
+   !String(entry.storageKey||'').startsWith('everflow-math2-')||!/^[a-z0-9-]+$/.test(entry.storageKey))throw Error('卷库登记表的数据源不合法');
+ closeTimer();paper=null;
+ currentCollection=entry;storageKey=entry.storageKey;
+ root.innerHTML='<div class="loading">正在读取题目与热力图…</div>';
+ const response=await fetch(file,{cache:'default'});
+ if(!response.ok)throw Error('HTTP '+response.status+' / '+entry.title);
+ const result=await response.json();
+ if(!Array.isArray(result.papers)||!result.papers.length||result.papers.some(p=>!Array.isArray(p.questions)||!p.questions.length))throw Error('试卷目录结构不完整');
+ doc=result;
+ const n=Number(paperNumber),q=Number(questionNumber);
+ if(Number.isInteger(n)&&n>=1&&n<=doc.papers.length){
+  const count=doc.papers[n-1].questions.length;
+  openPaper(n-1,Number.isInteger(q)&&q>=1&&q<=count?q:null);
+ }else{
+  history.replaceState(null,'',`?collection=${encodeURIComponent(entry.id)}`);
+  drawIndex();
+ }
+}
 async function main(){
  try{
- const response=await fetch(DATA_URL,{cache:'no-cache'});if(!response.ok)throw new Error('HTTP '+response.status);
- doc=await response.json();
- if(doc?.papers?.length!==8||doc.papers.some(p=>p.questions?.length!==22))throw new Error('八套题目清单结构不完整');
- const params=new URLSearchParams(location.search),n=Number(params.get('paper')),q=Number(params.get('q'));
- if(Number.isInteger(n)&&n>=1&&n<=8)openPaper(n-1,Number.isInteger(q)&&q>=1&&q<=22?q:0);else drawIndex();
- }catch(error){root.innerHTML=`<div class="error">2027 数学二套题载入失败：${esc(error?.message||error)}。请检查网络或刷新页面。</div>`}
+  const response=await fetch(REGISTRY_URL,{cache:'default'});
+  if(!response.ok)throw Error('卷库目录读取失败 HTTP '+response.status);
+  const manifest=await response.json();
+  const active=manifest.collections?.filter(c=>c.enabled===true)||[];
+  if(manifest.subject!=='math2'||!active.length)throw Error('暂无开放的数学二试卷');
+  registry={...manifest,collections:active};
+  const params=new URLSearchParams(location.search);
+  const choice=active.find(c=>c.id===params.get('collection'))||active[0];
+  await selectCollection(choice.id,{paperNumber:Number(params.get('paper')||0),questionNumber:Number(params.get('q')||0)});
+ }catch(error){root.innerHTML=`<div class="error">数学二试卷目录加载失败：${esc(error?.message||error)}。请刷新页面重试。</div>`;}
 }
 main();
