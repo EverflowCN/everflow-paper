@@ -259,3 +259,10 @@ footer{text-align:center;padding:18px;color:var(--muted);font-size:11px}
  .library-overview-link{font-size:11px;min-height:33px;padding:6px 8px}
  .library-summary{font-size:10px}
 }
+
+/* Past exam source indicators — link out to source; don't embed scanned questions. */
+.math-reference-answer{margin:6px 7px 7px 0;min-height:34px;padding:6px 11px;border-color:#a8c8df;background:#f0f6fc;color:#214b75}
+.math-reference-value{display:inline-flex;padding:8px 11px;margin:2px 3px 9px 0;border-radius:8px;background:#e9f0ff;color:#1e40af;font-weight:820;font-size:13px}
+.math-reference-value[hidden]{display:none}
+.math-knowledge-point{margin:7px 0!important;font-size:11px!important;color:#6a7580!important}
+.math-origin-link{display:inline-block;color:#295c87;text-decoration:underline;text-underline-offset:3px;font-size:11px;margin:7px 0}
