@@ -3,6 +3,8 @@ const source=(()=>{
   const year=Number(params.get('year')),q=Number(params.get('q'));
   // Explicit true-paper resume wins over a previously selected Relax/math bank.
   if(params.get('source')==='zhenti'||year>=2009&&year<=2026&&Number.isInteger(year)&&Number.isInteger(q)&&q>=1&&q<=47)return'zhenti';
+  if(params.get('source')==='math-papers')return'math-papers';
+  if(params.get('source')==='relax1000')return'relax1000';
   try{const value=localStorage.getItem('everflow-408-bank-source-v1');return['zhenti','relax1000','math-papers'].includes(value)?value:'zhenti'}catch{return'zhenti'}
 })();
 const mathMode=source==='math-papers';
@@ -23,7 +25,7 @@ if(source==='zhenti'){
 await runtime;
 if(mathMode){
   document.body.dataset.view='zhenti';
-  await import('/assets/js/question-bank-switch.js?v=20260909-math2-papers1');
+  await import('/assets/js/question-bank-switch.js?v=20261010-math2-2027');
 }else{
   await import('/assets/js/question-cloud-sync-v2.js?v=20260922-syncguard7');
   if(source==='zhenti')await import('/assets/js/zhenti-deeplink.js?v=20261010-resume1');
