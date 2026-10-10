@@ -50,6 +50,8 @@ jobs:
           node site/tools/test-math-2027-heatmap.mjs
           node site/tools/test-math-papers-overview.mjs
           node site/tools/test-math2-past-import.mjs
+          node site/tools/test-math-library-v3.mjs
+          test -s site/assets/css/math-library-v3.css
           node --check site/assets/js/math-paper-cloud.js
           node --check site/assets/js/math-2027-overview.js
           node --check site/assets/js/math-2027-mathjax.js
