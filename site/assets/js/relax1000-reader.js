@@ -90,7 +90,13 @@ function revealNavSelection(){
 function shortcutHtml(){return `<div class="relax-reader-shortcuts" aria-label="电脑快捷键"><span><kbd>A-D</kbd>选项</span><span><kbd>Enter</kbd>提交</span><span><kbd>←</kbd><kbd>→</kbd>切题</span><span><kbd>1</kbd>熟悉</span><span><kbd>2</kbd>模糊</span><span><kbd>3</kbd>不会</span><span><kbd>F</kbd>收藏</span><span><kbd>E</kbd>解析</span><span><kbd>Esc</kbd>返回</span></div>`}
 function renderQuestion(){
   const question=currentQuestion();if(!question){root.innerHTML='<section class="relax-reader-error"><strong>没有找到这道题</strong><p>题目可能已更新，请返回题库墙重新打开。</p><button type="button" data-reader-back>返回题库墙</button></section>';nav=null;stage=null;bindBack();return}
-  ensureShell();setUrl(question);document.title=`Relax1000 · 第 ${currentNumber(question)} 题 · Everflow`;
+  ensureShell();setUrl(question);
+  window.EveraStudyRecent?.mark('relax',{
+    id:String(question.id),title:'Relax1000',
+    detail:`${subjectName(question.subjectId,question.subject)} · ${question.chapter||'章节练习'} · 第 ${currentNumber(question)} 题`,
+    href:window.EveraStudyRecent.relaxHref(String(question.id))
+  });
+  document.title=`Relax1000 · 第 ${currentNumber(question)} 题 · Everflow`;
   const state=questionState(question,loadRecords()),rec=state.rec,images=questionImages(question),analysisImages=explanationImages(question),fallback=usesQuestionImageFallback(question);
   const imageHtml=images.length?`<div class="relax-reader-images">${images.map((src,index)=>imageMarkup(src,`原题截图 ${index+1}`)).join('')}</div>${fallback?'<p class="relax-image-fallback-note">这道题含公式或图表，文字识别不完整时请以原题图为准；仍可使用 A–D 正常作答。</p>':''}`:'';
   const result=rec.answer?`<div class="relax-reader-result ${rec.correct?'correct':'wrong'}"><strong>${rec.correct?'✓ 回答正确':'✕ 回答错误'}</strong><span>你的答案 ${esc(rec.answer)} · 正确答案 ${esc(question.answer)}</span></div>`:'';
