@@ -29,9 +29,9 @@ export function storageKey(collection){
 export function read(collection){
  try{return clean(JSON.parse(localStorage.getItem(storageKey(collection))||'{}'))}catch{return{}}
 }
-function persist(collection,records,{broadcast=true}={}){
+function persist(collection,records,{broadcast=true,remote=false}={}){
  localStorage.setItem(storageKey(collection),JSON.stringify(clean(records)));
- if(broadcast)document.dispatchEvent(new CustomEvent('everflow:math-records-change',{detail:{collectionId:collection.id}}));
+ if(broadcast)document.dispatchEvent(new CustomEvent('everflow:math-records-change',{detail:{collectionId:collection.id,remote}}));
 }
 function keys(p){return new Set([...Object.keys(clean(p?.answers)),...Object.keys(clean(p?.judgements)),...Array.isArray(p?.visited)?p.visited:[]])}
 function clonePaper(p={}){
@@ -174,7 +174,7 @@ export async function syncNow(reason='manual'){
     if(accountGeneration!==startGeneration)throw Error('account_changed_during_sync');
     // Protect edits made during the network round-trip: merge fresh local changes again.
     const latest=mergeRecords(read(c),merged);
-    persist(c,latest,{broadcast:JSON.stringify(latest)!==JSON.stringify(original)});
+    persist(c,latest,{broadcast:JSON.stringify(latest)!==JSON.stringify(original),remote:true});
     reports.push({collection:c.id,papers:Object.keys(latest).length});
    }
    localStorage.setItem(LAST_SYNC,JSON.stringify({userId:uid,at:now()}));
