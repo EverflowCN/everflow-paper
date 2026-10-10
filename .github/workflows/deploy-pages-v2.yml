@@ -46,6 +46,8 @@ jobs:
           node site/tools/audit-question-content.mjs --site-root=site
           node site/tools/test-question-content.mjs
           node site/tools/test-study-resume.mjs
+          node site/tools/test-math-2027-papers.mjs
+          node --check site/assets/js/math-2027-reader.js
           grep -q 'relax-reader-nav-group' site/assets/js/relax1000-reader.js
           grep -q 'chapterOrder' site/assets/js/relax1000-reader.js
           grep -q "event.key==='1'" site/assets/js/relax1000-reader.js
@@ -317,6 +319,9 @@ jobs:
           test -s site/zhenti/index.html
           test -s site/zhenti/relax-reader/index.html
           test -s site/graph/index.html
+          test -s site/math/27/index.html
+          test -s site/assets/js/math-2027-reader.js
+          test -s site/data/math-papers/zhangyu-2027-math2.json
           test -s site/graph-next/index.html
           test -s site/relax/index.html
           test -s site/408/index.html
