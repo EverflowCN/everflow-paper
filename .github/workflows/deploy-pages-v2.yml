@@ -45,6 +45,7 @@ jobs:
           node site/tools/audit-question-banks.mjs --skip-relax
           node site/tools/audit-question-content.mjs --site-root=site
           node site/tools/test-question-content.mjs
+          node site/tools/test-study-resume.mjs
           grep -q 'relax-reader-nav-group' site/assets/js/relax1000-reader.js
           grep -q 'chapterOrder' site/assets/js/relax1000-reader.js
           grep -q "event.key==='1'" site/assets/js/relax1000-reader.js
@@ -63,6 +64,9 @@ jobs:
             site/assets/js/cloud.js \
             site/assets/js/links.js \
             site/assets/js/checkin.js \
+            site/assets/js/study-resume-v1.js \
+            site/assets/js/study-home-courses.js \
+            site/assets/js/study-heatmap.js \
             site/assets/js/course-catalog-baseline.js \
             site/assets/js/dashboard.js \
             site/assets/js/graph-next.js \
