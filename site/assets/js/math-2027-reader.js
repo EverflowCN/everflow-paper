@@ -17,7 +17,8 @@ function countAnswers(id,items){const answers=record()[id]?.answers||{};return i
 function qualified(q){return q?.verification==='proofread'&&Boolean(q.stem)}
 function readableCount(p){return p.questions.filter(qualified).length}
 const HEAT_CLASSES=['unseen','visited','answered','correct','wrong','locked'];
-const HEAT_LABELS={unseen:'未做',visited:'已浏览',answered:'已作答',correct:'自评正确',wrong:'自评错误',locked:'暂未开放'};
+const HEAT_LABELS={unseen:'未做',visited:'已浏览',answered:'已作答，待自评',correct:'自评正确',wrong:'自评错误',locked:'暂未开放'};
+const HEAT_SYMBOLS={unseen:'',visited:'·',answered:'?',correct:'✓',wrong:'×',locked:'—'};
 function heatStatus(q,rec={}){
  if(!qualified(q))return'locked';
  const mark=rec.judgements?.[q.id];
@@ -42,19 +43,17 @@ function heatmapHtml(p,{inReader=false}={}){
    ${inReader?'':'data-heatmap-q="'+(index+1)+'"'} ${status==='locked'?'disabled':''}
    title="第 ${index+1} 题 · ${q.type==='choice'?'选择题':q.type==='fill'?'填空题':'解答题'} · ${HEAT_LABELS[status]}"
    aria-label="第 ${index+1} 题：${HEAT_LABELS[status]}" ${pressed?'aria-current="step"':''}
-   ></button>`;
+   ><span aria-hidden="true">${HEAT_SYMBOLS[status]}</span></button>`;
  }).join('');
  return `<div class="heatmap-wrap ${inReader?'is-reader':'is-card'}" aria-label="第 ${paperIndex+1} 套 22 题学习热力图">
   <div class="heatmap-heading"><span>题目热力图</span><strong>${counts.done}/${counts.total}</strong></div>
   <div class="heatmap-grid" role="group" aria-label="按照题号 1—22 排列的热力方格">${cells}</div>
  </div>`;
 }
-function heatLegend(){return `<div class="heat-legend" aria-label="热力图图例">
- <span><i class="heat-swatch heat-unseen"></i>未做</span>
- <span><i class="heat-swatch heat-visited"></i>已浏览</span>
- <span><i class="heat-swatch heat-answered"></i>已答</span>
- <span><i class="heat-swatch heat-correct"></i>自评对</span>
- <span><i class="heat-swatch heat-wrong"></i>自评错</span>
+function heatLegend(){return `<div class="heat-legend" aria-label="三色标记图例">
+ <span><i class="heat-swatch heat-correct" aria-hidden="true">✓</i>蓝色 · 正确</span>
+ <span><i class="heat-swatch heat-wrong" aria-hidden="true">×</i>橙色 · 错误</span>
+ <span><i class="heat-swatch heat-unseen" aria-hidden="true">?</i>灰色 · 待判断/未做</span>
  </div>`;}
 function refreshReaderHeatmap(){
  if(!paper)return;
@@ -88,7 +87,7 @@ function drawIndex(){
  root.innerHTML=`<section class="hero"><div><div class="eyebrow">EVERFLOW / 2027 MATH II</div><h1>27模拟卷</h1><p>张宇考研数学预测八套卷 · 数学二。逐题转为可选择、可填写的文字与数学公式，不使用整页截图；适合电脑与手机作答。</p></div><div class="pill">共 8 套 · 176 题</div></section>
  <div class="notice">资料为试题分册，未提供参考答案与解析，因此不自动判分。处于「校核中」的试题禁止将残缺公式当作正式题干显示；校核完成后自动开放。当前已校核 ${doc.verificationSummary.proofread} 道，待校核 ${doc.verificationSummary.pending} 道。</div>
  <section class="cards" aria-label="八套模拟卷">${html}</section>
- <section class="heatmap-index-footer">${heatLegend()}<p>每套独立显示 22 道题；点击对应色块可直接进入该题。绿色、红色均为你自己标记，并非系统判分。</p></section>`;
+ <section class="heatmap-index-footer">${heatLegend()}<p>每套独立 22 格：✓ 蓝色为自评正确，× 橙色为自评错误；灰色中 ? 表示已答待判、· 表示已浏览、空白表示未做。除了颜色还用符号区分，不需要辨别红绿。</p></section>`;
  root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.open))));
  bindHeatmap(root);
 }
@@ -121,8 +120,10 @@ function renderReader({keepFocus=false}={}){
  const visited=currentRecord().visited||[];
  if(qualified(q)&&!visited.includes(q.id))save({visited:[...visited,q.id]});
  const rec=currentRecord(),mine=answer(q),allCorrect=paper.questions.length;
- const buttons=paper.questions.map((x,i)=>{const a=String(rec.answers?.[x.id]||'').trim(),j=rec.judgements?.[x.id]||'';
- return `<button data-jump="${i}" class="${at===i?'current ':''}${!qualified(x)?'locked ':a?'answered ':''}${j==='wrong'?'wrong':''}" type="button" title="第 ${x.number} 题 · ${qualified(x)?a?'已记录':'可作答':'校核中'}">${x.number}</button>`}).join('');
+ const buttons=paper.questions.map((x,i)=>{
+ const status=heatStatus(x,rec);
+ return `<button data-jump="${i}" class="${at===i?'current ':''}heat-${status}" type="button" title="第 ${x.number} 题 · ${HEAT_LABELS[status]}" aria-label="第 ${x.number} 题 · ${HEAT_LABELS[status]}">${x.number}<span aria-hidden="true">${HEAT_SYMBOLS[status]}</span></button>`;
+ }).join('');
  root.innerHTML=`<div class="paper-shell">
  <aside class="sidebar"><h3>27 模拟卷</h3><p>选取试卷，题目保留原卷顺序。</p><nav class="paper-index">${doc.papers.map((p,i)=>`<button data-select-paper="${i}" class="${i===doc.papers.indexOf(paper)?'active':''}" type="button"><span>第 ${i+1} 套</span><small>${readableCount(p)}/22</small></button>`).join('')}</nav></aside>
  <main class="viewer">
@@ -130,7 +131,7 @@ function renderReader({keepFocus=false}={}){
   <div class="type-label">${title(q)} ${qualified(q)?'· 已人工转录':'· 数学公式待人工核对'}</div>
   ${qualified(q)?`<div class="stem" data-math-display>${esc(q.stem).replace(/\n/g,'<br>')}</div>${diagram(q.diagram)}${q.type==='choice'?`<div class="choices" data-math-display>${Object.entries(q.options).map(([letter,value])=>`<button type="button" class="choice ${mine===letter?'selected':''}" data-answer-choice="${letter}"><b>${letter}</b><span>${esc(value).replace(/\n/g,'<br>')}</span></button>`).join('')}</div>`:`<label class="inputlabel" for="math-draft">${q.type==='fill'?'填写答案（可输入 LaTeX）':'作答草稿与演算思路（本机保存）'}</label><textarea id="math-draft" class="draft" data-draft placeholder="${q.type==='fill'?'填写你的答案':'写下推导过程、最终结论或留作复盘…'}">${esc(mine)}</textarea>`}`:
  `<div class="status-warning"><strong>第 ${q.number} 题尚未完成数学公式复核</strong><p>原始 PDF 的自动文字层存在积分上下限、根号、指数、矩阵等缺损。为避免错误题干误导学习，本站暂不展示未核实的 OCR 文本，也不会以整页截图代替转录。</p><p>此题已经建立序号与卷内位置，待逐字校对后开放。</p></div>`}
-  ${qualified(q)?`<section class="judge"><strong>手动判定与复盘</strong><p>上传文件仅包含试题，不包含标准答案。本区不自动判对错；可在自行核对后标记。</p><div class="judge-buttons"><button class="btn" data-judge="correct" aria-pressed="${rec.judgements?.[q.id]==='correct'}">✓ 自判正确</button><button class="btn" data-judge="wrong" aria-pressed="${rec.judgements?.[q.id]==='wrong'}">✕ 自判错误</button><button class="btn" data-judge="" aria-pressed="${!rec.judgements?.[q.id]}">清除判定</button></div></section>`:''}
+  ${qualified(q)?`<section class="judge"><strong>手动判定与复盘</strong><p>上传文件仅包含试题，不包含标准答案。本区不自动判对错；可在自行核对后标记。</p><div class="judge-buttons"><button class="btn" data-judge="correct" aria-pressed="${rec.judgements?.[q.id]==='correct'}">✓ 标记正确（蓝）</button><button class="btn" data-judge="wrong" aria-pressed="${rec.judgements?.[q.id]==='wrong'}">× 标记错误（橙）</button><button class="btn" data-judge="" aria-pressed="${!rec.judgements?.[q.id]}">清除判定</button></div></section>`:''}
   <div class="viewer-nav"><button class="btn" data-prev ${at===0?'disabled':''}>← 上一题</button><span class="spacer"></span><button class="btn primary" data-next ${at===21?'disabled':''}>下一题 →</button></div>
  </main>
  <aside class="answer-sheet">
@@ -141,7 +142,7 @@ function renderReader({keepFocus=false}={}){
  <div class="sheet">${buttons}</div>
  <div class="mini-stats"><span data-heat-stats>已答 ${heatCounts(paper,rec).done}/22 · 自评对 ${heatCounts(paper,rec).correct} · 自评错 ${heatCounts(paper,rec).wrong}</span></div>
  <div class="progress-strip"><i data-heat-progress style="width:${Math.round(heatCounts(paper,rec).done/22*100)}%"></i></div>
- <p class="heat-local-note">热力图反映本套题的浏览、答题和自评状态。仅使用本机学习记录，不读取其他年份套题。</p>
+ <p class="heat-local-note">✓ 蓝色代表自评对，× 橙色代表自评错；灰色问号表示待自评。颜色与符号双重标记，记录仅保存在本机。</p>
  </aside></div>`;
  window.scrollTo({top:0,behavior:'instant'});
  setTimeout(()=>{root.querySelectorAll('[data-math-display]').forEach(node=>typeset(node).catch(()=>{}))},0);
