@@ -1,4 +1,4 @@
-import {YEARS,SUBJECTS,SUBSHORT,esc,yearData,subjectIndex,topicIndex,sourceFromQuestion,getRecord,getRecords,getNav,saveNav,patchRecord,grade,questionHtml,progressOf,statusOf} from './core.js';
+import {YEARS,SUBJECTS,SUBSHORT,esc,yearData,subjectIndex,topicIndex,sourceFromQuestion,getRecord,getRecords,getNav,saveNav,patchRecord,grade,questionHtml,progressOf,statusOf,clearPreview} from './core.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const elements={
  sidebar:$('[data-sidebar]'), yearList:$('[data-year-list]'),topicButtons:$('[data-topic-buttons]'),
@@ -122,6 +122,7 @@ function switchMode(next){
 }
 document.addEventListener('click',e=>{
  const el=e.target.closest('button');if(!el)return;
+ if(el.dataset.clearPreview!==undefined){if(confirm('仅清空两个测试页面的答题与图谱记录？正式学习记录不会改变。')){clearPreview();location.reload()}return;}
  if(el.dataset.mode){switchMode(el.dataset.mode);return}
  if(el.dataset.subject){subject=el.dataset.subject;topic='all';saveNav('zhenti',{subject,topic});renderLanding();return}
  if(el.dataset.topic!==undefined){topic=el.dataset.topic;saveNav('zhenti',{topic});renderLanding();return}
