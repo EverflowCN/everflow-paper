@@ -1,4 +1,10 @@
-const source=(()=>{try{const value=localStorage.getItem('everflow-408-bank-source-v1');return['zhenti','relax1000','math-papers'].includes(value)?value:'zhenti'}catch{return'zhenti'}})();
+const source=(()=>{
+  const params=new URLSearchParams(location.search);
+  const year=Number(params.get('year')),q=Number(params.get('q'));
+  // Explicit true-paper resume wins over a previously selected Relax/math bank.
+  if(params.get('source')==='zhenti'||year>=2009&&year<=2026&&Number.isInteger(year)&&Number.isInteger(q)&&q>=1&&q<=47)return'zhenti';
+  try{const value=localStorage.getItem('everflow-408-bank-source-v1');return['zhenti','relax1000','math-papers'].includes(value)?value:'zhenti'}catch{return'zhenti'}
+})();
 const mathMode=source==='math-papers';
 document.body.dataset.questionBank=source;
 document.body.classList.toggle('relax1000-active',source==='relax1000');
@@ -12,7 +18,7 @@ await import('/assets/js/question-content-v1.js?v=20260904-editor1');
 if(source==='zhenti'){
   await import('/assets/js/zhenti-data-overlay.js?v=20261010-feedback1');
   await import('/assets/js/zhenti-rtt-2025.js?v=20261009-rtt1');
-  await import('/assets/js/zhenti-wall.js?v=20260922-syncguard7');
+  await import('/assets/js/zhenti-wall.js?v=20261010-resume1');
 }
 await runtime;
 if(mathMode){
@@ -20,5 +26,5 @@ if(mathMode){
   await import('/assets/js/question-bank-switch.js?v=20260909-math2-papers1');
 }else{
   await import('/assets/js/question-cloud-sync-v2.js?v=20260922-syncguard7');
-  if(source==='zhenti')await import('/assets/js/zhenti-deeplink.js?v=20260828-relaxfix1');
+  if(source==='zhenti')await import('/assets/js/zhenti-deeplink.js?v=20261010-resume1');
 }
