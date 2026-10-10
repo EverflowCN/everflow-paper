@@ -151,7 +151,7 @@ document.addEventListener('everflow:math-account-change',()=>{
 });
 let down=null;
 view.addEventListener('pointerdown',event=>{
- if(event.pointerType==='touch'||event.button!==0||event.target.closest('button'))return;
+ if(event.pointerType==='touch'||event.button!==0)return;
  down={x:event.clientX,y:event.clientY,left:view.scrollLeft,top:view.scrollTop,moved:false};
 });
 view.addEventListener('pointermove',event=>{
@@ -160,7 +160,11 @@ view.addEventListener('pointermove',event=>{
  if(Math.hypot(dx,dy)>5)down.moved=true;
  if(down.moved){view.scrollLeft=down.left-dx;view.scrollTop=down.top-dy;view.classList.add('is-panning')}
 });
-function endPan(){down=null;view.classList.remove('is-panning')}
+function endPan(){
+ const wasDragged=Boolean(down?.moved);
+ down=null;view.classList.remove('is-panning');
+ if(wasDragged){preventClick=true;setTimeout(()=>{preventClick=false},90)}
+}
 view.addEventListener('pointerup',endPan);view.addEventListener('pointercancel',endPan);
 view.addEventListener('wheel',event=>{
  if(event.shiftKey&&Math.abs(event.deltaY)>0){event.preventDefault();view.scrollLeft+=event.deltaY}
