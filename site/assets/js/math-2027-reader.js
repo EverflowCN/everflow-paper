@@ -1,4 +1,4 @@
-import {typeset} from '/assets/js/math-papers-core.js?v=20260909-math2-papers1';
+import {typeset} from './math-2027-mathjax.js?v=20261010-heatmap4';
 const DATA_URL='/data/math-papers/zhangyu-2027-math2.json?v=20261010-2';
 const STORAGE='everflow-math2-2027-simulation-v1';
 const $=s=>document.querySelector(s);
