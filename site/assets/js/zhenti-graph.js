@@ -100,7 +100,9 @@
   function hideDrawer(){drawer.hidden=true;drawerReopen.hidden=!selected}
   async function openQuestion(year,q){
     const key=`${year}-${q}`;
-    selectCurrent(key);selected={year,q,item:null};answerVisible=false;drawer.dataset.feedbackEntity=key;showDrawer();
+    selectCurrent(key);
+    window.EveraStudyRecent?.mark('zhenti',{id:key,title:'408 历年真题',detail:`${year} 年 · 第 ${q} 题`,href:window.EveraStudyRecent.zhentiHref(year,q)});
+    selected={year,q,item:null};answerVisible=false;drawer.dataset.feedbackEntity=key;showDrawer();
     drawerTitle.textContent=`${year} · 第 ${q} 题`;
     drawerMeta.textContent=`${SUBJECT_LABEL[subjectFor(year,q)]} · ${q<=40?'选择题':'综合应用题'}`;
     drawerBody.innerHTML='<div class="drawer-loading">正在读取题目…</div>';
