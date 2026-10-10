@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../assets/css/learning-center.css?v=20260824-ui5">
   <link rel="stylesheet" href="../assets/css/app-ui.css">
   <link rel="stylesheet" href="../assets/css/study-heatmap.css?v=20261010-home1">
-  <link rel="stylesheet" href="../assets/css/study-home.css?v=20261010-github2">
+  <link rel="stylesheet" href="../assets/css/study-home.css?v=20261010-resume1">
 </head>
 <body>
 <header class="topbar"><div class="wrap nav"><a class="brand" href="../"><img src="../assets/everflow-icon.svg" alt="Everflow"><span>Everflow<small>彼时流年若水</small></span></a><nav class="links"><button class="icon-btn" data-theme aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8 8 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"/></svg></button></nav><button class="icon-btn menu-btn" data-menu aria-label="菜单"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
@@ -70,6 +70,14 @@
       <div class="study-home-practice-link"><span>需要做题训练？</span><a href="practice/">进入刷题 <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
     </aside>
   </div>
+  <section class="study-recent-section" data-study-recent aria-labelledby="study-recent-heading">
+    <header class="study-recent-heading">
+      <div><div class="eyebrow">PICK UP WHERE YOU LEFT OFF</div><h2 id="study-recent-heading">最近学习 <span>· 继续上次</span></h2><p>自动记住最近打开的课程、408 真题和 Relax1000 题目，不必重新查找。</p></div>
+      <a class="study-recent-primary" data-recent-primary href="../408/" hidden>继续最近一次学习</a>
+    </header>
+    <div class="study-recent-entries" data-recent-entries aria-live="polite"><div class="study-recent-loading">正在读取最近学习记录…</div></div>
+    <p class="study-recent-status" data-recent-status></p>
+  </section>
 </main>
 <dialog class="heatmap-dialog" data-day-dialog>
   <form method="dialog" class="heatmap-dialog-card">
@@ -95,6 +103,7 @@
 <script src="../assets/js/pretty-select.js"></script>
 <script type="module" src="../assets/js/cloud.js"></script>
 <script src="../assets/js/course-catalog-public.js?v=20260828-course3"></script>
+<script src="../assets/js/study-resume-v1.js?v=20261010-resume1"></script>
 <script defer src="../assets/js/study-home-courses.js?v=20261010-github2"></script>
 <script type="module" src="../assets/js/study-heatmap.js?v=20261010-github2"></script>
 </body>
