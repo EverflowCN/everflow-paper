@@ -42,11 +42,16 @@ export function mergePaper(a={},b={}){
  const left=clonePaper(a),right=clonePaper(b);
  const out=clonePaper(stamp(left.updatedAt)>=stamp(right.updatedAt)?left:right);
  const answers={},judgements={},visited=new Set(),questionUpdatedAt={};
- const questions=new Set([...keys(left),...keys(right),...Object.keys(left.questionUpdatedAt),...Object.keys(right.questionUpdatedAt)]);
+ const leftKeys=keys(left),rightKeys=keys(right);
+ const questions=new Set([...leftKeys,...rightKeys,...Object.keys(left.questionUpdatedAt),...Object.keys(right.questionUpdatedAt)]);
  for(const id of questions){
-  // Current format tracks each question independently; older records fall back to paper timestamp.
-  const ta=stamp(left.questionUpdatedAt[id]||left.updatedAt),tb=stamp(right.questionUpdatedAt[id]||right.updatedAt);
-  const candidate=tb>ta?right:left;
+  // A record that never contained this question cannot override a real answer merely
+  // because some OTHER question changed later on that device.
+  const hasLeft=leftKeys.has(id)||Object.hasOwn(left.questionUpdatedAt,id);
+  const hasRight=rightKeys.has(id)||Object.hasOwn(right.questionUpdatedAt,id);
+  const ta=hasLeft?stamp(left.questionUpdatedAt[id]||left.updatedAt):0;
+  const tb=hasRight?stamp(right.questionUpdatedAt[id]||right.updatedAt):0;
+  const candidate=!hasLeft?right:!hasRight?left:tb>ta?right:left;
   if(Object.hasOwn(candidate.answers,id))answers[id]=candidate.answers[id];
   if(Object.hasOwn(candidate.judgements,id))judgements[id]=candidate.judgements[id];
   if(candidate.visited.includes(id))visited.add(id);
