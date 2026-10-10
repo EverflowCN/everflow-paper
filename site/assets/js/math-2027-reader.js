@@ -16,18 +16,81 @@ function save(patch){
 function countAnswers(id,items){const answers=record()[id]?.answers||{};return items.filter(q=>q.verification==='proofread'&&String(answers[q.id]||'').trim()).length}
 function qualified(q){return q?.verification==='proofread'&&Boolean(q.stem)}
 function readableCount(p){return p.questions.filter(qualified).length}
+const HEAT_CLASSES=['unseen','visited','answered','correct','wrong','locked'];
+const HEAT_LABELS={unseen:'未做',visited:'已浏览',answered:'已作答',correct:'自评正确',wrong:'自评错误',locked:'暂未开放'};
+function heatStatus(q,rec={}){
+ if(!qualified(q))return'locked';
+ const mark=rec.judgements?.[q.id];
+ if(mark==='wrong'||mark==='correct')return mark;
+ if(String(rec.answers?.[q.id]??'').trim())return'answered';
+ if((rec.visited||[]).includes(q.id))return'visited';
+ return'unseen';
+}
+function heatCounts(p,rec={}){
+ const counts={total:p.questions.length,unseen:0,visited:0,answered:0,correct:0,wrong:0,locked:0};
+ p.questions.forEach(q=>{counts[heatStatus(q,rec)]++});
+ counts.done=counts.answered+counts.correct+counts.wrong;
+ counts.reviewed=counts.correct+counts.wrong;
+ return counts;
+}
+function heatmapHtml(p,{inReader=false}={}){
+ const rec=record()[p.id]||{},paperIndex=doc.papers.indexOf(p),counts=heatCounts(p,rec);
+ const cells=p.questions.map((q,index)=>{
+  const status=heatStatus(q,rec),pressed=inReader&&at===index;
+  return `<button class="heat-cell heat-${status}${pressed?' heat-current':''}" type="button"
+   data-heatmap-${inReader?'jump':'paper'}="${inReader?index:paperIndex}"
+   ${inReader?'':'data-heatmap-q="'+(index+1)+'"'} ${status==='locked'?'disabled':''}
+   title="第 ${index+1} 题 · ${q.type==='choice'?'选择题':q.type==='fill'?'填空题':'解答题'} · ${HEAT_LABELS[status]}"
+   aria-label="第 ${index+1} 题：${HEAT_LABELS[status]}" ${pressed?'aria-current="step"':''}
+   ></button>`;
+ }).join('');
+ return `<div class="heatmap-wrap ${inReader?'is-reader':'is-card'}" aria-label="第 ${paperIndex+1} 套 22 题学习热力图">
+  <div class="heatmap-heading"><span>题目热力图</span><strong>${counts.done}/${counts.total}</strong></div>
+  <div class="heatmap-grid" role="group" aria-label="按照题号 1—22 排列的热力方格">${cells}</div>
+ </div>`;
+}
+function heatLegend(){return `<div class="heat-legend" aria-label="热力图图例">
+ <span><i class="heat-swatch heat-unseen"></i>未做</span>
+ <span><i class="heat-swatch heat-visited"></i>已浏览</span>
+ <span><i class="heat-swatch heat-answered"></i>已答</span>
+ <span><i class="heat-swatch heat-correct"></i>自评对</span>
+ <span><i class="heat-swatch heat-wrong"></i>自评错</span>
+ </div>`;}
+function refreshReaderHeatmap(){
+ if(!paper)return;
+ const target=root.querySelector('[data-reader-heatmap]');
+ if(target){target.innerHTML=heatmapHtml(paper,{inReader:true});bindHeatmap(target)}
+ const counts=heatCounts(paper,currentRecord());
+ const stats=root.querySelector('[data-heat-stats]');
+ if(stats)stats.textContent=`已答 ${counts.done}/22 · 自评对 ${counts.correct} · 自评错 ${counts.wrong}`;
+ const bar=root.querySelector('[data-heat-progress]');
+ if(bar)bar.style.width=Math.round(counts.done/22*100)+'%';
+}
+function bindHeatmap(container=root){
+ container.querySelectorAll('[data-heatmap-paper]').forEach(b=>b.addEventListener('click',()=>{
+  openPaper(Number(b.dataset.heatmapPaper),Number(b.dataset.heatmapQ));
+ }));
+ container.querySelectorAll('[data-heatmap-jump]').forEach(b=>b.addEventListener('click',()=>changeQ(Number(b.dataset.heatmapJump))));
+}
 function drawIndex(){
  closeTimer();
- const html=doc.papers.map((p,i)=>{const n=readableCount(p),count=countAnswers(p.id,p.questions),rate=n?Math.round(count/n*100):0;return `<button class="card" type="button" data-open="${i}" aria-label="打开第${i+1}套试卷">
-  <header><span>${p.year} · 张宇八套卷</span><span class="pill ${n<22?'pending':''}">${n===22?'已录入':'校核中'}</span></header>
-  <h2>第 ${i+1} 套</h2><div class="stats">选择10 · 填空6 · 解答6 · ${n}/22题已完成数字转录</div>
-  <div class="bar"><i style="width:${rate}%"></i></div>
-  <footer><span>本机已答 ${count}/${n}</span><strong>进入试卷 →</strong></footer>
-  </button>`}).join('');
+ const html=doc.papers.map((p,i)=>{
+ const n=readableCount(p),counts=heatCounts(p,record()[p.id]||{}),rate=Math.round(counts.done/22*100);
+ return `<article class="card" aria-label="第${i+1}套试卷，包含22题热力图">
+  <header><span>${p.year} · 张宇八套卷</span><span class="pill ${n<22?'pending':''}">${n===22?'已收录':'校核中'}</span></header>
+  <h2>第 ${i+1} 套</h2><div class="stats">10 道选择 · 6 道填空 · 6 道解答</div>
+  ${heatmapHtml(p)}
+  <div class="bar" aria-label="完成率 ${rate}%"><i style="width:${rate}%"></i></div>
+  <div class="heat-card-stats"><span>已答 ${counts.done}</span><span>自评对 ${counts.correct}</span><span>自评错 ${counts.wrong}</span></div>
+  <footer><span>已练习 ${rate}%</span><button type="button" class="heat-open-btn" data-open="${i}">${counts.done?'继续做题':'开始做题'} →</button></footer>
+ </article>`;
+}).join('');
  root.innerHTML=`<section class="hero"><div><div class="eyebrow">EVERFLOW / 2027 MATH II</div><h1>27模拟卷</h1><p>张宇考研数学预测八套卷 · 数学二。逐题转为可选择、可填写的文字与数学公式，不使用整页截图；适合电脑与手机作答。</p></div><div class="pill">共 8 套 · 176 题</div></section>
  <div class="notice">资料为试题分册，未提供参考答案与解析，因此不自动判分。处于「校核中」的试题禁止将残缺公式当作正式题干显示；校核完成后自动开放。当前已校核 ${doc.verificationSummary.proofread} 道，待校核 ${doc.verificationSummary.pending} 道。</div>
- <section class="cards" aria-label="八套模拟卷">${html}</section>`;
+ <section class="cards" aria-label="八套模拟卷">${html}</section>
+ <section class="heatmap-index-footer">${heatLegend()}<p>每套独立显示 22 道题；点击对应色块可直接进入该题。绿色、红色均为你自己标记，并非系统判分。</p></section>`;
  root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.open))));
+ bindHeatmap(root);
 }
 function diagram(name){
  if(name==='tangent1')return `<figure class="diagram"><svg viewBox="0 0 500 275" role="img" aria-label="曲线 y=f(x) 在 x=ln2 处的切线 L 及第一象限内围成区域的示意重绘图">
@@ -54,7 +117,10 @@ function count(p){return countAnswers(p.id,p.questions)}
 function answer(q){return String(currentRecord()?.answers?.[q.id]||'')}
 function title(q){return q.type==='choice'?'选择题 · 5 分':q.type==='fill'?'填空题 · 5 分':'解答题 · '+q.points+' 分'}
 function renderReader({keepFocus=false}={}){
- const q=paper.questions[at],rec=currentRecord(),mine=answer(q),allCorrect=paper.questions.length;
+ const q=paper.questions[at];
+ const visited=currentRecord().visited||[];
+ if(qualified(q)&&!visited.includes(q.id))save({visited:[...visited,q.id]});
+ const rec=currentRecord(),mine=answer(q),allCorrect=paper.questions.length;
  const buttons=paper.questions.map((x,i)=>{const a=String(rec.answers?.[x.id]||'').trim(),j=rec.judgements?.[x.id]||'';
  return `<button data-jump="${i}" class="${at===i?'current ':''}${!qualified(x)?'locked ':a?'answered ':''}${j==='wrong'?'wrong':''}" type="button" title="第 ${x.number} 题 · ${qualified(x)?a?'已记录':'可作答':'校核中'}">${x.number}</button>`}).join('');
  root.innerHTML=`<div class="paper-shell">
@@ -67,13 +133,22 @@ function renderReader({keepFocus=false}={}){
   ${qualified(q)?`<section class="judge"><strong>手动判定与复盘</strong><p>上传文件仅包含试题，不包含标准答案。本区不自动判对错；可在自行核对后标记。</p><div class="judge-buttons"><button class="btn" data-judge="correct" aria-pressed="${rec.judgements?.[q.id]==='correct'}">✓ 自判正确</button><button class="btn" data-judge="wrong" aria-pressed="${rec.judgements?.[q.id]==='wrong'}">✕ 自判错误</button><button class="btn" data-judge="" aria-pressed="${!rec.judgements?.[q.id]}">清除判定</button></div></section>`:''}
   <div class="viewer-nav"><button class="btn" data-prev ${at===0?'disabled':''}>← 上一题</button><span class="spacer"></span><button class="btn primary" data-next ${at===21?'disabled':''}>下一题 →</button></div>
  </main>
- <aside class="answer-sheet"><h3>答题卡</h3><p>纯文字题库 · 原题序号</p><div class="sheet">${buttons}</div><div class="mini-stats"><span>${count(paper)} 道已答</span><span>共 ${readableCount(paper)} 道已校核</span></div><div class="progress-strip"><i style="width:${Math.round(count(paper)/22*100)}%"></i></div><p style="color:var(--muted);font-size:10px;line-height:1.65;margin-top:13px">绿色：已作答；淡黄：校核中；红色：自行标错。作答与计时记录仅在当前设备保存。</p></aside></div>`;
+ <aside class="answer-sheet">
+ <div data-reader-heatmap>${heatmapHtml(paper,{inReader:true})}</div>
+ ${heatLegend()}
+ <div class="heat-sheet-divider"></div>
+ <h3>快速答题卡</h3><p>点击题号快速跳转</p>
+ <div class="sheet">${buttons}</div>
+ <div class="mini-stats"><span data-heat-stats>已答 ${heatCounts(paper,rec).done}/22 · 自评对 ${heatCounts(paper,rec).correct} · 自评错 ${heatCounts(paper,rec).wrong}</span></div>
+ <div class="progress-strip"><i data-heat-progress style="width:${Math.round(heatCounts(paper,rec).done/22*100)}%"></i></div>
+ <p class="heat-local-note">热力图反映本套题的浏览、答题和自评状态。仅使用本机学习记录，不读取其他年份套题。</p>
+ </aside></div>`;
  window.scrollTo({top:0,behavior:'instant'});
  setTimeout(()=>{root.querySelectorAll('[data-math-display]').forEach(node=>typeset(node).catch(()=>{}))},0);
  if(!keepFocus)root.querySelector('[data-math-display]')?.setAttribute('tabindex','-1');
  bindReader();
 }
-function openPaper(index,q=1){
+function openPaper(index,q=null){
  closeTimer();paper=doc.papers[index];if(!paper)return;
  const last=Number(currentRecord().lastQuestion||1);
  at=Math.max(0,Math.min(21,Number(q||last)-1));
@@ -96,10 +171,11 @@ function bindReader(){
  root.querySelector('[data-exit]')?.addEventListener('click',()=>{closeTimer();paper=null;history.replaceState(null,'',location.pathname);drawIndex()});
  root.querySelectorAll('[data-select-paper]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.selectPaper))));
  root.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>changeQ(Number(b.dataset.jump))));
+ bindHeatmap(root);
  root.querySelector('[data-prev]')?.addEventListener('click',()=>changeQ(at-1));
  root.querySelector('[data-next]')?.addEventListener('click',()=>changeQ(at+1));
  root.querySelectorAll('[data-answer-choice]').forEach(b=>b.addEventListener('click',()=>{saveAnswer(b.dataset.answerChoice);renderReader()}));
- const draft=root.querySelector('[data-draft]');if(draft){let debounce=0;draft.addEventListener('input',()=>{const text=draft.value;clearTimeout(debounce);debounce=setTimeout(()=>saveAnswer(text),180)});draft.addEventListener('blur',()=>saveAnswer(draft.value))}
+ const draft=root.querySelector('[data-draft]');if(draft){let debounce=0;draft.addEventListener('input',()=>{const text=draft.value;clearTimeout(debounce);debounce=setTimeout(()=>{saveAnswer(text);refreshReaderHeatmap()},180)});draft.addEventListener('blur',()=>{saveAnswer(draft.value);refreshReaderHeatmap()})}
  root.querySelectorAll('[data-judge]').forEach(b=>b.addEventListener('click',()=>{const q=paper.questions[at],r=currentRecord();const j={...r.judgements};if(b.dataset.judge)j[q.id]=b.dataset.judge;else delete j[q.id];save({judgements:j});renderReader()}));
 }
 document.addEventListener('keydown',event=>{
