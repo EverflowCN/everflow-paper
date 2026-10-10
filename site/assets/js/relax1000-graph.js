@@ -120,6 +120,9 @@ function showDrawer(){drawer.hidden=false;if(drawerReopen)drawerReopen.hidden=tr
 function hideDrawer(){drawer.hidden=true;if(drawerReopen)drawerReopen.hidden=!selected}
 function openQuestion(question){
   selected=question;answerVisible=false;drawer.dataset.feedbackEntity=idKey(question);selectCurrent(question);showDrawer();
+  window.EveraStudyRecent?.mark('relax',{id:idKey(question),title:'Relax1000',
+    detail:`${subjectName(question.subjectId,question.subject)} · ${question.chapter||'章节练习'} · 第 ${questionNumber(question)} 题`,
+    href:window.EveraStudyRecent.relaxHref(idKey(question))});
   const row=rows.find(item=>item.questions.some(q=>idKey(q)===idKey(question)));
   drawerTitle.textContent=`${row?.code||SUBJECT_SHORT[question.subjectId]||'408'} · 第 ${questionNumber(question)} 题`;
   drawerMeta.textContent=`${subjectName(question.subjectId,question.subject)} · ${question.chapter||row?.chapter||''}`;
