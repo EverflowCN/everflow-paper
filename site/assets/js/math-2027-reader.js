@@ -1,4 +1,5 @@
 import {typeset} from './math-2027-mathjax.js?v=20261010-heatmap4';
+import * as mathCloud from './math-paper-cloud.js?v=20261011-overview1';
 const REGISTRY_URL='/data/math-papers/active-collections.json?v=20261011-compact1';
 let storageKey='everflow-math2-2027-simulation-v1';
 let registry=null,currentCollection=null;
@@ -6,14 +7,9 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const root=$('#math-app');
 let doc=null,paper=null,at=0,started=0,timer=null;
-function record(){
- try{const r=JSON.parse(localStorage.getItem(storageKey)||'{}');return r&&typeof r==='object'&&!Array.isArray(r)?r:{}}catch{return{}}
-}
+function record(){return mathCloud.read(currentCollection||{storageKey})}
 function currentRecord(){return record()[paper.id]||{answers:{},judgements:{},elapsed:0,visited:[]}}
-function save(patch){
- if(!paper)return;
- try{const all=record();all[paper.id]={...currentRecord(),...patch,updatedAt:new Date().toISOString()};localStorage.setItem(storageKey,JSON.stringify(all))}catch(error){console.warn('数学二本机记录存储失败',error)}
-}
+function save(patch){if(paper&&currentCollection)mathCloud.update(currentCollection,paper.id,patch)}
 function countAnswers(id,items){const answers=record()[id]?.answers||{};return items.filter(q=>q.verification==='proofread'&&String(answers[q.id]||'').trim()).length}
 function qualified(q){return q?.verification==='proofread'&&Boolean(q.stem)}
 function readableCount(p){return p.questions.filter(qualified).length}
@@ -105,7 +101,7 @@ function drawIndex(){
  const total=papers.reduce((n,p)=>n+p.questions.length,0);
  root.innerHTML=`<section class="library-heading" aria-labelledby="library-title">
     <div><div class="library-breadcrumb">数学二 <span>/</span> ${esc(categoryLabel(currentCollection.category))}</div><h1 id="library-title">${esc(title)}</h1></div>
-    <div class="library-summary">${papers.length} 套 · ${total} 题</div>
+    <div class="library-heading-actions"><a class="library-overview-link" href="/math/27/map/" title="查看已实际做过的全部套卷、正误和题目">▦ 已做套卷图谱 <span>↗</span></a><div class="library-summary">${papers.length} 套 · ${total} 题</div></div>
   </section>
   ${collectionTabHtml()}
   <section class="library-tools" aria-label="热力图标记说明">
@@ -245,9 +241,31 @@ async function main(){
   const active=manifest.collections?.filter(c=>c.enabled===true)||[];
   if(manifest.subject!=='math2'||!active.length)throw Error('暂无开放的数学二试卷');
   registry={...manifest,collections:active};
+  await mathCloud.initialize(registry);
   const params=new URLSearchParams(location.search);
   const choice=active.find(c=>c.id===params.get('collection'))||active[0];
   await selectCollection(choice.id,{paperNumber:Number(params.get('paper')||0),questionNumber:Number(params.get('q')||0)});
  }catch(error){root.innerHTML=`<div class="error">数学二试卷目录加载失败：${esc(error?.message||error)}。请刷新页面重试。</div>`;}
 }
+
+mathCloud.onStatus(({kind,text})=>{
+ const label=document.querySelector('[data-math-sync-status]');
+ if(label){label.textContent=text;label.dataset.status=kind}
+ const button=document.querySelector('[data-math-sync]');
+ if(button){button.disabled=kind==='busy';button.textContent=kind==='guest'?'登录同步':'↻ 云同步'}
+});
+document.querySelector('[data-math-sync]')?.addEventListener('click',async()=>{
+ const result=await mathCloud.syncNow('manual');
+ if(result?.reason==='guest')location.href='/account/';
+});
+document.addEventListener('everflow:math-records-change',event=>{
+ if(!doc||event.detail?.collectionId!==currentCollection?.id||!event.detail?.remote)return;
+ if(paper){if(!document.activeElement?.matches('textarea,input'))renderReader()}
+ else drawIndex();
+});
+document.addEventListener('everflow:math-account-change',()=>{
+ if(!doc)return;
+ if(paper){closeTimer();paper=null;history.replaceState(null,'',location.pathname)}
+ drawIndex();
+});
 main();
