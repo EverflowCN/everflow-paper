@@ -1,7 +1,7 @@
 import {typeset} from './math-2027-mathjax.js?v=20261010-heatmap4';
 import * as cloud from './math-paper-cloud.js?v=20261011-overview1';
 const ROOT='/math/27/';
-const MANIFEST='/data/math-papers/active-collections.json?v=20261011-compact1';
+const MANIFEST='/data/math-papers/active-collections.json?v=20261011-math2-past1';
 const $=selector=>document.querySelector(selector);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const surface=$('[data-map-inner]'),view=$('[data-map-scroll]'),layout=$('[data-overview-layout]');
@@ -9,7 +9,7 @@ const detail=$('[data-overview-detail]'),detailBody=$('[data-detail-content]');
 let manifest=null,groups=[],rows=[],selected=null,size=27,filter='all',pan=false,preventClick=false,renderSerial=0;
 const symbols={correct:'✓',wrong:'×',answered:'?',visited:'·',unseen:'',locked:'—'};
 const labels={correct:'自评正确',wrong:'自评错误',answered:'已作答，待判断',visited:'已浏览',unseen:'未做',locked:'待校核'};
-function qualified(q){return q?.verification==='proofread'&&Boolean(q?.stem)}
+function qualified(q){return ['proofread','source-transcription'].includes(q?.verification)&&Boolean(q?.stem)}
 function statusFor(q,rec={}){
  if(!qualified(q))return'locked';
  if(rec.judgements?.[q.id]==='correct')return'correct';
@@ -75,11 +75,11 @@ function matrixFor(group){
  const cells=group.active.map(row=>{
   const body=row.paper.questions.map((q,i)=>{
    const state=statusFor(q,row.state),match=filter==='all'||(filter==='answered'?state==='answered':filter===state),index=rows.indexOf(row);
-   const title=`${label} · 第${row.index+1}套 · 第${i+1}题 · ${labels[state]}`;
+   const title=`${label} · ${row.collection.category==='past'?row.paper.year+'年':'第'+(row.index+1)+'套'} · 第${i+1}题 · ${labels[state]}`;
    return `<button type="button" class="overview-cell ${state}${match?'':' dim'}${selected?.questionId===q.id?' is-selected':''}"
        data-row="${index}" data-q="${i}" title="${esc(title)}" aria-label="${esc(title)}" ${state==='locked'?'disabled':''}><span aria-hidden="true">${symbols[state]}</span></button>`;
   }).join('')+Array.from({length:maxCols-row.paper.questions.length},()=>'<span class="overview-blank"></span>').join('');
-  return `<span class="overview-row-label" title="${label} 第${row.index+1}套"><strong>第${row.index+1}套</strong><small>${row.paper.questions.length}题</small></span>${body}`;
+  return `<span class="overview-row-label" title="${label} ${esc(row.paper.name)}"><strong>${row.collection.category==='past'?row.paper.year+' 年':'第'+(row.index+1)+'套'}</strong><small>${row.paper.questions.length}题</small></span>${body}`;
  }).join('');
  return `<div class="overview-collection-heading"><span>${label}</span><small>· ${group.active.length} 套有作答</small></div><div class="overview-matrix" style="--cols:${maxCols}"><span class="overview-column corner">套卷 / 题号</span>${headers}${cells}</div>`;
 }
@@ -108,7 +108,7 @@ function showDetail(index,qIndex){
  surface.querySelectorAll('.overview-cell.is-selected').forEach(el=>el.classList.remove('is-selected'));
  surface.querySelector(`[data-row="${index}"][data-q="${qIndex}"]`)?.classList.add('is-selected');
  layout.classList.add('is-open');detail.hidden=false;
- $('[data-detail-title]').textContent=`${row.collection.shortTitle||row.collection.title} · 第${row.index+1}套 · 第${qIndex+1}题`;
+ $('[data-detail-title]').textContent=`${row.collection.shortTitle||row.collection.title} · ${row.collection.category==='past'?row.paper.year+'年':'第'+(row.index+1)+'套'} · 第${qIndex+1}题`;
  const state=statusFor(q,row.state);
  const answer=String(row.state.answers?.[q.id]||'');
  const statusLabel=state==='correct'?'✓ 自评正确':state==='wrong'?'× 自评错误':state==='answered'?'? 已答待判断':labels[state];
