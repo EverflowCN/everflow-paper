@@ -91,7 +91,7 @@ async function adoptGuest(owner){
  if(localStorage.getItem(CLAIM))return;
  let adopted=0;
  for(const c of registry?.collections||[]){
-  const old=clean(JSON.parse(localStorage.getItem(c.storageKey)||'{}'));
+  let old={};try{old=clean(JSON.parse(localStorage.getItem(c.storageKey)||'{}'))}catch{}
   if(!Object.keys(old).length)continue;
   const scoped=c.storageKey+'::user:'+owner;
   let existing={};try{existing=clean(JSON.parse(localStorage.getItem(scoped)||'{}'))}catch{}
@@ -108,7 +108,7 @@ async function applyUser(next){
  clearTimeout(dirtyTimer);
  user=next||null;
  if(user)try{await adoptGuest(user.id)}catch(e){console.warn('Math guest migration retained locally',e)}
- status(user?'local','云端已连接 · 等待同步');
+ status(user?'local':'guest',user?'云端已连接 · 等待同步':'本机模式 · 登录后可跨设备同步');
  document.dispatchEvent(new CustomEvent('everflow:math-account-change',{detail:{userId:user?.id||null}}));
 }
 export async function initialize(manifest){
