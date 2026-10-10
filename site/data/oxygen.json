@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updatedAt": "2026-09-08T04:57:54Z",
+  "updatedAt": "2026-10-10T05:12:26.864Z",
   "source": {
     "up": "就是氧气11",
     "collection": "27考研408计算机基础综合合集",
@@ -10,7 +10,7 @@
     "url": "https://www.bilibili.com/video/BV1MW8i6tEa1",
     "auto": true,
     "syncStatus": "ok",
-    "message": "已按 B站 UGC 合集真值与实际发布日期同步 17 课时：2009—2025；条目使用 bvid:<BVID> 稳定 ID。"
+    "message": "已交叉核对B站UGC合集与氧气11主页联合投稿，补充2026年真题精讲；2009—2026合计18节，保留原bvid:<BVID>稳定ID。"
   },
   "course": {
     "id": "oxygen-408-pastpaper-27",
@@ -33,7 +33,8 @@
       {"id":"bvid:BV1KPtC6qEck","year":2022,"title":"2022年408计算机基础综合真题讲解-27优化版","duration":"02:12:28","url":"https://www.bilibili.com/video/BV1KPtC6qEck/","bvid":"BV1KPtC6qEck","publishedAt":1788575858},
       {"id":"bvid:BV1UxbE6uEKk","year":2023,"title":"2023年408计算机基础综合真题讲解-27优化版","duration":"02:35:52","url":"https://www.bilibili.com/video/BV1UxbE6uEKk/","bvid":"BV1UxbE6uEKk","publishedAt":1788657751},
       {"id":"bvid:BV1TkbP6wEgx","year":2024,"title":"2024年408计算机基础综合真题讲解-27优化版","duration":"02:35:42","url":"https://www.bilibili.com/video/BV1TkbP6wEgx/","bvid":"BV1TkbP6wEgx","publishedAt":1788757549},
-      {"id":"bvid:BV1xFbV6QEHu","year":2025,"title":"2025年408计算机基础综合真题讲解-27优化版","duration":"02:56:06","url":"https://www.bilibili.com/video/BV1xFbV6QEHu/","bvid":"BV1xFbV6QEHu","publishedAt":1788839491}
+      {"id":"bvid:BV1xFbV6QEHu","year":2025,"title":"2025年408计算机基础综合真题讲解-27优化版","duration":"02:56:06","url":"https://www.bilibili.com/video/BV1xFbV6QEHu/","bvid":"BV1xFbV6QEHu","publishedAt":1788839491},
+      {"id":"bvid:BV1hTH266ErG","year":2026,"title":"2026年408计算机基础综合真题精讲-零壹&氧气版","duration":"04:59:11","url":"https://www.bilibili.com/video/BV1hTH266ErG/","bvid":"BV1hTH266ErG","publishedAt":1791421200}
     ]
   }
 }
