@@ -219,3 +219,6 @@ button,.lab-btn,.lab-chip{transition:background .15s,color .15s,border-color .15
  .lab-matrix{--gsize:25px}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+
+.lab-clear-btn{display:inline-flex;align-items:center;margin-left:12px;padding:5px 9px;border:1px solid #e9d7bc;border-radius:7px;background:#fffdf6;color:#906b3c;font-size:10px;font-weight:760;cursor:pointer;white-space:nowrap}
+.lab-clear-btn:hover{background:#fff3dc}
