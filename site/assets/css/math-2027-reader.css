@@ -78,3 +78,57 @@ footer{text-align:center;padding:18px;color:var(--muted);font-size:11px}
 .diagram{margin:19px auto;max-width:650px;width:100%;border:1px solid var(--line);background:#fff;padding:12px;border-radius:13px;overflow-x:auto}.diagram svg{display:block;max-width:100%;min-width:360px;height:auto;margin:auto}
 @media(max-width:1130px){.paper-shell{grid-template-columns:190px minmax(0,1fr)}.answer-sheet{grid-column:2;position:static;max-height:none}.sheet{grid-template-columns:repeat(11,minmax(0,1fr))}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:750px){.main{width:calc(100% - 20px);padding-top:18px}.topbar{height:58px;padding:0 12px}.brand{font-size:14px}.brand img{width:27px;height:27px}.top-actions{gap:9px}.badge{font-size:9px}.text-back{font-size:10px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{padding:15px}.card h2{font-size:22px}.hero h1{font-size:28px}.paper-shell{grid-template-columns:1fr;gap:10px}.sidebar{position:static;max-height:none;padding:12px}.sidebar h3,.sidebar>p{display:none}.paper-index{display:flex;gap:5px;overflow-x:auto;margin-top:0;padding:3px}.paper-index button{white-space:nowrap;padding:8px;min-height:33px}.viewer{padding:18px 15px}.viewer-head{margin-bottom:14px;padding-bottom:13px}.viewer-head h2{font-size:15px}.stem{font-size:15px;line-height:1.86}.choice{font-size:13px;padding:11px 10px}.answer-sheet{grid-column:auto;padding:13px}.sheet{grid-template-columns:repeat(11,minmax(0,1fr))}.viewer-nav{gap:7px}.viewer-nav .btn{min-width:0;padding:9px 11px}.draft{min-height:105px}}
+
+
+/* GitHub-inspired heatmaps: each of the eight papers uses 22 individually clickable cells. */
+.cards .card{display:flex;flex-direction:column;align-items:stretch;cursor:default}
+.cards .card:hover{transform:none}
+.heatmap-wrap{min-width:0}
+.heatmap-wrap.is-card{margin:19px 0 11px}
+.heatmap-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;color:var(--muted);font-size:11px;font-weight:700}
+.heatmap-heading strong{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.heatmap-grid{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:5px;max-width:330px;width:100%}
+.heat-cell{position:relative;display:block;aspect-ratio:1;min-width:0;min-height:10px;border-radius:4px;border:1px solid #dce4df;background:#ebefeb;padding:0;cursor:pointer;transition:transform .1s,box-shadow .1s,border-color .1s}
+.heat-cell.heat-unseen,.heat-swatch.heat-unseen{background:#e9eeea;border-color:#dae2dc}
+.heat-cell.heat-visited,.heat-swatch.heat-visited{background:#c9e7d3;border-color:#b3ddc0}
+.heat-cell.heat-answered,.heat-swatch.heat-answered{background:#7cc9a0;border-color:#66ba8d}
+.heat-cell.heat-correct,.heat-swatch.heat-correct{background:#26835a;border-color:#227750}
+.heat-cell.heat-wrong,.heat-swatch.heat-wrong{background:#dc7885;border-color:#c96271}
+.heat-cell.heat-locked,.heat-swatch.heat-locked{background:#fbf2df;border-color:#f0e2bf}
+.heat-cell.heat-current{outline:2px solid #275744;outline-offset:2px;z-index:2}
+.heat-cell:hover:not(:disabled){border-color:#193d2a;outline:2px solid #193d2a;outline-offset:1px;z-index:3;transform:translateY(-1px)}
+.heat-cell:focus-visible{outline:3px solid #296e51;outline-offset:2px;z-index:3}
+.heatmap-index-footer{margin:18px 0 9px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.heatmap-index-footer p{font-size:11px;color:var(--muted);line-height:1.7;margin:9px 0 0}
+.heat-legend{display:flex;align-items:center;flex-wrap:wrap;gap:7px 12px}
+.heat-legend>span{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:10px;white-space:nowrap}
+.heat-swatch{display:inline-block;width:11px;height:11px;flex:0 0 11px;border-radius:3px;border:1px solid #dae2dc}
+.heat-card-stats{display:flex;flex-wrap:wrap;gap:5px 12px;align-items:center;color:var(--muted);font-size:10px;margin:4px 0 0;font-variant-numeric:tabular-nums}
+.heat-open-btn{display:inline-flex;align-items:center;border:0;background:transparent;color:var(--green);font-size:11px;font-weight:820;padding:6px 0}
+.heat-open-btn:hover{text-decoration:underline;text-underline-offset:4px}
+.heatmap-wrap.is-reader{margin:2px 0 12px}
+.answer-sheet .heatmap-heading{font-size:12px}
+.answer-sheet .heatmap-grid{max-width:none;gap:4px}
+.answer-sheet .heat-cell{border-radius:3px}
+.answer-sheet .heat-legend{gap:6px 8px}
+.answer-sheet .heat-legend>span{font-size:9px}
+.heat-sheet-divider{height:1px;background:var(--line);margin:16px 0}
+.heat-local-note{font-size:10px;color:var(--muted);line-height:1.65;margin:13px 0 0}
+.answer-sheet .mini-stats{display:block;font-size:10px;line-height:1.5;margin-top:12px}
+@media(min-width:1100px){
+ .heatmap-wrap.is-card .heatmap-grid{max-width:270px;gap:5px}
+ .card{min-height:267px}
+ .card footer{margin-top:auto}
+}
+@media(max-width:1130px){.answer-sheet .heatmap-grid{max-width:410px}.answer-sheet .heat-cell{min-height:20px;max-height:27px}}
+@media(max-width:750px){
+ .heatmap-wrap.is-card{margin:13px 0 7px}
+ .heatmap-grid{gap:3px}
+ .heat-cell{border-radius:3px}
+ .heatmap-index-footer{padding:12px 14px}
+ .answer-sheet .heatmap-grid{max-width:450px}
+ .answer-sheet .heat-cell{max-height:30px}
+ .heatmap-heading{font-size:10px}
+ .heat-card-stats{font-size:9px;gap:5px 7px}
+ .heat-open-btn{font-size:10px}
+}
