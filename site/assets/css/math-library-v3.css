@@ -277,3 +277,76 @@ body.math-library-page{
 @media(prefers-reduced-motion:reduce){
  .library-paper-row,.math-library-page .main.is-library button{transition:none!important}
 }
+
+
+/* Study view: same restrained materials as the library, without changing behavior. */
+.math-library-page .main:not(.is-library){
+ width:min(1320px,calc(100% - 32px));padding:17px 0 40px;
+}
+.math-library-page .paper-shell{grid-template-columns:185px minmax(0,1fr) 224px;gap:11px}
+.math-library-page .sidebar,.math-library-page .viewer,.math-library-page .answer-sheet{
+ border-color:#e6ebee;border-radius:11px;box-shadow:none;
+}
+.math-library-page .sidebar{padding:15px 12px}
+.math-library-page .sidebar h3{font-size:13px;line-height:1.5;color:#293d50;letter-spacing:-.025em}
+.math-library-page .sidebar>p{font-size:10px;color:#88959e}
+.math-library-page .paper-index button{border-radius:7px;font-size:11px;gap:8px;padding:10px 9px}
+.math-library-page .paper-index button.active{background:#ebf3f9;color:#285a80;border-color:#d6e5f0}
+.math-library-page .viewer{padding:25px clamp(20px,3vw,40px) 27px}
+.math-library-page .viewer-head{border-color:#e8edf0}
+.math-library-page .viewer-head h2{font-weight:830;letter-spacing:-.04em;color:#1c2b39}
+.math-library-page .type-label{color:#486f8d;letter-spacing:.04em}
+.math-library-page .viewer .stem{font-size:17px;line-height:2;color:#263746}
+.math-library-page .choice{border-color:#e5eaf0;border-radius:10px;box-shadow:none}
+.math-library-page .choice:hover:not(:disabled){border-color:#9dbbd2;background:#f5f9fc}
+.math-library-page .choice.selected{border-color:#6ea1c5;background:#edf5fb}
+.math-library-page .choice.selected b{background:#295c87}
+.math-library-page .answer-sheet{padding:15px 12px}
+.math-library-page .answer-sheet h3{color:#283d50}
+.math-library-page .answer-sheet .heatmap-heading{color:#7f8b94}
+.math-library-page .answer-sheet .heatmap-grid{gap:4px}
+.math-library-page .answer-sheet .heat-legend{margin-top:11px}
+.math-library-page .btn{border-radius:8px}
+.math-library-page .btn.primary{background:#245479;border-color:#245479}
+.math-library-page .btn.primary:hover{background:#163f61}
+.math-library-page .judge{border-color:#e8edf0}
+.math-library-page .judge strong{font-size:13px;color:#293e51}
+.math-library-page .status-warning{border-radius:9px}
+@media(max-width:1130px){
+ .math-library-page .paper-shell{grid-template-columns:175px minmax(0,1fr)}
+ .math-library-page .answer-sheet{grid-column:2}
+}
+@media(max-width:750px){
+ .math-library-page .main:not(.is-library){width:calc(100% - 18px);padding:10px 0 25px}
+ .math-library-page .paper-shell{grid-template-columns:1fr;gap:8px}
+ .math-library-page .sidebar{padding:8px}
+ .math-library-page .paper-index{margin:0}
+ .math-library-page .viewer{padding:17px 15px}
+ .math-library-page .viewer .stem{font-size:15px;line-height:1.9}
+ .math-library-page .answer-sheet{grid-column:auto}
+}
+/* Companion full-paper graph: unified typography, color, and focus states. */
+.math-library-page .overview-page{width:min(1380px,calc(100% - 44px));padding:22px 0 34px}
+.math-library-page .overview-title{margin-bottom:16px;align-items:center}
+.math-library-page .overview-title .library-breadcrumb{font-size:10px;letter-spacing:.09em;color:#84939e;font-weight:760}
+.math-library-page .overview-title h1{font-size:30px;color:#1e2b37;letter-spacing:-.062em;font-weight:850;margin:6px 0 5px}
+.math-library-page .overview-title p{font-size:11px;color:#8d99a2}
+.math-library-page .overview-sync-status{color:#778892}
+.math-library-page .overview-stat{border:1px solid #e6ebef;border-radius:9px;background:#fff;min-width:114px;box-shadow:none}
+.math-library-page .overview-stat strong{color:#263a4b;font-weight:840}
+.math-library-page .overview-stats{gap:8px;margin-bottom:12px}
+.math-library-page .overview-tools{border:1px solid #e6ebef;background:#fff;padding:10px 15px;margin-bottom:10px;border-radius:10px}
+.math-library-page .overview-tools .heat-legend>span{color:#667988}
+.math-library-page .overview-filter select,.math-library-page .zoom-button{border-color:#dfe6ed;border-radius:7px}
+.math-library-page .overview-map,.math-library-page .overview-detail{border:1px solid #e6ebef;border-radius:11px;box-shadow:0 6px 24px rgba(29,51,68,.035)}
+.math-library-page .overview-column{background:#f6f9fb;color:#728594}
+.math-library-page .overview-row-label{color:#2b3d4c}
+.math-library-page .overview-collection-heading{color:#295c87;font-weight:810}
+.math-library-page .overview-cell{border-radius:5px}
+.math-library-page .overview-detail-head{border-color:#e8edf1}
+.math-library-page .overview-detail h2{color:#283f50;font-weight:820}
+@media(max-width:650px){
+ .math-library-page .overview-page{width:calc(100% - 20px);padding:11px 0 25px}
+ .math-library-page .overview-title h1{font-size:24px}
+ .math-library-page .overview-stat{min-width:0}
+}
