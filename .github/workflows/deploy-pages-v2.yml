@@ -49,6 +49,7 @@ jobs:
           node site/tools/test-math-2027-papers.mjs
           node site/tools/test-math-2027-heatmap.mjs
           node site/tools/test-math-papers-overview.mjs
+          node site/tools/test-math2-past-import.mjs
           node --check site/assets/js/math-paper-cloud.js
           node --check site/assets/js/math-2027-overview.js
           node --check site/assets/js/math-2027-mathjax.js
@@ -328,6 +329,7 @@ jobs:
           test -s site/math/27/map/index.html
           test -s site/assets/css/math-2027-overview.css
           test -s site/data/math-papers/active-collections.json
+          test -s site/data/math-papers/lx-ruc-math2-2009-2025.json
           test -s site/assets/js/math-2027-reader.js
           test -s site/data/math-papers/zhangyu-2027-math2.json
           test -s site/graph-next/index.html
