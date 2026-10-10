@@ -15,6 +15,16 @@
   ],
   "collections": [
     {
+      "id": "math2-past-2009-2025",
+      "category": "past",
+      "year": "2009—2025",
+      "title": "数学二历年真题",
+      "shortTitle": "历年真题",
+      "dataUrl": "/data/math-papers/lx-ruc-math2-2009-2025.json",
+      "storageKey": "everflow-math2-past-2009-2025-v1",
+      "enabled": true
+    },
+    {
       "id": "zhangyu-2027-math2",
       "category": "simulation",
       "year": 2027,
