@@ -7,6 +7,11 @@ const source=(()=>{
   if(params.get('source')==='relax1000')return'relax1000';
   try{const value=localStorage.getItem('everflow-408-bank-source-v1');return['zhenti','relax1000','math-papers'].includes(value)?value:'zhenti'}catch{return'zhenti'}
 })();
+if(source==='math-papers'){
+  // 2027 is the only active Math II simulation set. Retire the 2022–2026 legacy bank.
+  try{if(localStorage.getItem('everflow-408-bank-source-v1')==='math-papers')localStorage.setItem('everflow-408-bank-source-v1','zhenti')}catch{}
+  location.replace('/math/27/');
+}else{
 const mathMode=source==='math-papers';
 document.body.dataset.questionBank=source;
 document.body.classList.toggle('relax1000-active',source==='relax1000');
@@ -29,4 +34,6 @@ if(mathMode){
 }else{
   await import('/assets/js/question-cloud-sync-v2.js?v=20260922-syncguard7');
   if(source==='zhenti')await import('/assets/js/zhenti-deeplink.js?v=20261010-resume1');
+}
+
 }
