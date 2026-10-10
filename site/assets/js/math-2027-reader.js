@@ -42,9 +42,9 @@ function heatmapHtml(p,{inReader=false}={}){
    aria-label="第 ${index+1} 题：${HEAT_LABELS[status]}" ${pressed?'aria-current="step"':''}
    ><span aria-hidden="true">${HEAT_SYMBOLS[status]}</span></button>`;
  }).join('');
- return `<div class="heatmap-wrap ${inReader?'is-reader':'is-card'}" aria-label="第 ${paperIndex+1} 套 ${p.questions.length} 题学习热力图">
+ return `<div class="heatmap-wrap ${inReader?'is-reader':'is-gallery'}" aria-label="第 ${paperIndex+1} 套 ${p.questions.length} 题学习热力图">
   <div class="heatmap-heading"><span>题目热力图</span><strong>${counts.done}/${counts.total}</strong></div>
-  <div class="heatmap-grid" role="group" aria-label="按照题号 1—${p.questions.length} 排列的热力方格">${cells}</div>
+  <div class="heatmap-grid" style="--question-count:${p.questions.length}" role="group" aria-label="按照题号 1—${p.questions.length} 排列的热力方格">${cells}</div>
  </div>`;
 }
 function heatLegend(){return `<div class="heat-legend" aria-label="三色标记图例">
@@ -69,51 +69,81 @@ function bindHeatmap(container=root){
  container.querySelectorAll('[data-heatmap-jump]').forEach(b=>b.addEventListener('click',()=>changeQ(Number(b.dataset.heatmapJump))));
 }
 function categoryLabel(id){return registry?.categories?.find(c=>c.id===id)?.title||'卷库'}
+let librarySortNewest=true,libraryShowDoneOnly=false;
 function collectionTabHtml(){
- const enabled=registry.collections;
- const categories=[...new Set(enabled.map(c=>c.category))];
- return `<nav class="library-collections" aria-label="选择数学二试卷系列">${categories.map(category=>{
-  const collections=enabled.filter(x=>x.category===category);
-  return `<div class="library-series-group"><span class="library-series-label">${esc(categoryLabel(category))}</span>
-   <div class="library-series-list">${collections.map(c=>`<button type="button" data-collection-id="${esc(c.id)}" class="library-series-btn ${c.id===currentCollection.id?'active':''}" aria-pressed="${c.id===currentCollection.id}">${esc(c.year)} · ${esc(c.shortTitle||c.title)} <span>${c.id===currentCollection.id?'当前':''}</span></button>`).join('')}</div></div>`;
+ const ordered=registry.collections.filter(c=>c.enabled).sort((a,b)=>(registry.categories?.find(v=>v.id===a.category)?.order??9)-(registry.categories?.find(v=>v.id===b.category)?.order??9));
+ return `<nav class="library-collections" aria-label="切换试卷类型">${ordered.map(c=>{
+  const active=c.id===currentCollection.id;
+  const category=categoryLabel(c.category);
+  return `<button type="button" data-collection-id="${esc(c.id)}" class="library-series-btn ${active?'active':''}" aria-current="${active?'page':'false'}">
+   <span class="series-name">${esc(category)}</span><span class="series-description">${esc(c.category==='past'?'2009—2025':'2027 · 张宇八套卷')}</span><span class="series-count">${c.category==='past'?'17':'8'}</span>
+  </button>`;
  }).join('')}</nav>`;
 }
 function drawIndex(){
  closeTimer();
- const papers=doc.papers||[];
- const records=record();
- const html=papers.map((p,i)=>{
-  const counts=heatCounts(p,records[p.id]||{});
-  const digits=currentCollection.category==='past'?String(p.year):String(i+1).padStart(2,'0');
-  const unit=currentCollection.category==='past'?'年':' / 套';
-  return `<article class="card" aria-label="第 ${i+1} 套，${counts.done}/${counts.total} 题已答">
-   <header class="card-compact-head">
-    <button class="card-name" type="button" data-open="${i}" aria-label="打开${esc(p.name)}">${digits}<small>${unit}</small></button>
-    <span class="card-fraction" title="已答题数 / 总题数">${counts.done}<em>/${counts.total}</em></span>
-   </header>
-   ${heatmapHtml(p)}
-   <div class="card-compact-foot">
-    <div class="card-results"><span><b>✓</b> ${counts.correct}</span><span><b>×</b> ${counts.wrong}</span><span><b>?</b> ${counts.answered}</span></div>
-    <button type="button" class="heat-open-btn" data-open="${i}">${counts.done?'继续':'开始'} ↗</button>
-   </div>
-  </article>`;
- }).join('');
- const title=currentCollection?.title||doc.title||'模拟卷';
+ root.classList.add('is-library');
+ const papers=doc.papers||[],records=record(),isPast=currentCollection.category==='past';
+ const all=papers.map((p,index)=>({p,index,counts:heatCounts(p,records[p.id]||{})}));
+ const attempted=all.filter(x=>x.counts.done>0).length;
+ const answered=all.reduce((total,x)=>total+x.counts.done,0);
  const total=papers.reduce((n,p)=>n+p.questions.length,0);
- root.innerHTML=`<section class="library-heading" aria-labelledby="library-title">
-    <div><div class="library-breadcrumb">数学二 <span>/</span> ${esc(categoryLabel(currentCollection.category))}</div><h1 id="library-title">${esc(title)}</h1></div>
-    <div class="library-heading-actions"><a class="library-overview-link" href="/math/27/map/" title="查看已实际做过的全部套卷、正误和题目">▦ 已做套卷图谱 <span>↗</span></a><div class="library-summary">${papers.length} 套 · ${total} 题</div></div>
+ let list=libraryShowDoneOnly?all.filter(x=>x.counts.done>0):all;
+ if(isPast)list=[...list].sort((a,b)=>librarySortNewest?b.p.year-a.p.year:a.p.year-b.p.year);
+ const label=isPast?'历年真题':'27 模拟卷';
+ const description=isPast?'2009—2025 · 数学二':'2027 · 张宇预测八套卷';
+ const issueCount=Number(doc.verificationSummary?.pending)||0;
+ const rowHtml=list.map(({p,index,counts})=>{
+  const name=isPast?p.year+' 年':'第 '+String(index+1).padStart(2,'0')+' 套';
+  const heading=isPast?'数学二 · 全国硕士研究生招生考试':'张宇预测八套卷 · 数学二';
+  const rate=Math.round(counts.done/counts.total*100);
+  return `<article class="library-paper-row ${counts.done?'has-answers':''}" aria-label="${esc(name)}，已答 ${counts.done}/${counts.total} 题">
+    <div class="paper-row-index"><button type="button" data-open="${index}" class="paper-year" aria-label="进入${esc(name)}">${esc(name)}</button>
+      <span class="paper-series-meta">${esc(heading)}</span></div>
+    <div class="paper-row-map">${heatmapHtml(p)}</div>
+    <div class="paper-row-result"><strong>${counts.done}<span>/${counts.total}</span></strong>
+      <div class="paper-mini-results" aria-label="正确 ${counts.correct}，错误 ${counts.wrong}，待判断 ${counts.answered}"><span class="result-good">✓${counts.correct}</span><span class="result-bad">×${counts.wrong}</span><span class="result-pending">?${counts.answered}</span></div></div>
+    <button type="button" class="paper-row-open" data-open="${index}" aria-label="进入${esc(name)}第 ${p.questions.length} 题以内的学习页面"><span>${counts.done?'继续':'开始'}</span><span aria-hidden="true">↗</span></button>
+   </article>`;
+ }).join('');
+ const content=list.length?rowHtml:`<div class="library-empty">
+  <div class="library-empty-symbol" aria-hidden="true">◇</div><h2>还没有已做的试卷</h2><p>开始作答后，这里会显示你的学习记录。</p>
+  <button type="button" class="btn" data-show-all>查看全部试卷</button></div>`;
+ const note=isPast?`<span class="library-source-notice"><span class="notice-dot"></span> 来源文字 ${total-issueCount}/${total} 题 · ${issueCount} 题待核对</span>`:'';
+ root.innerHTML=`<section class="library-hero" aria-label="数学二卷库">
+    <div class="library-hero-main"><div class="library-kicker"><span class="kicker-square"></span> EVERFLOW <span class="kicker-separator">/</span> 数学二</div>
+      <h1>数学二<span class="hero-title-mark">.</span></h1>
+      <p>按年练真题，按套做模拟。你的进度，就在每一格里。</p></div>
+    <div class="library-hero-side">
+      <a href="/math/27/map/" class="library-overview-link" aria-label="进入已做套卷图谱">已做套卷图谱 <span aria-hidden="true">↗</span></a>
+      <div class="library-hero-numbers"><div><strong>${papers.length}</strong><span>套试卷</span></div><span class="numbers-divider"></span><div><strong>${attempted}</strong><span>已开始</span></div><span class="numbers-divider"></span><div><strong>${answered}</strong><span>已答题</span></div></div>
+    </div>
   </section>
   ${collectionTabHtml()}
-  <section class="library-tools" aria-label="热力图标记说明">
-    ${heatLegend()}
-    <details class="library-help"><summary>使用说明</summary><p>点击色块可直接进入对应题目；✓ 蓝色表示自评正确、× 橙色表示自评错误、? 灰色表示待判断。登录后沿用主站账号云同步，未登录时保存在本机。历年真题来自公开仓库文本，未逐题核对；仅收录数学二，不包含数学一、数学三或截图解析。未核对的题目暂不开放作答。</p></details>
-  </section>
-  <section class="cards" aria-label="${esc(title)} 的试卷热力图">${html}</section>`;
+  <section class="library-main" aria-labelledby="library-section-title">
+   <header class="library-section-head">
+     <div class="library-section-left"><div class="library-section-pre">PAPER COLLECTION <span> / ${isPast?'01':'02'}</span></div><h2 id="library-section-title">${label}<span class="library-section-year">${description}</span></h2></div>
+     <div class="library-section-actions">
+       <button type="button" class="library-filter-btn ${libraryShowDoneOnly?'active':''}" data-toggle-filter aria-pressed="${libraryShowDoneOnly}">${libraryShowDoneOnly?'✓ 仅看已做':'◌ 仅看已做'}</button>
+       ${isPast?`<button type="button" class="library-sort-btn" data-toggle-sort aria-label="切换年份顺序">${librarySortNewest?'最新优先 ↓':'最早优先 ↑'}</button>`:''}
+     </div>
+   </header>
+   <div class="library-guide"><div class="library-guide-legend">${heatLegend()}</div><span class="library-guide-tip">选中格子，直接进入原题 <span aria-hidden="true">↗</span></span></div>
+   <div class="library-paper-table" role="region" aria-label="${label}的练习进度">
+      <div class="library-table-label"><span>试卷</span><span>题目作答分布</span><span>进度 / 状态</span><span></span></div>
+      <div class="library-paper-list">${content}</div>
+   </div>
+   <div class="library-bottom-note">${note}<details class="library-help"><summary>题库与标记说明</summary>
+    <p>蓝色 ✓ 表示自评正确，橙色 × 表示自评错误，灰色 ? 表示已答待判断；灰色空白表示未做。点击方格可直接打开对应题目。登录时按照主站机制同步学习记录。历年真题由公开文字来源整理，尚未逐题核对；待核验的题目会暂时锁定。</p></details></div>
+  </section>`;
  root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.open))));
- root.querySelectorAll('[data-collection-id]').forEach(b=>b.addEventListener('click',()=>selectCollection(b.dataset.collectionId)));
+ root.querySelectorAll('[data-collection-id]').forEach(b=>b.addEventListener('click',()=>{libraryShowDoneOnly=false;selectCollection(b.dataset.collectionId).catch(showLoadError)}));
+ root.querySelector('[data-toggle-filter]')?.addEventListener('click',()=>{libraryShowDoneOnly=!libraryShowDoneOnly;drawIndex()});
+ root.querySelector('[data-toggle-sort]')?.addEventListener('click',()=>{librarySortNewest=!librarySortNewest;drawIndex()});
+ root.querySelector('[data-show-all]')?.addEventListener('click',()=>{libraryShowDoneOnly=false;drawIndex()});
  bindHeatmap(root);
 }
+function showLoadError(error){root.innerHTML=`<div class="error">切换试卷失败：${esc(error?.message||error)}。<a href="/math/27/">重新载入</a></div>`;}
 function diagram(name){
  if(name==='tangent1')return `<figure class="diagram"><svg viewBox="0 0 500 275" role="img" aria-label="曲线 y=f(x) 在 x=ln2 处的切线 L 及第一象限内围成区域的示意重绘图">
   <defs><pattern id="dGrid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0 H0 V30" fill="none" stroke="#edf2ec" stroke-width="1"/></pattern></defs>
@@ -139,6 +169,7 @@ function count(p){return countAnswers(p.id,p.questions)}
 function answer(q){return String(currentRecord()?.answers?.[q.id]||'')}
 function title(q){return q.type==='choice'?'选择题 · 5 分':q.type==='fill'?'填空题 · 5 分':'解答题 · '+q.points+' 分'}
 function renderReader({keepFocus=false}={}){
+ root.classList.remove('is-library');
  const q=paper.questions[at];
  const visited=currentRecord().visited||[];
  if(qualified(q)&&!visited.includes(q.id))save({visited:[...visited,q.id]});
