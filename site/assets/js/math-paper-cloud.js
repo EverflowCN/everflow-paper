@@ -15,7 +15,7 @@ const now=()=>new Date().toISOString();
 const stamp=v=>{const ms=Date.parse(v||'');return Number.isFinite(ms)?ms:0};
 const emit=detail=>document.dispatchEvent(new CustomEvent('everflow:math-cloud',{detail}));
 let registry=null,user=null,client=null,initializing=null,syncing=null,dirtyTimer=0;
-let accountGeneration=0;
+let accountGeneration=0,dirtySeq=0;
 const callbacks=new Set();
 function status(kind,text){emit({kind,text,userId:user?.id||null});callbacks.forEach(fn=>{try{fn({kind,text,userId:user?.id||null})}catch{}})}
 export const onStatus=fn=>{callbacks.add(fn);return()=>callbacks.delete(fn)};
@@ -82,6 +82,7 @@ export function update(collection,paperId,patch={}){
  next.updatedAt=date;
  all[paperId]=next;
  persist(collection,all);
+ dirtySeq++;
  clearTimeout(dirtyTimer);
  // Debounced after local edits: no waiting 12h for progress to reach another device.
  if(user&&navigator.onLine!==false)dirtyTimer=setTimeout(()=>syncNow('edit').catch(()=>{}),1700);
@@ -154,7 +155,7 @@ export async function syncNow(reason='manual'){
  if(syncing)return syncing;
  if(!client||!user){status('guest','登录后可同步');return{ok:false,reason:'guest'}}
  if(navigator.onLine===false){status('local','离线 · 本机记录已保存');return{ok:false,reason:'offline'}}
- const startGeneration=accountGeneration,uid=user.id;
+ const startGeneration=accountGeneration,startDirtySeq=dirtySeq,uid=user.id;
  syncing=(async()=>{
   status('busy','正在同步云端…');
   try{
@@ -185,7 +186,12 @@ export async function syncNow(reason='manual'){
    localStorage.setItem(LAST_SYNC,JSON.stringify({userId:uid,at:now()}));
    status('ok','已同步 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}));
    const result={ok:true,reports,reason};document.dispatchEvent(new CustomEvent('everflow:math-cloud-sync',{detail:result}));return result;
-  }catch(error){if(error?.message!=='account_changed_during_sync'){status('error','同步失败 · 本机记录安全');console.warn('Math sync failure',error)}return{ok:false,error:String(error?.message||error)}}finally{syncing=null}
+  }catch(error){if(error?.message!=='account_changed_during_sync'){status('error','同步失败 · 本机记录安全');console.warn('Math sync failure',error)}return{ok:false,error:String(error?.message||error)}}finally{
+  syncing=null;
+  // If the user edited a question during this network round trip, flush it again.
+  if(accountGeneration===startGeneration&&dirtySeq>startDirtySeq&&user&&navigator.onLine!==false)
+   setTimeout(()=>syncNow('inflight-edits').catch(()=>{}),250);
+ }
  })();
  return syncing;
 }
