@@ -8,7 +8,7 @@ const SOURCE_LABELS={
   'manual':'手动补录'
 };
 const MONTH_COLORS=['#f36b75','#e99842','#d8a94f','#58a96d','#4db3a5','#52b8d4','#5a9be6','#ff5a68','#9b7fd6','#bb8b65','#61adba','#e36e91'];
-const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 // The study landing page uses a continuous GitHub-like yearly calendar.
 // The standalone /study/heatmap/ page retains its existing month/year controls.
 const githubHome=Boolean(document.querySelector('[data-github-heatmap]'));
@@ -135,11 +135,10 @@ function renderGithub(){
   start.setDate(start.getDate()-((start.getDay()+6)%7)); // Monday
   const end=new Date(last);
   end.setDate(end.getDate()+(7-end.getDay())%7); // Sunday
-  const weeks=Math.round((end-start)/86400000/7)+1;
+  const weeks=Math.floor(Math.round((end-start)/86400000)/7)+1;
   const yearly=events.filter(e=>new Date(e.occurred_at).getFullYear()===cursorYear);
   const counts=new Map();
   const yearDays=new Set(),monthDays=new Set();
-  let monthCount=0;
   for(const e of events){
     const d=new Date(e.occurred_at);
     if(!Number.isFinite(d.getTime()))continue;
@@ -149,7 +148,6 @@ function renderGithub(){
       yearDays.add(key);
     }
     if(d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()){
-      monthCount++;
       monthDays.add(key);
     }
   }
