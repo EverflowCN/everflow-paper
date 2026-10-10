@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="description" content="Everflow独立测试页面；不影响正式版题库和答题记录"><title>整体图谱 · Everflow 设计测试</title><link rel="icon" href="/assets/everflow-icon.svg"><link rel="stylesheet" href="/preview/assets/lab.css?v=20261010-lab1"></head><body>
+<header class="lab-topbar"><a class="lab-brand" href="/preview/zhenti/"><img src="/assets/everflow-icon.svg" alt=""><span>Everflow<small>彼时流年若水</small></span></a><span class="lab-badge">设计实验室 · TEST</span><nav class="lab-toplinks"><a href="/preview/zhenti/" class="">真题工作台</a><a href="/preview/graph/" class="active">整体图谱</a></nav><div class="lab-production-link"><a href="/graph/" target="_blank" rel="noopener">正式版 ↗</a></div></header>
+<div class="lab-wrap"><div class="lab-intro"><div><div class="lab-eyebrow">EVERFLOW / GLOBAL KNOWLEDGE MAP</div><h1>整体图谱</h1><p>一张图纵览学习掌握情况：按年份或章节快速定位薄弱点，选中方格后直接在旁边查看题目。</p></div><div class="lab-intro-note">测试版 · 数据隔离已启用</div></div>
+<section class="lab-stats" aria-label="图谱测试统计" style="margin-bottom:14px">
+<div class="lab-panel lab-stat"><strong data-stat-total>846</strong><span>题目总数</span></div><div class="lab-panel lab-stat"><strong data-stat-done>0</strong><span>已练习题目</span></div><div class="lab-panel lab-stat"><strong data-stat-weak>0</strong><span>待重点复习</span></div><div class="lab-panel lab-stat"><strong data-stat-rate>0%</strong><span>完成率</span></div></section>
+<div class="lab-graph-layout" data-graph-layout>
+ <section class="lab-panel lab-graph-main">
+  <header class="lab-graph-header">
+   <div class="lab-graph-top">
+    <div><div class="lab-eyebrow">QUESTION MAP / OVERVIEW</div><h2 style="font-size:20px;letter-spacing:-.04em;margin:5px 0 3px" data-graph-heading>408 真题 · 年份 × 题号</h2><div style="font-size:11px;color:var(--muted)" data-graph-caption>2009—2026 · 18 年 · 共 846 题</div></div>
+    <div class="lab-graph-controls" role="group" aria-label="题库来源">
+      <button class="lab-chip active" type="button" data-graph-source="zhenti">408 真题</button><button class="lab-chip" type="button" data-graph-source="relax">Relax1000</button>
+    </div>
+   </div>
+   <div class="lab-graph-control-row">
+    <div class="lab-graph-controls"><span class="lab-filter-label">筛选</span><select class="lab-select" data-graph-subject><option value="all">全部科目</option><option value="ds">数据结构</option><option value="co">计算机组成原理</option><option value="os">操作系统</option><option value="cn">计算机网络</option></select><select class="lab-select" data-graph-filter><option value="all">全部状态</option><option value="weak">不会 / 模糊</option><option value="unmarked">未标记</option><option value="wrong">答错</option><option value="mastered">熟练</option></select></div>
+    <div class="lab-graph-controls"><span class="lab-filter-label">缩放</span><button class="lab-btn small" data-zoom="out">−</button><span style="min-width:34px;text-align:center;color:var(--muted);font-size:11px" data-zoom-level>18px</span><button class="lab-btn small" data-zoom="in">＋</button><button class="lab-btn small" data-zoom="fit">适应</button><button class="lab-btn small" data-zoom="standard">标准</button></div>
+   </div>
+   <div class="lab-graph-control-row"><div class="lab-legend"><span><i class="lab-dot mastered"></i>熟练</span><span><i class="lab-dot fuzzy"></i>模糊</span><span><i class="lab-dot weak"></i>不会</span><span><i class="lab-dot unmarked"></i>未标记</span></div><div class="lab-graph-summary" data-visible-summary>点击方格查看具体题目</div></div>
+  </header>
+  <div class="lab-graph-scroll" data-graph-scroll><div class="lab-matrix" data-graph-matrix aria-label="题目状态图谱" aria-busy="true"><div class="lab-loading">正在载入图谱…</div></div></div>
+  <div class="lab-graph-fixed-controls"><span style="color:var(--muted);font-size:10px;margin-right:auto">提示：可双向滚动；按方向键移动，Enter 打开，Esc 关闭</span><button class="lab-btn small" data-next-weak>定位下一道薄弱题 →</button><button class="lab-btn small" data-reset-filters>重置筛选</button></div>
+ </section>
+ <aside class="lab-panel lab-graph-detail" data-graph-detail hidden>
+  <header class="lab-graph-detail-head"><div><div class="lab-eyebrow">QUESTION DETAILS</div><h3 data-detail-title>题目预览</h3></div><button class="lab-btn small" data-close-detail aria-label="关闭题目">关闭 ✕</button></header>
+  <div class="lab-graph-detail-body" data-detail-body><div class="lab-loading">正在读取试题…</div></div>
+  <div class="lab-paper-actions"><button class="lab-btn small" data-detail-answer>查看答案</button><button class="lab-btn small primary" data-detail-submit>提交答案</button></div>
+  <div class="lab-graph-fixed-controls"><span class="lab-filter-label">掌握状态</span><button class="lab-chip" data-detail-mark="mastered">熟练</button><button class="lab-chip" data-detail-mark="fuzzy">模糊</button><button class="lab-chip" data-detail-mark="weak">不会</button><button class="lab-chip" data-detail-mark="">清除</button></div>
+  <div class="lab-graph-fixed-controls"><a class="lab-btn small" data-open-workspace href="/preview/zhenti/">在测试真题页继续练习 ↗</a></div>
+ </aside>
+</div><div class="lab-soft-warning" style="margin:14px 0 22px">图谱仅引用题目原始静态文件。测试版不读取正式掌握状态；完成测试后只有测试环境里的方格发生变化，正式真题与 Relax1000 不受影响。</div></div>
+<script type="module" src="/preview/assets/graph.js?v=20261010-lab1"></script>
+<footer class="lab-footer">Everflow · 彼时流年若水 &nbsp; / &nbsp; 设计测试环境，仅用于验收，不影响正式学习记录</footer></body></html>
