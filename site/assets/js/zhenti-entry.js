@@ -25,7 +25,7 @@ await import('/assets/js/question-content-v1.js?v=20260904-editor1');
 if(source==='zhenti'){
   await import('/assets/js/zhenti-data-overlay.js?v=20261010-feedback1');
   await import('/assets/js/zhenti-rtt-2025.js?v=20261009-rtt1');
-  await import('/assets/js/zhenti-tcp-2016.js?v=20261012-tcp1');
+  await import('/assets/js/zhenti-tcp-2016.js?v=20261012-tcp2-mobile');
   await import('/assets/js/zhenti-wall.js?v=20261010-resume1');
 }
 await runtime;
