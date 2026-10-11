@@ -30,7 +30,7 @@ if(!document.getElementById(STYLE_ID)){
     '.evera-tcp16 .tcp16-board{border:1px solid var(--line,#ddd);border-radius:12px;background:var(--soft,#f8f8f8);overflow:hidden}',
     '.evera-tcp16 .tcp16-board-top{padding:9px 11px;border-bottom:1px solid var(--line,#ddd);font-size:12px;color:var(--muted,#666);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}',
     '.evera-tcp16 .tcp16-scroll{overflow-x:auto;overscroll-behavior-x:contain}',
-    '.evera-tcp16 svg{width:100%;min-width:460px;height:auto;display:block}',
+    '.evera-tcp16 canvas{display:block;width:100%;min-width:0;max-width:100%;height:auto;touch-action:pan-y}',
     '.evera-tcp16 .tcp16-detail{background:var(--soft,#f6f6f6);border-radius:12px;padding:12px;margin-top:12px}',
     '.evera-tcp16 .tcp16-detail-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}',
     '.evera-tcp16 .tcp16-detail p{font-size:13px;line-height:1.75;margin:8px 0}',
@@ -60,12 +60,12 @@ function mount(host){
     '<div class="tcp16-controls"><button type="button" data-tcp16-action="reset">↺ 重来</button><button type="button" data-tcp16-action="prev">← 上个 ACK</button><button type="button" data-tcp16-action="next">下个 ACK →</button><button type="button" data-tcp16-action="play">▶ 自动演示</button></div>',
     '<div class="tcp16-range-row"><label for="evera-tcp16-range">确认进度</label><input id="evera-tcp16-range" data-tcp16-range class="tcp16-range" type="range" min="0" max="20" step="1" value="0" aria-label="已经确认的数据段数量"><span class="tcp16-counter" data-tcp16-progress>0 / 20</span></div>',
     '<div class="tcp16-rounds" aria-label="跳转到传输轮次"><button type="button" data-tcp16-jump="1">第1轮</button><button type="button" data-tcp16-jump="3">第2轮</button><button type="button" data-tcp16-jump="7">第3轮</button><button type="button" data-tcp16-jump="15">第4轮</button><button type="button" data-tcp16-jump="20">第5轮</button></div>',
-    '<div class="tcp16-board"><div class="tcp16-board-top"><span>TCP 数据/ACK 时序（时间向下）</span><span>小屏幕可横向滑动</span></div><div class="tcp16-scroll"><svg data-tcp16-svg viewBox="0 0 600 852" role="img" aria-label="H3和S之间的三次握手和五轮数据段及ACK交换过程"></svg></div></div>',
+    '<div class="tcp16-board"><div class="tcp16-board-top"><span>TCP 数据/ACK 时序（时间向下）</span><span>小屏幕可横向滑动</span></div><div class="tcp16-scroll"><canvas data-tcp16-canvas role="img" aria-label="H3与S的三次握手、五轮数据发送和接收确认时序图。实线表示数据，虚线表示ACK。"></canvas></div></div>',
     '<div class="tcp16-detail" aria-live="polite"><div class="tcp16-detail-head"><strong data-tcp16-stage>准备第1轮</strong><span class="tcp16-muted" data-tcp16-time>0 ms</span></div><p data-tcp16-detail>H3 初始 SYN 序号为 100，消耗一个序号，因此应用层第一个字节的序号为 101。</p><div class="tcp16-formulas"><span>下一字节序号：<b data-tcp16-seq>101</b></span><span>窗口上限 min：<b data-tcp16-win>1KB</b></span></div><div class="tcp16-note"><b>真题结论：</b>第8个 ACK 后 rwnd=12KB、cwnd=9KB、发送窗口上限9KB；最终5轮发送 1、2、4、8、5KB，20KB÷(5×200ms)=20KB/s=163.84kb/s。<br><b>单位注意：</b>TCP 的 seq/ack 按字节编号，MSS=1KB 表示每个数据段携带1024B；窗口在本题用KB显示。实际在途数据会进一步限制当下可发送的数据量。</div></div>'
   ].join('');
   host.appendChild(box);
   const $=function(name){return box.querySelector('[data-tcp16-'+name+']');};
-  const svg=$('svg');
+  const canvas=$('canvas');
   const range=$('range');
   let n=0,timer=null;
   function stop(){
@@ -74,52 +74,100 @@ function mount(host){
     const play=box.querySelector('[data-tcp16-action="play"]');
     if(play)play.textContent='▶ 自动演示';
   }
-  function arrow(x1,y1,x2,y2,color,dashed,opacity){
-    const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy);
-    const ux=dx/L,uy=dy/L,px=x2-ux*10,py=y2-uy*10;
-    return '<g opacity="'+opacity+'"><path d="M'+x1+' '+y1+' L'+px+' '+py+'" fill="none" stroke="'+color+'" stroke-width="2.5" '+(dashed?'stroke-dasharray="7 5"':'')+'/>'+
-      '<path d="M'+x2+' '+y2+' L'+(px-uy*5)+' '+(py+ux*5)+' L'+(px+uy*5)+' '+(py-ux*5)+' Z" fill="'+color+'"/></g>';
-  }
-  function label(x,y,text,options){
-    return '<text x="'+x+'" y="'+y+'" '+options+'>'+escapeText(text)+'</text>';
-  }
+  // Canvas instead of SVG: prevents inherited site-wide SVG rules or CSS scaling from
+  // making arrowheads enormous on iOS Safari. Never set a desktop-only min-width.
   function roundOf(count){
     if(count===0)return -1;
     for(let i=0;i<5;i++)if(count<=boundaries[i+1])return i;
     return 4;
   }
   function draw(){
-    const blue='var(--cyan,#357f9e)',purple='var(--red,#a65f62)',ink='var(--ink,#171717)',muted='var(--muted,#666)';
-    let out='';
-    out+=label(132,28,'H3（发送）','text-anchor="middle" font-size="19" font-weight="700" fill="'+ink+'"');
-    out+=label(478,28,'S（接收）','text-anchor="middle" font-size="19" font-weight="700" fill="'+ink+'"');
-    out+='<path d="M132 40V837 M478 40V837" stroke="var(--line,#ccc)" stroke-dasharray="5 6" stroke-width="1.5" fill="none"/>';
-    out+=arrow(142,55,465,77,blue,false,1);
-    out+=label(308,60,'① SYN · seq=100','text-anchor="middle" font-size="13" fill="'+ink+'"');
-    out+=arrow(465,84,142,106,purple,true,1);
-    out+=label(305,103,'② SYN+ACK · ack=101','text-anchor="middle" font-size="13" fill="'+ink+'"');
-    out+=arrow(142,112,465,135,blue,false,1);
-    out+=label(303,130,'③ ACK','text-anchor="middle" font-size="12" fill="'+ink+'"');
+    if(!box.isConnected)return;
+    const measure=canvas.getBoundingClientRect();
+    const w=Math.max(250,Math.round(measure.width||box.clientWidth-24||320));
+    const h=830;
+    const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    const targetW=Math.round(w*dpr),targetH=Math.round(h*dpr);
+    if(canvas.width!==targetW||canvas.height!==targetH){
+      canvas.width=targetW;
+      canvas.height=targetH;
+    }
+    canvas.style.height=h+'px';
+    const ctx=canvas.getContext('2d');
+    if(!ctx)return;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    const ink=getComputedStyle(box).color||'#1f2937';
+    const send='#1976a3'; // teal-blue data arrows
+    const recv='#b06821'; // amber dashed ACK arrows; not red/green coding
+    const muted='#687586';
+    const x1=Math.max(47,Math.round(w*.19));
+    const x2=w-x1;
+    function line(xa,ya,xb,yb,color,alpha,dashed){
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      ctx.strokeStyle=color;
+      ctx.lineWidth=2;
+      ctx.lineCap='round';
+      ctx.setLineDash(dashed?[6,4]:[]);
+      ctx.beginPath();ctx.moveTo(xa,ya);ctx.lineTo(xb,yb);ctx.stroke();
+      ctx.setLineDash([]);
+      const a=Math.atan2(yb-ya,xb-xa);
+      ctx.fillStyle=color;
+      ctx.beginPath();ctx.moveTo(xb,yb);
+      ctx.lineTo(xb-9*Math.cos(a-.48),yb-9*Math.sin(a-.48));
+      ctx.lineTo(xb-9*Math.cos(a+.48),yb-9*Math.sin(a+.48));
+      ctx.closePath();ctx.fill();ctx.restore();
+    }
+    function txt(str,x,y,size,weight,color,align){
+      ctx.save();ctx.font=(weight||500)+' '+(size||12)+'px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign=align||'left';
+      ctx.textBaseline='middle';
+      ctx.fillStyle=color||ink;ctx.fillText(str,x,y);ctx.restore();
+    }
+    function rect(x,y,width,height,highlight){
+      ctx.save();
+      ctx.fillStyle='rgba(125,130,138,.055)';
+      ctx.strokeStyle=highlight?send:'rgba(125,130,138,.25)';
+      ctx.lineWidth=highlight?1.8:1;
+      ctx.beginPath();
+      if(typeof ctx.roundRect==='function')ctx.roundRect(x,y,width,height,10);
+      else ctx.rect(x,y,width,height);
+      ctx.fill();ctx.stroke();ctx.restore();
+    }
+    txt('H3 · 发送方',x1,18,14,700,ink,'center');
+    txt('S · 接收方',x2,18,14,700,ink,'center');
+    ctx.save();
+    ctx.strokeStyle='rgba(120,130,145,.38)';ctx.lineWidth=1;ctx.setLineDash([4,6]);
+    for(const x of [x1,x2]){ctx.beginPath();ctx.moveTo(x,34);ctx.lineTo(x,h-8);ctx.stroke();}
+    ctx.restore();
+    // Handshake: SYN occupies sequence number 100; the first data byte is 101.
+    line(x1,43,x2,59,send,1,false);
+    txt('SYN · seq=100',w/2,42,11,600,ink,'center');
+    line(x2,65,x1,82,recv,1,true);
+    txt('SYN+ACK · ack=101',w/2,65,11,600,ink,'center');
+    line(x1,88,x2,105,send,1,false);
+    txt('ACK → 连接建立',w/2,88,11,600,ink,'center');
     for(let j=0;j<5;j++){
-      const top=162+j*133;
-      const before=boundaries[j],total=amounts[j],acked=Math.max(0,Math.min(total,n-before));
-      const started=n>before,highlight=started&&n<=boundaries[j+1];
-      out+='<rect x="6" y="'+top+'" width="588" height="125" rx="9" fill="var(--card,#fff)" stroke="'+(highlight?'var(--cyan,#1689a7)':'var(--line,#ddd)')+'" stroke-width="'+(highlight?'2':'1')+'" '+(!started?'stroke-dasharray="5 4"':'')+'/>';
-      out+=label(16,top+19,'第'+(j+1)+'轮 · '+total+'段','font-size="13" font-weight="700" fill="'+ink+'"');
-      out+=label(16,top+38,'cwnd '+(1+before+acked)+'KB','font-size="12" fill="'+blue+'"');
-      out+=label(492,top+38,'rwnd '+(20-before-acked)+'KB','font-size="12" fill="'+purple+'"');
-      out+=label(300,top+23,'H3 → S：'+total+'×1KB','font-size="13" text-anchor="middle" fill="'+ink+'"');
+      const top=119+j*140,old=boundaries[j];
+      const total=amounts[j],acknowledged=Math.max(0,Math.min(total,n-old));
+      const active=n>old,selected=active&&n<=boundaries[j+1];
+      rect(4,top,w-8,134,selected);
+      txt('第'+(j+1)+'轮 · '+total+'段',12,top+13,12,700,ink);
+      txt('cwnd '+(1+old+acknowledged)+'KB',12,top+30,11,650,send);
+      txt('rwnd '+(20-old-acknowledged)+'KB',w-12,top+30,11,650,recv,'right');
+      txt('H3 → S：发送 '+total+'×1KB',w/2,top+46,10,550,muted,'center');
+      // All data sent in the round is shown, even before ACKs return.
       for(let k=0;k<total;k++){
-        const y=top+43+k*3.7;
-        out+=arrow(143,y,465,y+12,blue,false,started?0.95:0.16);
+        const y=top+55+k*3.3;
+        line(x1,y,x2,y+12,send,active?0.9:0.17,false);
       }
-      out+=label(300,top+86,'S → H3：已确认 '+acked+'/'+total,'font-size="12" text-anchor="middle" fill="'+ink+'"');
+      txt('S → H3：确认 '+acknowledged+'/'+total,w/2,top+96,10,550,muted,'center');
       for(let k=0;k<total;k++){
-        const y=top+91+k*2.8;
-        out+=arrow(465,y,143,y+10,purple,true,k<acked?0.95:0.08);
+        const y=top+106+k*2.45;
+        line(x2,y,x1,y+7,recv,k<acknowledged?0.95:0.13,true);
       }
     }
-    svg.innerHTML=out;
   }
   function render(){
     range.value=String(n);
@@ -176,6 +224,14 @@ function mount(host){
   });
   // Keep site-wide question navigation shortcuts from firing while keyboard-operating the demo.
   box.addEventListener('keydown',function(e){if(['Enter',' ','ArrowLeft','ArrowRight','a','b','c','d','A','B','C','D'].includes(e.key))e.stopPropagation();});
+  // The modal can mount while hidden; redraw when it becomes visible/resized.
+  if(typeof ResizeObserver==='function'){
+    const resizeObserver=new ResizeObserver(function(){
+      if(!box.isConnected){resizeObserver.disconnect();stop();return;}
+      if(canvas.getBoundingClientRect().width>0)requestAnimationFrame(draw);
+    });
+    resizeObserver.observe(canvas.parentElement);
+  }
   render();
 }
 window.EveraTcp2016={mount:mount};
