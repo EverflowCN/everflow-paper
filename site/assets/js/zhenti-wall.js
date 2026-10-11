@@ -280,6 +280,18 @@
         demo?.mount(box.querySelector('.live-answer'));
       }
     }
+    // 2016 Q41, not Q47: mount TCP slow-start timing next to the verified answer.
+    // Preserve answer/reveal gating, cloud history, and existing grading behavior.
+    if(year===2016&&q===41&&item?.verification?.status==='verified'){
+      const demo=window.EveraTcp2016;
+      if(context==='modal'){
+        const rr=record(year,q);
+        const inlineAnswer=hasSubmitted(rr)||Boolean(rr.reviewed);
+        demo?.mount(inlineAnswer?box.querySelector('.live-answer'):els.analysis);
+      }else{
+        demo?.mount(box.querySelector('.live-answer'));
+      }
+    }
   }
 
   function refreshAfterRecordChange(context){
