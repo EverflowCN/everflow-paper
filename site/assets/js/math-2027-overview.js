@@ -1,6 +1,19 @@
 import {typeset} from './math-2027-mathjax.js?v=20261010-heatmap4';
 import * as cloud from './math-paper-cloud.js?v=20261011-overview1';
 const ROOT='/math/27/';
+const inboundCollection=new URLSearchParams(location.search).get('collection');
+const backHref=/^(math2-past-2009-2025|zhangyu-2027-math2)$/.test(inboundCollection||'')
+ ?ROOT+'?collection='+encodeURIComponent(inboundCollection):ROOT;
+document.querySelectorAll('.topbar a[href="/math/27/"]').forEach(a=>{a.href=backHref});
+document.querySelector('.topbar .text-back')?.addEventListener('click',event=>{
+ try{
+  const previous=new URL(document.referrer);
+  const pathname=previous.pathname.endsWith('index.html')?previous.pathname.slice(0,-10):previous.pathname;
+  if(previous.origin===location.origin&&(pathname==='/math/27/'||pathname==='/math/27')&&history.length>1){
+   event.preventDefault();history.back(); // Restore the previous page without reloading when possible.
+  }
+ }catch{}
+});
 const MANIFEST='/data/math-papers/active-collections.json?v=20261011-math2-past1';
 const $=selector=>document.querySelector(selector);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
@@ -40,7 +53,7 @@ async function load(){
  const data=await response.json();
  manifest={...data,collections:(data.collections||[]).filter(c=>c.enabled===true)};
  if(!manifest.collections.length)throw Error('还没有启用的试卷系列');
- await cloud.initialize(manifest);
+ cloud.initialize(manifest).catch(error=>console.warn('Math overview cloud: local records retained',error));
  groups=await Promise.all(manifest.collections.map(async c=>{
   const r=await fetch(c.dataUrl,{cache:'default'});
   if(!r.ok)throw Error(c.title+' 加载失败：'+r.status);
@@ -88,7 +101,7 @@ function render(){
  const included=gathered();
  totalsHtml();
  if(!included.length){
-  surface.innerHTML=`<div class="overview-empty"><div><h2>还没有做过的套卷</h2><p>整体图谱只收录真正作答或自评过的试卷；单纯打开、浏览但没有作答的试卷不会出现在这里。</p><a class="btn primary" href="${ROOT}">开始练习 →</a></div></div>`;
+  surface.innerHTML=`<div class="overview-empty"><div><h2>还没有做过的套卷</h2><p>整体图谱只收录真正作答或自评过的试卷；单纯打开、浏览但没有作答的试卷不会出现在这里。</p><a class="btn primary" href="${backHref}">开始练习 →</a></div></div>`;
   closeDetail();return;
  }
  surface.style.setProperty('--cell',size+'px');
