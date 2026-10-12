@@ -7,6 +7,20 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const root=$('#math-app');
 let doc=null,paper=null,at=0,started=0,timer=null;
+const collectionCache=new Map();
+let navigationSequence=0;
+// Use real history entries for opening/switching papers. Internal question changes
+// replace their URL so that browser Back returns to the collection, not 22 intermediate steps.
+function updateMathRoute(paperNumber=0,questionNumber=0,{historyMode='push',fromIndex=false}={}){
+ if(historyMode==='none'||!currentCollection)return;
+ const params=new URLSearchParams({collection:currentCollection.id});
+ if(paperNumber){params.set('paper',String(paperNumber));params.set('q',String(questionNumber))}
+ const url=location.pathname+'?'+params.toString();
+ const state={...history.state,mathRoute:{view:paperNumber?'paper':'index',fromIndex:Boolean(fromIndex)}};
+ if(historyMode==='push'&&location.pathname+location.search===url)history.replaceState(state,'',url);
+ else if(historyMode==='push')history.pushState(state,'',url);
+ else history.replaceState(state,'',url);
+}
 function record(){return mathCloud.read(currentCollection||{storageKey})}
 function currentRecord(){return record()[paper.id]||{answers:{},judgements:{},elapsed:0,visited:[]}}
 function save(patch){if(paper&&currentCollection)mathCloud.update(currentCollection,paper.id,patch)}
@@ -115,7 +129,7 @@ function drawIndex(){
       <h1>数学二<span class="hero-title-mark">.</span></h1>
       <p>按年练真题，按套做模拟。你的进度，就在每一格里。</p></div>
     <div class="library-hero-side">
-      <a href="/math/27/map/" class="library-overview-link" aria-label="进入已做套卷图谱">已做套卷图谱 <span aria-hidden="true">↗</span></a>
+      <a href="/math/27/map/?collection=${encodeURIComponent(currentCollection.id)}" class="library-overview-link" aria-label="进入已做套卷图谱">已做套卷图谱 <span aria-hidden="true">↗</span></a>
       <div class="library-hero-numbers"><div><strong>${papers.length}</strong><span>套试卷</span></div><span class="numbers-divider"></span><div><strong>${attempted}</strong><span>已开始</span></div><span class="numbers-divider"></span><div><strong>${answered}</strong><span>已答题</span></div></div>
     </div>
   </section>
@@ -230,11 +244,30 @@ function renderReader({keepFocus=false}={}){
  if(!keepFocus)root.querySelector('[data-math-display]')?.setAttribute('tabindex','-1');
  bindReader();
 }
-function openPaper(index,q=null){
- closeTimer();paper=doc.papers[index];if(!paper)return;
+function openPaper(index,q=null,{historyMode='push'}={}){
+ if(!doc?.papers?.[index])return;
+ const fromIndex=!paper&&history.state?.mathRoute?.view==='index';
+ closeTimer();
+ paper=doc.papers[index];
  const last=Number(currentRecord().lastQuestion||1);
  at=Math.max(0,Math.min(paper.questions.length-1,Number(q||last)-1));
- started=Date.now();history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}&paper=${index+1}&q=${at+1}`);renderReader();timer=setInterval(tick,1000);
+ started=Date.now();
+ updateMathRoute(index+1,at+1,{historyMode,fromIndex});
+ renderReader();
+ timer=setInterval(tick,1000);
+}
+function showIndex({historyMode='push'}={}){
+ closeTimer();
+ paper=null;
+ updateMathRoute(0,0,{historyMode});
+ drawIndex();
+}
+function exitPaper(){
+ if(history.state?.mathRoute?.view==='paper'&&history.state.mathRoute.fromIndex){
+  history.back(); // Restore the prior index without another fetch or page reload.
+  return;
+ }
+ showIndex({historyMode:'replace'});
 }
 function persistTime(){
  if(!paper||!started)return;
@@ -244,13 +277,13 @@ function persistTime(){
 }
 function tick(){if(paper&&Date.now()-started>30000)persistTime()}
 function closeTimer(){if(timer)clearInterval(timer);timer=null;if(paper)persistTime();started=0}
-function changeQ(index){if(index<0||index>=paper.questions.length)return;persistTime();at=index;save({lastQuestion:at+1});history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}&paper=${doc.papers.indexOf(paper)+1}&q=${at+1}`);renderReader()}
+function changeQ(index){if(index<0||index>=paper.questions.length)return;persistTime();at=index;save({lastQuestion:at+1});updateMathRoute(doc.papers.indexOf(paper)+1,at+1,{historyMode:'replace'});renderReader()}
 function saveAnswer(value){
  const q=paper?.questions[at];if(!qualified(q))return;
  const rec=currentRecord();save({answers:{...rec.answers,[q.id]:value},lastQuestion:at+1});
 }
 function bindReader(){
- root.querySelector('[data-exit]')?.addEventListener('click',()=>{closeTimer();paper=null;history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}`);drawIndex()});
+ root.querySelector('[data-exit]')?.addEventListener('click',exitPaper);
  root.querySelectorAll('[data-select-paper]').forEach(b=>b.addEventListener('click',()=>openPaper(Number(b.dataset.selectPaper))));
  root.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>changeQ(Number(b.dataset.jump))));
  bindHeatmap(root);
@@ -270,10 +303,11 @@ document.addEventListener('keydown',event=>{
  if(event.key==='ArrowLeft')changeQ(at-1);
  if(event.key==='ArrowRight')changeQ(at+1);
  if(/^[A-Da-d]$/.test(event.key)&&paper.questions[at]?.type==='choice'&&qualified(paper.questions[at])){saveAnswer(event.key.toUpperCase());renderReader()}
- if(event.key==='Escape'){closeTimer();paper=null;history.replaceState(null,'',`?collection=${encodeURIComponent(currentCollection.id)}`);drawIndex()}
+ if(event.key==='Escape')exitPaper()
 });
 window.addEventListener('pagehide',()=>{if(paper)closeTimer()});
-async function selectCollection(id,{paperNumber=0,questionNumber=0}={}){
+window.addEventListener('pageshow',event=>{if(event.persisted&&paper&&!timer){started=Date.now();timer=setInterval(tick,1000)}});
+async function selectCollection(id,{paperNumber=0,questionNumber=0,historyMode='push'}={}){
  const entry=registry?.collections.find(c=>c.id===id&&c.enabled);
  if(!entry)throw Error('系列不存在或未启用');
  const prefix='/data/math-papers/';
@@ -281,23 +315,48 @@ async function selectCollection(id,{paperNumber=0,questionNumber=0}={}){
  const filename=file.slice(prefix.length);
  if(!file.startsWith(prefix)||!filename.endsWith('.json')||!filename||!/^[a-z0-9.-]+$/.test(filename)||filename.includes('..')||
    !String(entry.storageKey||'').startsWith('everflow-math2-')||!/^[a-z0-9-]+$/.test(entry.storageKey))throw Error('卷库登记表的数据源不合法');
- closeTimer();paper=null;
- currentCollection=entry;storageKey=entry.storageKey;
- root.innerHTML='<div class="loading">正在读取题目与热力图…</div>';
- const response=await fetch(file,{cache:'default'});
- if(!response.ok)throw Error('HTTP '+response.status+' / '+entry.title);
- const result=await response.json();
- if(!Array.isArray(result.papers)||!result.papers.length||result.papers.some(p=>!Array.isArray(p.questions)||!p.questions.length))throw Error('试卷目录结构不完整');
+ const serial=++navigationSequence;
+ closeTimer();
+ paper=null;
+ currentCollection=entry;
+ storageKey=entry.storageKey;
+ let result=collectionCache.get(id);
+ if(!result){
+  doc=null;
+  root.innerHTML='<div class="loading">正在读取题目与热力图…</div>';
+  try{
+   // Revalidate once per page session; use the in-memory document after that.
+   const response=await fetch(file,{cache:'no-cache'});
+   if(!response.ok)throw Error('HTTP '+response.status+' / '+entry.title);
+   result=await response.json();
+   if(!Array.isArray(result.papers)||!result.papers.length||
+      result.papers.some(p=>!Array.isArray(p.questions)||!p.questions.length))throw Error('试卷目录结构不完整');
+   collectionCache.set(id,result);
+  }catch(error){if(serial===navigationSequence)showLoadError(error);return}
+ }
+ if(serial!==navigationSequence)return; // Ignore a stale fetch after a rapid tab/back change.
  doc=result;
  const n=Number(paperNumber),q=Number(questionNumber);
  if(Number.isInteger(n)&&n>=1&&n<=doc.papers.length){
   const count=doc.papers[n-1].questions.length;
-  openPaper(n-1,Number.isInteger(q)&&q>=1&&q<=count?q:null);
- }else{
-  history.replaceState(null,'',`?collection=${encodeURIComponent(entry.id)}`);
-  drawIndex();
- }
+  openPaper(n-1,Number.isInteger(q)&&q>=1&&q<=count?q:null,{historyMode});
+ }else showIndex({historyMode});
 }
+window.addEventListener('popstate',()=>{
+ if(!registry)return;
+ const params=new URLSearchParams(location.search);
+ const selected=registry.collections.find(c=>c.id===params.get('collection'))||registry.collections[0];
+ const p=Number(params.get('paper')||0),q=Number(params.get('q')||0);
+ if(currentCollection?.id!==selected.id||!doc){
+  selectCollection(selected.id,{paperNumber:p,questionNumber:q,historyMode:'none'}).catch(showLoadError);
+  return;
+ }
+ ++navigationSequence;
+ if(Number.isInteger(p)&&p>=1&&p<=doc.papers.length){
+  const count=doc.papers[p-1].questions.length;
+  openPaper(p-1,Number.isInteger(q)&&q>=1&&q<=count?q:null,{historyMode:'none'});
+ }else showIndex({historyMode:'none'});
+});
 async function main(){
  try{
   const response=await fetch(REGISTRY_URL,{cache:'default'});
@@ -306,10 +365,10 @@ async function main(){
   const active=manifest.collections?.filter(c=>c.enabled===true)||[];
   if(manifest.subject!=='math2'||!active.length)throw Error('暂无开放的数学二试卷');
   registry={...manifest,collections:active};
-  await mathCloud.initialize(registry);
+  mathCloud.initialize(registry).catch(error=>console.warn('Math cloud init: using local state',error));
   const params=new URLSearchParams(location.search);
   const choice=active.find(c=>c.id===params.get('collection'))||active[0];
-  await selectCollection(choice.id,{paperNumber:Number(params.get('paper')||0),questionNumber:Number(params.get('q')||0)});
+  await selectCollection(choice.id,{paperNumber:Number(params.get('paper')||0),questionNumber:Number(params.get('q')||0),historyMode:'replace'});
  }catch(error){root.innerHTML=`<div class="error">数学二试卷目录加载失败：${esc(error?.message||error)}。请刷新页面重试。</div>`;}
 }
 
@@ -330,7 +389,7 @@ document.addEventListener('everflow:math-records-change',event=>{
 });
 document.addEventListener('everflow:math-account-change',()=>{
  if(!doc)return;
- if(paper){closeTimer();paper=null;history.replaceState(null,'',location.pathname)}
- drawIndex();
+ if(paper)renderReader();
+ else drawIndex();
 });
 main();
