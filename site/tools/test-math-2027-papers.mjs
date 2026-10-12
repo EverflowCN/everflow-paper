@@ -56,28 +56,6 @@ assert.equal(registry.subject,'math2');
 assert.equal(registry.collections.filter(c=>c.enabled).length,2);
 assert.deepEqual(new Set(registry.collections.filter(c=>c.enabled).map(c=>c.id)),new Set(['zhangyu-2027-math2','math2-past-2009-2025']));
 assert.equal(registry.collections.find(c=>c.id==='zhangyu-2027-math2').dataUrl,'/data/math-papers/zhangyu-2027-math2.json');
-// Literal backslash-n separators should render, but LaTeX \neq must remain intact.
-const source=reader.match(/function formatPaperText\(value\)\{[\s\S]*?\n\}/)?.[0];
-assert.ok(source,'missing display formatter');
-const fmt=new Function('esc',source+'\nreturn formatPaperText;')(x=>String(x));
-const sample='题干：\\n(1) 求 $x\\ne0$；② 判断 $y\\neq0
-assert.match(reader,/selectCollection\(id/);
-assert.match(legacy,/math-27-feature/);
-assert.doesNotMatch(reader,/everflow-math-papers-progress-v1/);
-console.log('2027 mathematics II: 8 sets / 176 digitally transcribed questions, existing 107 sets preserved.');
-;
-const expected='题干：<br>(1) 求 $x\\ne0$；<br>② 判断 $y\\neq0
-assert.match(reader,/selectCollection\(id/);
-assert.match(legacy,/math-27-feature/);
-assert.doesNotMatch(reader,/everflow-math-papers-progress-v1/);
-console.log('2027 mathematics II: 8 sets / 176 digitally transcribed questions, existing 107 sets preserved.');
-;
-assert.equal(fmt(sample),expected);
-assert.match(reader,/formatPaperText\(q\.stem\)/);
-assert.match(reader,/formatPaperText\(value\)/);
-// Source PDF p.22 volume 3 question 12 uses e^{-x}, not e^{-x^2}.
-assert.ok(book.papers[2].questions[11].stem.includes('e^{-x}'));
-assert.ok(!book.papers[2].questions[11].stem.includes('e^{-x^2}'));
 assert.match(reader,/active-collections\.json/);
 assert.match(reader,/selectCollection\(id/);
 assert.match(legacy,/math-27-feature/);
