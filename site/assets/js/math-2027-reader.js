@@ -145,6 +145,31 @@ function drawIndex(){
 }
 function showLoadError(error){root.innerHTML=`<div class="error">切换试卷失败：${esc(error?.message||error)}。<a href="/math/27/">重新载入</a></div>`;}
 function diagram(name){
+ if(name==='math2-2009-q6'){
+  // Original f(x) and the four candidate graphs, recreated as SVG rather than screenshot assets.
+  const axes=(name,x,y)=>`<g transform="translate(${x} ${y})">
+   <path d="M12 79 H188 M52 140 V9" stroke="#627a89" stroke-width="1.4" fill="none"/>
+   <path d="M188 79 l-7 -4 v8 Z M52 9 l-4 7 h8 Z" fill="#627a89"/>
+   <g fill="#526677" font-size="12"><text x="192" y="84">x</text><text x="42" y="9">${name}</text><text x="43" y="94">O</text>
+   <text x="16" y="94">-1</text><text x="86" y="94">1</text><text x="124" y="94">2</text><text x="162" y="94">3</text></g>
+  </g>`;
+  const plot=(x,y,path,tail='',label='')=>`${axes('F(x)',x,y)}<g transform="translate(${x} ${y})" fill="none" stroke="#315a75" stroke-width="2.7" stroke-linecap="round"><path d="${path}"/>${tail}</g><text x="${x+14}" y="${y+144}" font-size="17" fill="#2d3f4e">${label}</text>`;
+  const source=`${axes('f(x)',22,22)}<g transform="translate(22 22)" stroke="#315a75" stroke-width="2.7" fill="none">
+   <path d="M14 47 H52 M52 111 C79 111 83 110 90 79 S115 21 128 19 M128 79 H165"/>
+   <circle cx="52" cy="47" r="3.7" stroke="#315a75" fill="#fff"/>
+   <circle cx="128" cy="79" r="3.7" stroke="#315a75" fill="#fff"/>
+   <path d="M14 47 V79 M128 19 V79" stroke="#b0bfcb" stroke-width="1.2" stroke-dasharray="3 3"/>
+  </g><text x="28" y="203" font-size="14" fill="#617383">已知 f(x) 的图形</text>`;
+  return `<figure class="diagram math-source-diagram"><svg viewBox="0 0 690 370" role="img" aria-label="2009年数学二第6题原函数图与A、B、C、D四种积分函数图像的矢量重绘">
+  <rect x="1" y="1" width="688" height="368" rx="12" fill="#fff" stroke="#dce5e8"/>
+  ${source}
+  ${plot(248,22,'M14 38 L52 79 C64 102 81 125 92 111 S115 60 128 54 H165','','A.')}
+  ${plot(471,22,'M14 115 L52 79 C64 99 81 124 92 111 S116 64 128 42','','B.')}
+  ${plot(248,204,'M14 79 L52 47 C67 59 78 98 92 80 S116 39 128 35 H165','','C.')}
+  ${plot(471,204,'M14 112 L52 79 C66 100 80 124 92 111 S115 59 128 51 H165','','D.')}
+  </svg><figcaption>依据原题图形重新绘制（示意比例）；可点击题目下方“来源核对”与原卷比对。</figcaption></figure>`;
+ }
+
  if(name==='tangent1')return `<figure class="diagram"><svg viewBox="0 0 500 275" role="img" aria-label="曲线 y=f(x) 在 x=ln2 处的切线 L 及第一象限内围成区域的示意重绘图">
   <defs><pattern id="dGrid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0 H0 V30" fill="none" stroke="#edf2ec" stroke-width="1"/></pattern></defs>
   <rect width="500" height="275" fill="url(#dGrid)"/><path d="M40 235 H460 M75 250 V20" fill="none" stroke="#6e8173" stroke-width="2"/>
