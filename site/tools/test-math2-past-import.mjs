@@ -16,8 +16,8 @@ assert.equal(questions.length,386);
 assert.equal(new Set(questions.map(q=>q.id)).size,386);
 const valid=questions.filter(q=>q.verification==='source-transcription');
 const pending=questions.filter(q=>q.verification==='pending');
-assert.equal(valid.length,370);
-assert.equal(pending.length,16);
+assert.equal(valid.length,386);
+assert.equal(pending.length,0);
 for(const p of data.papers){
  assert.equal(p.questions.length,p.year<=2020?23:22);
  for(const [index,q] of p.questions.entries()){
@@ -41,6 +41,20 @@ for(const p of data.papers){
   }
  }
 }
+const recovered=['2009-6','2009-8','2009-10','2011-9','2012-18','2013-9','2014-9','2017-15','2018-11','2018-15','2019-9','2021-10','2022-4','2024-7','2025-6','2025-9'];
+for(const id of recovered){
+ const [year,number]=id.split('-').map(Number);
+ const q=data.papers.find(p=>p.year===year).questions[number-1];
+ assert.ok(q.stem.trim().length>10,'missing recovered stem '+id);
+ assert.equal(q.verification,'source-transcription');
+}
+assert.equal(data.verificationSummary.pending,0);
+assert.equal(data.verificationSummary.sourceTranscribed,386);
+assert.match(reader,/history\.pushState/);
+assert.match(reader,/window\.addEventListener\('popstate'/);
+assert.match(reader,/collectionCache\.get\(id\)/);
+assert.match(reader,/if\(paper\)renderReader\(\)/);
+assert.ok(data.papers[0].questions[5].diagram==='math2-2009-q6');
 assert.match(reader,/source-transcription/);
 assert.match(graph,/source-transcription/);
 assert.match(reader,/referenceAnswer/);
@@ -48,4 +62,4 @@ assert.match(reader,/category==='past'/);
 assert.match(graph,/row\.paper\.year/);
 const legacy=read('assets/js/question-bank-switch.js');
 assert.doesNotMatch(legacy,/math-papers\/catalog\.json/);
-console.log('Math II past exams: 2009–2025, 17 papers, 386 indexed, 370 source text, 16 flagged pending; Math I/III excluded.');
+console.log('Math II past exams: 2009–2025, 17 papers, 386 indexed and all 386 digitally readable; Math I/III excluded.');
