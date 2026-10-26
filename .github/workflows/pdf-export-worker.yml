@@ -1,21 +1,8 @@
 name: PDF export worker
+# Temporarily suspend all automatic polling during the Supabase Free quota restriction.
+# Re-enable scheduled triggers only after migration to a low-frequency worker.
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
-  repository_dispatch:
-    types: [pdf-export]
-  push:
-    branches: [main]
-    paths:
-      - 'tools/pdf/worker.py'
-      - 'tools/pdf/render.py'
-      - 'tools/pdf/template/**'
-      - 'tools/pdf/test_render.py'
-      - 'tools/pdf/test_worker.py'
-      - '.github/workflows/pdf-export-worker.yml'
-      - 'supabase/functions/pdf-export/**'
-      - 'supabase/sql/pdf-export.sql'
 permissions:
   contents: read
   packages: read
