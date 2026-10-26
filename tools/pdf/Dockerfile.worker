@@ -30,7 +30,7 @@ ENV EVERFLOW_BUILD_SHA=${EVERFLOW_BUILD_SHA}
 WORKDIR /app
 COPY tools/pdf /app/tools/pdf
 
-RUN python3 -m py_compile tools/pdf/worker.py tools/pdf/render.py \
+RUN python3 -m py_compile tools/pdf/worker.py tools/pdf/render.py tools/pdf/worker_daemon.py tools/pdf/test_daemon_rate_limit.py \
  && python3 - <<'PY'
 import shutil
 for cmd in ('xelatex','pdftotext'):
