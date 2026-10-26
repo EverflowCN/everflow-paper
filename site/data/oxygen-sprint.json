@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "updatedAt": "2026-10-27T02:54:00+08:00",
+  "source": {
+    "up": "就是氧气11",
+    "seasonId": "7092273",
+    "sectionId": "9943987",
+    "sectionTitle": "27真题与冲刺",
+    "entryBvid": "BV1mBLQ6AEiR",
+    "url": "https://www.bilibili.com/video/BV1VMnM6aEvm/",
+    "auto": false,
+    "syncStatus": "ok",
+    "message": "2026-10-27通过哔哩哔哩官方视频API核验真实冲刺专题：数据结构8节，组成原理1节，来源发布日期2026-10-18至2026-10-26；不混入26考研旧视频。"
+  },
+  "course": {
+    "id": "oxygen-408-sprint-27",
+    "label": "27考研408冲刺习题课（更新中）",
+    "short": "408冲刺",
+    "items": [
+      {
+        "id": "bvid:BV1VMnM6aEvm",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课一",
+        "duration": "00:55:55",
+        "url": "https://www.bilibili.com/video/BV1VMnM6aEvm/",
+        "bvid": "BV1VMnM6aEvm",
+        "publishedAt": 1792293632
+      },
+      {
+        "id": "bvid:BV1XunJ68En7",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课二",
+        "duration": "00:55:48",
+        "url": "https://www.bilibili.com/video/BV1XunJ68En7/",
+        "bvid": "BV1XunJ68En7",
+        "publishedAt": 1792380095
+      },
+      {
+        "id": "bvid:BV1XinF6gEge",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课三",
+        "duration": "00:37:05",
+        "url": "https://www.bilibili.com/video/BV1XinF6gEge/",
+        "bvid": "BV1XinF6gEge",
+        "publishedAt": 1792466369
+      },
+      {
+        "id": "bvid:BV1xYnv6FEuH",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课四",
+        "duration": "00:39:36",
+        "url": "https://www.bilibili.com/video/BV1xYnv6FEuH/",
+        "bvid": "BV1xYnv6FEuH",
+        "publishedAt": 1792552625
+      },
+      {
+        "id": "bvid:BV1qtn16VE1B",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课五",
+        "duration": "00:37:50",
+        "url": "https://www.bilibili.com/video/BV1qtn16VE1B/",
+        "bvid": "BV1qtn16VE1B",
+        "publishedAt": 1792649769
+      },
+      {
+        "id": "bvid:BV1jvn46dERo",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课六",
+        "duration": "00:33:15",
+        "url": "https://www.bilibili.com/video/BV1jvn46dERo/",
+        "bvid": "BV1jvn46dERo",
+        "publishedAt": 1792726376
+      },
+      {
+        "id": "bvid:BV1YTHA6DErB",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课七",
+        "duration": "00:39:34",
+        "url": "https://www.bilibili.com/video/BV1YTHA6DErB/",
+        "bvid": "BV1YTHA6DErB",
+        "publishedAt": 1792810686
+      },
+      {
+        "id": "bvid:BV1FtHg6nEy6",
+        "subject": "ds",
+        "title": "27考研408冲刺-数据结构冲刺习题课八",
+        "duration": "00:38:34",
+        "url": "https://www.bilibili.com/video/BV1FtHg6nEy6/",
+        "bvid": "BV1FtHg6nEy6",
+        "publishedAt": 1792897961
+      },
+      {
+        "id": "bvid:BV1HLnR6VESK",
+        "subject": "co",
+        "title": "27考研408冲刺-组成原理冲刺习题课一",
+        "duration": "01:10:05",
+        "url": "https://www.bilibili.com/video/BV1HLnR6VESK/",
+        "bvid": "BV1HLnR6VESK",
+        "publishedAt": 1792983718
+      }
+    ]
+  }
+}
