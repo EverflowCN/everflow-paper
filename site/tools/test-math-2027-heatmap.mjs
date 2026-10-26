@@ -44,7 +44,11 @@ assert.match(reader,/library-collections/);
 assert.match(reader,/data-collection-id/);
 assert.match(reader,/categoryLabel\(id\)/);
 assert.match(reader,/heatmapHtml\(p\)/);
-assert.match(reader,/history\.replaceState\(null,'',`\?collection=/);
+// Navigation now preserves history state and uses URLSearchParams for stable back/forward behavior.
+assert.match(reader,/function updateMathRoute\(/);
+assert.match(reader,/new URLSearchParams\(\{collection:currentCollection\.id\}\)/);
+assert.match(reader,/history\.replaceState\(state,'',url\)/);
+assert.match(reader,/history\.pushState\(state,'',url\)/);
 assert.match(reader,/paper\.questions\.length-1/);
 assert.match(style,/\.main:has\(\.library-heading\) \.cards/);
 assert.match(style,/\.main:has\(\.library-heading\) \.heatmap-wrap\.is-card \.heatmap-grid/);
