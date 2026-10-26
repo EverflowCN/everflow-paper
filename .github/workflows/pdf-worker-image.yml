@@ -50,7 +50,7 @@ jobs:
         run: |
           IMAGE="ghcr.io/everflowcn/everflow-pdf-worker:sha-${GITHUB_SHA}"
           docker pull "$IMAGE"
-          docker run --rm "$IMAGE" bash -lc 'PYTHONPATH=tools/pdf python3 -m unittest test_render.Safety && PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py'
+          docker run --rm "$IMAGE" bash -lc 'PYTHONPATH=tools/pdf python3 -m unittest test_render.Safety && PYTHONPATH=tools/pdf python3 tools/pdf/test_worker.py && PYTHONPATH=tools/pdf python3 tools/pdf/test_daemon_rate_limit.py'
       - name: Promote tested image to latest
         run: |
           IMAGE="ghcr.io/everflowcn/everflow-pdf-worker:sha-${GITHUB_SHA}"
