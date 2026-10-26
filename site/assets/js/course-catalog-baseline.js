@@ -3,8 +3,8 @@
   if(!api||typeof api.load!=='function')return;
 
   const originalLoad=api.load.bind(api);
-  const DATA_VERSION='20260828-course-baseline1';
-  const BUILTIN_IDS=new Set(['oxygen-past-papers','oxygen-reinforcement']);
+  const DATA_VERSION='20261027-course-sprint1';
+  const BUILTIN_IDS=new Set(['oxygen-past-papers','oxygen-reinforcement','oxygen-408-sprint-27']);
   const MIN_REINFORCEMENT={ds:37,co:29,os:29,cn:28};
 
   const itemKey=item=>String(item?.progress_id||item?.progressId||item?.item_id||item?.id||'');
@@ -16,9 +16,15 @@
   };
 
   async function loadStaticBaseline({force=false}={}){
-    const [paper,reinforcement]=await Promise.all([
+    const [paper,reinforcement,sprint]=await Promise.all([
       fetchJson('../data/oxygen.json',{force}),
-      fetchJson('../data/oxygen-reinforcement.json',{force})
+      fetchJson('../data/oxygen-reinforcement.json',{force}),
+      // Sprint remains usable when Supabase is quota-restricted; a stale Pages
+      // deployment without the new JSON must not break existing courses.
+      fetchJson('../data/oxygen-sprint.json',{force}).catch(error=>{
+        console.warn('static sprint snapshot unavailable',error);
+        return null;
+      })
     ]);
     const catalogs=[
       {id:'oxygen-past-papers',title:paper?.course?.label||'历年408真题讲解',kind:'past-paper',source_url:paper?.source?.url||'',sort_order:10,enabled:true},
@@ -35,6 +41,18 @@
       });
     }
     itemMap.set('oxygen-reinforcement',reinforcementItems);
+    if(Array.isArray(sprint?.course?.items)&&sprint.course.items.length){
+      const sprintId='oxygen-408-sprint-27';
+      catalogs.push({id:sprintId,title:sprint.course.label||'27考研408冲刺习题课（更新中）',kind:'custom',
+        source_url:sprint?.source?.url||'',sort_order:60,enabled:true,
+        metadata:{status:'updating',baseline:true,sourceCount:sprint.course.items.length}});
+      itemMap.set(sprintId,sprint.course.items.map((item,index)=>({
+        catalog_id:sprintId,item_id:item.id,progress_id:item.id,
+        subject:item.subject||'408',title:item.title,duration:item.duration||'',url:item.url||'',
+        bvid:item.bvid||'',year:null,sort_order:index+1,enabled:true,
+        metadata:{publishedAt:Number(item.publishedAt||0)||0,baseline:true}
+      })));
+    }
     return{catalogs,itemMap};
   }
 
