@@ -11,6 +11,7 @@ import socket
 import tempfile
 import threading
 import time
+import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -18,7 +19,13 @@ from pathlib import Path
 ENDPOINT=os.environ.get('EVERFLOW_PDF_ENDPOINT','https://xzodetdohinktagxuwhs.supabase.co/functions/v1/pdf-export')
 WORKER_SECRET=os.environ.get('EVERFLOW_PDF_WORKER_SECRET','').strip()
 CAPACITY=max(1,min(8,int(os.environ.get('PDF_WORKER_CAPACITY','2'))))
-POLL_SECONDS=max(0.5,float(os.environ.get('PDF_WORKER_POLL_SECONDS','1.5')))
+# Protect the Free-tier Edge Functions quota even when the host still provides 1.5s.
+# Polling 1.5s while idle would exceed 1.7M invocations/month per worker.
+POLL_SECONDS=max(20.0,float(os.environ.get('PDF_WORKER_POLL_SECONDS','30')))
+HEARTBEAT_SECONDS=max(30.0,float(os.environ.get('PDF_WORKER_HEARTBEAT_SECONDS','30')))
+MAX_IDLE_POLL_SECONDS=max(POLL_SECONDS,60.0)
+RATE_LOCK=threading.Lock()
+RATE_PAUSE_UNTIL=0.0
 PORT=int(os.environ.get('PORT','8080'))
 BUILD_SHA=os.environ.get('EVERFLOW_BUILD_SHA','unknown').strip() or 'unknown'
 NODE_ID=os.environ.get('PDF_WORKER_NODE_ID','').strip() or socket.gethostname().replace(' ','-')[:64]
@@ -61,6 +68,13 @@ def mark_job_finished(success,error=''):
         return dict(STATE)
 
 def call(action,body=None,job=None,pdf=None):
+    global RATE_PAUSE_UNTIL
+    # During a provider-imposed restriction, skip the request entirely:
+    # even rejected Edge Function invocations consume request traffic.
+    with RATE_LOCK:
+        retry_after=max(0.0,RATE_PAUSE_UNTIL-time.monotonic())
+    if retry_after:
+        raise RuntimeError(f'Backend temporarily restricted; retry in {retry_after:.0f}s')
     if not WORKER_SECRET:
         raise RuntimeError('EVERFLOW_PDF_WORKER_SECRET is required')
     url=ENDPOINT+'?action='+action
@@ -72,8 +86,16 @@ def call(action,body=None,job=None,pdf=None):
         'Content-Type':'application/pdf' if pdf is not None else 'application/json',
     }
     req=urllib.request.Request(url,data=data,headers=headers,method='POST')
-    with urllib.request.urlopen(req,timeout=90) as response:
-        return json.load(response)
+    try:
+        with urllib.request.urlopen(req,timeout=90) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as exc:
+        if exc.code in (402,429):
+            cooldown=3600.0 if exc.code==402 else 300.0
+            with RATE_LOCK:
+                RATE_PAUSE_UNTIL=max(RATE_PAUSE_UNTIL,time.monotonic()+cooldown)
+            print(f'Worker paused after HTTP {exc.code} for {cooldown:.0f}s',flush=True)
+        raise
 
 def report_heartbeat(state=None):
     try:
@@ -137,7 +159,7 @@ def serve_health():
 def heartbeat():
     while not STOP.is_set():
         report_heartbeat()
-        STOP.wait(10)
+        STOP.wait(HEARTBEAT_SECONDS)
 
 def shutdown(*_):
     STOP.set()
@@ -153,6 +175,7 @@ def main():
     print('Everflow persistent PDF worker online',{'node':NODE_ID,'buildSha':BUILD_SHA,'capacity':CAPACITY,'pollSeconds':POLL_SECONDS,'port':PORT},flush=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=CAPACITY,thread_name_prefix='pdf') as pool:
         futures=set()
+        idle_delay=POLL_SECONDS
         while not STOP.is_set():
             done={f for f in futures if f.done()}
             for future in done:
@@ -163,6 +186,11 @@ def main():
                     update_state(lastError=str(exc)[:1000])
                     print('Worker future crashed',str(exc)[:2000],flush=True)
             now=time.monotonic()
+            with RATE_LOCK:
+                paused_for=max(0.0,RATE_PAUSE_UNTIL-now)
+            if paused_for:
+                STOP.wait(min(paused_for,60.0))
+                continue
             if now>=next_cleanup:
                 try:
                     print('Cleanup',call('cleanup'),flush=True)
@@ -183,7 +211,10 @@ def main():
                 claimed=True
                 futures.add(pool.submit(process,result))
             if not claimed:
-                STOP.wait(POLL_SECONDS)
+                idle_delay=min(MAX_IDLE_POLL_SECONDS,max(POLL_SECONDS,idle_delay*1.6))
+                STOP.wait(idle_delay)
+            else:
+                idle_delay=POLL_SECONDS
         if futures:
             print('Shutdown requested; waiting for active PDF jobs',len(futures),flush=True)
             concurrent.futures.wait(futures,timeout=180)
