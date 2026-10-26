@@ -12,6 +12,7 @@ on:
       - 'tools/pdf/template/**'
       - 'tools/pdf/test_render.py'
       - 'tools/pdf/test_worker.py'
+      - 'tools/pdf/test_daemon_rate_limit.py'
       - '.github/workflows/pdf-worker-image.yml'
 
 permissions:
